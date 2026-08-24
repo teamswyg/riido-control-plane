@@ -116,17 +116,18 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `7ee1bbf6a41c` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `control_plane_owner_contract_guard` | `contracts/nonwork17-owner-schema` | 100% | `2583cbc4940b` | `shared_contract_compat_must_preserve_generated_contract_surface` |
-| `control_plane_graphql_receiver_guard` | `internal/controlplanegraphql` | 100% | `1ba827d28ef3` | `server_route_handlers_must_stay_semantically_split` |
+| `control_plane_owner_contract_guard` | `contracts/nonwork17-owner-schema` | 100% | `7e792bcee801` | `shared_contract_compat_must_preserve_generated_contract_surface` |
+| `control_plane_graphql_receiver_guard` | `internal/controlplanegraphql` | 100% | `cacef3af94ad` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_graphql_generated_guard` | `internal/controlplanegraphql/generated` | 100% | `1f07ad3012ac` | `shared_contract_compat_must_preserve_generated_contract_surface` |
 | `control_plane_graphql_model_guard` | `internal/controlplanegraphql/model` | 100% | `5518809afdc1` | `shared_contract_compat_must_preserve_generated_contract_surface` |
-| `control_plane_health_use_case_guard` | `internal/controlplanehealth` | 100% | `da4f9c87860f` | `server_route_handlers_must_stay_semantically_split` |
+| `control_plane_health_use_case_guard` | `internal/controlplanehealth` | 100% | `5f9c39da7bf4` | `server_route_handlers_must_stay_semantically_split` |
 | `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `e43df6575099` | `server_route_handlers_must_stay_semantically_split` |
+| `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 
 ## Repository Coverage
 
-- Go files: `3418`
-- tracked files: `3418`
+- Go files: `3431`
+- tracked files: `3431`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -135,7 +136,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `91`
-- duplicate files: `314`
+- duplicate files: `315`
 - internal groups: `6`
 
 | Shape Hash | Files | Packages |
@@ -172,16 +173,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3418`
-- unique syntax hashes: `3215`
-- compression gain: `203`
-- analysis reduction: `5.93%`
+- tracked files: `3431`
+- unique syntax hashes: `3227`
+- compression gain: `204`
+- analysis reduction: `5.94%`
 - collision count: `0`
-- relocation mappings: `3418`
+- relocation mappings: `3431`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
-- golden commands: `114`
+- golden commands: `115`
 - missing golden commands: `0`
-- efficiency score: `593`
-- compression score: `203`
-- weighted score: `796`
+- efficiency score: `594`
+- compression score: `204`
+- weighted score: `798`

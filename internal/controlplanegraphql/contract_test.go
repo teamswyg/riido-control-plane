@@ -15,6 +15,34 @@ func TestPublishedHealthContractIsExact(t *testing.T) {
 	}
 }
 
+func TestPublishedFireErrorContractIsExact(t *testing.T) {
+	if err := validateFireErrorContract(ownerschema.RuntimeFireErrorBinding(), ownerschema.OwnerSchema(), ownerschema.SourceManifest(), FrozenClientRelease); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFireErrorContractRejectsFabricatedSuccessAndIdentityDrift(t *testing.T) {
+	originalBinding := ownerschema.RuntimeFireErrorBinding()
+	originalSchema := ownerschema.OwnerSchema()
+	originalManifest := ownerschema.SourceManifest()
+	for _, replacement := range []struct {
+		name string
+		old  string
+		new  string
+	}{
+		{name: "success semantics", old: "NEVER_RETURNING_VOID", new: "RETURNS_VALUE"},
+		{name: "provider policy", old: "FAIL_CLOSED", new: "ALLOW_SUCCESS"},
+		{name: "production credit", old: `"production_runtime_credit": false`, new: `"production_runtime_credit": true`},
+	} {
+		t.Run(replacement.name, func(t *testing.T) {
+			binding := bytes.Replace(originalBinding, []byte(replacement.old), []byte(replacement.new), 1)
+			if err := validateFireErrorContract(binding, originalSchema, originalManifest, FrozenClientRelease); err == nil {
+				t.Fatal("drifted fireError contract was admitted")
+			}
+		})
+	}
+}
+
 func TestHealthContractFailsClosedOnUnknownHashSchemaAndRelease(t *testing.T) {
 	originalBinding := ownerschema.RuntimeHealthBinding()
 	originalSchema := ownerschema.OwnerSchema()

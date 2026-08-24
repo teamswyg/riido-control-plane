@@ -72,7 +72,7 @@ func TestRuntimeStartupFailsWhenGraphQLContractAdmissionFails(t *testing.T) {
 		t.Fatalf("handler=%v err=%v", handler, err)
 	}
 	if handler, err := newRuntimeHandlerWithGraphQL(runtimeConfig{}, nil, nil, nil, nil, nil, nil); err == nil || handler != nil {
-		 t.Fatalf("nil GraphQL receiver was admitted: handler=%v err=%v", handler, err)
+		t.Fatalf("nil GraphQL receiver was admitted: handler=%v err=%v", handler, err)
 	}
 }
 

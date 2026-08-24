@@ -14,6 +14,9 @@ var (
 
 	//go:embed runtime-health-binding.json
 	runtimeHealthBinding []byte
+
+	//go:embed runtime-fire-error-binding.json
+	runtimeFireErrorBinding []byte
 )
 
 func OwnerSchema() []byte { return append([]byte(nil), ownerSchema...) }
@@ -21,3 +24,5 @@ func OwnerSchema() []byte { return append([]byte(nil), ownerSchema...) }
 func SourceManifest() []byte { return append([]byte(nil), sourceManifest...) }
 
 func RuntimeHealthBinding() []byte { return append([]byte(nil), runtimeHealthBinding...) }
+
+func RuntimeFireErrorBinding() []byte { return append([]byte(nil), runtimeFireErrorBinding...) }

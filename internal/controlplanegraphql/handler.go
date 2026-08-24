@@ -21,7 +21,10 @@ func NewHandler(checker controlplanehealth.Checker) (http.Handler, error) {
 	if err := validatePublishedContract(); err != nil {
 		return nil, err
 	}
-	server := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{Health: checker}}))
+	server := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{
+		Health:            checker,
+		FireErrorProvider: controlplanehealth.NewAlwaysFailFireError(),
+	}}))
 	server.AddTransport(transport.POST{})
 	return requireWorkloadIdentity(server, BFFProductionSPIFFE), nil
 }

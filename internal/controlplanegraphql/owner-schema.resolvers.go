@@ -15,7 +15,13 @@ import (
 
 // FireError is the resolver for the fireError field.
 func (r *queryResolver) FireError(ctx context.Context) (*model.FireErrorVoid, error) {
-	return nil, fmt.Errorf("control-plane fireError always fails by contract")
+	if r.FireErrorProvider == nil {
+		return nil, fmt.Errorf("control-plane fireError provider is not configured")
+	}
+	if err := r.FireErrorProvider.FireError(ctx); err != nil {
+		return nil, err
+	}
+	return nil, fmt.Errorf("control-plane fireError provider returned an invalid success")
 }
 
 // HealthCheck is the resolver for the healthCheck field.

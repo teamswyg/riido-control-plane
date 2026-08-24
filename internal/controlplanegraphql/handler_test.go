@@ -20,6 +20,10 @@ type checkerFunc func(context.Context) (int, error)
 
 func (function checkerFunc) HealthCheck(ctx context.Context) (int, error) { return function(ctx) }
 
+type fireErrorFunc func(context.Context) error
+
+func (function fireErrorFunc) FireError(ctx context.Context) error { return function(ctx) }
+
 func TestHealthCheckGeneratedReceiverReturnsExactFrozenValueWithoutUserAuth(t *testing.T) {
 	handler, err := NewHandler(controlplanehealth.NewService())
 	if err != nil {
@@ -71,6 +75,25 @@ func TestFireErrorAlwaysReturnsGraphQLErrorWithoutPanicking(t *testing.T) {
 	response := performGraphQL(t, handler, `query OwnerHealth { fireError }`, BFFProductionSPIFFE)
 	if response.Code != http.StatusOK || !bytes.Contains(response.Body.Bytes(), []byte(`"fireError":null`)) || !bytes.Contains(response.Body.Bytes(), []byte(`"errors"`)) {
 		t.Fatalf("fireError did not fail safely: %s", response.Body.String())
+	}
+}
+
+func TestFireErrorProviderIsFailClosedAndCannotInventSuccess(t *testing.T) {
+	tests := []struct {
+		name     string
+		provider controlplanehealth.FireErrorer
+	}{
+		{name: "provider absent", provider: nil},
+		{name: "provider reports success", provider: fireErrorFunc(func(context.Context) error { return nil })},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			resolver := (&Resolver{FireErrorProvider: test.provider}).Query()
+			value, err := resolver.FireError(context.Background())
+			if err == nil || value != nil {
+				t.Fatalf("fireError escaped fail-closed path: value=%v err=%v", value, err)
+			}
+		})
 	}
 }
 

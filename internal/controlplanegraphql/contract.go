@@ -45,6 +45,33 @@ type runtimeHealthBinding struct {
 	ProductionRuntimeCredit       bool   `json:"production_runtime_credit"`
 }
 
+type runtimeFireErrorBinding struct {
+	SchemaVersion                 string `json:"schema_version"`
+	Lifecycle                     string `json:"lifecycle"`
+	Coordinate                    string `json:"coordinate"`
+	ClientCoordinate              string `json:"client_coordinate"`
+	ClientContractRelease         string `json:"client_contract_release"`
+	OwnerRepository               string `json:"owner_repository"`
+	OwnerRevision                 string `json:"owner_revision"`
+	OwnerSchemaPath               string `json:"owner_schema_path"`
+	OwnerSchemaSHA256             string `json:"owner_schema_sha256"`
+	OwnerManifestPath             string `json:"owner_manifest_path"`
+	OwnerManifestSHA256           string `json:"owner_manifest_sha256"`
+	GraphQLType                   string `json:"graphql_type"`
+	AuthPolicy                    string `json:"auth_policy"`
+	SuccessSemantics              string `json:"success_semantics"`
+	WireSemantics                 string `json:"wire_semantics"`
+	SideEffects                   string `json:"side_effects"`
+	ProviderPolicy                string `json:"provider_policy"`
+	TransportTermination          string `json:"transport_termination"`
+	ListenerConfigurationRequired bool   `json:"listener_configuration_required"`
+	IngressIdentitySource         string `json:"ingress_identity_source"`
+	VerifiedClientChainRequired   bool   `json:"verified_client_chain_required"`
+	ProductionIngressVerified     bool   `json:"production_ingress_verified"`
+	DeploymentStatus              string `json:"deployment_status"`
+	ProductionRuntimeCredit       bool   `json:"production_runtime_credit"`
+}
+
 type publishedOwnerManifest struct {
 	SchemaVersion        string `json:"schema_version"`
 	Service              string `json:"service"`
@@ -72,6 +99,12 @@ type publishedOwnerManifest struct {
 		SourceOptional bool   `json:"source_optional"`
 		SourceNullable bool   `json:"source_nullable"`
 	} `json:"source_type_mappings"`
+	CustomScalarMappings []struct {
+		GraphQLName string `json:"graphql_name"`
+		MappingMode string `json:"mapping_mode"`
+		SourceKind  string `json:"source_kind"`
+		WireType    string `json:"wire_type"`
+	} `json:"custom_scalar_mappings"`
 }
 
 func validateContract(bindingRaw, schemaRaw, manifestRaw []byte, expectedRelease string) error {
@@ -113,6 +146,51 @@ func validateContract(bindingRaw, schemaRaw, manifestRaw []byte, expectedRelease
 		return fmt.Errorf("control-plane health owner signature is invalid")
 	}
 	if err := validateManifestHealthSemantics(manifestRaw); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateFireErrorContract(bindingRaw, schemaRaw, manifestRaw []byte, expectedRelease string) error {
+	decoder := json.NewDecoder(bytes.NewReader(bindingRaw))
+	decoder.DisallowUnknownFields()
+	var binding runtimeFireErrorBinding
+	if err := decoder.Decode(&binding); err != nil {
+		return fmt.Errorf("decode control-plane fireError binding: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return fmt.Errorf("decode control-plane fireError binding: trailing data")
+	}
+	if binding.SchemaVersion != "riido.control-plane-fire-error-runtime-binding.v1" ||
+		binding.Lifecycle != "SOURCE_READY_OWNER_ONLY" ||
+		binding.Coordinate != "Query.fireError" || binding.ClientCoordinate != "Query.controlPlane.fireError" ||
+		binding.ClientContractRelease != expectedRelease || expectedRelease != FrozenClientRelease ||
+		binding.OwnerRepository != "teamswyg/riido-control-plane" ||
+		binding.OwnerRevision != "f9897c716066c35611db79b989df5130b097b66c" ||
+		binding.OwnerSchemaPath != "contracts/nonwork17-owner-schema/owner-schema.graphqls" ||
+		binding.OwnerManifestPath != "contracts/nonwork17-owner-schema/source-manifest.json" ||
+		binding.OwnerSchemaSHA256 != PublishedOwnerSchemaSHA256 || binding.OwnerManifestSHA256 != PublishedOwnerManifestSHA256 ||
+		binding.GraphQLType != "ControlPlaneFireErrorVoid" || binding.AuthPolicy != "UNAUTHENTICATED" ||
+		binding.SuccessSemantics != "NEVER_RETURNING_VOID" || binding.WireSemantics != "NULL_WITH_GRAPHQL_ERROR" ||
+		binding.SideEffects != "ZERO" || binding.ProviderPolicy != "FAIL_CLOSED" ||
+		binding.TransportTermination != "APPLICATION_TLS13_MTLS_LISTENER" || !binding.ListenerConfigurationRequired ||
+		binding.IngressIdentitySource != "request.TLS.VerifiedChains" || !binding.VerifiedClientChainRequired ||
+		binding.ProductionIngressVerified || binding.DeploymentStatus != "HOLD_UNTIL_VERIFIED_CLIENT_CHAIN_INGRESS_PROOF" ||
+		binding.ProductionRuntimeCredit {
+		return fmt.Errorf("control-plane fireError binding identity is not admitted")
+	}
+	if digest(schemaRaw) != PublishedOwnerSchemaSHA256 || digest(manifestRaw) != PublishedOwnerManifestSHA256 {
+		return fmt.Errorf("control-plane fireError owner artifact hash mismatch")
+	}
+	schema, err := gqlparser.LoadSchema(&ast.Source{Name: binding.OwnerSchemaPath, Input: string(schemaRaw)})
+	if err != nil || schema.Query == nil {
+		return fmt.Errorf("control-plane fireError owner schema is invalid")
+	}
+	field := schema.Query.Fields.ForName("fireError")
+	if field == nil || len(field.Arguments) != 0 || field.Type.String() != binding.GraphQLType {
+		return fmt.Errorf("control-plane fireError owner signature is invalid")
+	}
+	if err := validateManifestFireErrorSemantics(manifestRaw); err != nil {
 		return err
 	}
 	return nil
@@ -160,9 +238,60 @@ func validateManifestHealthSemantics(raw []byte) error {
 	return nil
 }
 
+func validateManifestFireErrorSemantics(raw []byte) error {
+	var manifest publishedOwnerManifest
+	if err := json.Unmarshal(raw, &manifest); err != nil {
+		return fmt.Errorf("decode published owner manifest: %w", err)
+	}
+	operationCount, authCount, mappingCount, scalarCount := 0, 0, 0, 0
+	for _, operation := range manifest.Operations {
+		if operation.Name == "fireError" {
+			operationCount++
+			if operation.Coordinate != "Query.fireError" {
+				return fmt.Errorf("published owner fireError operation semantics are invalid")
+			}
+		}
+	}
+	for _, policy := range manifest.ContractAuthPolicies {
+		if policy.Name == "fireError" {
+			authCount++
+			if policy.OperationKind != "Query" || policy.TargetPolicy != "UNAUTHENTICATED" || policy.Status != "PINNED" {
+				return fmt.Errorf("published owner fireError auth policy is invalid")
+			}
+		}
+	}
+	for _, mapping := range manifest.SourceTypeMappings {
+		if mapping.Name == "fireError" {
+			mappingCount++
+			if mapping.OperationKind != "Query" || mapping.Path != "return" || mapping.GraphQLType != "ControlPlaneFireErrorVoid" ||
+				mapping.MappingMode != "EXPLICIT_VOID_SCALAR" || !mapping.Nullable || mapping.SourceOptional || !mapping.SourceNullable {
+				return fmt.Errorf("published owner fireError type mapping is invalid")
+			}
+		}
+	}
+	for _, mapping := range manifest.CustomScalarMappings {
+		if mapping.GraphQLName == "ControlPlaneFireErrorVoid" {
+			scalarCount++
+			if mapping.MappingMode != "EXPLICIT_VOID_SCALAR" || mapping.SourceKind != "NEVER_RETURNING_VOID" ||
+				mapping.WireType != "no successful response value; source always throws" {
+				return fmt.Errorf("published owner fireError scalar mapping is invalid")
+			}
+		}
+	}
+	if operationCount != 1 || authCount != 1 || mappingCount != 1 || scalarCount != 1 {
+		return fmt.Errorf("published owner fireError semantic slice is incomplete or duplicate")
+	}
+	return nil
+}
+
 func validatePublishedContract() error {
-	return validateContract(
+	if err := validateContract(
 		ownerschema.RuntimeHealthBinding(), ownerschema.OwnerSchema(), ownerschema.SourceManifest(), FrozenClientRelease,
+	); err != nil {
+		return err
+	}
+	return validateFireErrorContract(
+		ownerschema.RuntimeFireErrorBinding(), ownerschema.OwnerSchema(), ownerschema.SourceManifest(), FrozenClientRelease,
 	)
 }
 

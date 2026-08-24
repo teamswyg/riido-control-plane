@@ -76,8 +76,8 @@
       {
         "path": "internal/controlplanegraphql",
         "max_files": 3,
-        "max_lines": 172,
-        "max_total_over_target_lines": 193
+        "max_lines": 301,
+        "max_total_over_target_lines": 373
       },
       {
         "path": "internal/controlplanegraphql/generated",
@@ -147,6 +147,12 @@
       "kind": "use-case",
       "role": "Stateless exact numeric health use case preserving the frozen 200 result.",
       "must_not_own": "HTTP, GraphQL parsing, caller identity, or deployment admission"
+    },
+    {
+      "path": "internal/ownergraphql/controlplane",
+      "kind": "compatibility-test",
+      "role": "Retained historical owner receiver compatibility surface; production wiring is replaced by the generated SPIFFE-gated receiver.",
+      "must_not_own": "production route registration, public schema changes, or workload identity policy"
     },
     {
       "path": "internal/repoidentity",

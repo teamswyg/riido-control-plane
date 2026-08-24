@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `113`; runtime: `1`; internal: `8`; tools: `103`; forbidden import hits: `0`.
+Packages: `114`; runtime: `1`; internal: `9`; tools: `103`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `101`; max file lines: `2377`.
 
@@ -35,7 +35,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
 | `internal/contractscompat` | 0 | 1 | 0 | 81 | 0 | 6 |
-| `internal/controlplanegraphql` | 3 | 3 | 172 | 172 | 193 | 193 |
+| `internal/controlplanegraphql` | 3 | 3 | 301 | 301 | 373 | 373 |
 | `internal/controlplanegraphql/generated` | 1 | 1 | 2377 | 2377 | 2302 | 2302 |
 | `tools/operationalreadiness` | 0 | 1 | 0 | 77 | 0 | 2 |
 | `tools/looprefreshdispatch` | 0 | 0 | 0 | 75 | 0 | 0 |
@@ -66,7 +66,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver` | 86 | 832 | 13196 |
 | `internal/authpep` | 6 | 291 | 687 |
 | `cmd/riido_ai_server` | 5 | 243 | 266 |
-| `internal/controlplanegraphql` | 3 | 172 | 193 |
+| `internal/controlplanegraphql` | 3 | 301 | 373 |
 | `internal/controlplanegraphql/generated` | 1 | 2377 | 2302 |
 
 ## Packages
@@ -74,7 +74,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `public-adapter`: `awsadapters`
 - `runtime-shell`: `cmd/riido_ai_server`
 - `identity-adapter`: `internal/authpep`
-- `compatibility-test`: `internal/contractscompat`
+- `compatibility-test`: `internal/contractscompat`, `internal/ownergraphql/controlplane`
 - `graphql-transport`: `internal/controlplanegraphql`
 - `generated-code`: `internal/controlplanegraphql/generated`
 - `graphql-model`: `internal/controlplanegraphql/model`
