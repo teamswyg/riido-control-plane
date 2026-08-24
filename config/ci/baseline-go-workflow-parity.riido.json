@@ -1487,7 +1487,7 @@
       "baseline": {
         "source_revision": "cbcbbe9e9e612011836c622c300a3b6cafa0f638",
         "workflow": ".github/workflows/evidence-graph.yml",
-        "workflow_sha256": "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710",
+        "workflow_sha256": "034ed729d08ff85117f84db26fd23c9dd31d80ba89715243f3b89d8112458b37",
         "workflow_name": "Evidence Graph",
         "job": "evidence-graph",
         "tracked_workflow_count": 56

@@ -17,11 +17,25 @@
   },
   "allowed_direct_modules": [
     {
+      "path": "github.com/99designs/gqlgen",
+      "layer": "contract",
+      "owner": "control-plane",
+      "approved": true,
+      "reason": "Generated GraphQL receiver for the frozen published control-plane owner SDL."
+    },
+    {
       "path": "github.com/teamswyg/riido-contracts",
       "layer": "contract",
       "owner": "platform",
       "approved": true,
       "reason": "Shared generated assignment/runtime vocabulary contract."
+    },
+    {
+      "path": "github.com/vektah/gqlparser/v2",
+      "layer": "contract",
+      "owner": "control-plane",
+      "approved": true,
+      "reason": "Parse and validate the frozen published owner schema during fail-fast startup admission."
     },
     {
       "path": "go.opentelemetry.io/otel",

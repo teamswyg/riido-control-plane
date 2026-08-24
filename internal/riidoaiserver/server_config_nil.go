@@ -31,8 +31,5 @@ func normalizeServerConfigNilInterfaces(config ServerConfig) ServerConfig {
 	if isNilInterface(config.TraceRecorder) {
 		config.TraceRecorder = nil
 	}
-	if isNilInterface(config.ControlPlaneOwnerGraphQL) {
-		config.ControlPlaneOwnerGraphQL = nil
-	}
 	return config
 }

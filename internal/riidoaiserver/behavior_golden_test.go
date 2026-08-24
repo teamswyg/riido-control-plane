@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	riidoAIServerRouteGoldenHash  = "fc3eb6351096043bae8a2945d4e8d40a76f1c94393c37112e920b8237a72bd34"
+	riidoAIServerRouteGoldenHash  = "781d846754109bc8455da756a8a023fc671da87786fa155f83cd7d020cea32a4"
 	riidoAIServerStatusGoldenHash = "7191fa30926ca05804763741bfb752231ea4ead921f9a58640b875001038437f"
 )
 

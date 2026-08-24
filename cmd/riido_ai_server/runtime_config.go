@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"time"
 
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
@@ -13,6 +14,7 @@ type runtimeConfig struct {
 	ReviewProvision          *riidoaiserver.ReviewAccountProvisioning
 	MetricsLogInterval       time.Duration
 	PprofAddr                string
+	ControlPlaneGraphQLMTLS  controlPlaneGraphQLMTLSConfig
 	Tracing                  tracingRuntimeConfig
 	WebAllowedOrigins        []string
 	AssignmentActiveLease    time.Duration
@@ -29,6 +31,11 @@ type runtimeConfig struct {
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
 	AssignmentOutbox         riidoaiserver.EventSink
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
+}
+
+type controlPlaneGraphQLMTLSConfig struct {
+	Addr      string
+	TLSConfig *tls.Config
 }
 
 func closeRuntimeConfig(config runtimeConfig) {

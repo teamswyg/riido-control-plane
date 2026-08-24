@@ -36,6 +36,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		ReviewProvision:          parts.reviewProvision,
 		MetricsLogInterval:       timing.MetricsLogInterval,
 		PprofAddr:                parts.pprofAddr,
+		ControlPlaneGraphQLMTLS:  parts.controlPlaneGraphQLMTLS,
 		Tracing:                  parts.tracing,
 		WebAllowedOrigins:        webAllowedOrigins,
 		AssignmentActiveLease:    timing.AssignmentActiveLease,

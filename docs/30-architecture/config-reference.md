@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `51`; manifest entries: `51`; secret/credential entries: `7`; operator-only entries: `11`.
+Runtime env reads: `55`; manifest entries: `55`; secret/credential entries: `8`; operator-only entries: `14`.
 
 ## Runtime Env
 
@@ -32,6 +32,10 @@ Runtime env reads: `51`; manifest entries: `51`; secret/credential entries: `7`;
 | `RIIDO_AI_SERVER_REVIEW_ACCOUNT_TOKEN_SHA256` | `empty` | `sensitive-hash` | Review/demo seed token hash; raw token values are never documented. |
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | `disabled` | `public` | Positive stdout CloudWatch EMF publish interval. |
 | `RIIDO_AI_SERVER_PPROF_ADDR` | `disabled` | `operator` | Optional loopback-only pprof listener address. |
+| `RIIDO_AI_SERVER_CONTROL_PLANE_GRAPHQL_MTLS_ADDR` | `disabled` | `operator` | Dedicated application-terminated TLS listener for the source-ready owner GraphQL receiver; all four mTLS settings are required together. |
+| `RIIDO_AI_SERVER_CONTROL_PLANE_GRAPHQL_SERVER_CERT_FILE` | `disabled` | `operator` | Path to the current TLS server certificate with the exact production control-plane DNS identity and ServerAuth usage. |
+| `RIIDO_AI_SERVER_CONTROL_PLANE_GRAPHQL_SERVER_KEY_FILE` | `disabled` | `secret` | Path to the private key for the dedicated owner GraphQL TLS server certificate. |
+| `RIIDO_AI_SERVER_CONTROL_PLANE_GRAPHQL_CLIENT_CA_FILE` | `disabled` | `operator` | Path to the trust roots used to verify the BFF client certificate before exact SPIFFE admission. |
 | `RIIDO_AI_SERVER_TRACING_ENABLED` | `false` | `public` | Opt-in OpenTelemetry trace export switch. |
 | `RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO` | `0.01` | `public` | Trace sampling ratio from 0 to 1. |
 | `RIIDO_AI_SERVER_OTEL_EXPORTER_OTLP_ENDPOINT` | `empty` | `operator` | Riido-specific OTLP/HTTP collector endpoint override. |

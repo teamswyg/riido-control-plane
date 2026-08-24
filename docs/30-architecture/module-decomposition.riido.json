@@ -22,7 +22,7 @@
     "target_lines": 75,
     "sample_limit": 10,
     "hotspot_limit": 8,
-    "max_files_over_target": 99,
+    "max_files_over_target": 105,
     "max_file_lines": 2481,
     "hotspot_limits": [
       {
@@ -45,9 +45,9 @@
       },
       {
         "path": "cmd/riido_ai_server",
-        "max_files": 3,
+        "max_files": 5,
         "max_lines": 791,
-        "max_total_over_target_lines": 1474
+        "max_total_over_target_lines": 1613
       },
       {
         "path": "tools/containercontract",
@@ -72,6 +72,18 @@
         "max_files": 1,
         "max_lines": 81,
         "max_total_over_target_lines": 6
+      },
+      {
+        "path": "internal/controlplanegraphql",
+        "max_files": 3,
+        "max_lines": 301,
+        "max_total_over_target_lines": 373
+      },
+      {
+        "path": "internal/controlplanegraphql/generated",
+        "max_files": 1,
+        "max_lines": 2377,
+        "max_total_over_target_lines": 2302
       },
       {
         "path": "tools/operationalreadiness",
@@ -113,10 +125,34 @@
       "must_not_own": "domain redefinition"
     },
     {
+      "path": "internal/controlplanegraphql",
+      "kind": "graphql-transport",
+      "role": "Generated owner receiver composition, frozen contract admission, exact workload identity guard, and resolvers.",
+      "must_not_own": "public client schema changes, deployment admission, or fabricated health values"
+    },
+    {
+      "path": "internal/controlplanegraphql/generated",
+      "kind": "generated-code",
+      "role": "gqlgen executable schema generated only from the frozen published owner SDL.",
+      "must_not_own": "hand-written contract or domain behavior"
+    },
+    {
+      "path": "internal/controlplanegraphql/model",
+      "kind": "graphql-model",
+      "role": "Generated and explicit scalar model boundary for the frozen owner SDL.",
+      "must_not_own": "runtime transport, use-case behavior, or public client projection"
+    },
+    {
+      "path": "internal/controlplanehealth",
+      "kind": "use-case",
+      "role": "Stateless exact numeric health use case preserving the frozen 200 result.",
+      "must_not_own": "HTTP, GraphQL parsing, caller identity, or deployment admission"
+    },
+    {
       "path": "internal/ownergraphql/controlplane",
-      "kind": "source-ready-adapter",
-      "role": "Unregistered source-derived control-plane owner GraphQL receiver, exact use case, and generated operation registry.",
-      "must_not_own": "production route registration, deployment readiness, runtime credit, or mutable public schema"
+      "kind": "compatibility-test",
+      "role": "Retained historical owner receiver compatibility surface; production wiring is replaced by the generated SPIFFE-gated receiver.",
+      "must_not_own": "production route registration, public schema changes, or workload identity policy"
     },
     {
       "path": "internal/repoidentity",

@@ -18,7 +18,7 @@ func TestControlPlaneOwnerReceiverFailsClosedWithoutExplicitHandler(t *testing.T
 
 	riidoaiserver.NewServer(riidoaiserver.ServerConfig{}).Handler().ServeHTTP(response, request)
 
-	if response.Code != http.StatusServiceUnavailable {
+	if response.Code != http.StatusNotFound {
 		t.Fatalf("missing receiver must fail closed, status=%d", response.Code)
 	}
 }

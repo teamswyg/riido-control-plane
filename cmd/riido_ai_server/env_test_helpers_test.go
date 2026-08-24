@@ -16,6 +16,8 @@ func riidoAIServerEnvKeys() []string {
 		envAuthIssuer, envAuthResource, envAuthAuthorizationProfile,
 		envAuthIntrospectionClientID, envAuthIntrospectionClientSecret, envAuthHTTPTimeout,
 		envReviewAccountTokenHash, envMetricsLogInterval, envPprofAddr,
+		envControlPlaneGraphQLMTLSAddr, envControlPlaneGraphQLServerCertFile,
+		envControlPlaneGraphQLServerKeyFile, envControlPlaneGraphQLClientCAFile,
 		envTracingEnabled, envTracingSampleRatio, envTracingOTLPEndpoint,
 		envTracingServiceName, envWebAllowedOrigins, envAssignmentActiveLease,
 		envAIAgentClientDev, envAIAgentClientTable, envAIAgentClientSnapshotReload,
