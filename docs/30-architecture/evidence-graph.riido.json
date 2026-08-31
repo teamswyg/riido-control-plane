@@ -14008,7 +14008,7 @@
           "redacted": true
         }
       ],
-      "decision": "Control-plane performance syntax coverage may expand only after TestControlPlanePerformanceBehaviorGolden preserves the deterministic performance evidence hash; the syntax target binds performance verifier shape to control_plane_performance_hot_paths_must_emit_evidence while preserving API contracts and evidence output semantics. Shared syntax-hash duplicate-shape evidence remains evidence_only: it can reveal hot-path AST shape overlap for future architecture routing without claiming a runtime performance optimization or changing endpoint behavior.",
+      "decision": "Control-plane performance syntax coverage may expand only after TestControlPlanePerformanceBehaviorGolden preserves the deterministic performance evidence hash; the syntax target binds performance verifier shape to control_plane_performance_hot_paths_must_emit_evidence while preserving API contracts and evidence output semantics. Assignment failure logging is admitted only on terminal failure events with bounded fields, keeping normal append traffic and metric cardinality unchanged. Shared syntax-hash duplicate-shape evidence remains evidence_only: it can reveal hot-path AST shape overlap for future architecture routing without claiming a runtime performance optimization or changing endpoint behavior.",
       "next_loop": "closed_loop_candidate"
     },
     {
