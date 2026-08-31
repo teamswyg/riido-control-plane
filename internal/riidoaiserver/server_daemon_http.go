@@ -50,5 +50,6 @@ func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Reque
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	traceProviderHealth(r.Context(), response.Device.Runtimes)
 	writeJSON(w, http.StatusAccepted, response)
 }

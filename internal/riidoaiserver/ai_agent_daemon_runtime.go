@@ -332,6 +332,9 @@ func deviceRuntimeSnapshotChangedForEvent(prev DeviceRecord, prevOK bool, next D
 			p.Availability != rt.Availability ||
 			p.DetectionState != rt.DetectionState ||
 			p.ProviderVersion != rt.ProviderVersion ||
+			p.HealthStatus != rt.HealthStatus ||
+			p.DiagnosticCode != rt.DiagnosticCode ||
+			p.DiagnosticSummary != rt.DiagnosticSummary ||
 			p.HasAssignedAgent != rt.HasAssignedAgent ||
 			p.RequiresExperimentalOptIn != rt.RequiresExperimentalOptIn ||
 			!equalRuntimeModelRecords(p.Models, rt.Models) {
@@ -516,6 +519,10 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 		if err != nil {
 			return nil, fmt.Errorf("runtimes[%d].provider_version: %w", i, err)
 		}
+		healthStatus, diagnosticCode, diagnosticSummary, err := normalizeRuntimeProviderHealth(runtime)
+		if err != nil {
+			return nil, fmt.Errorf("runtimes[%d].provider_health: %w", i, err)
+		}
 		out = append(out, RuntimeRecord{
 			RuntimeID:                 runtime.RuntimeID,
 			DeviceID:                  deviceID,
@@ -525,6 +532,9 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,
 			ProviderVersion:           providerVersion,
+			HealthStatus:              healthStatus,
+			DiagnosticCode:            diagnosticCode,
+			DiagnosticSummary:         diagnosticSummary,
 			OwnerPrincipalID:          ownerPrincipalID,
 			LastDetectedAt:            now,
 			RequiresExperimentalOptIn: runtime.RequiresExperimentalOptIn,

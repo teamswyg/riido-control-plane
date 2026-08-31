@@ -38,7 +38,7 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 ## Public Field And Endpoint Signals
 
-- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`, `author_principal_id`, `is_owned_by_viewer`, `desktop_app_version`, `client_status`, `minimum_daemon_version`, `latest_daemon_version`, `agent_capability`, `agent_supported`, `update_required`, `download_url`
+- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `health_status`, `diagnostic_code`, `diagnostic_summary`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`, `author_principal_id`, `is_owned_by_viewer`, `desktop_app_version`, `client_status`, `minimum_daemon_version`, `latest_daemon_version`, `agent_capability`, `agent_supported`, `update_required`, `download_url`
 
 ## Deployment Evidence Phrases
 

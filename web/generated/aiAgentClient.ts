@@ -679,6 +679,16 @@ export interface ErrorEnvelope {
 }
 
 /**
+ * 원문 오류 대신 사용하는 비민감 provider 진단 코드입니다.
+ */
+export type ProviderDiagnosticCode = "none" | "executable-missing" | "login-required" | "version-unsupported" | "probe-failed" | "runtime-error";
+
+/**
+ * provider probe의 저카디널리티 상태입니다.
+ */
+export type ProviderHealthStatus = "healthy" | "degraded" | "unavailable" | "unknown";
+
+/**
  * client에 노출되는 runtime online/offline 상태입니다.
  */
 export type RuntimeAvailability = "online" | "offline";
@@ -709,7 +719,13 @@ export interface RuntimeRecord {
   availability: RuntimeAvailability;
   detection_state: RuntimeDetectionState;
   device_id: string;
+  diagnostic_code?: ProviderDiagnosticCode;
+  /**
+   * diagnostic_code에서 파생된 고정된 비민감 요약입니다.
+   */
+  diagnostic_summary?: string;
   has_assigned_agent: boolean;
+  health_status?: ProviderHealthStatus;
   kind: RuntimeKind;
   last_detected_at?: string;
   models: RuntimeModelRecord[];

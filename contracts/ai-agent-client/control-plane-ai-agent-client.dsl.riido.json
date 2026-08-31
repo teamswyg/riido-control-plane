@@ -502,6 +502,30 @@
       ]
     },
     {
+      "name": "ProviderHealthStatus",
+      "type": "string",
+      "description": "provider probe의 저카디널리티 상태입니다.",
+      "values": [
+        {"value": "healthy"},
+        {"value": "degraded"},
+        {"value": "unavailable"},
+        {"value": "unknown"}
+      ]
+    },
+    {
+      "name": "ProviderDiagnosticCode",
+      "type": "string",
+      "description": "원문 오류 대신 사용하는 비민감 provider 진단 코드입니다.",
+      "values": [
+        {"value": "none"},
+        {"value": "executable-missing"},
+        {"value": "login-required"},
+        {"value": "version-unsupported"},
+        {"value": "probe-failed"},
+        {"value": "runtime-error"}
+      ]
+    },
+    {
       "name": "DaemonAvailability",
       "type": "string",
       "description": "runtime 설정 화면에서 표시하는 desktop local daemon online/offline 상태입니다.",
@@ -764,6 +788,19 @@
           "name": "provider_version",
           "type": "string",
           "description": "provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다."
+        },
+        {
+          "name": "health_status",
+          "ref": "ProviderHealthStatus"
+        },
+        {
+          "name": "diagnostic_code",
+          "ref": "ProviderDiagnosticCode"
+        },
+        {
+          "name": "diagnostic_summary",
+          "type": "string",
+          "description": "diagnostic_code에서 파생된 고정된 비민감 요약입니다."
         },
         {
           "name": "owner_principal_id",
