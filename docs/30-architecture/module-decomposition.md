@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 87 | 85 | 832 | 838 | 13241 | 13604 |
+| `internal/riidoaiserver` | 87 | 85 | 832 | 838 | 13259 | 13604 |
 | `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 2 | 3 | 144 | 791 | 92 | 1474 |
@@ -51,8 +51,8 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
-| `internal/riidoaiserver/ai_agent_client_api.go` | 631 |
-| `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 627 |
+| `internal/riidoaiserver/ai_agent_client_api.go` | 639 |
+| `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 637 |
 | `internal/riidoaiserver/store.go` | 541 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
 | `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 482 |
@@ -61,7 +61,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 87 | 832 | 13241 |
+| `internal/riidoaiserver` | 87 | 832 | 13259 |
 | `internal/authpep` | 6 | 291 | 687 |
 | `cmd/riido_ai_server` | 2 | 144 | 92 |
 
