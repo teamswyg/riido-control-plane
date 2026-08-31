@@ -203,6 +203,16 @@ jobs:
               --output text
           )"
           echo "::add-mask::$current_task_definition"
+          current_desired_count="$(
+            aws ecs describe-services \
+              --cluster "$ECS_CLUSTER" \
+              --services "$ECS_SERVICE" \
+              --query 'services[0].desiredCount' \
+              --output text
+          )"
+          printf '%s' "$current_task_definition" > "$RUNNER_TEMP/riido-previous-task-definition-arn"
+          printf '%s' "$current_desired_count" > "$RUNNER_TEMP/riido-previous-desired-count"
+          chmod 600 "$RUNNER_TEMP/riido-previous-task-definition-arn" "$RUNNER_TEMP/riido-previous-desired-count"
 
           aws ecs describe-task-definition \
             --task-definition "$current_task_definition" \
@@ -251,8 +261,18 @@ jobs:
           set -euo pipefail
           umask 077
           task_definition="$(cat "$RUNNER_TEMP/riido-task-definition-arn")"
+          previous_desired_count="$(cat "$RUNNER_TEMP/riido-previous-desired-count")"
+          deploy_desired_count="$previous_desired_count"
+          if [ "$deploy_desired_count" -eq 0 ]; then
+            deploy_desired_count=1
+          fi
           echo "::add-mask::$task_definition"
+          touch "$RUNNER_TEMP/riido-deployment-started"
           if [ -n "${CODEDEPLOY_APPLICATION:-}" ]; then
+            if [ "$previous_desired_count" -eq 0 ]; then
+              aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --desired-count 1 >/dev/null
+              aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+            fi
             container_port="$(cat "$RUNNER_TEMP/riido-container-port")"
             appspec_json="$RUNNER_TEMP/codedeploy-appspec.json"
             deployment_json="$RUNNER_TEMP/codedeploy-deployment.json"
@@ -315,6 +335,7 @@ jobs:
               --cluster "$ECS_CLUSTER" \
               --service "$ECS_SERVICE" \
               --task-definition "$task_definition" \
+              --desired-count "$deploy_desired_count" \
               --force-new-deployment \
               >/dev/null
             aws ecs wait services-stable \
@@ -368,6 +389,37 @@ jobs:
             "$base_url/v2/client/workspaces/$workspace_id/ai-agent/profile-thumbnails/uploads" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .method == "POST" and .form_file_field == "file" and (.upload_url | length) > 0 and (.profile_thumbnail_url | startswith("https://")) and (.form_fields | length) >= 6 and .max_content_length_bytes >= 1024' >/dev/null
 
+      - name: Roll back failed ECS deployment
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${CODEDEPLOY_APPLICATION:-}" ] || [ ! -f "$RUNNER_TEMP/riido-deployment-started" ]; then
+            exit 0
+          fi
+          previous_task_definition="$(cat "$RUNNER_TEMP/riido-previous-task-definition-arn")"
+          previous_desired_count="$(cat "$RUNNER_TEMP/riido-previous-desired-count")"
+          echo "::add-mask::$previous_task_definition"
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --task-definition "$previous_task_definition" \
+            --desired-count "$previous_desired_count" \
+            --force-new-deployment \
+            >/dev/null
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+
+      - name: Restore temporary non-production capacity
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          previous_desired_count="$(cat "$RUNNER_TEMP/riido-previous-desired-count")"
+          if [ "$previous_desired_count" -eq 0 ]; then
+            aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --desired-count 0 >/dev/null
+            aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+          fi
+
       - name: Cleanup live handoff files
         if: always()
         shell: bash
@@ -376,7 +428,10 @@ jobs:
           rm -f \
             "$RUNNER_TEMP/riido-image-uri" \
             "$RUNNER_TEMP/riido-task-definition-arn" \
-            "$RUNNER_TEMP/riido-container-port"
+            "$RUNNER_TEMP/riido-container-port" \
+            "$RUNNER_TEMP/riido-previous-task-definition-arn" \
+            "$RUNNER_TEMP/riido-previous-desired-count" \
+            "$RUNNER_TEMP/riido-deployment-started"
 
       - name: Publish redacted deploy summary evidence
         if: always()

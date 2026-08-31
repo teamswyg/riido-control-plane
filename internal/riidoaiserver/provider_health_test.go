@@ -86,14 +86,14 @@ func TestTraceProviderHealthRecordsUnknownDiagnostic(t *testing.T) {
 	traceProviderHealth(ctx, []RuntimeRecord{{
 		Kind:              RuntimeKindCodex,
 		HealthStatus:      hostintegration.ProviderHealthUnknown,
-		DiagnosticCode:    hostintegration.ProviderDiagnosticProbeFailed,
-		DiagnosticSummary: "provider probe did not complete",
+		DiagnosticCode:    hostintegration.ProviderDiagnosticAuthProbeFailed,
+		DiagnosticSummary: "provider authentication probe did not complete",
 	}})
 	spans := recorder.snapshot()
 	if len(spans) != 1 || len(spans[0].Errors) != 1 {
 		t.Fatalf("provider health spans = %+v", spans)
 	}
-	if got := spans[0].Attributes["riido.provider.diagnostic_code"]; got != "probe-failed" {
+	if got := spans[0].Attributes["riido.provider.diagnostic_code"]; got != "auth-probe-failed" {
 		t.Fatalf("diagnostic code = %q", got)
 	}
 }

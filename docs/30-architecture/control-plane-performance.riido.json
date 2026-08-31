@@ -256,6 +256,7 @@
     "live load evidence must emit requests_per_second, success_per_second, failure_rate_pct, endpoint findings, capacity_estimate, and load_generator_resource_delta",
     "live load evidence may attach opt-in pprof sample metadata but must never persist pprof profile bodies",
     "pprof collection must use loopback-only RIIDO_AI_SERVER_PPROF_ADDR",
+    "assignment failure logging must remain terminal-failure-only and use bounded provider, result, and category values so the normal append hot path does not create high-cardinality observability work",
     "performance candidates must name the hot path, risk, existing evidence, and next verifier candidate",
     "performance evidence must expose a generated file_architecture_index that maps hot-path files to architecture components, pressure dimensions, OTel/X-Ray/CloudWatch signal names, evidence refs, hot path ids, and executable target verifier commands",
     "architecture query evidence must let agents map a known changed file to pressure dimensions, observability signals, optimization candidates, and target verifier commands without rereading the generated architecture prose"

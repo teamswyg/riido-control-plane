@@ -13,7 +13,7 @@ Executable SSOT: [`control-plane-performance.riido.json`](control-plane-performa
 - architecture components: `5`
 - architecture file index entries: `38`
 - architecture target verifier commands: `8`
-- assertions: `15`
+- assertions: `16`
 - local pressure artifact: `control-plane-local-pressure`
 - race artifact: `control-plane-race`
 - pressure candidate artifact: `control-plane-pressure-closed-loop-candidates`
