@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strconv"
 )
 
@@ -69,6 +70,11 @@ type TraceRecorder interface {
 	StartTraceSpan(ctx context.Context, start TraceSpanStart) (context.Context, TraceSpan)
 }
 
+type traceContextPropagator interface {
+	ExtractTraceContext(context.Context, http.Header) context.Context
+	InjectTraceContext(context.Context, http.Header)
+}
+
 type traceRecorderContextKey struct{}
 
 func WithTraceRecorder(ctx context.Context, recorder TraceRecorder) context.Context {
@@ -87,6 +93,19 @@ func TraceRecorderFromContext(ctx context.Context) TraceRecorder {
 	}
 	recorder, _ := ctx.Value(traceRecorderContextKey{}).(TraceRecorder)
 	return recorder
+}
+
+func ExtractTraceContext(ctx context.Context, recorder TraceRecorder, header http.Header) context.Context {
+	if propagator, ok := recorder.(traceContextPropagator); ok {
+		return propagator.ExtractTraceContext(ctx, header)
+	}
+	return ctx
+}
+
+func InjectTraceContext(ctx context.Context, header http.Header) {
+	if propagator, ok := TraceRecorderFromContext(ctx).(traceContextPropagator); ok {
+		propagator.InjectTraceContext(ctx, header)
+	}
 }
 
 func StartTraceSpan(ctx context.Context, recorder TraceRecorder, start TraceSpanStart) (context.Context, TraceSpan) {

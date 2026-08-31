@@ -22,6 +22,41 @@ func TestHTTPStatusRecorderFlushUnwrapAndImplicitStatus(t *testing.T) {
 	}
 }
 
+func TestHTTPTracingExtractsParentContext(t *testing.T) {
+	recorder := &propagatingTraceRecorder{recordingTraceRecorder: &recordingTraceRecorder{}}
+	handler := withHTTPTracing(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got, _ := r.Context().Value(traceContextTestKey{}).(string); got != "incoming" {
+			t.Fatalf("request trace context = %q", got)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}), recorder)
+	req := httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/poll", nil)
+	req.Header.Set("Traceparent", "incoming")
+	handler.ServeHTTP(httptest.NewRecorder(), req)
+}
+
+func TestHTTPTracingRecordsAndRethrowsPanic(t *testing.T) {
+	trace := &recordingTraceRecorder{}
+	handler := withHTTPTracing(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		panic("boom")
+	}), trace)
+	func() {
+		defer func() {
+			if recovered := recover(); recovered != "boom" {
+				t.Fatalf("recovered panic = %v", recovered)
+			}
+		}()
+		handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/poll", nil))
+	}()
+	spans := trace.snapshot()
+	if len(spans) != 1 || !spans[0].Ended || len(spans[0].Errors) != 1 {
+		t.Fatalf("panic span = %+v", spans)
+	}
+	if got := spans[0].Attributes["http.response.status_code"]; got != "500" {
+		t.Fatalf("panic status = %q", got)
+	}
+}
+
 func TestHTTPTracingRecordsServerErrorStatus(t *testing.T) {
 	trace := &recordingTraceRecorder{}
 	handler := withHTTPTracing(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

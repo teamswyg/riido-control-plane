@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"log"
+	"strings"
 	"testing"
 )
 
@@ -18,4 +22,15 @@ func TestShutdownTracingCallsConfiguredShutdown(t *testing.T) {
 		t.Fatal("shutdown was not called")
 	}
 	shutdownTracing(nil)
+}
+
+func TestShutdownTracingLogsFailureWithoutDetails(t *testing.T) {
+	var output bytes.Buffer
+	previousWriter := log.Writer()
+	log.SetOutput(&output)
+	defer log.SetOutput(previousWriter)
+	shutdownTracing(func(context.Context) error { return errors.New("sensitive detail") })
+	if got := output.String(); !strings.Contains(got, "event=otel_internal_error") || strings.Contains(got, "sensitive detail") {
+		t.Fatalf("shutdown log = %q", got)
+	}
 }

@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -13,6 +16,14 @@ type otelTraceRecorder struct {
 
 type otelTraceSpan struct {
 	span trace.Span
+}
+
+func (r otelTraceRecorder) ExtractTraceContext(ctx context.Context, header http.Header) context.Context {
+	return otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(header))
+}
+
+func (r otelTraceRecorder) InjectTraceContext(ctx context.Context, header http.Header) {
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(header))
 }
 
 //nolint:spancheck // Ownership is returned through otelTraceSpan and ended by the caller via the riidoaiserver.TraceSpan port.

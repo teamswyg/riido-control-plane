@@ -22,7 +22,10 @@ func TestExternalHTTPAuthorizerUsesConfiguredTimeoutForDefaultClient(t *testing.
 }
 
 func TestExternalHTTPAuthorizerTracesOutcomeWithoutRequestSecrets(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Traceparent"); got != "outgoing" {
+			t.Fatalf("traceparent = %q", got)
+		}
 		_ = json.NewEncoder(w).Encode(externalAuthorizerResponse{
 			SchemaVersion: ExternalAuthorizerResponseSchemaVersion, Allowed: true, PrincipalID: "user-1",
 		})
@@ -32,7 +35,7 @@ func TestExternalHTTPAuthorizerTracesOutcomeWithoutRequestSecrets(t *testing.T) 
 	if err != nil {
 		t.Fatalf("NewExternalHTTPAuthorizer: %v", err)
 	}
-	trace := &recordingTraceRecorder{}
+	trace := &propagatingTraceRecorder{recordingTraceRecorder: &recordingTraceRecorder{}}
 	_, err = authorizer.Authorize(WithTraceRecorder(context.Background(), trace), "secret-token", AuthorizationRequest{
 		Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionDeviceRead, WorkspaceID: "workspace-secret",
 	})

@@ -17,15 +17,25 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 		}
 		startedAt := time.Now()
 		recorder := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			statusCode := recorder.statusCode
+			recovered := recover()
+			if recovered != nil {
+				statusCode = http.StatusInternalServerError
+			}
+			route := httpMetricRoute(r.Method, r.URL.Path, r.Pattern, statusCode)
+			metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
+				Method:        r.Method,
+				Route:         route,
+				ClientSurface: traceHTTPClientSurface(route, r.URL.Path, r.UserAgent()),
+				StatusCode:    statusCode,
+				Duration:      time.Since(startedAt),
+			})
+			if recovered != nil {
+				panic(recovered)
+			}
+		}()
 		next.ServeHTTP(recorder, r)
-		route := httpMetricRoute(r.Method, r.URL.Path, r.Pattern, recorder.statusCode)
-		metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
-			Method:        r.Method,
-			Route:         route,
-			ClientSurface: traceHTTPClientSurface(route, r.URL.Path, r.UserAgent()),
-			StatusCode:    recorder.statusCode,
-			Duration:      time.Since(startedAt),
-		})
 	})
 }
 
