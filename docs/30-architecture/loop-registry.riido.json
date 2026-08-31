@@ -1534,7 +1534,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "4488a06937b3772a87074d422a8bec45d9504c38d8b6df503dbf90d986305932"
+      "semantic_hash": "105b39869b3ff86da45e43030dbae4f02b8547a458fa72c47a79f7375d56e3a1"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
