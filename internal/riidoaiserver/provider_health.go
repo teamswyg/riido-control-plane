@@ -55,6 +55,12 @@ func canonicalProviderDiagnosticSummary(code hostintegration.ProviderDiagnosticC
 		return "provider version is not supported"
 	case hostintegration.ProviderDiagnosticProbeFailed:
 		return "provider probe did not complete"
+	case hostintegration.ProviderDiagnosticAuthProbeFailed:
+		return "provider authentication probe did not complete"
+	case hostintegration.ProviderDiagnosticVersionProbeFailed:
+		return "provider version probe did not complete"
+	case hostintegration.ProviderDiagnosticCapabilityProbeFailed:
+		return "provider capability probe did not complete"
 	case hostintegration.ProviderDiagnosticRuntimeError:
 		return "provider runtime reported an error"
 	default:

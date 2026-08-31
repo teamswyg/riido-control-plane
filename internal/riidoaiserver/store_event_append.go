@@ -23,6 +23,7 @@ func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, ev
 		At:           at,
 	}
 	state.events[taskID] = append(state.events[taskID], event)
+	logAssignmentFailure(state, event)
 	if s.outbox != nil {
 		s.appendTaskEventToOutbox(state, event)
 	}
