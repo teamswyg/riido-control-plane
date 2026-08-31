@@ -744,6 +744,14 @@
           "path": ".github/workflows/control-plane-performance.yml"
         },
         {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_health_tracing.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_health_test.go"
+        },
+        {
           "kind": "tool",
           "path": "tools/controlplaneaudit"
         },
