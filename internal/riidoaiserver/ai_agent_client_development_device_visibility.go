@@ -34,6 +34,9 @@ func (s *DevelopmentAIAgentClientStore) deviceVisibleToPrincipalLocked(principal
 	if device.OwnerPrincipalID == principal.PrincipalID {
 		return true
 	}
+	if deviceConnectedToWorkspace(device, principal.WorkspaceID) {
+		return true
+	}
 	if s.deviceWorkspaceVisibleByAdminLocked(principal, device.DeviceID) {
 		return true
 	}

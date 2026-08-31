@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -23,6 +24,10 @@ func TestDeviceVisibleToConnectedWorkspaceMembers(t *testing.T) {
 	if !containsDeviceID(asMember.Devices, enroll.DeviceID) {
 		t.Fatalf("device %q not visible to connected workspace member", enroll.DeviceID)
 	}
+	if daemons, err := store.ListAIAgentDeviceDaemons(ctx,
+		AuthorizationResult{PrincipalID: "other-user", WorkspaceID: ws}, enroll.DeviceID); err != nil || len(daemons.Daemons) != 1 {
+		t.Fatalf("list daemons as member: daemons=%+v err=%v", daemons.Daemons, err)
+	}
 
 	asOther, err := store.ListAIAgentDevices(ctx,
 		AuthorizationResult{PrincipalID: "other-user", WorkspaceID: "workspace-unconnected"})
@@ -31,5 +36,9 @@ func TestDeviceVisibleToConnectedWorkspaceMembers(t *testing.T) {
 	}
 	if containsDeviceID(asOther.Devices, enroll.DeviceID) {
 		t.Fatalf("device %q leaked into unconnected workspace", enroll.DeviceID)
+	}
+	if _, err := store.ListAIAgentDeviceDaemons(ctx,
+		AuthorizationResult{PrincipalID: "other-user", WorkspaceID: "workspace-unconnected"}, enroll.DeviceID); !errors.Is(err, ErrAIAgentNotFound) {
+		t.Fatalf("device daemons leaked into unconnected workspace: %v", err)
 	}
 }
