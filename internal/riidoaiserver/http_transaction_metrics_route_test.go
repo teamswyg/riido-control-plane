@@ -35,3 +35,22 @@ func TestHTTPTransactionMetricsUseRouteVocabulary(t *testing.T) {
 		t.Fatalf("transaction latency = %+v", transaction)
 	}
 }
+
+func TestHTTPTransactionMetricsRecordAndRethrowPanic(t *testing.T) {
+	metrics := NewHTTPTransactionMetrics()
+	handler := withHTTPTransactionMetrics(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		panic("boom")
+	}), metrics)
+	func() {
+		defer func() {
+			if recovered := recover(); recovered != "boom" {
+				t.Fatalf("recovered panic = %v", recovered)
+			}
+		}()
+		handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodPost, "/v1/agents/agent-a/poll", nil))
+	}()
+	snapshot := metrics.ApplyToMetricsSnapshot(MetricsSnapshot{SchemaVersion: MetricsSchemaVersion})
+	if snapshot.HTTPRequestsTotal != 1 || snapshot.HTTPResponsesByStatus[http.StatusInternalServerError] != 1 {
+		t.Fatalf("panic metrics = %+v", snapshot)
+	}
+}

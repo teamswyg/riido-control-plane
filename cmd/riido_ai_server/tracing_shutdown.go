@@ -10,5 +10,7 @@ func shutdownTracing(shutdown tracingShutdownFunc) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), tracingShutdownTimeout)
 	defer cancel()
-	_ = shutdown(ctx)
+	if err := shutdown(ctx); err != nil {
+		logOTelInternalError(err)
+	}
 }

@@ -127,6 +127,7 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if a.apiKey != "" {
 		httpReq.Header.Set(ExternalAuthorizerAPIKeyHeader, a.apiKey)
 	}
+	InjectTraceContext(requestCtx, httpReq.Header)
 
 	resp, err := a.httpClient.Do(httpReq)
 	if err != nil {

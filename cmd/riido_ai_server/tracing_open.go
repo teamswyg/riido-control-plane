@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
@@ -38,5 +39,10 @@ func openTracing(ctx context.Context, config tracingRuntimeConfig) (riidoaiserve
 	)
 	otel.SetTracerProvider(provider)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
+	otel.SetErrorHandler(otel.ErrorHandlerFunc(logOTelInternalError))
 	return otelTraceRecorder{tracer: provider.Tracer(config.ServiceName)}, provider.Shutdown, nil
+}
+
+func logOTelInternalError(error) {
+	log.Print("event=otel_internal_error")
 }

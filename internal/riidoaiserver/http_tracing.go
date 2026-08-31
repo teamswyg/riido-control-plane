@@ -1,6 +1,8 @@
 package riidoaiserver
 
 import (
+	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -17,7 +19,8 @@ func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		ctx, span := StartTraceSpan(r.Context(), recorder, TraceSpanStart{
+		requestCtx := ExtractTraceContext(r.Context(), recorder, r.Header)
+		ctx, span := StartTraceSpan(requestCtx, recorder, TraceSpanStart{
 			Name: "HTTP " + r.Method + " " + route,
 			Kind: TraceSpanKindServer,
 			Attributes: []TraceAttribute{
@@ -28,15 +31,28 @@ func withHTTPTracing(next http.Handler, recorder TraceRecorder) http.Handler {
 			},
 		})
 		recorderResponse := &httpStatusRecorder{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			statusCode := recorderResponse.statusCode
+			recovered := recover()
+			if recovered != nil {
+				statusCode = http.StatusInternalServerError
+				log.Printf("event=http_handler_panic route=%q", route)
+			}
+			span.SetAttributes(
+				Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(statusCode)),
+				Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(statusCode)),
+			)
+			if recovered != nil {
+				span.RecordError(errors.New("http handler panic"))
+			} else if statusCode >= 500 {
+				span.RecordError(httpStatusTraceError(statusCode))
+			}
+			span.End()
+			if recovered != nil {
+				panic(recovered)
+			}
+		}()
 		next.ServeHTTP(recorderResponse, r.WithContext(WithTraceRecorder(ctx, recorder)))
-		span.SetAttributes(
-			Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(recorderResponse.statusCode)),
-			Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(recorderResponse.statusCode)),
-		)
-		if recorderResponse.statusCode >= 500 {
-			span.RecordError(httpStatusTraceError(recorderResponse.statusCode))
-		}
-		span.End()
 	})
 }
 

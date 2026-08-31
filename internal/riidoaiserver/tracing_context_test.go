@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"net/http"
 	"testing"
 )
 
@@ -65,6 +66,33 @@ func TestTaskContextOperationNameStringFallback(t *testing.T) {
 	if got := (TaskContextOperationName(" \t")).String(); got != unknownTaskContextOperation {
 		t.Fatalf("blank operation = %q, want %q", got, unknownTaskContextOperation)
 	}
+}
+
+func TestTraceContextPropagationUsesOptionalRecorderCapability(t *testing.T) {
+	recorder := &propagatingTraceRecorder{recordingTraceRecorder: &recordingTraceRecorder{}}
+	header := make(http.Header)
+	header.Set("Traceparent", "incoming")
+	ctx := ExtractTraceContext(context.Background(), recorder, header)
+	if got, _ := ctx.Value(traceContextTestKey{}).(string); got != "incoming" {
+		t.Fatalf("extracted trace context = %q", got)
+	}
+	outbound := make(http.Header)
+	InjectTraceContext(WithTraceRecorder(ctx, recorder), outbound)
+	if got := outbound.Get("Traceparent"); got != "outgoing" {
+		t.Fatalf("injected trace context = %q", got)
+	}
+}
+
+type traceContextTestKey struct{}
+
+type propagatingTraceRecorder struct{ *recordingTraceRecorder }
+
+func (r *propagatingTraceRecorder) ExtractTraceContext(ctx context.Context, header http.Header) context.Context {
+	return context.WithValue(ctx, traceContextTestKey{}, header.Get("Traceparent"))
+}
+
+func (r *propagatingTraceRecorder) InjectTraceContext(_ context.Context, header http.Header) {
+	header.Set("Traceparent", "outgoing")
 }
 
 func nilTraceContext() context.Context {
