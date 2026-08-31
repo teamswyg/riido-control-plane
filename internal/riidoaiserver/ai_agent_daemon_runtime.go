@@ -201,6 +201,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	// so the SSE stream isn't flooded with identical snapshots every ~5s.
 	deviceChanged := deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device)
 	if deviceChanged {
+		logProviderHealthChanges(previousDevice, previousDeviceOK, device)
 		s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
 			EventType:     AgentClientEventDeviceRuntimeSnapshot,
 			SchemaVersion: SchemaVersion,
