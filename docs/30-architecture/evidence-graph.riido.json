@@ -20,6 +20,61 @@
   ],
   "chains": [
     {
+      "id": "production_provider_failure_observability_loop",
+      "observation": "Production logs showed repeated external-authorizer timeouts, short HTTP 503 bursts, and initial non-operational provider observations without a useful diagnostic code or device correlation. One-percent head sampling also produced no retained error traces for the same incident window.",
+      "hypothesis": "Bounded failure-stage fields, hashed device correlation, normalized provider diagnostics, and error-marked spans can make provider and request failures diagnosable without changing endpoints, logging raw provider output, or adding high-cardinality metric dimensions.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "operational_readiness_checks_must_bind_release_items_to_evidence",
+        "request_authorization_must_preserve_security_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_health_tracing.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/external_authorizer_observation.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/request-authorization.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_health_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_transaction_metrics_route_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/external_authorizer_observation_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "production-cloudwatch-provider-failure-analysis-2026-09-01",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep the existing v1/v2 endpoint and payload contracts unchanged. Record only normalized routes, bounded diagnostic codes and stages, and a short device hash; retain error spans while leaving successful traffic on a low-rate baseline.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "production_agent_event_rejection_observability_loop",
       "observation": "The production store-operation alarm observed five POST /v1/agents/{agent_id}/events 400 responses in a window with 126 successful event appends, zero HTTP 5xx, zero queued assignments, and zero outbox errors. The durable journal proved asn-000064 reached completed in the same window, but the HTTP boundary did not log a rejection category, so a late-event transition race remained an unconfirmed inference rather than evidence.",
       "hypothesis": "A bounded structured diagnostic at the existing agent-event 400 boundary can classify assignment absence, identity mismatch, invalid state transition, binding validation, and store failure without changing endpoint behavior or logging daemon IDs, runtime IDs, provider output, metadata, or tokens.",
