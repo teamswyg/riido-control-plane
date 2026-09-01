@@ -23,23 +23,26 @@ func TestLogProviderHealthChangesOnlyLogsTransitions(t *testing.T) {
 		DiagnosticCode:    hostintegration.ProviderDiagnosticProbeFailed,
 		DiagnosticSummary: "sensitive detail",
 	}
-	logProviderHealthChanges(DeviceRecord{}, false, DeviceRecord{Runtimes: []RuntimeRecord{unknown}})
+	logProviderHealthChanges(DeviceRecord{}, false, DeviceRecord{DeviceID: "device-private", Runtimes: []RuntimeRecord{unknown}})
 	logProviderHealthChanges(DeviceRecord{Runtimes: []RuntimeRecord{unknown}}, true, DeviceRecord{Runtimes: []RuntimeRecord{unknown}})
 	recovered := unknown
 	recovered.HealthStatus = hostintegration.ProviderHealthHealthy
 	recovered.DiagnosticCode = hostintegration.ProviderDiagnosticNone
-	logProviderHealthChanges(DeviceRecord{Runtimes: []RuntimeRecord{unknown}}, true, DeviceRecord{Runtimes: []RuntimeRecord{recovered}})
+	logProviderHealthChanges(DeviceRecord{Runtimes: []RuntimeRecord{unknown}}, true, DeviceRecord{DeviceID: "device-private", Runtimes: []RuntimeRecord{recovered}})
 
 	got := output.String()
-	if strings.Count(got, "event=provider_health_changed") != 2 {
+	if strings.Count(got, "event=provider_health_snapshot") != 1 ||
+		strings.Count(got, "event=provider_health_changed") != 1 {
 		t.Fatalf("provider health transition logs = %q", got)
 	}
 	if !strings.Contains(got, `status="unknown" diagnostic_code="probe-failed"`) ||
 		!strings.Contains(got, `previous_status="unknown" status="healthy" diagnostic_code="none"`) {
 		t.Fatalf("provider health transition logs = %q", got)
 	}
-	if strings.Contains(got, unknown.DiagnosticSummary) {
-		t.Fatalf("provider health log leaked diagnostic summary: %q", got)
+	if strings.Contains(got, "device-private") || strings.Contains(got, unknown.DiagnosticSummary) ||
+		!strings.Contains(got, `failure_stage="probe"`) ||
+		!strings.Contains(got, `diagnostic_summary="provider probe did not complete"`) {
+		t.Fatalf("provider health log correlation is unsafe or incomplete: %q", got)
 	}
 }
 
@@ -69,6 +72,20 @@ func TestNormalizeRuntimeProviderHealthFillsUnknownDiagnostic(t *testing.T) {
 	}
 }
 
+func TestNormalizeRuntimeProviderHealthFillsUnavailableDiagnostic(t *testing.T) {
+	health, code, summary, err := normalizeRuntimeProviderHealth(RuntimeSnapshotRecord{
+		HealthStatus: hostintegration.ProviderHealthUnavailable,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if health != hostintegration.ProviderHealthUnavailable ||
+		code != hostintegration.ProviderDiagnosticProbeFailed ||
+		summary != "provider probe did not complete" {
+		t.Fatalf("health=%q code=%q summary=%q", health, code, summary)
+	}
+}
+
 func TestNormalizeRuntimeProviderHealthRejectsRawDiagnostic(t *testing.T) {
 	_, _, _, err := normalizeRuntimeProviderHealth(RuntimeSnapshotRecord{
 		HealthStatus:      hostintegration.ProviderHealthUnknown,
@@ -83,7 +100,7 @@ func TestNormalizeRuntimeProviderHealthRejectsRawDiagnostic(t *testing.T) {
 func TestTraceProviderHealthRecordsUnknownDiagnostic(t *testing.T) {
 	recorder := &recordingTraceRecorder{}
 	ctx := WithTraceRecorder(context.Background(), recorder)
-	traceProviderHealth(ctx, []RuntimeRecord{{
+	traceProviderHealth(ctx, "device-private", []RuntimeRecord{{
 		Kind:              RuntimeKindCodex,
 		HealthStatus:      hostintegration.ProviderHealthUnknown,
 		DiagnosticCode:    hostintegration.ProviderDiagnosticAuthProbeFailed,
@@ -95,5 +112,8 @@ func TestTraceProviderHealthRecordsUnknownDiagnostic(t *testing.T) {
 	}
 	if got := spans[0].Attributes["riido.provider.diagnostic_code"]; got != "auth-probe-failed" {
 		t.Fatalf("diagnostic code = %q", got)
+	}
+	if got := spans[0].Attributes["riido.daemon.device_ref"]; got == "" || got == "device-private" {
+		t.Fatalf("device ref = %q", got)
 	}
 }

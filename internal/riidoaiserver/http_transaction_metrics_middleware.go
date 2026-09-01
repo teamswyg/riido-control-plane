@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -31,6 +32,13 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 				StatusCode:    statusCode,
 				Duration:      time.Since(startedAt),
 			})
+			if statusCode >= http.StatusInternalServerError {
+				log.Printf(
+					"event=http_request_failed method=%q route=%q client_surface=%q status_code=%d duration_ms=%d",
+					r.Method, route, traceHTTPClientSurface(route, r.URL.Path, r.UserAgent()),
+					statusCode, time.Since(startedAt).Milliseconds(),
+				)
+			}
 			if recovered != nil {
 				panic(recovered)
 			}

@@ -3,11 +3,30 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 )
+
+func TestExternalAuthorizerRetryabilityIsBounded(t *testing.T) {
+	for _, test := range []struct {
+		err  error
+		want bool
+	}{
+		{context.DeadlineExceeded, true},
+		{errors.New("upstream unavailable"), true},
+		{ErrAuthorizationForbidden, false},
+		{ErrAuthorizationUnauthenticated, false},
+		{context.Canceled, false},
+		{nil, false},
+	} {
+		if got := externalAuthorizerRetryable(test.err); got != test.want {
+			t.Fatalf("retryable(%v)=%t want=%t", test.err, got, test.want)
+		}
+	}
+}
 
 func TestExternalHTTPAuthorizerUsesConfiguredTimeoutForDefaultClient(t *testing.T) {
 	authorizer, err := NewExternalHTTPAuthorizer(ExternalHTTPAuthorizerConfig{
