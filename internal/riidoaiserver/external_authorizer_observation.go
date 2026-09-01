@@ -36,9 +36,16 @@ func (o *externalAuthorizerObservation) start(
 		)
 		FinishTraceSpan(span, err)
 		if duration >= externalAuthorizerSlowThreshold || externalAuthorizerLogFailure(err) {
-			log.Printf("event=external_authorizer_request outcome=%q resource=%q action=%q duration_ms=%d in_flight_at_start=%d in_flight_remaining=%d timeout_ms=%d", externalAuthorizerOutcome(err), req.Resource, req.Action, duration.Milliseconds(), inFlight, remaining, timeout.Milliseconds())
+			outcome := externalAuthorizerOutcome(err)
+			log.Printf("event=external_authorizer_request outcome=%q error_type=%q failure_stage=%q retryable=%t resource=%q action=%q duration_ms=%d in_flight_at_start=%d in_flight_remaining=%d timeout_ms=%d", outcome, outcome, "authorize", externalAuthorizerRetryable(err), req.Resource, req.Action, duration.Milliseconds(), inFlight, remaining, timeout.Milliseconds())
 		}
 	}
+}
+
+func externalAuthorizerRetryable(err error) bool {
+	return errors.Is(err, context.DeadlineExceeded) ||
+		(err != nil && !errors.Is(err, ErrAuthorizationForbidden) &&
+			!errors.Is(err, ErrAuthorizationUnauthenticated) && !errors.Is(err, context.Canceled))
 }
 
 func externalAuthorizerOutcome(err error) string {

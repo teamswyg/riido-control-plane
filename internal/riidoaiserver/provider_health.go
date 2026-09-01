@@ -34,7 +34,7 @@ func normalizeRuntimeProviderHealth(runtime RuntimeSnapshotRecord) (
 	}
 	if health == hostintegration.ProviderHealthHealthy {
 		code = hostintegration.ProviderDiagnosticNone
-	} else if health == hostintegration.ProviderHealthUnknown && code == hostintegration.ProviderDiagnosticNone {
+	} else if code == hostintegration.ProviderDiagnosticNone {
 		code = hostintegration.ProviderDiagnosticProbeFailed
 	}
 	summary := canonicalProviderDiagnosticSummary(code)

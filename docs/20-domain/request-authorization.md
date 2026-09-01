@@ -55,7 +55,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | Group | Verified Rules |
 | --- | --- |
 | `static-token` | `principal-required`, `exactly-one-token-material`, `sha256-hash-supported`, `duplicate-token-rejected`, `scopes-required`, `constant-time-compare`, `scoped-deny-forbidden` |
-| `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only`, `configured-timeout-budget`, `slow-or-failed-authorization-observed`, `trace-span-without-token-or-workspace` |
+| `external-authorizer` | `request-schema-v1`, `response-schema-v1`, `opaque-bearer-token`, `ai-agent-client-workspace-required`, `api-key-header-server-only`, `response-disallow-unknown-fields`, `response-size-limit`, `allowed-principal-required`, `admin-role-only`, `configured-timeout-budget`, `slow-or-failed-authorization-observed`, `bounded-retryability-observed`, `trace-span-without-token-or-workspace` |
 | `fail-closed` | `http-401-unauthenticated`, `http-403-forbidden`, `allowed-false-forbidden`, `non-2xx-service-error`, `malformed-json-service-error`, `unsupported-schema-service-error`, `invalid-role-service-error`, `network-error-service-error` |
 | `fallback` | `next-only-unauthenticated`, `forbidden-stops-chain`, `empty-chain-unauthenticated` |
 | `authorization-scheme-routing` | `explicit-legacy-v1-and-auth-service-v2`, `selector-classifies-but-does-not-authenticate`, `legacy-v1-behavior-preserved`, `v2-failure-never-downgrades`, `v2-unavailable-fails-closed`, `unknown-scheme-fails-closed` |
