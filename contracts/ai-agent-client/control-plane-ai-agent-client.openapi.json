@@ -714,6 +714,66 @@
         ]
       }
     },
+    "/v1/client/ai-agent/agents/{agent_id}/dashboard": {
+      "get": {
+        "operationId": "getAgentDashboard",
+        "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDashboardResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ],
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "dashboard"
+          ],
+          "generated_path": "aiAgent.agents.dashboard",
+          "cache_tag": "aiAgent.agents.dashboard"
+        }
+      }
+    },
     "/v1/client/ai-agent/agents/{agent_id}/editability": {
       "get": {
         "operationId": "getAIAgentEditability",
@@ -2472,6 +2532,75 @@
             "v2.aiAgent.agents.daemon",
             "v2.aiAgent.devices.runtimes"
           ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard": {
+      "get": {
+        "operationId": "getAgentDashboardV2",
+        "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDashboardResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ],
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "dashboard"
+          ],
+          "generated_path": "v2.aiAgent.agents.dashboard",
+          "cache_tag": "v2.agents.dashboard"
         }
       }
     },
@@ -4674,6 +4803,186 @@
           "assigned_task_count",
           "created_at",
           "updated_at"
+        ],
+        "type": "object"
+      },
+      "AgentDashboardDay": {
+        "properties": {
+          "completed": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "completed"
+        ],
+        "type": "object"
+      },
+      "AgentDashboardResponse": {
+        "properties": {
+          "active_days": {
+            "type": "integer"
+          },
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDashboardDay"
+            },
+            "type": "array"
+          },
+          "activity_completed": {
+            "type": "integer"
+          },
+          "activity_end": {
+            "type": "string"
+          },
+          "activity_start": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "completed_runs": {
+            "type": "integer"
+          },
+          "confirmation_count": {
+            "type": "integer"
+          },
+          "current": {
+            "$ref": "#/components/schemas/AgentDashboardTask"
+          },
+          "has_next_page": {
+            "type": "boolean"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDashboardTask"
+            },
+            "type": "array"
+          },
+          "history_durable": {
+            "type": "boolean"
+          },
+          "observed_since": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          },
+          "queue": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDashboardTask"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "time_zone": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "waiting_count": {
+            "type": "integer"
+          },
+          "work_status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "agent_id",
+          "work_status",
+          "queue",
+          "waiting_count",
+          "confirmation_count",
+          "completed_runs",
+          "history",
+          "page",
+          "page_size",
+          "total",
+          "has_next_page",
+          "activity",
+          "activity_start",
+          "activity_end",
+          "activity_completed",
+          "active_days",
+          "time_zone",
+          "history_durable",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "AgentDashboardTask": {
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "confirmation_reason": {
+            "type": "string"
+          },
+          "duration_seconds": {
+            "type": "integer"
+          },
+          "ended_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "key_number": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "queue_position": {
+            "type": "integer"
+          },
+          "queued_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "task_id",
+          "assignment_id",
+          "run_id",
+          "title",
+          "key_number",
+          "state",
+          "message",
+          "queue_position",
+          "queued_at"
         ],
         "type": "object"
       },

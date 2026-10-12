@@ -2310,6 +2310,227 @@
           }
         }
       ]
+    },
+    {
+      "name": "AgentDashboardTask",
+      "type": "object",
+      "required": [
+        "agent_id",
+        "task_id",
+        "assignment_id",
+        "run_id",
+        "title",
+        "key_number",
+        "state",
+        "message",
+        "queue_position",
+        "queued_at"
+      ],
+      "properties": [
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "assignment_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "key_number",
+          "type": "string"
+        },
+        {
+          "name": "state",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "confirmation_reason",
+          "type": "string"
+        },
+        {
+          "name": "queue_position",
+          "type": "integer"
+        },
+        {
+          "name": "queued_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "ended_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "duration_seconds",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "AgentDashboardDay",
+      "type": "object",
+      "required": [
+        "date",
+        "completed"
+      ],
+      "properties": [
+        {
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "name": "completed",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "AgentDashboardResponse",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "agent_id",
+        "work_status",
+        "queue",
+        "waiting_count",
+        "confirmation_count",
+        "completed_runs",
+        "history",
+        "page",
+        "page_size",
+        "total",
+        "has_next_page",
+        "activity",
+        "activity_start",
+        "activity_end",
+        "activity_completed",
+        "active_days",
+        "time_zone",
+        "history_durable",
+        "scope"
+      ],
+      "properties": [
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "type": "string"
+        },
+        {
+          "name": "current",
+          "ref": "AgentDashboardTask"
+        },
+        {
+          "name": "queue",
+          "type": "array",
+          "items": {
+            "ref": "AgentDashboardTask"
+          }
+        },
+        {
+          "name": "waiting_count",
+          "type": "integer"
+        },
+        {
+          "name": "confirmation_count",
+          "type": "integer"
+        },
+        {
+          "name": "completed_runs",
+          "type": "integer"
+        },
+        {
+          "name": "history",
+          "type": "array",
+          "items": {
+            "ref": "AgentDashboardTask"
+          }
+        },
+        {
+          "name": "page",
+          "type": "integer"
+        },
+        {
+          "name": "page_size",
+          "type": "integer"
+        },
+        {
+          "name": "total",
+          "type": "integer"
+        },
+        {
+          "name": "has_next_page",
+          "type": "boolean"
+        },
+        {
+          "name": "activity",
+          "type": "array",
+          "items": {
+            "ref": "AgentDashboardDay"
+          }
+        },
+        {
+          "name": "activity_start",
+          "type": "string"
+        },
+        {
+          "name": "activity_end",
+          "type": "string"
+        },
+        {
+          "name": "activity_completed",
+          "type": "integer"
+        },
+        {
+          "name": "active_days",
+          "type": "integer"
+        },
+        {
+          "name": "time_zone",
+          "type": "string"
+        },
+        {
+          "name": "observed_since",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "history_durable",
+          "type": "boolean"
+        },
+        {
+          "name": "scope",
+          "type": "string"
+        }
+      ]
     }
   ],
   "operations": [
@@ -2736,10 +2957,28 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon",
       "resource": "device",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "details"], "cache_tag": "aiAgent.devices.daemon"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:read", "ai-agent:device:{device_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "details"
+        ],
+        "cache_tag": "aiAgent.devices.daemon"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "response": {"status": 200, "ref": "DeviceDaemonDetailResponse"},
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonDetailResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon details",
@@ -2757,11 +2996,34 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon/start",
       "resource": "device",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "start"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:control", "ai-agent:device:{device_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "start"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon start",
@@ -2779,11 +3041,34 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon/restart",
       "resource": "device",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "restart"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:control", "ai-agent:device:{device_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "restart"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon restart",
@@ -2801,11 +3086,34 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon/stop",
       "resource": "device",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "stop"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:control", "ai-agent:device:{device_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "stop"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon stop",
@@ -4606,6 +4914,67 @@
           "then": "the response keeps the stream handoff shape but returns an empty active_thread_filters array"
         }
       ]
+    },
+    {
+      "operation_id": "getAgentDashboardV2",
+      "kind": "query",
+      "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+      "description": "page query parameter is a positive integer (default 1); page_size is 10. Filter task read permissions before pagination and aggregates. Counts are completed assignment runs. Asia/Seoul dates cover this month and the previous five months. Duration excludes queue time and includes response waits. observed_since is the oldest retained accessible record, not proof of complete prior history.",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "agents",
+          "dashboard"
+        ],
+        "cache_tag": "v2.agents.dashboard"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentDashboardResponse"
+      }
+    },
+    {
+      "operation_id": "getAgentDashboard",
+      "kind": "query",
+      "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+      "description": "page query parameter is a positive integer (default 1); page_size is 10. Filter task read permissions before pagination and aggregates. Counts are completed assignment runs. Asia/Seoul dates cover this month and the previous five months. Duration excludes queue time and includes response waits. observed_since is the oldest retained accessible record, not proof of complete prior history.",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/dashboard",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "dashboard"
+        ],
+        "cache_tag": "aiAgent.agents.dashboard"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentDashboardResponse"
+      }
     }
   ]
 }

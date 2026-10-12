@@ -108,6 +108,20 @@ export interface StopAIAgentDaemonReactEndpoint extends core.StopAIAgentDaemonEn
 }
 
 /**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `agents.dashboard`
+ * 접근 예시: `riido.aiAgent.agents.dashboard`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAgentDashboardReactEndpoint extends core.GetAgentDashboardEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAgentDashboardPathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => UseQueryResult<core.AgentDashboardResponse, Error>;
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
  * 계약 generated path: `aiAgent.agents.editability`
  * 검색용 generated 경로: `agents.editability`
@@ -441,6 +455,20 @@ export interface StopAIAgentDaemonV2ReactEndpoint extends core.StopAIAgentDaemon
    * React Query useMutation hook입니다.
    */
   readonly useMutation: (options?: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDaemonV2MutationVariables>) => UseMutationResult<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDaemonV2MutationVariables>;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `v2.aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `aiAgent.agents.dashboard`
+ * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAgentDashboardV2ReactEndpoint extends core.GetAgentDashboardV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAgentDashboardV2PathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => UseQueryResult<core.AgentDashboardResponse, Error>;
 }
 
 /**
@@ -806,6 +834,14 @@ export interface RiidoAIAgentAgentsReactNamespace {
    */
   readonly daemon: RiidoAIAgentAgentsDaemonReactNamespace;
   /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `agents.dashboard`
+   * 접근 예시: `riido.aiAgent.agents.dashboard`
+   * cache tag: `aiAgent.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardReactEndpoint;
+  /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
    * 계약 generated path: `aiAgent.agents.delete`
    * 검색용 generated 경로: `agents.delete`
@@ -1085,6 +1121,14 @@ export interface RiidoV2AIAgentAgentsReactNamespace {
    * workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다.
    */
   readonly daemon: RiidoV2AIAgentAgentsDaemonReactNamespace;
+  /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `v2.aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `aiAgent.agents.dashboard`
+   * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+   * cache tag: `v2.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardV2ReactEndpoint;
   /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.agents.delete`
@@ -1418,6 +1462,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDaemonMutationVariables>(coreClient.aiAgent.agents.daemon.stop.mutation(options)),
             },
           },
+          dashboard: {
+            ...coreClient.aiAgent.agents.dashboard,
+            useQuery: (params: core.GetAgentDashboardPathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => useQuery<core.AgentDashboardResponse, Error>(coreClient.aiAgent.agents.dashboard.query(params, options)),
+          },
           delete: {
             ...coreClient.aiAgent.agents.delete,
             useMutation: (options: core.RiidoMutationOptions<core.DeleteAgentResponse, core.DeleteAIAgentMutationVariables> = {}) => useMutation<core.DeleteAgentResponse, Error, core.DeleteAIAgentMutationVariables>(coreClient.aiAgent.agents.delete.mutation(options)),
@@ -1532,6 +1580,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
                 ...coreClient.v2.aiAgent.agents.daemon.stop,
                 useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDaemonV2MutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDaemonV2MutationVariables>(coreClient.v2.aiAgent.agents.daemon.stop.mutation(options)),
               },
+            },
+            dashboard: {
+              ...coreClient.v2.aiAgent.agents.dashboard,
+              useQuery: (params: core.GetAgentDashboardV2PathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => useQuery<core.AgentDashboardResponse, Error>(coreClient.v2.aiAgent.agents.dashboard.query(params, options)),
             },
             delete: {
               ...coreClient.v2.aiAgent.agents.delete,

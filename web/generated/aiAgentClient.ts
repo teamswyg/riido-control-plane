@@ -197,6 +197,62 @@ export interface AgentClientRecordV2 {
 }
 
 /**
+ * AgentDashboardDay 타입입니다.
+ */
+export interface AgentDashboardDay {
+  completed: number;
+  date: string;
+}
+
+/**
+ * AgentDashboardResponse 타입입니다.
+ */
+export interface AgentDashboardResponse {
+  active_days: number;
+  activity: AgentDashboardDay[];
+  activity_completed: number;
+  activity_end: string;
+  activity_start: string;
+  agent_id: string;
+  completed_runs: number;
+  confirmation_count: number;
+  current?: AgentDashboardTask;
+  has_next_page: boolean;
+  history: AgentDashboardTask[];
+  history_durable: boolean;
+  observed_since?: string;
+  page: number;
+  page_size: number;
+  queue: AgentDashboardTask[];
+  schema_version: string;
+  scope: string;
+  time_zone: string;
+  total: number;
+  waiting_count: number;
+  work_status: string;
+}
+
+/**
+ * AgentDashboardTask 타입입니다.
+ */
+export interface AgentDashboardTask {
+  agent_id: string;
+  assignment_id: string;
+  confirmation_reason?: string;
+  duration_seconds?: number;
+  ended_at?: string;
+  key_number: string;
+  message: string;
+  queue_position: number;
+  queued_at: string;
+  run_id: string;
+  started_at?: string;
+  state: string;
+  task_id: string;
+  title: string;
+}
+
+/**
  * agent를 현재 수정할 수 있는지 나타냅니다.
  */
 export type AgentEditability = "editable" | "blocked_assigned_tasks";
@@ -1034,6 +1090,52 @@ export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, opti
     ...options,
     mutationKey: stopAIAgentDaemonMutationKey(),
     mutationFn: (variables: StopAIAgentDaemonMutationVariables) => stopAIAgentDaemon(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 경로 파라미터입니다.
+ */
+export interface GetAgentDashboardPathParams {
+  agent_id: string;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ */
+export async function getAgentDashboard(config: RiidoClientConfig, params: GetAgentDashboardPathParams, options: RiidoRequestOptions = {}): Promise<AgentDashboardResponse> {
+  const path = `/v1/client/ai-agent/agents/${params.agent_id}/dashboard`;
+  return riidoRequest<AgentDashboardResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * cache tag: `aiAgent.agents.dashboard`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAgentDashboardQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.agents.dashboard"] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAgentDashboardQueryKey(params: GetAgentDashboardPathParams): readonly unknown[] {
+  return [...getAgentDashboardQueryKeyRoot(), params] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAgentDashboardQueryOptions(config: RiidoClientConfig, params: GetAgentDashboardPathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAgentDashboardQueryKey(params),
+    queryFn: () => getAgentDashboard(config, params, { signal }),
   };
 }
 
@@ -2097,6 +2199,53 @@ export function stopAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, op
     ...options,
     mutationKey: stopAIAgentDaemonV2MutationKey(),
     mutationFn: (variables: StopAIAgentDaemonV2MutationVariables) => stopAIAgentDaemonV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 경로 파라미터입니다.
+ */
+export interface GetAgentDashboardV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ */
+export async function getAgentDashboardV2(config: RiidoClientConfig, params: GetAgentDashboardV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentDashboardResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/dashboard`;
+  return riidoRequest<AgentDashboardResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * cache tag: `v2.agents.dashboard`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAgentDashboardV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.agents.dashboard"] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAgentDashboardV2QueryKey(params: GetAgentDashboardV2PathParams): readonly unknown[] {
+  return [...getAgentDashboardV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAgentDashboardV2QueryOptions(config: RiidoClientConfig, params: GetAgentDashboardV2PathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAgentDashboardV2QueryKey(params),
+    queryFn: () => getAgentDashboardV2(config, params, { signal }),
   };
 }
 
@@ -3439,6 +3588,48 @@ export interface StopAIAgentDaemonEndpoint {
 }
 
 /**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `agents.dashboard`
+ * 접근 예시: `riido.aiAgent.agents.dashboard`
+ * cache tag: `aiAgent.agents.dashboard`
+ */
+export interface GetAgentDashboardEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAgentDashboardPathParams, options?: RiidoRequestOptions) => Promise<AgentDashboardResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAgentDashboardPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAgentDashboardPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => Promise<void>;
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
  * 계약 generated path: `aiAgent.agents.editability`
  * 검색용 generated 경로: `agents.editability`
@@ -4510,6 +4701,48 @@ export interface StopAIAgentDaemonV2Endpoint {
 }
 
 /**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `v2.aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `aiAgent.agents.dashboard`
+ * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+ * cache tag: `v2.agents.dashboard`
+ */
+export interface GetAgentDashboardV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAgentDashboardV2PathParams, options?: RiidoRequestOptions) => Promise<AgentDashboardResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAgentDashboardV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => Promise<void>;
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.agents.editability`
  * 검색용 generated 경로: `aiAgent.agents.editability`
@@ -5560,6 +5793,14 @@ export interface RiidoAIAgentAgentsNamespace {
    */
   readonly daemon: RiidoAIAgentAgentsDaemonNamespace;
   /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `agents.dashboard`
+   * 접근 예시: `riido.aiAgent.agents.dashboard`
+   * cache tag: `aiAgent.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardEndpoint;
+  /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
    * 계약 generated path: `aiAgent.agents.delete`
    * 검색용 generated 경로: `agents.delete`
@@ -5839,6 +6080,14 @@ export interface RiidoV2AIAgentAgentsNamespace {
    * workspace-scoped agent 권한을 통해 daemon 상세와 제어 command를 다루는 v2 namespace입니다.
    */
   readonly daemon: RiidoV2AIAgentAgentsDaemonNamespace;
+  /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `v2.aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `aiAgent.agents.dashboard`
+   * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+   * cache tag: `v2.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardV2Endpoint;
   /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.agents.delete`
@@ -6204,6 +6453,16 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             },
           },
         },
+        dashboard: {
+          request: (params: GetAgentDashboardPathParams, options?: RiidoRequestOptions) => getAgentDashboard(config, params, options),
+          queryKeyRoot: getAgentDashboardQueryKeyRoot,
+          queryKey: getAgentDashboardQueryKey,
+          query: (params: GetAgentDashboardPathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardQueryOptions(config, params, options),
+          queryOptions: (params: GetAgentDashboardPathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardQueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: GetAgentDashboardPathParams) => queryClient.invalidateQueries({ queryKey: getAgentDashboardQueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAgentDashboardQueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => queryClient.prefetchQuery(getAgentDashboardQueryOptions(config, params, options)),
+        },
         delete: {
           request: (params: DeleteAIAgentPathParams, options?: RiidoRequestOptions) => deleteAIAgent(config, params, options),
           mutationKey: deleteAIAgentMutationKey,
@@ -6488,6 +6747,16 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() })]),
               },
             },
+          },
+          dashboard: {
+            request: (params: GetAgentDashboardV2PathParams, options?: RiidoRequestOptions) => getAgentDashboardV2(config, params, options),
+            queryKeyRoot: getAgentDashboardV2QueryKeyRoot,
+            queryKey: getAgentDashboardV2QueryKey,
+            query: (params: GetAgentDashboardV2PathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardV2QueryOptions(config, params, options),
+            queryOptions: (params: GetAgentDashboardV2PathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams) => queryClient.invalidateQueries({ queryKey: getAgentDashboardV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAgentDashboardV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => queryClient.prefetchQuery(getAgentDashboardV2QueryOptions(config, params, options)),
           },
           delete: {
             request: (params: DeleteAIAgentV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentV2(config, params, options),

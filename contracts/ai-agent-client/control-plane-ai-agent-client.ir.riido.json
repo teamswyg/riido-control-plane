@@ -2440,6 +2440,236 @@
           }
         ]
       }
+    },
+    {
+      "name": "AgentDashboardTask",
+      "schema": {
+        "name": "AgentDashboardTask",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "task_id",
+          "assignment_id",
+          "run_id",
+          "title",
+          "key_number",
+          "state",
+          "message",
+          "queue_position",
+          "queued_at"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "key_number",
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string"
+          },
+          {
+            "name": "queue_position",
+            "type": "integer"
+          },
+          {
+            "name": "queued_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "ended_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "duration_seconds",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDashboardDay",
+      "schema": {
+        "name": "AgentDashboardDay",
+        "type": "object",
+        "required": [
+          "date",
+          "completed"
+        ],
+        "properties": [
+          {
+            "name": "date",
+            "type": "string"
+          },
+          {
+            "name": "completed",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDashboardResponse",
+      "schema": {
+        "name": "AgentDashboardResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "agent_id",
+          "work_status",
+          "queue",
+          "waiting_count",
+          "confirmation_count",
+          "completed_runs",
+          "history",
+          "page",
+          "page_size",
+          "total",
+          "has_next_page",
+          "activity",
+          "activity_start",
+          "activity_end",
+          "activity_completed",
+          "active_days",
+          "time_zone",
+          "history_durable",
+          "scope"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "type": "string"
+          },
+          {
+            "name": "current",
+            "ref": "AgentDashboardTask"
+          },
+          {
+            "name": "queue",
+            "type": "array",
+            "items": {
+              "ref": "AgentDashboardTask"
+            }
+          },
+          {
+            "name": "waiting_count",
+            "type": "integer"
+          },
+          {
+            "name": "confirmation_count",
+            "type": "integer"
+          },
+          {
+            "name": "completed_runs",
+            "type": "integer"
+          },
+          {
+            "name": "history",
+            "type": "array",
+            "items": {
+              "ref": "AgentDashboardTask"
+            }
+          },
+          {
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "type": "integer"
+          },
+          {
+            "name": "total",
+            "type": "integer"
+          },
+          {
+            "name": "has_next_page",
+            "type": "boolean"
+          },
+          {
+            "name": "activity",
+            "type": "array",
+            "items": {
+              "ref": "AgentDashboardDay"
+            }
+          },
+          {
+            "name": "activity_start",
+            "type": "string"
+          },
+          {
+            "name": "activity_end",
+            "type": "string"
+          },
+          {
+            "name": "activity_completed",
+            "type": "integer"
+          },
+          {
+            "name": "active_days",
+            "type": "integer"
+          },
+          {
+            "name": "time_zone",
+            "type": "string"
+          },
+          {
+            "name": "observed_since",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "history_durable",
+            "type": "boolean"
+          },
+          {
+            "name": "scope",
+            "type": "string"
+          }
+        ]
+      }
     }
   ],
   "operations": [
@@ -4506,6 +4736,67 @@
         "getAIAgentTaskThreadStreamSubscriptionV2.multi-active-task-threads-use-filters",
         "getAIAgentTaskThreadStreamSubscriptionV2.cold-task-returns-empty-filters"
       ]
+    },
+    {
+      "operation_id": "getAgentDashboardV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "agents",
+          "dashboard"
+        ],
+        "generated_path": "v2.aiAgent.agents.dashboard",
+        "cache_tag": "v2.agents.dashboard"
+      },
+      "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentDashboardResponse"
+      }
+    },
+    {
+      "operation_id": "getAgentDashboard",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/dashboard",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "dashboard"
+        ],
+        "generated_path": "aiAgent.agents.dashboard",
+        "cache_tag": "aiAgent.agents.dashboard"
+      },
+      "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentDashboardResponse"
+      }
     }
   ],
   "scenarios": [
