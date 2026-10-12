@@ -1992,7 +1992,7 @@ func assignmentEventActionResponse(thread AIAgentTaskThreadRecord, state Assignm
 func assignmentEventVisibleThreadMessage(state AssignmentState, eventType, message, previous string) string {
 	switch state {
 	case AssignmentQueued, AssignmentLeased, AssignmentReady, AssignmentRunning, AssignmentCancelling:
-		if strings.TrimSpace(eventType) != EventRiidoLog {
+		if eventType != EventRiidoLog && eventType != EventProviderError && eventType != EventProviderWarning {
 			return strings.TrimSpace(previous)
 		}
 	}
@@ -2200,7 +2200,18 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		if len(event.Lines) > 0 {
 			threads[i].Message = event.Lines[len(event.Lines)-1].Message
 		}
-		threads[i].Lines = append(threads[i].Lines, copyProgressLines(event.Lines)...)
+		for _, line := range event.Lines {
+			if line.MessageKey == "assistant.partial" {
+				kept := threads[i].Lines[:0]
+				for _, previous := range threads[i].Lines {
+					if previous.MessageKey != "assistant.partial" {
+						kept = append(kept, previous)
+					}
+				}
+				threads[i].Lines = kept
+			}
+			threads[i].Lines = append(threads[i].Lines, line)
+		}
 		s.taskThreads[event.TaskID] = threads
 		return
 	}
@@ -2234,7 +2245,13 @@ func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, thre
 		if threads[i].ThreadID != threadID {
 			continue
 		}
-		return len(threads[i].Lines) + 1
+		maxSeq := 0
+		for _, line := range threads[i].Lines {
+			if line.Seq > maxSeq {
+				maxSeq = line.Seq
+			}
+		}
+		return maxSeq + 1
 	}
 	return 1
 }

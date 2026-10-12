@@ -786,6 +786,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 
 	state.nextAssignmentSeq++
 	assignment := Assignment{
+		WorkspaceID:              req.WorkspaceID,
 		ID:                       fmt.Sprintf("asn-%06d", state.nextAssignmentSeq),
 		TaskID:                   taskID,
 		ComponentID:              req.ComponentID,

@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -60,6 +61,7 @@ type runtimeConfig struct {
 	LongPollTick             time.Duration
 	AIAgentClientDev         bool
 	AIAgentClientStore       riidoaiserver.AIAgentClientSnapshotStore
+	AssignmentSnapshotStore  riidoaiserver.SnapshotStore
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
 }
@@ -88,6 +90,7 @@ func run() error {
 		AgentRegistry:       riidoaiserver.NewCompositeAgentRegistry(agentRegistryFromAIAgentClient(aiAgentClient)),
 		ActiveLeaseDuration: config.AssignmentActiveLease,
 		OperationStore:      config.AssignmentOperationStore,
+		SnapshotStore:       config.AssignmentSnapshotStore,
 	})
 	if err != nil {
 		return fmt.Errorf("open assignment store: %w", err)
@@ -145,15 +148,30 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	aiAgentClientStore, err := aiAgentClientSnapshotStoreFromEnv(aiAgentClientDev)
+	localDir, err := localStateDirectory(authorizer)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	assignmentOperationStore, err := assignmentOperationStoreFromEnv(aiAgentClientDev, assignmentActiveLease)
+	var aiAgentClientStore riidoaiserver.AIAgentClientSnapshotStore
+	var assignmentOperationStore riidoaiserver.AssignmentOperationStore
+	var assignmentSnapshotStore riidoaiserver.SnapshotStore
+	if localDir != "" {
+		aiAgentClientDev = true
+		aiAgentClientStore = riidoaiserver.NewFileAIAgentClientSnapshot(filepath.Join(localDir, "agents.json"))
+		assignmentSnapshotStore, err = riidoaiserver.NewFileStoreSnapshot(filepath.Join(localDir, "assignments.json"))
+	} else {
+		aiAgentClientStore, err = aiAgentClientSnapshotStoreFromEnv(aiAgentClientDev)
+		if err == nil {
+			assignmentOperationStore, err = assignmentOperationStoreFromEnv(aiAgentClientDev, assignmentActiveLease)
+		}
+	}
 	if err != nil {
 		return runtimeConfig{}, err
 	}
 	taskContextReader, err := taskContextReaderFromEnv()
+	if err == nil && localDir != "" && taskContextReader == nil {
+		taskContextReader, err = readLocalTaskContexts(localDir)
+	}
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -170,6 +188,7 @@ func configFromEnv() (runtimeConfig, error) {
 		AIAgentClientDev:         aiAgentClientDev,
 		AIAgentClientStore:       aiAgentClientStore,
 		AssignmentOperationStore: assignmentOperationStore,
+		AssignmentSnapshotStore:  assignmentSnapshotStore,
 		TaskContextReader:        taskContextReader,
 	}, nil
 }

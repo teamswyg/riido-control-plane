@@ -2074,6 +2074,10 @@
             "name": "observed_at",
             "type": "string",
             "format": "date-time"
+          },
+          {
+            "name": "message_key",
+            "type": "string"
           }
         ]
       }

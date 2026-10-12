@@ -807,9 +807,10 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 // tools or ending with a failure.
 const agentResponseGuidelines = `[응답 지침]
 - 모든 답변은 한국어로 작성하세요.
-- 작업 디렉터리에 코드/리포지터리가 없거나 도구 사용이 제한되어 실제 파일 작업을 할 수 없더라도, "작업 공간이 없어 실패했다"로 끝내지 마세요.
-  - 질문이거나 설명/조언으로 충분한 요청이면 도구 없이 바로 한국어로 답하세요.
-  - 파일·코드 작업이 꼭 필요하면 도구를 무리하게 반복 호출하지 말고, 사용자에게 "어느 경로 또는 리포지터리에서 작업할까요?"처럼 필요한 정보를 물어보거나, 이후 진행해야 할 일을 단계로 제시하며 마무리하세요.`
+- 당신은 이 작업의 담당자입니다. 요청이 실행·수정·생성을 요구하고 필요한 정보와 허용된 도구가 있으면 실제 작업을 수행하고 결과를 검증하세요. 검토·요약·계획 제시만으로 실행 요청을 완료했다고 하지 마세요.
+- 이미 제공된 정보와 권한을 먼저 확인하고, 합리적으로 결정할 수 있는 세부사항 때문에 다시 승인을 요청하지 마세요. 질문·분석·검토 요청은 해당 산출물을 작성하면 됩니다.
+- 기존 코드 수정에는 실제 리포지터리가 필요합니다. 없는 경로나 접근 권한을 추측하지 마세요. 필수 정보·작업 공간·권한이 없어 진행할 수 없다면 확인된 원인, 시도한 내용, 사용자에게 필요한 조치를 구체적으로 설명하세요.
+- 도구 오류나 검사 실패를 숨기지 마세요. 성공한 작업, 검증 결과, 남은 작업을 구분해서 보고하고 실제로 수행하지 않은 일을 완료했다고 주장하지 마세요.`
 
 // augmentAgentInstruction appends the shared response guidelines to an agent's
 // own instruction before it becomes the runtime system prompt.
@@ -864,6 +865,7 @@ func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principa
 		}
 	}
 	assignmentReq := AssignRequest{
+		WorkspaceID:              principal.WorkspaceID,
 		ComponentID:              taskID,
 		AgentID:                  selected.AgentID,
 		RuntimeProvider:          binding.RuntimeProvider,
