@@ -16,6 +16,11 @@ func (s *Store) loop(state storeState) {
 	for cmd := range s.commands {
 		switch msg := cmd.(type) {
 		case assignCmd:
+			if msg.allowConcurrentTaskAgents && strings.TrimSpace(msg.req.RequestID) != "" {
+				assignment, err := s.assignIdentifiedRequest(&state, msg.taskID, msg.req)
+				msg.reply <- assignResult{assignment: assignment, err: err}
+				continue
+			}
 			startedAt := time.Now()
 			_, taskExisted := state.tasks[msg.taskID]
 			beforeEventSeq := state.nextEventSeq
@@ -31,6 +36,13 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- assignResult{assignment: assignment, err: err}
 		case cancelAssignmentCmd:
+			if _, durable := s.operationStore.(AssignmentProjectionReader); durable && msg.req.AssignmentID != "" {
+				assignment, err := s.mutateDurableAssignment(&state, msg.req.AssignmentID, AssignmentOperationClientStop, func(quiet *Store, trial *storeState) (Assignment, error) {
+					return quiet.handleCancelAssignment(trial, msg.taskID, msg.req)
+				})
+				msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
+				continue
+			}
 			beforeEventSeq := state.nextEventSeq
 			assignment, err := s.handleCancelAssignment(&state, msg.taskID, msg.req)
 			if err == nil {
@@ -59,6 +71,19 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- pollResult{response: response, operationAlreadySaved: operationAlreadySaved, mutatedAssignment: mutatedAssignment, mutationOperationType: mutationOperationType, err: err}
 		case eventCmd:
+			if _, durable := s.operationStore.(AssignmentProjectionReader); durable {
+				var response AgentEventResponse
+				_, err := s.mutateDurableAssignment(&state, msg.req.AssignmentID, AssignmentOperationAgentEvent, func(quiet *Store, trial *storeState) (Assignment, error) {
+					var eventErr error
+					response, eventErr = quiet.handleEvent(trial, msg.agentID, msg.req)
+					if eventErr != nil {
+						return Assignment{}, eventErr
+					}
+					return *response.Assignment, nil
+				})
+				msg.reply <- eventResult{response: response, err: err}
+				continue
+			}
 			beforeEventSeq := state.nextEventSeq
 			response, err := s.handleEvent(&state, msg.agentID, msg.req)
 			if err == nil && state.nextEventSeq != beforeEventSeq {
@@ -214,7 +239,12 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		task = taskRecord{id: taskID, componentID: req.ComponentID}
 	}
 
-	if allowConcurrentTaskAgents {
+	if allowConcurrentTaskAgents && req.RequestID != "" {
+		if current, ok := state.assignments[identifiedAssignmentID(taskID, req)]; ok {
+			return current, nil
+		}
+	}
+	if allowConcurrentTaskAgents && req.RequestID == "" {
 		for _, assignmentID := range state.agentAssignments[req.AgentID] {
 			current := state.assignments[assignmentID]
 			if current.TaskID == taskID && !isTerminal(current.State) {
@@ -250,8 +280,13 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	}
 
 	state.nextAssignmentSeq++
+	assignmentID := fmt.Sprintf("asn-%06d", state.nextAssignmentSeq)
+	if allowConcurrentTaskAgents && req.RequestID != "" {
+		assignmentID = identifiedAssignmentID(taskID, req)
+	}
 	assignment := Assignment{
-		ID:                       fmt.Sprintf("asn-%06d", state.nextAssignmentSeq),
+		RequestID: req.RequestID, WorkspaceID: req.WorkspaceID, CreatedBy: req.CreatedBy,
+		ID:                       assignmentID,
 		TaskID:                   taskID,
 		ComponentID:              req.ComponentID,
 		AgentID:                  req.AgentID,
@@ -442,6 +477,8 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			recordPollAction(state, response.Action, count)
 			return response, true, nil, "", nil
 		}
+		state.pollActionsTotal[response.Action]++
+		return response, false, nil, "", nil
 	}
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]

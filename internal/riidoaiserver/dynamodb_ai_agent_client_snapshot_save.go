@@ -37,7 +37,7 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 	}
 	snapshotBytes = encodedBytes
 	stats = dynamoDBAIAgentClientSnapshotWritePressure(items)
-	if err := s.putSnapshotItems(ctx, items, credentials); err != nil {
+	if err := s.putSnapshotTransaction(ctx, items, snapshot.ExpectedVersion, credentials); err != nil {
 		return err
 	}
 	s.partHashes = hashes

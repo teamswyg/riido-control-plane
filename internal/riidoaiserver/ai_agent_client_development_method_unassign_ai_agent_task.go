@@ -59,6 +59,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 		s.agents[agent.AgentID] = agent
 	}
+	s.removeTaskMemberLocked(taskID, agent.AgentID)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }

@@ -25,12 +25,13 @@ func TestDynamoDBAIAgentClientSnapshotSkipsUnchangedSplitParts(t *testing.T) {
 	if len(fixture.requests) != 1 {
 		t.Fatalf("manifest-only save wrote %d items, want 1", len(fixture.requests))
 	}
-	var payload struct {
-		Item map[string]map[string]string `json:"Item"`
+	var transaction struct {
+		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
 	}
-	if err := json.Unmarshal((<-fixture.requests).body, &payload); err != nil {
+	if err := json.Unmarshal((<-fixture.requests).body, &transaction); err != nil {
 		t.Fatalf("decode manifest-only PutItem payload: %v", err)
 	}
+	payload := transaction.TransactItems[0].Put
 	assertDynamoDBString(t, payload.Item, "sk", dynamoDBAIAgentClientSnapshotSK)
 	assertDynamoDBNumber(t, payload.Item, "next_daemon_command", "3")
 	if len(fixture.items) != len(dynamoDBAIAgentClientSnapshotPartNames)+1 {

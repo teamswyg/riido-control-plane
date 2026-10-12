@@ -3,6 +3,9 @@ package riidoaiserver
 import "strings"
 
 func assignmentClientResponseDurableState(assignment Assignment) AssignmentState {
+	if assignment.RequestID != "" {
+		return assignment.State
+	}
 	if strings.TrimSpace(assignment.BlockedByAssignmentID) != "" {
 		return assignment.State
 	}

@@ -21,7 +21,7 @@ func TestRunWritesEvidence(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.Status != "verified" || got.ScannedCount == 0 || got.ManualCount != 0 {
+	if got.Status != "verified" || got.ScannedCount == 0 || got.ManualCount != 1 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 	assertEvidenceCoverage(t, got)

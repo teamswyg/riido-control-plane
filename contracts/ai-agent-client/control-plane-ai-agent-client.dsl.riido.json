@@ -506,10 +506,18 @@
       "type": "string",
       "description": "provider probe의 저카디널리티 상태입니다.",
       "values": [
-        {"value": "healthy"},
-        {"value": "degraded"},
-        {"value": "unavailable"},
-        {"value": "unknown"}
+        {
+          "value": "healthy"
+        },
+        {
+          "value": "degraded"
+        },
+        {
+          "value": "unavailable"
+        },
+        {
+          "value": "unknown"
+        }
       ]
     },
     {
@@ -517,12 +525,24 @@
       "type": "string",
       "description": "원문 오류 대신 사용하는 비민감 provider 진단 코드입니다.",
       "values": [
-        {"value": "none"},
-        {"value": "executable-missing"},
-        {"value": "login-required"},
-        {"value": "version-unsupported"},
-        {"value": "probe-failed"},
-        {"value": "runtime-error"}
+        {
+          "value": "none"
+        },
+        {
+          "value": "executable-missing"
+        },
+        {
+          "value": "login-required"
+        },
+        {
+          "value": "version-unsupported"
+        },
+        {
+          "value": "probe-failed"
+        },
+        {
+          "value": "runtime-error"
+        }
       ]
     },
     {
@@ -690,6 +710,25 @@
         },
         {
           "value": "desktop_webview"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadMessageRole",
+      "type": "string",
+      "description": "v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.",
+      "values": [
+        {
+          "value": "user",
+          "description": "사용자가 thread에 남긴 다음 작업 지시입니다."
+        },
+        {
+          "value": "agent",
+          "description": "AI Agent가 생성한 상태/최종 결과 메시지입니다."
+        },
+        {
+          "value": "progress",
+          "description": "runtime output에서 파생된 진행 로그 메시지입니다."
         }
       ]
     }
@@ -1841,6 +1880,14 @@
         {
           "name": "agent_id",
           "type": "string"
+        },
+        {
+          "name": "request_id",
+          "type": "string"
+        },
+        {
+          "name": "instruction",
+          "type": "string"
         }
       ]
     },
@@ -1937,6 +1984,61 @@
           "name": "message",
           "description": "사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.",
           "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadAgentSnapshot",
+      "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
+      "type": "object",
+      "required": [
+        "agent_id"
+      ],
+      "properties": [
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "workspace_id",
+          "type": "string"
+        },
+        {
+          "name": "owner_principal_id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "profile_thumbnail_url",
+          "type": "string"
+        },
+        {
+          "name": "tmp_color",
+          "type": "string"
+        },
+        {
+          "name": "visibility",
+          "ref": "AgentVisibility"
+        },
+        {
+          "name": "runtime_kind",
+          "ref": "RuntimeKind"
+        },
+        {
+          "name": "model_id",
+          "type": "string"
+        },
+        {
+          "name": "model_label",
+          "type": "string"
+        },
+        {
+          "name": "captured_at",
+          "type": "string",
+          "format": "date-time"
         }
       ]
     },
@@ -2315,61 +2417,6 @@
       ]
     },
     {
-      "name": "AIAgentTaskThreadAgentSnapshot",
-      "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
-      "type": "object",
-      "required": [
-        "agent_id"
-      ],
-      "properties": [
-        {
-          "name": "agent_id",
-          "type": "string"
-        },
-        {
-          "name": "workspace_id",
-          "type": "string"
-        },
-        {
-          "name": "owner_principal_id",
-          "type": "string"
-        },
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "profile_thumbnail_url",
-          "type": "string"
-        },
-        {
-          "name": "tmp_color",
-          "type": "string"
-        },
-        {
-          "name": "visibility",
-          "ref": "AgentVisibility"
-        },
-        {
-          "name": "runtime_kind",
-          "ref": "RuntimeKind"
-        },
-        {
-          "name": "model_id",
-          "type": "string"
-        },
-        {
-          "name": "model_label",
-          "type": "string"
-        },
-        {
-          "name": "captured_at",
-          "type": "string",
-          "format": "date-time"
-        }
-      ]
-    },
-    {
       "name": "AIAgentTaskThreadRecord",
       "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
       "type": "object",
@@ -2489,6 +2536,13 @@
         {
           "name": "active_stream",
           "ref": "AIAgentTaskThreadStreamLink"
+        },
+        {
+          "name": "assigned_agent_ids",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       ]
     },
@@ -2594,6 +2648,183 @@
           "items": {
             "ref": "AIAgentTaskThreadStreamTarget"
           }
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryMessage",
+      "description": "v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.",
+      "type": "object",
+      "required": [
+        "message_id",
+        "role"
+      ],
+      "properties": [
+        {
+          "name": "message_id",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "ref": "AIAgentTaskThreadMessageRole"
+        },
+        {
+          "name": "comment_kind",
+          "ref": "AgentTaskCommentKind"
+        },
+        {
+          "name": "assignment_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "source_message_id",
+          "type": "string"
+        },
+        {
+          "name": "seq",
+          "type": "integer"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "result_message",
+          "type": "string"
+        },
+        {
+          "name": "observed_at",
+          "type": "string",
+          "format": "date-time"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryRecord",
+      "description": "v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.",
+      "type": "object",
+      "required": [
+        "thread_id",
+        "task_id",
+        "agent_id",
+        "run_id",
+        "work_status",
+        "assignment_state",
+        "conversation_id",
+        "messages"
+      ],
+      "properties": [
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "conversation_id",
+          "type": "string",
+          "description": "같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다."
+        },
+        {
+          "name": "parent_thread_id",
+          "type": "string",
+          "description": "후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다."
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "assignment_id",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "agent_snapshot_id",
+          "type": "string",
+          "description": "agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다."
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "work_status",
+          "ref": "AgentWorkStatus"
+        },
+        {
+          "name": "assignment_state",
+          "ref": "AgentAssignmentState"
+        },
+        {
+          "name": "started_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "completed_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "messages",
+          "type": "array",
+          "items": {
+            "ref": "AIAgentTaskThreadHistoryMessage"
+          }
+        },
+        {
+          "name": "active_stream",
+          "ref": "AIAgentTaskThreadStreamLink"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryCollectionResponse",
+      "description": "v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "task_id",
+        "threads"
+      ],
+      "properties": [
+        {
+          "name": "assigned_agent_ids",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "threads",
+          "type": "array",
+          "items": {
+            "ref": "AIAgentTaskThreadHistoryRecord"
+          }
+        },
+        {
+          "name": "agent_snapshots",
+          "type": "object",
+          "description": "agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.",
+          "additional_properties_ref": "AIAgentTaskThreadAgentSnapshot"
+        },
+        {
+          "name": "active_stream",
+          "ref": "AIAgentTaskThreadStreamLink"
         }
       ]
     }
@@ -3022,10 +3253,28 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon",
       "resource": "device",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "details"], "cache_tag": "aiAgent.devices.daemon"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:read", "ai-agent:device:{device_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "details"
+        ],
+        "cache_tag": "aiAgent.devices.daemon"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "response": {"status": 200, "ref": "DeviceDaemonDetailResponse"},
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonDetailResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon details",
@@ -3043,10 +3292,28 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemons",
       "resource": "device",
       "action": "read",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemons", "list"], "cache_tag": "aiAgent.devices.daemons"},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:read", "ai-agent:device:{device_id}:read"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemons",
+          "list"
+        ],
+        "cache_tag": "aiAgent.devices.daemons"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "response": {"status": 200, "ref": "DeviceDaemonListResponse"},
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonListResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon profiles",
@@ -3064,11 +3331,34 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon/start",
       "resource": "device",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "start"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:control", "ai-agent:device:{device_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "start"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon start",
@@ -3086,11 +3376,34 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon/restart",
       "resource": "device",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "restart"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:control", "ai-agent:device:{device_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "restart"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon restart",
@@ -3108,11 +3421,34 @@
       "path": "/v1/client/ai-agent/devices/{device_id}/daemon/stop",
       "resource": "device",
       "action": "control",
-      "client": {"module": "aiAgent", "facade_path": ["devices", "daemon", "stop"], "invalidates": ["aiAgent.devices.daemon", "aiAgent.devices.runtimes"]},
-      "auth": {"scheme": "apiKey", "header": "X-Riido-AI-Agent-Token", "scopes": ["ai-agent:device:control", "ai-agent:device:{device_id}:control"]},
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemon",
+          "stop"
+        ],
+        "invalidates": [
+          "aiAgent.devices.daemon",
+          "aiAgent.devices.runtimes"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:control",
+          "ai-agent:device:{device_id}:control"
+        ]
+      },
       "rbac_policy": "runtime_liveness.v1",
-      "request": {"ref": "ControlDeviceDaemonRequest"},
-      "response": {"status": 202, "ref": "DeviceDaemonCommandResponse"},
+      "request": {
+        "ref": "ControlDeviceDaemonRequest"
+      },
+      "response": {
+        "status": 202,
+        "ref": "DeviceDaemonCommandResponse"
+      },
       "scenarios": [
         {
           "name": "figma my device daemon stop",

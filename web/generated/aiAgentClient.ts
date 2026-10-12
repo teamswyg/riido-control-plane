@@ -56,6 +56,7 @@ export interface AIAgentTaskThreadAgentSnapshot {
  */
 export interface AIAgentTaskThreadCollectionResponse {
   active_stream?: AIAgentTaskThreadStreamLink;
+  assigned_agent_ids?: string[];
   schema_version: string;
   task_id: string;
   threads: AIAgentTaskThreadRecord[];
@@ -78,6 +79,71 @@ export interface AIAgentTaskThreadFailureDiagnostics {
    */
   result_status?: string;
 }
+
+/**
+ * v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.
+ */
+export interface AIAgentTaskThreadHistoryCollectionResponse {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  /**
+   * agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.
+   */
+  agent_snapshots?: Record<string, AIAgentTaskThreadAgentSnapshot>;
+  assigned_agent_ids?: string[];
+  schema_version: string;
+  task_id: string;
+  threads: AIAgentTaskThreadHistoryRecord[];
+}
+
+/**
+ * v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.
+ */
+export interface AIAgentTaskThreadHistoryMessage {
+  assignment_id?: string;
+  body?: string;
+  comment_kind?: AgentTaskCommentKind;
+  message_id: string;
+  observed_at?: string;
+  result_message?: string;
+  role: AIAgentTaskThreadMessageRole;
+  run_id?: string;
+  seq?: number;
+  source_message_id?: string;
+}
+
+/**
+ * v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.
+ */
+export interface AIAgentTaskThreadHistoryRecord {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  agent_id: string;
+  /**
+   * agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다.
+   */
+  agent_snapshot_id?: string;
+  assignment_id?: string;
+  assignment_state: AgentAssignmentState;
+  completed_at?: string;
+  /**
+   * 같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다.
+   */
+  conversation_id: string;
+  messages: AIAgentTaskThreadHistoryMessage[];
+  /**
+   * 후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다.
+   */
+  parent_thread_id?: string;
+  run_id: string;
+  started_at?: string;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+/**
+ * v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.
+ */
+export type AIAgentTaskThreadMessageRole = "user" | "agent" | "progress";
 
 /**
  * task 화면에 표시할 AI Agent thread의 cold record입니다.
@@ -423,6 +489,8 @@ export interface AgentWorkStatusChangedEvent {
  */
 export interface AssignAIAgentTaskRequest {
   agent_id: string;
+  instruction?: string;
+  request_id?: string;
 }
 
 /**

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestDynamoDBAIAgentClientSnapshotWritesManifestAfterParts(t *testing.T) {
+func TestDynamoDBAIAgentClientSnapshotWritesManifestAndPartsAtomically(t *testing.T) {
 	fixedNow := fixedSnapshotTestNow()
 	fixture := newSnapshotDynamoDBFixture(t, fixedNow, nil, nil)
 	defer fixture.close()
@@ -14,11 +14,24 @@ func TestDynamoDBAIAgentClientSnapshotWritesManifestAfterParts(t *testing.T) {
 		t.Fatalf("SaveAIAgentClientSnapshot: %v", err)
 	}
 	requests := drainDynamoDBAIAgentClientSnapshotRequests(fixture.requests)
-	if len(requests) != len(dynamoDBAIAgentClientSnapshotPartNames)+1 {
-		t.Fatalf("put requests = %d, want %d", len(requests), len(dynamoDBAIAgentClientSnapshotPartNames)+1)
+	if len(requests) != 1 {
+		t.Fatalf("want one atomic write, got %d", len(requests))
 	}
-	last := decodeDynamoDBAIAgentClientSnapshotPut(t, requests[len(requests)-1])
+	var transaction struct {
+		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
+	}
+	if err := json.Unmarshal(requests[0].body, &transaction); err != nil {
+		t.Fatal(err)
+	}
+	if len(transaction.TransactItems) != len(dynamoDBAIAgentClientSnapshotPartNames)+1 {
+		t.Fatal("missing parts")
+	}
+	last := transaction.TransactItems[len(transaction.TransactItems)-1].Put
 	assertDynamoDBString(t, last.Item, "sk", dynamoDBAIAgentClientSnapshotSK)
+	if last.ConditionExpression == "" {
+		t.Fatal("missing manifest CAS")
+	}
+
 }
 
 func TestDynamoDBAIAgentClientSnapshotWritePressure(t *testing.T) {

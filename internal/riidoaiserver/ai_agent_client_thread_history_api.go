@@ -42,9 +42,10 @@ type AIAgentTaskThreadHistoryRecord struct {
 }
 
 type AIAgentTaskThreadHistoryCollectionResponse struct {
-	SchemaVersion  string                                     `json:"schema_version"`
-	TaskID         string                                     `json:"task_id"`
-	Threads        []AIAgentTaskThreadHistoryRecord           `json:"threads"`
-	AgentSnapshots map[string]*AIAgentTaskThreadAgentSnapshot `json:"agent_snapshots,omitempty"`
-	ActiveStream   *AIAgentTaskThreadStreamLink               `json:"active_stream,omitempty"`
+	AssignedAgentIDs []string                                   `json:"assigned_agent_ids"`
+	SchemaVersion    string                                     `json:"schema_version"`
+	TaskID           string                                     `json:"task_id"`
+	Threads          []AIAgentTaskThreadHistoryRecord           `json:"threads"`
+	AgentSnapshots   map[string]*AIAgentTaskThreadAgentSnapshot `json:"agent_snapshots,omitempty"`
+	ActiveStream     *AIAgentTaskThreadStreamLink               `json:"active_stream,omitempty"`
 }

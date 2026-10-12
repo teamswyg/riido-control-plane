@@ -26,8 +26,26 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
+	receiptKey := taskRequestReceiptKey(principal, taskID, req)
+	if receiptKey != "" {
+		if response, ok := s.taskRequestReceipts[receiptKey]; ok {
+			return response, nil
+		}
+	}
+	if receiptKey != "" && req.intentGateRequired && req.AssignmentID == "" {
+		req.AssignmentID = intentGateAssignmentIDPrefix + receiptKey
+	}
+	// Replaying a request after explicit unassignment must not re-add membership.
+	if req.AssignmentID != "" {
+		for _, thread := range s.taskThreads[taskID] {
+			if thread.AssignmentID == req.AssignmentID && thread.AgentID == req.AgentID {
+				return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(thread, principal.WorkspaceID)), nil
+			}
+		}
+	}
+	s.addTaskMemberLocked(taskID, agent.AgentID)
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok && canReuseActiveTaskThreadForAssignment(thread, req.AssignmentID) {
-		return actionResponseFromThread(thread, principal.WorkspaceID), nil
+		return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(thread, principal.WorkspaceID)), nil
 	}
 	if stopExistingTaskThreads {
 		s.markTaskActiveThreadsStoppedLocked(taskID, AgentTaskCommentStoppedByUserRequest, clientMessageTaskStopped)
@@ -60,7 +78,10 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
 	agent.AssignedTaskCount++
 	s.agents[agent.AgentID] = agent
-	s.upsertTaskThreadFromActionLocked(response, "")
+	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
+	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+	s.agents[agent.AgentID] = agent
 	s.appendAgentTaskActionEvent(response)
+	s.rememberTaskRequestReceiptLocked(receiptKey, response)
 	return clientVisibleQueuedActionResponse(response), nil
 }

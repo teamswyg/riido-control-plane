@@ -30,8 +30,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Owned manifests with owner evidence | 9 |
 | Executable manifest inventory | 60 |
 | Tracked executable manifests | 60 |
-| Registered manual docs | 0 |
-| Scanned docs | 42 |
+| Registered manual docs | 1 |
+| Scanned docs | 43 |
 
 ## Manifest Inventory
 
@@ -69,19 +69,21 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 ## Registered Manual Surfaces
 
-None.
+| Group | Owner | Next artifact | Matched docs |
+| --- | --- | --- | ---: |
+| `task-agent-requests` | riido-control-plane | internal/riidoaiserver/task_request_receipts_test.go | 1 |
 
 ## Manual Hotspots
 
 | Directory | Matched docs |
 | --- | ---: |
-| None | 0 |
+| `docs/30-architecture` | 1 |
 
 ## Manual Samples
 
 | Group | Path |
 | --- | --- |
-| None | - |
+| `task-agent-requests` | `docs/30-architecture/task-agent-requests.md` |
 
 ## Assertions
 

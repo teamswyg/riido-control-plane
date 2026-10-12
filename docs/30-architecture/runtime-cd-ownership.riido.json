@@ -389,6 +389,8 @@
       "docs/migration/control-plane.md"
     ],
     "allowed_public_non_cd_runtime_keys": [
+      {"name": "RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL", "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."},
+      {"name": "RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY", "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."},
       {
         "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT",
         "reason": "development runtime feature flag documented for testnet/development API startup; it is not a deploy/smoke GitHub configuration key"

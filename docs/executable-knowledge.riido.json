@@ -141,7 +141,17 @@
       "owner_key": "pipelines"
     }
   ],
-  "manual_groups": [],
+  "manual_groups": [
+    {
+      "id": "task-agent-requests",
+      "owner": "riido-control-plane",
+      "reason": "Cross-repository request lifecycle and coordinated rollout notes for RIID-5828.",
+      "next_artifact": "internal/riidoaiserver/task_request_receipts_test.go",
+      "paths": [
+        "docs/30-architecture/task-agent-requests.md"
+      ]
+    }
+  ],
   "manifest_loop_budget": {
     "max_missing": 0,
     "max_missing_by_group": {}

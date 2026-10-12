@@ -43,6 +43,8 @@ func (f *snapshotDynamoDBFixture) handle(t *testing.T, w http.ResponseWriter, r 
 	}
 	f.requests <- capturedDynamoDBRequest{method: r.Method, header: r.Header.Clone(), body: body}
 	switch r.Header.Get("X-Amz-Target") {
+	case dynamoDBTransactWriteTarget:
+		f.transact(t, body, w)
 	case dynamoDBPutItemTarget:
 		f.put(t, body, w)
 	case dynamoDBQueryTarget:

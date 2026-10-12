@@ -5,7 +5,10 @@ import (
 )
 
 type DevelopmentAIAgentClientStore struct {
+	taskRequestReceipts     map[string]AIAgentTaskActionResponse
 	mu                      sync.Mutex
+	taskAssignedAgents      map[string][]string
+	snapshotVersion         int64
 	workspaceID             string
 	expectedDaemonProfile   string
 	daemonClientPolicy      DaemonClientCompatibilityPolicy

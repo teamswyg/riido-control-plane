@@ -82,15 +82,16 @@ type AssignmentClaimResult struct {
 }
 
 type AssignmentOperationRecord struct {
-	SchemaVersion string                  `json:"schema_version"`
-	OperationID   string                  `json:"operation_id"`
-	OperationType AssignmentOperationType `json:"operation_type"`
-	TaskID        string                  `json:"task_id"`
-	AssignmentID  string                  `json:"assignment_id"`
-	AgentID       string                  `json:"agent_id"`
-	Assignment    Assignment              `json:"assignment"`
-	Events        []TaskEvent             `json:"events"`
-	RecordedAt    time.Time               `json:"recorded_at"`
+	ExpectedProjection *AssignmentProjection   `json:"-"`
+	SchemaVersion      string                  `json:"schema_version"`
+	OperationID        string                  `json:"operation_id"`
+	OperationType      AssignmentOperationType `json:"operation_type"`
+	TaskID             string                  `json:"task_id"`
+	AssignmentID       string                  `json:"assignment_id"`
+	AgentID            string                  `json:"agent_id"`
+	Assignment         Assignment              `json:"assignment"`
+	Events             []TaskEvent             `json:"events"`
+	RecordedAt         time.Time               `json:"recorded_at"`
 }
 
 func validateAssignmentOperationRecord(record AssignmentOperationRecord) error {
@@ -145,6 +146,9 @@ func assignmentOperationID(operationType AssignmentOperationType, assignment Ass
 	}
 	switch operationType {
 	case AssignmentOperationAssignTask:
+		if assignment.RequestID != "" {
+			return "assign:" + assignment.ID
+		}
 		return fmt.Sprintf("assign:%s:%d", assignment.ID, lastSeq)
 	case AssignmentOperationPollStart:
 		return fmt.Sprintf("poll-start:%s:%s:%d", assignment.ID, assignment.LeaseToken, lastSeq)

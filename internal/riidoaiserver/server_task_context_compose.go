@@ -21,8 +21,9 @@ func composeAssignRequestWithTaskContextResult(
 	contextSnapshot AIAgentTaskContext,
 ) (composedAssignRequest, error) {
 	composed, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
-		TaskID:  taskID,
-		Context: contextSnapshot,
+		TaskID:          taskID,
+		UserInstruction: req.Prompt,
+		Context:         contextSnapshot,
 	})
 	if err != nil {
 		return composedAssignRequest{}, err

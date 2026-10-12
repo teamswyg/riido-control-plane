@@ -1,5 +1,10 @@
 package main
 
+import (
+	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
+	"os"
+)
+
 func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (runtimeConfig, error) {
 	webAllowedOrigins, err := webAllowedOriginsFromEnv()
 	if err != nil {
@@ -29,7 +34,12 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	commentDelivery := riidoaiserver.CommentDeliveryConfig{EvidenceBaseURL: os.Getenv("RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL"), Key: os.Getenv("RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY")}
+	if err := commentDelivery.Validate(); err != nil {
+		return runtimeConfig{}, err
+	}
 	return runtimeConfig{
+		CommentDelivery:          commentDelivery,
 		Addr:                     getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:          timing.ShutdownTimeout,
 		Authorizer:               parts.authorizer,

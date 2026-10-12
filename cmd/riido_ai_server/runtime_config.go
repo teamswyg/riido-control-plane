@@ -7,6 +7,7 @@ import (
 )
 
 type runtimeConfig struct {
+	CommentDelivery          riidoaiserver.CommentDeliveryConfig
 	Addr                     string
 	ShutdownTimeout          time.Duration
 	Authorizer               riidoaiserver.RequestAuthorizer

@@ -36,6 +36,8 @@ func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([
 		{name: dynamoDBAIAgentClientSnapshotPartDaemons, value: snapshot.Daemons},
 		{name: dynamoDBAIAgentClientSnapshotPartAgents, value: snapshot.Agents},
 		{name: dynamoDBAIAgentClientSnapshotPartFixtures, value: snapshot.Fixtures},
+		{name: dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts, value: snapshot.TaskRequestReceipts},
+		{name: dynamoDBAIAgentClientSnapshotPartTaskAssignedAgents, value: snapshot.TaskAssignedAgents},
 		{name: dynamoDBAIAgentClientSnapshotPartTaskThreads, value: snapshot.TaskThreads},
 		{name: dynamoDBAIAgentClientSnapshotPartTaskThreadMessages, value: snapshot.TaskThreadMessages},
 		{name: dynamoDBAIAgentClientSnapshotPartEvents, value: snapshot.Events},

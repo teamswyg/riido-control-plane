@@ -16,12 +16,20 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	s.ensureTaskMembershipLocked()
+	ids := []string{}
+	for _, id := range s.taskAssignedAgents[taskID] {
+		if _, ok := s.visibleAgent(principal, id); ok {
+			ids = append(ids, id)
+		}
+	}
 	threads, snapshots := s.visibleTaskThreadHistoryRecordsLocked(principal, taskID)
 	response := AIAgentTaskThreadHistoryCollectionResponse{
-		SchemaVersion:  SchemaVersion,
-		TaskID:         taskID,
-		Threads:        threads,
-		AgentSnapshots: snapshots,
+		SchemaVersion:    SchemaVersion,
+		AssignedAgentIDs: ids,
+		TaskID:           taskID,
+		Threads:          threads,
+		AgentSnapshots:   snapshots,
 	}
 	suppressSupersededQueuedHistoryMessages(response.Threads)
 	response.ActiveStream = taskThreadHistoryActiveStream(response.Threads)

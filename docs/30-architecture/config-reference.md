@@ -10,12 +10,14 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `51`; manifest entries: `51`; secret/credential entries: `7`; operator-only entries: `11`.
+Runtime env reads: `53`; manifest entries: `53`; secret/credential entries: `8`; operator-only entries: `12`.
 
 ## Runtime Env
 
 | Variable | Default | Sensitivity | Meaning |
 | --- | --- | --- | --- |
+| `RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL` | `empty` | `operator` | Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery. |
+| `RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY` | `empty` | `secret` | Dedicated server-to-server comment delivery secret (minimum 32 bytes). |
 | `RIIDO_AI_SERVER_ADDR` | `:8080` | `public` | HTTP listen address passed to the main API server. |
 | `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS` | `10` | `public` | Graceful shutdown timeout after SIGINT or SIGTERM. |
 | `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON` | `empty` | `secret` | Static bearer-token credential JSON for public-testable authorization. |

@@ -8,6 +8,8 @@
   "evidence_artifact":"config-reference-evidence",
   "source_dir":"cmd/riido_ai_server",
   "entries":[
+    {"name":"RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"operator","meaning":"Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery."},
+    {"name":"RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"secret","meaning":"Dedicated server-to-server comment delivery secret (minimum 32 bytes)."},
     {"name":"RIIDO_AI_SERVER_ADDR","default":":8080","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"HTTP listen address passed to the main API server."},
     {"name":"RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS","default":"10","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Graceful shutdown timeout after SIGINT or SIGTERM."},
     {"name":"RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"secret","meaning":"Static bearer-token credential JSON for public-testable authorization."},

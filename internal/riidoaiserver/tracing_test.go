@@ -176,6 +176,17 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
 		switch r.Header.Get("X-Amz-Target") {
+		case dynamoDBTransactWriteTarget:
+			var payload struct{ TransactItems []dynamoDBTransactWritePut }
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Error(err)
+			}
+			itemsMu.Lock()
+			for _, entry := range payload.TransactItems {
+				items[entry.Put.Item["sk"]["S"]] = entry.Put.Item
+			}
+			itemsMu.Unlock()
+			_, _ = w.Write([]byte(`{}`))
 		case dynamoDBPutItemTarget:
 			var payload struct {
 				Item map[string]map[string]string `json:"Item"`
@@ -226,7 +237,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	}
 
 	names := traceSpanNames(recorder.snapshot())
-	for _, want := range []string{aiAgentClientSnapshotSaveTraceName, "aws.dynamodb.PutItem", "aws.dynamodb.Query"} {
+	for _, want := range []string{aiAgentClientSnapshotSaveTraceName, "aws.dynamodb.TransactWriteItems", "aws.dynamodb.Query"} {
 		if !slices.Contains(names, want) {
 			t.Fatalf("missing span %q in %v", want, names)
 		}
@@ -236,7 +247,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	for _, span := range spans {
 		spanByName[span.Name] = span
 	}
-	if got := spanByName["aws.dynamodb.PutItem"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotSave.String() {
+	if got := spanByName["aws.dynamodb.TransactWriteItems"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotSave.String() {
 		t.Fatalf("PutItem store operation = %q, want %q", got, AIAgentClientSnapshotSave.String())
 	}
 	if got := spanByName["aws.dynamodb.Query"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotLoad.String() {

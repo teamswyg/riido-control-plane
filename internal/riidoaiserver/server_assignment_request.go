@@ -41,6 +41,7 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		return composedAssignRequest{}, err
 	}
 	assignmentReq := AssignRequest{
+		RequestID: req.RequestID, WorkspaceID: principal.WorkspaceID, Prompt: strings.TrimSpace(req.Instruction),
 		ComponentID:              taskID,
 		AgentID:                  selected.AgentID,
 		RuntimeProvider:          binding.RuntimeProvider,
@@ -48,6 +49,9 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		AgentInstruction:         augmentAgentInstruction(selected.Instruction),
 		AllowExperimentalRuntime: runtime.RequiresExperimentalOptIn,
 		CreatedBy:                strings.TrimSpace(principal.PrincipalID),
+	}
+	if req.VerifiedTaskContext != nil {
+		return composeAssignRequestWithTaskContextResult(taskID, taskID, assignmentReq, *req.VerifiedTaskContext)
 	}
 	return s.assignRequestWithTaskContextPromptForClientResult(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
 		ComponentID: taskID,

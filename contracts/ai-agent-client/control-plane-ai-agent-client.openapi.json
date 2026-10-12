@@ -957,71 +957,6 @@
         ]
       }
     },
-    "/v1/client/ai-agent/devices/{device_id}/daemons": {
-      "get": {
-        "operationId": "listAIAgentDeviceDaemons",
-        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceDaemonListResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "riidoAIAgentToken": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:device:read",
-          "ai-agent:device:{device_id}:read"
-        ],
-        "x-riido-rbac-policy": "runtime_liveness.v1",
-        "x-riido-operation-kind": "query",
-        "x-riido-client": {
-          "module": "aiAgent",
-          "facade_path": [
-            "devices",
-            "daemons",
-            "list"
-          ],
-          "generated_path": "aiAgent.devices.daemons.list",
-          "cache_tag": "aiAgent.devices.daemons"
-        },
-        "x-riido-scenarios": [
-          "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles"
-        ]
-      }
-    },
     "/v1/client/ai-agent/devices/{device_id}/daemon/restart": {
       "post": {
         "operationId": "restartAIAgentDeviceDaemon",
@@ -1250,6 +1185,71 @@
         },
         "x-riido-scenarios": [
           "stopAIAgentDeviceDaemon.figma-my-device-daemon-stop"
+        ]
+      }
+    },
+    "/v1/client/ai-agent/devices/{device_id}/daemons": {
+      "get": {
+        "operationId": "listAIAgentDeviceDaemons",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonListResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "devices",
+            "daemons",
+            "list"
+          ],
+          "generated_path": "aiAgent.devices.daemons.list",
+          "cache_tag": "aiAgent.devices.daemons"
+        },
+        "x-riido-scenarios": [
+          "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles"
         ]
       }
     },
@@ -2867,77 +2867,6 @@
         }
       }
     },
-    "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons": {
-      "get": {
-        "operationId": "listAIAgentDeviceDaemonsV2",
-        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)",
-        "tags": [
-          "ai_agent_client"
-        ],
-        "parameters": [
-          {
-            "name": "device_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "workspace_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeviceDaemonListResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "riidoAIAgentToken": []
-          }
-        ],
-        "x-riido-auth-scopes": [
-          "ai-agent:device:read",
-          "ai-agent:device:{device_id}:read"
-        ],
-        "x-riido-rbac-policy": "runtime_liveness.v1",
-        "x-riido-operation-kind": "query",
-        "x-riido-client": {
-          "module": "v2",
-          "facade_path": [
-            "aiAgent",
-            "devices",
-            "daemons",
-            "list"
-          ],
-          "generated_path": "v2.aiAgent.devices.daemons.list",
-          "cache_tag": "v2.aiAgent.devices.daemons"
-        }
-      }
-    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon/restart": {
       "post": {
         "operationId": "restartAIAgentDeviceDaemonV2",
@@ -3184,6 +3113,77 @@
             "v2.aiAgent.devices.daemon",
             "v2.aiAgent.devices.runtimes"
           ]
+        }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons": {
+      "get": {
+        "operationId": "listAIAgentDeviceDaemonsV2",
+        "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceDaemonListResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ],
+        "x-riido-rbac-policy": "runtime_liveness.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "devices",
+            "daemons",
+            "list"
+          ],
+          "generated_path": "v2.aiAgent.devices.daemons.list",
+          "cache_tag": "v2.aiAgent.devices.daemons"
         }
       }
     },
@@ -4540,50 +4540,6 @@
         ],
         "type": "object"
       },
-      "AIAgentTaskThreadCollectionResponse": {
-        "description": "task 화면 진입 시 먼저 읽는 AI Agent thread cold collection 응답입니다.",
-        "properties": {
-          "active_stream": {
-            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
-          },
-          "schema_version": {
-            "type": "string"
-          },
-          "task_id": {
-            "type": "string"
-          },
-          "threads": {
-            "items": {
-              "$ref": "#/components/schemas/AIAgentTaskThreadRecord"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "schema_version",
-          "task_id",
-          "threads"
-        ],
-        "type": "object"
-      },
-      "AIAgentTaskThreadFailureDiagnostics": {
-        "description": "terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.",
-        "properties": {
-          "failure_category": {
-            "description": "control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed.",
-            "type": "string"
-          },
-          "message": {
-            "description": "사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.",
-            "type": "string"
-          },
-          "result_status": {
-            "description": "daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted.",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "AIAgentTaskThreadAgentSnapshot": {
         "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
         "properties": {
@@ -4626,6 +4582,211 @@
           "agent_id"
         ],
         "type": "object"
+      },
+      "AIAgentTaskThreadCollectionResponse": {
+        "description": "task 화면 진입 시 먼저 읽는 AI Agent thread cold collection 응답입니다.",
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "assigned_agent_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadFailureDiagnostics": {
+        "description": "terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.",
+        "properties": {
+          "failure_category": {
+            "description": "control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed.",
+            "type": "string"
+          },
+          "message": {
+            "description": "사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.",
+            "type": "string"
+          },
+          "result_status": {
+            "description": "daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AIAgentTaskThreadHistoryCollectionResponse": {
+        "description": "v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.",
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "agent_snapshots": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadAgentSnapshot"
+            },
+            "description": "agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.",
+            "type": "object"
+          },
+          "assigned_agent_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadHistoryRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadHistoryMessage": {
+        "description": "v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.",
+        "properties": {
+          "assignment_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "result_message": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadMessageRole"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer"
+          },
+          "source_message_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_id",
+          "role"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadHistoryRecord": {
+        "description": "v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.",
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "agent_snapshot_id": {
+            "description": "agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다.",
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "conversation_id": {
+            "description": "같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다.",
+            "type": "string"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadHistoryMessage"
+            },
+            "type": "array"
+          },
+          "parent_thread_id": {
+            "description": "후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다.",
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "conversation_id",
+          "messages"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadMessageRole": {
+        "description": "v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.",
+        "enum": [
+          "user",
+          "agent",
+          "progress"
+        ],
+        "type": "string"
       },
       "AIAgentTaskThreadRecord": {
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
@@ -5411,6 +5572,12 @@
         "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
         "properties": {
           "agent_id": {
+            "type": "string"
+          },
+          "instruction": {
+            "type": "string"
+          },
+          "request_id": {
             "type": "string"
           }
         },
