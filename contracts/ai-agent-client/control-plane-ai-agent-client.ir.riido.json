@@ -696,6 +696,10 @@
         {
           "kind": "agent_thread_progress",
           "schema": "AgentThreadProgressEvent"
+        },
+        {
+          "kind": "agent_task_notification",
+          "schema": "AgentTaskNotificationEvent"
         }
       ]
     }
@@ -1889,6 +1893,14 @@
           {
             "name": "message",
             "type": "string"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
           }
         ]
       }
@@ -2047,6 +2059,14 @@
           {
             "name": "comment_kind",
             "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
           }
         ]
       }
@@ -2290,6 +2310,14 @@
             "items": {
               "ref": "AgentThreadProgressLine"
             }
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
           }
         ]
       }
@@ -2441,6 +2469,109 @@
             "items": {
               "ref": "AIAgentTaskThreadStreamTarget"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentTaskNotificationEvent",
+      "schema": {
+        "name": "AgentTaskNotificationEvent",
+        "description": "배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "event_id",
+          "occurred_at",
+          "workspace_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "created_by",
+          "recipient_principal_id",
+          "notification_type",
+          "work_status",
+          "assignment_state"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_task_notification"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "event_id",
+            "type": "string"
+          },
+          {
+            "name": "occurred_at",
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "team_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "created_by",
+            "type": "string"
+          },
+          {
+            "name": "recipient_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "notification_type",
+            "type": "string",
+            "enum": [
+              "result_ready",
+              "answer_required",
+              "approval_required",
+              "failed"
+            ]
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
           }
         ]
       }

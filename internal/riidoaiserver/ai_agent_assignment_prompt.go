@@ -14,6 +14,7 @@ const (
 )
 
 type AIAgentTaskContext struct {
+	TeamID        string                         `json:"team_id,omitempty"`
 	SchemaVersion string                         `json:"schema_version,omitempty"`
 	Component     AIAgentTaskContextComponent    `json:"component"`
 	Document      AIAgentTaskContextDocument     `json:"document"`

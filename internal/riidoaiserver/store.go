@@ -9,6 +9,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 	"github.com/teamswyg/riido-contracts/provider/capability"
 )
 
@@ -787,6 +788,8 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	state.nextAssignmentSeq++
 	assignment := Assignment{
 		WorkspaceID:              req.WorkspaceID,
+		CreatedBy:                req.CreatedBy,
+		TeamID:                   req.TeamID,
 		ID:                       fmt.Sprintf("asn-%06d", state.nextAssignmentSeq),
 		TaskID:                   taskID,
 		ComponentID:              req.ComponentID,
@@ -1282,6 +1285,12 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	if err := validateDaemonBinding(s.agentRegistry, agentID, PollRequest{DaemonID: req.DaemonID, DeviceID: req.DeviceID, RuntimeID: req.RuntimeID}); err != nil {
 		return AgentEventResponse{}, err
 	}
+	if req.EventType == assignmentcontract.EventAssignmentWaitingForUser && (!req.ConfirmationReason.Valid() || isTerminal(assignment.State) || assignment.State == AssignmentCancelling) {
+		return AgentEventResponse{}, errors.New("waiting event requires an active execution and confirmation_reason")
+	}
+	if event, ok := repeatedNotificationEvent(state, assignment, req); ok {
+		return AgentEventResponse{SchemaVersion: SchemaVersion, Assignment: copyAssignment(assignment), Event: event}, nil
+	}
 	state.agentEventsTotal++
 	now := s.now()
 	if req.State != "" && req.State != assignment.State {
@@ -1301,6 +1310,13 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 			eventType = EventRiidoLog
 		}
 	}
+	if eventType == assignmentcontract.EventAssignmentWaitingForUser {
+		assignment.ConfirmationReason = req.ConfirmationReason
+	} else if eventType == EventAssignmentRunning || isTerminal(assignment.State) {
+		assignment.ConfirmationReason = ""
+	}
+	assignment.UpdatedAt = now
+	state.assignments[assignment.ID] = assignment
 	event := s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, assignment.State, req.Message, req.Metadata, now)
 	return AgentEventResponse{
 		SchemaVersion: SchemaVersion,
@@ -1445,16 +1461,22 @@ func (s *Store) handleMetrics(state *storeState) MetricsSnapshot {
 
 func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, eventType string, assignmentState AssignmentState, message string, metadata map[string]string, at time.Time) TaskEvent {
 	state.nextEventSeq++
+	assignment := state.assignments[assignmentID]
 	event := TaskEvent{
-		Seq:          state.nextEventSeq,
-		TaskID:       taskID,
-		AssignmentID: assignmentID,
-		AgentID:      agentID,
-		Type:         eventType,
-		State:        assignmentState,
-		Message:      message,
-		Metadata:     cloneMetadata(metadata),
-		At:           at,
+		EventID:            fmt.Sprintf("%s:%d", assignmentID, state.nextEventSeq),
+		WorkspaceID:        assignment.WorkspaceID,
+		TeamID:             assignment.TeamID,
+		CreatedBy:          assignment.CreatedBy,
+		ConfirmationReason: assignment.ConfirmationReason,
+		Seq:                state.nextEventSeq,
+		TaskID:             taskID,
+		AssignmentID:       assignmentID,
+		AgentID:            agentID,
+		Type:               eventType,
+		State:              assignmentState,
+		Message:            message,
+		Metadata:           cloneMetadata(metadata),
+		At:                 at,
 	}
 	state.events[taskID] = append(state.events[taskID], event)
 	if s.outbox != nil {

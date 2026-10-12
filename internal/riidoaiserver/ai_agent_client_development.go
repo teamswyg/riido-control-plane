@@ -1404,6 +1404,11 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 		BatchEndedAt:    req.BatchEndedAt,
 		Lines:           lines,
 	}
+	if existing, ok := s.taskThreadForAssignmentLocked(req.TaskID, agentID, req.AssignmentID); ok && existing.ConfirmationReason != "" {
+		event.WorkStatus = AgentWorkStatusWaitingForUser
+		agent.WorkStatus = AgentWorkStatusWaitingForUser
+		s.agents[agentID] = agent
+	}
 	s.appendThreadProgressLocked(event)
 	s.appendClientEventLocked(event.EventType, event)
 	return AgentThreadProgressBatchResponse{
@@ -1480,6 +1485,10 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	}
 	hadThread := ok
 	previousThread := thread
+	// Once stopped or terminal, late status/log retries cannot revive a run.
+	if hadThread && (previousThread.AssignmentState == AgentAssignmentStateCompleted || previousThread.AssignmentState == AgentAssignmentStateFailed || previousThread.AssignmentState == AgentAssignmentStateStopped) {
+		return nil
+	}
 
 	if strings.TrimSpace(event.Type) == EventRiidoLog && message != "" {
 		// Terminal/stop fence (C2): a late runtime-progress log for a thread the
@@ -1522,9 +1531,12 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 			BatchEndedAt:    line.ObservedAt,
 			Lines:           []AgentThreadProgressLine{line},
 		}
+		if thread.ConfirmationReason != "" {
+			progressEvent.WorkStatus = AgentWorkStatusWaitingForUser
+		}
 		s.appendThreadProgressLocked(progressEvent)
 		s.appendClientEventLocked(progressEvent.EventType, progressEvent)
-		agent.WorkStatus = AgentWorkStatusRunning
+		agent.WorkStatus = thread.WorkStatus
 		agent.Editability = AgentEditabilityBlockedAssignedTasks
 		if agent.AssignedTaskCount == 0 {
 			agent.AssignedTaskCount = 1
@@ -1535,6 +1547,11 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 
 	responseMessage := assignmentEventVisibleThreadMessage(state, strings.TrimSpace(event.Type), message, previousThread.Message)
 	response := assignmentEventActionResponse(thread, state, responseMessage)
+	if state == AssignmentRunning && event.ConfirmationReason.Valid() {
+		response.WorkStatus = AgentWorkStatusWaitingForUser
+		response.ConfirmationReason = string(event.ConfirmationReason)
+	}
+
 	response.AssignmentID = assignmentID
 	s.upsertTaskThreadFromActionLocked(response, "")
 	shouldFanoutStatus := shouldFanoutAgentTaskActionEvent(hadThread, previousThread, response)
@@ -1552,6 +1569,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	s.agents[agentID] = agent
 	if shouldFanoutStatus {
 		s.appendAgentTaskActionEvent(response)
+		s.appendTaskNotificationLocked(event, response)
 	}
 	return nil
 }
@@ -1860,16 +1878,22 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 		}
 		previous := threads[i]
 		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "")
+		if projection.Assignment.State == AssignmentRunning && projection.Assignment.ConfirmationReason.Valid() {
+			response.WorkStatus = AgentWorkStatusWaitingForUser
+			response.ConfirmationReason = string(projection.Assignment.ConfirmationReason)
+		}
 		response.AssignmentID = projection.Assignment.ID
 		if previous.AssignmentID == response.AssignmentID &&
 			previous.WorkStatus == response.WorkStatus &&
 			previous.AssignmentState == response.AssignmentState &&
 			previous.CommentKind == response.CommentKind &&
+			previous.ConfirmationReason == response.ConfirmationReason &&
 			queueDiagnosticsEqual(previous.QueueDiagnostics, diagnostics) {
 			return false
 		}
 		threads[i].AssignmentID = response.AssignmentID
 		threads[i].WorkStatus = response.WorkStatus
+		threads[i].ConfirmationReason = response.ConfirmationReason
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = copyQueueDiagnostics(diagnostics)
 		threads[i].CommentKind = response.CommentKind
@@ -2077,24 +2101,25 @@ func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThread
 	}
 	return previous.WorkStatus != response.WorkStatus ||
 		previous.AssignmentState != response.AssignmentState ||
-		previous.CommentKind != response.CommentKind
+		previous.CommentKind != response.CommentKind || previous.ConfirmationReason != response.ConfirmationReason
 }
 
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
-		ThreadID:        response.ThreadID,
-		TaskID:          response.TaskID,
-		AssignmentID:    response.AssignmentID,
-		AgentID:         response.AgentID,
-		RunID:           response.RunID,
-		SourceCommentID: strings.TrimSpace(sourceCommentID),
-		WorkStatus:      response.WorkStatus,
-		AssignmentState: response.AssignmentState,
-		CommentKind:     response.CommentKind,
-		Message:         response.Message,
-		StartedAt:       now,
-		Lines:           []AgentThreadProgressLine{},
+		ThreadID:           response.ThreadID,
+		TaskID:             response.TaskID,
+		AssignmentID:       response.AssignmentID,
+		AgentID:            response.AgentID,
+		RunID:              response.RunID,
+		SourceCommentID:    strings.TrimSpace(sourceCommentID),
+		WorkStatus:         response.WorkStatus,
+		ConfirmationReason: response.ConfirmationReason,
+		AssignmentState:    response.AssignmentState,
+		CommentKind:        response.CommentKind,
+		Message:            response.Message,
+		StartedAt:          now,
+		Lines:              []AgentThreadProgressLine{},
 	}
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
@@ -2105,6 +2130,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 			continue
 		}
 		threads[i].WorkStatus = response.WorkStatus
+		threads[i].ConfirmationReason = response.ConfirmationReason
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
 		}
@@ -2130,18 +2156,19 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(response AIAgentTaskActionResponse, sourceMessageID string) {
 	now := time.Now().UTC()
 	thread := AIAgentTaskThreadRecord{
-		ThreadID:        response.ThreadID,
-		TaskID:          response.TaskID,
-		AssignmentID:    response.AssignmentID,
-		AgentID:         response.AgentID,
-		RunID:           response.RunID,
-		SourceMessageID: strings.TrimSpace(sourceMessageID),
-		WorkStatus:      response.WorkStatus,
-		AssignmentState: response.AssignmentState,
-		CommentKind:     response.CommentKind,
-		Message:         response.Message,
-		StartedAt:       now,
-		Lines:           []AgentThreadProgressLine{},
+		ThreadID:           response.ThreadID,
+		TaskID:             response.TaskID,
+		AssignmentID:       response.AssignmentID,
+		AgentID:            response.AgentID,
+		RunID:              response.RunID,
+		SourceMessageID:    strings.TrimSpace(sourceMessageID),
+		WorkStatus:         response.WorkStatus,
+		ConfirmationReason: response.ConfirmationReason,
+		AssignmentState:    response.AssignmentState,
+		CommentKind:        response.CommentKind,
+		Message:            response.Message,
+		StartedAt:          now,
+		Lines:              []AgentThreadProgressLine{},
 	}
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
@@ -2156,6 +2183,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadMessageFromActionLocked(
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
 		}
 		threads[i].WorkStatus = response.WorkStatus
+		threads[i].ConfirmationReason = response.ConfirmationReason
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
@@ -2193,7 +2221,9 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 		if strings.TrimSpace(event.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(event.AssignmentID)
 		}
-		threads[i].WorkStatus = event.WorkStatus
+		if threads[i].ConfirmationReason == "" {
+			threads[i].WorkStatus = event.WorkStatus
+		}
 		threads[i].AssignmentState = event.AssignmentState
 		threads[i].QueueDiagnostics = nil
 		threads[i].CommentKind = event.CommentKind
@@ -2340,16 +2370,17 @@ func (s *DevelopmentAIAgentClientStore) agentForTaskStopLocked(principal Authori
 
 func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
 	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
-		EventType:       AgentClientEventWorkStatusChanged,
-		SchemaVersion:   SchemaVersion,
-		AgentID:         response.AgentID,
-		TaskID:          response.TaskID,
-		AssignmentID:    response.AssignmentID,
-		ThreadID:        response.ThreadID,
-		RunID:           response.RunID,
-		WorkStatus:      response.WorkStatus,
-		AssignmentState: response.AssignmentState,
-		CommentKind:     response.CommentKind,
+		EventType:          AgentClientEventWorkStatusChanged,
+		SchemaVersion:      SchemaVersion,
+		AgentID:            response.AgentID,
+		TaskID:             response.TaskID,
+		AssignmentID:       response.AssignmentID,
+		ThreadID:           response.ThreadID,
+		RunID:              response.RunID,
+		WorkStatus:         response.WorkStatus,
+		ConfirmationReason: response.ConfirmationReason,
+		AssignmentState:    response.AssignmentState,
+		CommentKind:        response.CommentKind,
 	})
 }
 
@@ -2444,6 +2475,14 @@ func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal A
 }
 
 func clientEventVisibleToLocked(s *DevelopmentAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
+	if notification, ok := event.Payload.(AgentTaskNotificationEvent); ok {
+		return notification.RecipientPrincipalID != "" && notification.RecipientPrincipalID == principal.PrincipalID && notification.WorkspaceID != "" && notification.WorkspaceID == principal.WorkspaceID
+	}
+	// Unknown notification payloads fail closed, including older snapshot formats.
+	if event.EventType == AgentClientEventTaskNotification {
+		return false
+	}
+
 	if daemon, ok := eventDeviceDaemon(event.Payload); ok {
 		return s.daemonVisibleToPrincipalLocked(principal, daemon)
 	}

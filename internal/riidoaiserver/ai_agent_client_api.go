@@ -369,16 +369,17 @@ type StopAIAgentTaskRequest struct {
 }
 
 type AIAgentTaskActionResponse struct {
-	SchemaVersion   string               `json:"schema_version"`
-	TaskID          string               `json:"task_id"`
-	AssignmentID    string               `json:"assignment_id,omitempty"`
-	AgentID         string               `json:"agent_id"`
-	ThreadID        string               `json:"thread_id"`
-	RunID           string               `json:"run_id"`
-	WorkStatus      AgentWorkStatus      `json:"work_status"`
-	AssignmentState AgentAssignmentState `json:"assignment_state"`
-	CommentKind     AgentTaskCommentKind `json:"comment_kind"`
-	Message         string               `json:"message"`
+	ConfirmationReason string               `json:"confirmation_reason,omitempty"`
+	SchemaVersion      string               `json:"schema_version"`
+	TaskID             string               `json:"task_id"`
+	AssignmentID       string               `json:"assignment_id,omitempty"`
+	AgentID            string               `json:"agent_id"`
+	ThreadID           string               `json:"thread_id"`
+	RunID              string               `json:"run_id"`
+	WorkStatus         AgentWorkStatus      `json:"work_status"`
+	AssignmentState    AgentAssignmentState `json:"assignment_state"`
+	CommentKind        AgentTaskCommentKind `json:"comment_kind"`
+	Message            string               `json:"message"`
 }
 
 type AIAgentTaskThreadStreamLink struct {
@@ -412,21 +413,22 @@ type AIAgentTaskThreadQueueDiagnostics struct {
 }
 
 type AIAgentTaskThreadRecord struct {
-	ThreadID         string                             `json:"thread_id"`
-	TaskID           string                             `json:"task_id"`
-	AssignmentID     string                             `json:"assignment_id,omitempty"`
-	AgentID          string                             `json:"agent_id"`
-	RunID            string                             `json:"run_id"`
-	SourceCommentID  string                             `json:"source_comment_id,omitempty"`
-	SourceMessageID  string                             `json:"source_message_id,omitempty"`
-	WorkStatus       AgentWorkStatus                    `json:"work_status"`
-	AssignmentState  AgentAssignmentState               `json:"assignment_state"`
-	QueueDiagnostics *AIAgentTaskThreadQueueDiagnostics `json:"queue_diagnostics,omitempty"`
-	CommentKind      AgentTaskCommentKind               `json:"comment_kind"`
-	Message          string                             `json:"message"`
-	StartedAt        time.Time                          `json:"started_at,omitempty"`
-	CompletedAt      time.Time                          `json:"completed_at,omitempty"`
-	Lines            []AgentThreadProgressLine          `json:"lines"`
+	ConfirmationReason string                             `json:"confirmation_reason,omitempty"`
+	ThreadID           string                             `json:"thread_id"`
+	TaskID             string                             `json:"task_id"`
+	AssignmentID       string                             `json:"assignment_id,omitempty"`
+	AgentID            string                             `json:"agent_id"`
+	RunID              string                             `json:"run_id"`
+	SourceCommentID    string                             `json:"source_comment_id,omitempty"`
+	SourceMessageID    string                             `json:"source_message_id,omitempty"`
+	WorkStatus         AgentWorkStatus                    `json:"work_status"`
+	AssignmentState    AgentAssignmentState               `json:"assignment_state"`
+	QueueDiagnostics   *AIAgentTaskThreadQueueDiagnostics `json:"queue_diagnostics,omitempty"`
+	CommentKind        AgentTaskCommentKind               `json:"comment_kind"`
+	Message            string                             `json:"message"`
+	StartedAt          time.Time                          `json:"started_at,omitempty"`
+	CompletedAt        time.Time                          `json:"completed_at,omitempty"`
+	Lines              []AgentThreadProgressLine          `json:"lines"`
 }
 
 type AIAgentTaskThreadCollectionResponse struct {
@@ -464,16 +466,17 @@ type AgentEditabilityChangedEvent struct {
 }
 
 type AgentWorkStatusChangedEvent struct {
-	EventType       string               `json:"event_type"`
-	SchemaVersion   string               `json:"schema_version"`
-	AgentID         string               `json:"agent_id"`
-	TaskID          string               `json:"task_id,omitempty"`
-	AssignmentID    string               `json:"assignment_id,omitempty"`
-	ThreadID        string               `json:"thread_id,omitempty"`
-	RunID           string               `json:"run_id,omitempty"`
-	WorkStatus      AgentWorkStatus      `json:"work_status"`
-	AssignmentState AgentAssignmentState `json:"assignment_state,omitempty"`
-	CommentKind     AgentTaskCommentKind `json:"comment_kind,omitempty"`
+	ConfirmationReason string               `json:"confirmation_reason,omitempty"`
+	EventType          string               `json:"event_type"`
+	SchemaVersion      string               `json:"schema_version"`
+	AgentID            string               `json:"agent_id"`
+	TaskID             string               `json:"task_id,omitempty"`
+	AssignmentID       string               `json:"assignment_id,omitempty"`
+	ThreadID           string               `json:"thread_id,omitempty"`
+	RunID              string               `json:"run_id,omitempty"`
+	WorkStatus         AgentWorkStatus      `json:"work_status"`
+	AssignmentState    AgentAssignmentState `json:"assignment_state,omitempty"`
+	CommentKind        AgentTaskCommentKind `json:"comment_kind,omitempty"`
 }
 
 type AgentThreadProgressLine struct {
@@ -563,4 +566,25 @@ type ClientStreamEvent struct {
 	Seq       int64
 	EventType string
 	Payload   any
+}
+
+const AgentClientEventTaskNotification = "agent_task_notification"
+
+type AgentTaskNotificationEvent struct {
+	TeamID               string               `json:"team_id,omitempty"`
+	EventType            string               `json:"event_type"`
+	SchemaVersion        string               `json:"schema_version"`
+	EventID              string               `json:"event_id"`
+	OccurredAt           time.Time            `json:"occurred_at"`
+	WorkspaceID          string               `json:"workspace_id"`
+	TaskID               string               `json:"task_id"`
+	AgentID              string               `json:"agent_id"`
+	AssignmentID         string               `json:"assignment_id"`
+	RunID                string               `json:"run_id"`
+	CreatedBy            string               `json:"created_by"`
+	RecipientPrincipalID string               `json:"recipient_principal_id"`
+	NotificationType     string               `json:"notification_type"`
+	ConfirmationReason   string               `json:"confirmation_reason,omitempty"`
+	WorkStatus           AgentWorkStatus      `json:"work_status"`
+	AssignmentState      AgentAssignmentState `json:"assignment_state"`
 }

@@ -759,6 +759,9 @@ func restoreSnapshotEventPayload(eventType string, raw json.RawMessage) (any, er
 	case AgentClientEventEditabilityChanged:
 		var payload AgentEditabilityChangedEvent
 		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventTaskNotification:
+		var payload AgentTaskNotificationEvent
+		return payload, json.Unmarshal(raw, &payload)
 	case AgentClientEventWorkStatusChanged:
 		var payload AgentWorkStatusChangedEvent
 		return payload, json.Unmarshal(raw, &payload)

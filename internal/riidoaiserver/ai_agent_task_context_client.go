@@ -237,7 +237,9 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	return detail.toAIAgentTaskContext(), nil
+	snapshot := detail.toAIAgentTaskContext()
+	snapshot.TeamID = location.Team.ID
+	return snapshot, nil
 }
 
 func (c *AIAgentPrivateTaskContextClient) getComponentWorkspace(ctx context.Context, componentID, bearerToken string) (privateComponentWorkspaceResponse, error) {
