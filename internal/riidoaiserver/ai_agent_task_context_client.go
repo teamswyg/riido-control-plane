@@ -276,6 +276,9 @@ func (c *AIAgentPrivateTaskContextClient) doPrivateTaskContextJSON(req *http.Req
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 1024))
+		if resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("%w: HTTP %d", errDashboardTaskUnavailable, resp.StatusCode)
+		}
 		return fmt.Errorf("riidoaiserver: private task context returned HTTP %d", resp.StatusCode)
 	}
 	dec := json.NewDecoder(io.LimitReader(resp.Body, 1<<20))

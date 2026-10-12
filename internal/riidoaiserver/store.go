@@ -653,6 +653,8 @@ func (s *Store) loop(state storeState) {
 		case unregisterWaiterCmd:
 			s.handleUnregisterWaiter(&state, msg.agentID, msg.id)
 			msg.reply <- struct{}{}
+		case agentDashboardSnapshotCmd:
+			msg.reply <- snapshotFromState(&state, s.now())
 		case metricsCmd:
 			msg.reply <- metricsResult{snapshot: s.handleMetrics(&state)}
 		case assignmentProjectionCmd:
