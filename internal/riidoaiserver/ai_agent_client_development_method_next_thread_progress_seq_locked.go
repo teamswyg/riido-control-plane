@@ -18,7 +18,13 @@ func (s *DevelopmentAIAgentClientStore) nextThreadProgressSeqLocked(taskID, thre
 		if threads[i].ThreadID != threadID {
 			continue
 		}
-		return len(threads[i].Lines) + 1
+		maxSeq := 0
+		for _, line := range threads[i].Lines {
+			if line.Seq > maxSeq {
+				maxSeq = line.Seq
+			}
+		}
+		return maxSeq + 1
 	}
 	return 1
 }

@@ -383,6 +383,7 @@ export interface AgentThreadProgressEvent {
  */
 export interface AgentThreadProgressLine {
   message: string;
+  message_key?: string;
   observed_at?: string;
   seq: number;
 }

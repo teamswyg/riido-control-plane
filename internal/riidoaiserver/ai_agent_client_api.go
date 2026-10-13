@@ -585,6 +585,7 @@ func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
 
 func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
 	wire := struct {
+		MessageKey string    `json:"message_key,omitempty"`
 		Seq        int       `json:"seq"`
 		Message    string    `json:"message"`
 		ObservedAt time.Time `json:"observed_at,omitempty"`
@@ -592,6 +593,9 @@ func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
 		Seq:        line.Seq,
 		Message:    line.Message,
 		ObservedAt: line.ObservedAt,
+	}
+	if line.MessageKey == "assistant.partial" || line.MessageKey == "runtime.activity" {
+		wire.MessageKey = line.MessageKey
 	}
 	return json.Marshal(wire)
 }

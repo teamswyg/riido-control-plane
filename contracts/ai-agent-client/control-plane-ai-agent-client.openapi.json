@@ -5326,6 +5326,9 @@
           },
           "seq": {
             "type": "integer"
+          },
+          "message_key": {
+            "type": "string"
           }
         },
         "required": [
