@@ -28,7 +28,8 @@
       "agent_capability=offline means the device remains registered but the daemon heartbeat is stale or absent; do not describe this as not installed.",
       "agent_capability=version_unknown means an online daemon did not report a parseable release version; show diagnostics or update guidance rather than an installation claim.",
       "agent_capability=ready and agent_supported=true mean the daemon meets the configured minimum version.",
-      "download_url is server-owned update guidance; clients must not hard-code a different release URL."
+      "download_url is server-owned update guidance; clients must not hard-code a different release URL.",
+      "RIID-5827: authenticated loopback local-state mode preserves assignment workspace identity, serializes client snapshots, and rejects stale file versions. Provider errors remain visible before terminal state; coalesced assistant snapshots keep monotonic sequence numbers."
     ]
   },
   "thread_history_v3_frontend": {

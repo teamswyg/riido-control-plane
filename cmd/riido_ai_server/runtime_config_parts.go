@@ -1,5 +1,11 @@
 package main
 
+import (
+	"path/filepath"
+
+	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
+)
+
 func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (runtimeConfig, error) {
 	webAllowedOrigins, err := webAllowedOriginsFromEnv()
 	if err != nil {
@@ -25,11 +31,22 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	var snapshotStore riidoaiserver.SnapshotStore
+	if parts.localDir != "" {
+		snapshotStore, err = riidoaiserver.NewFileStoreSnapshot(filepath.Join(parts.localDir, "assignments.json"))
+		if err != nil {
+			return runtimeConfig{}, err
+		}
+	}
 	taskContextReader, err := taskContextReaderFromEnv()
+	if err == nil && parts.localDir != "" && taskContextReader == nil {
+		taskContextReader, err = readLocalTaskContexts(parts.localDir)
+	}
 	if err != nil {
 		return runtimeConfig{}, err
 	}
 	return runtimeConfig{
+		AssignmentSnapshotStore:  snapshotStore,
 		Addr:                     getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:          timing.ShutdownTimeout,
 		Authorizer:               parts.authorizer,

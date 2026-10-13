@@ -41,6 +41,7 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		return composedAssignRequest{}, err
 	}
 	assignmentReq := AssignRequest{
+		WorkspaceID:              strings.TrimSpace(principal.WorkspaceID),
 		ComponentID:              taskID,
 		AgentID:                  selected.AgentID,
 		RuntimeProvider:          binding.RuntimeProvider,
