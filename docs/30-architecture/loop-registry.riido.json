@@ -5151,7 +5151,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "517042ad42799c22dd92eaed1256a4c4a568a7b121b0426db32804c593c2e063"
+      "semantic_hash": "79fbe579c136c1514414656763161bde7c3138c783e6f80a376d5b8d833c13ca"
     },
     {
       "id": "repo_identity_must_anchor_public_module_boundary",

@@ -260,7 +260,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `59` | `27` | `825ccb4fb3d0` |
 | `public_aws_adapter_facade_must_preserve_contract` | `closed_loop_candidate` | `16` | `3` | `2992950fb81d` |
 | `review_account_seed_must_preserve_redacted_seed_evidence` | `closed_loop_candidate` | `31` | `10` | `e54b2514b3e3` |
-| `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `76` | `14` | `517042ad4279` |
+| `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `76` | `14` | `79fbe579c136` |
 | `repo_identity_must_anchor_public_module_boundary` | `closed_loop_candidate` | `5` | `2` | `f64ca9144ca3` |
 | `shared_contract_compat_must_preserve_generated_contract_surface` | `closed_loop_candidate` | `10` | `6` | `86a587a55138` |
 | `request_authorization_must_preserve_security_boundary` | `closed_loop_candidate` | `46` | `17` | `709d3eee1647` |

@@ -19,13 +19,17 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	assignmentOperationStore, err := assignmentOperationStoreFromEnv(parts.aiAgentClientDev, timing.AssignmentActiveLease)
-	if err != nil {
-		return runtimeConfig{}, err
-	}
-	assignmentOutbox, err := assignmentOutboxFromEnv()
-	if err != nil {
-		return runtimeConfig{}, err
+	var assignmentOperationStore riidoaiserver.AssignmentOperationStore
+	var assignmentOutbox riidoaiserver.EventSink
+	if parts.localDir == "" {
+		assignmentOperationStore, err = assignmentOperationStoreFromEnv(parts.aiAgentClientDev, timing.AssignmentActiveLease)
+		if err != nil {
+			return runtimeConfig{}, err
+		}
+		assignmentOutbox, err = assignmentOutboxFromEnv()
+		if err != nil {
+			return runtimeConfig{}, err
+		}
 	}
 	profileThumbnails, err := agentProfileThumbnailUploadServiceFromEnv()
 	if err != nil {
