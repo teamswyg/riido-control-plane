@@ -32,10 +32,11 @@
     {
       "id": "runtime-artifact-cd",
       "owner": "riido-control-plane",
-      "scope": "Manual or tag-triggered image-only ECS service promotion using stable environment configuration.",
+      "scope": "Manual or tag-triggered image-only ECS service promotion using stable environment configuration. Permit a second native stability wait only while the primary rollout remains IN_PROGRESS or has just reached COMPLETED, bounded to two ten-minute windows; failed rollouts still trigger rollback. The 45-minute workflow budget retains time for rollback after an extended wait.",
       "does_not_own": ["AWS topology", "secret values", "Terraform drift policy"],
       "evidence": [
-        {"path": ".github/workflows/deploy-ai-agent-testnet.yml", "contains": ["workflow_dispatch", "deployment_target", "update-service"]},
+        {"path": ".github/workflows/deploy-ai-agent-testnet.yml", "contains": ["workflow_dispatch", "deployment_target", "update-service", "BEGIN bounded ECS stability wait", "IN_PROGRESS"]},
+        {"path": "tools/deploypolicy/ecs_stability_wait_test.go", "contains": ["TestECSStabilityWaitExtendsOnlyAnActiveRollout"]},
         {"path": "docs/30-architecture/runtime-cd-ownership.riido.json", "contains": ["RIID-4835", "RIID-4839", "runtime-cd-ownership"]}
       ]
     },

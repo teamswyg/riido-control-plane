@@ -50,6 +50,13 @@
       "owner": "platform",
       "approved": true,
       "reason": "Trace span API used by the OpenTelemetry exporter adapter."
+    },
+    {
+      "path": "golang.org/x/net",
+      "layer": "contract",
+      "owner": "platform",
+      "approved": true,
+      "reason": "RIID-5818 uses the already pinned HTML parser to render rich task documents safely; no new module version, networking client or runtime permission is introduced."
     }
   ]
 }
