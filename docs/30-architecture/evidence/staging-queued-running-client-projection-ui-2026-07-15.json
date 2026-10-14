@@ -1,0 +1,44 @@
+{
+  "schema_version": "riido-staging-ui-observation.v1",
+  "id": "staging-queued-running-client-projection-ui-2026-07-15",
+  "environment": "staging",
+  "redacted": true,
+  "captured_at": "2026-07-15T10:15:11Z",
+  "deployment": {
+    "commit": "680688d9282f5d454edf3d4d77dac408f51e6442",
+    "ecs_task_definition": "riido-ai-server-testnet:271",
+    "image_tag": "main-680688d9282f-attempt1",
+    "image_digest": "sha256:b510d324e18d4c9502bc59c1c2ffbc2dd270a83157c35d5f2f41c7a11a0941c0"
+  },
+  "subject": {
+    "workspace": "redacted",
+    "primary_task": "uNYpHxDOzMp3vMy_urWsu",
+    "overlap_task": "uv_6DmyvfcetszNRbhIo9",
+    "provider": "claude"
+  },
+  "checks": {
+    "normal_assignment": {
+      "started_at": "2026-07-15T10:01:57Z",
+      "completed_without_refresh": true,
+      "false_busy_notice_visible": false
+    },
+    "immediate_reassignment_after_completion": {
+      "started_at": "2026-07-15T10:03:12Z",
+      "completed_without_refresh": true,
+      "false_busy_notice_visible": false
+    },
+    "real_busy_overlap": {
+      "blocker_started_at": "2026-07-15T10:06:24Z",
+      "overlap_started_at": "2026-07-15T10:06:47Z",
+      "busy_notice_visible_with_running_progress": true,
+      "observed_progress": "Go 프로젝트 생성 수집 중",
+      "result": "fail_before_fix"
+    },
+    "root_cause": {
+      "queued_status_event_hidden": true,
+      "queued_copy_retained_in_client_progress_lines": true,
+      "durable_line_preservation_required": true
+    }
+  },
+  "decision": "Preserve durable queue and progress lines, but remove the busy queue status copy from v2 thread and SSE client-visible progress projections so queued and running copy cannot be rendered together."
+}

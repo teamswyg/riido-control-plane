@@ -402,7 +402,7 @@
       "kind": "profile",
       "description": "Agent profile presentation fields and server-authored creation/update timestamps are saved with the agent configuration and projected to client bootstrap, task assignment, and update responses.",
       "rules": [
-        "profile_thumbnail_url: optional HTTPS image URL string; binary upload is outside this contract",
+        "profile_thumbnail_url: optional HTTPS image URL string; profile image binary transfer uses the dedicated profile thumbnail upload-intent endpoint and deployment-owned media storage",
         "tmp_color: optional fixture-provided avatar fallback color preserved on fixture-created agents for list/card presentation; clients still own final rendering precedence",
         "description: optional client-authored one-line summary with a maximum of 160 characters; empty string is allowed; client UI owns truncation and wrapping",
         "instruction: optional client-authored text with a maximum of 1000 characters; empty string is allowed",
@@ -410,7 +410,7 @@
         "updated_at: server-authored RFC3339 date-time refreshed when editable agent configuration is saved; used by clients for list update dates and absolute-time tooltips",
         "model_id: optional runtime-scoped model selection; omitted create/update values resolve to the selected runtime default",
         "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
-        "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image binary upload/storage stays outside this endpoint",
+        "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image upload uses createAIAgentProfileThumbnailUpload before saving profile_thumbnail_url",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
       ]
@@ -499,6 +499,50 @@
         },
         {
           "value": "error"
+        }
+      ]
+    },
+    {
+      "name": "ProviderHealthStatus",
+      "type": "string",
+      "description": "provider probe의 저카디널리티 상태입니다.",
+      "values": [
+        {
+          "value": "healthy"
+        },
+        {
+          "value": "degraded"
+        },
+        {
+          "value": "unavailable"
+        },
+        {
+          "value": "unknown"
+        }
+      ]
+    },
+    {
+      "name": "ProviderDiagnosticCode",
+      "type": "string",
+      "description": "원문 오류 대신 사용하는 비민감 provider 진단 코드입니다.",
+      "values": [
+        {
+          "value": "none"
+        },
+        {
+          "value": "executable-missing"
+        },
+        {
+          "value": "login-required"
+        },
+        {
+          "value": "version-unsupported"
+        },
+        {
+          "value": "probe-failed"
+        },
+        {
+          "value": "runtime-error"
         }
       ]
     },
@@ -696,6 +740,10 @@
         {
           "kind": "agent_thread_progress",
           "schema": "AgentThreadProgressEvent"
+        },
+        {
+          "kind": "agent_task_notification",
+          "schema": "AgentTaskNotificationEvent"
         }
       ]
     }
@@ -740,6 +788,7 @@
           "kind",
           "availability",
           "detection_state",
+          "provider_version",
           "has_assigned_agent",
           "requires_experimental_opt_in",
           "models"
@@ -764,6 +813,24 @@
           {
             "name": "detection_state",
             "ref": "RuntimeDetectionState"
+          },
+          {
+            "name": "provider_version",
+            "type": "string",
+            "description": "provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다."
+          },
+          {
+            "name": "health_status",
+            "ref": "ProviderHealthStatus"
+          },
+          {
+            "name": "diagnostic_code",
+            "ref": "ProviderDiagnosticCode"
+          },
+          {
+            "name": "diagnostic_summary",
+            "type": "string",
+            "description": "diagnostic_code에서 파생된 고정된 비민감 요약입니다."
           },
           {
             "name": "owner_principal_id",
@@ -932,6 +999,36 @@
           {
             "name": "daemon",
             "ref": "DeviceDaemonRecord"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeviceDaemonListResponse",
+      "schema": {
+        "name": "DeviceDaemonListResponse",
+        "description": "runtime 설정 화면의 내 기기 영역에서 device_id 기준으로 접근 가능한 daemon들을 profile별로 모두 표시하기 위한 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "device_id",
+          "daemons"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "daemons",
+            "type": "array",
+            "items": {
+              "ref": "DeviceDaemonRecord"
+            }
           }
         ]
       }
@@ -1597,10 +1694,123 @@
       }
     },
     {
+      "name": "AgentProfileThumbnailUploadFormField",
+      "schema": {
+        "name": "AgentProfileThumbnailUploadFormField",
+        "description": "브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.",
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateAgentProfileThumbnailUploadRequest",
+      "schema": {
+        "name": "CreateAgentProfileThumbnailUploadRequest",
+        "description": "agent 프로필 썸네일 파일을 기존 CDN/S3 media path로 업로드하기 위한 one-time upload intent 요청입니다.",
+        "type": "object",
+        "required": [
+          "content_type",
+          "content_length_bytes"
+        ],
+        "properties": [
+          {
+            "name": "content_type",
+            "type": "string",
+            "description": "업로드할 이미지 MIME type입니다. 지원 값은 image/png, image/jpeg, image/webp입니다."
+          },
+          {
+            "name": "content_length_bytes",
+            "type": "integer",
+            "description": "업로드할 파일 크기입니다. 서버가 허용 범위를 S3 POST policy에 고정합니다."
+          },
+          {
+            "name": "file_name",
+            "type": "string",
+            "description": "클라이언트가 선택한 원본 파일명입니다. object key나 public URL에는 사용하지 않습니다."
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentProfileThumbnailUploadResponse",
+      "schema": {
+        "name": "AgentProfileThumbnailUploadResponse",
+        "description": "agent 프로필 썸네일 S3 POST upload intent입니다. 클라이언트는 form_fields와 file field를 upload_url로 전송하고, 저장 요청에는 profile_thumbnail_url만 전달합니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "method",
+          "upload_url",
+          "form_file_field",
+          "form_fields",
+          "profile_thumbnail_url",
+          "expires_at",
+          "max_content_length_bytes"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "method",
+            "type": "string",
+            "description": "S3 upload에 사용할 HTTP method입니다. 현재 POST입니다."
+          },
+          {
+            "name": "upload_url",
+            "type": "string",
+            "description": "브라우저가 multipart/form-data POST를 보낼 S3 endpoint입니다.",
+            "format": "uri"
+          },
+          {
+            "name": "form_file_field",
+            "type": "string",
+            "description": "파일 binary를 담을 multipart field name입니다. 현재 file입니다."
+          },
+          {
+            "name": "form_fields",
+            "type": "array",
+            "items": {
+              "ref": "AgentProfileThumbnailUploadFormField"
+            }
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "description": "업로드 성공 후 agent create/update 요청의 profile_thumbnail_url에 저장할 CDN URL입니다.",
+            "format": "uri"
+          },
+          {
+            "name": "expires_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "max_content_length_bytes",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
       "name": "CreateAgentConfigurationRequest",
       "schema": {
         "name": "CreateAgentConfigurationRequest",
-        "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
+        "description": "Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다. 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.",
         "type": "object",
         "required": [
           "name",
@@ -1616,7 +1826,7 @@
           {
             "name": "profile_thumbnail_url",
             "type": "string",
-            "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.",
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
             "format": "uri"
           },
           {
@@ -1653,7 +1863,7 @@
       "name": "UpdateAgentConfigurationRequest",
       "schema": {
         "name": "UpdateAgentConfigurationRequest",
-        "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.",
+        "description": "Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다. 새 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다.",
         "type": "object",
         "properties": [
           {
@@ -1664,7 +1874,7 @@
           {
             "name": "profile_thumbnail_url",
             "type": "string",
-            "description": "agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.",
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
             "format": "uri"
           },
           {
@@ -1833,62 +2043,26 @@
       }
     },
     {
-      "name": "AIAgentTaskActionResponse",
+      "name": "AIAgentTaskThreadFailureDiagnostics",
       "schema": {
-        "name": "AIAgentTaskActionResponse",
-        "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
+        "name": "AIAgentTaskThreadFailureDiagnostics",
+        "description": "terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.",
         "type": "object",
-        "required": [
-          "schema_version",
-          "task_id",
-          "agent_id",
-          "thread_id",
-          "run_id",
-          "work_status",
-          "assignment_state",
-          "comment_kind",
-          "message"
-        ],
         "properties": [
           {
-            "name": "schema_version",
-            "type": "string"
+            "name": "result_status",
+            "type": "string",
+            "description": "daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted."
           },
           {
-            "name": "task_id",
-            "type": "string"
-          },
-          {
-            "name": "assignment_id",
-            "type": "string"
-          },
-          {
-            "name": "agent_id",
-            "type": "string"
-          },
-          {
-            "name": "thread_id",
-            "type": "string"
-          },
-          {
-            "name": "run_id",
-            "type": "string"
-          },
-          {
-            "name": "work_status",
-            "ref": "AgentWorkStatus"
-          },
-          {
-            "name": "assignment_state",
-            "ref": "AgentAssignmentState"
-          },
-          {
-            "name": "comment_kind",
-            "ref": "AgentTaskCommentKind"
+            "name": "failure_category",
+            "type": "string",
+            "description": "control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed."
           },
           {
             "name": "message",
-            "type": "string"
+            "type": "string",
+            "description": "사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다."
           }
         ]
       }
@@ -2047,6 +2221,23 @@
           {
             "name": "comment_kind",
             "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "result_message",
+            "type": "string",
+            "description": "terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다."
+          },
+          {
+            "name": "failure_diagnostics",
+            "ref": "AIAgentTaskThreadFailureDiagnostics"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
           }
         ]
       }
@@ -2074,6 +2265,10 @@
             "name": "observed_at",
             "type": "string",
             "format": "date-time"
+          },
+          {
+            "name": "message_key",
+            "type": "string"
           }
         ]
       }
@@ -2209,6 +2404,146 @@
       }
     },
     {
+      "name": "AIAgentTaskThreadAgentSnapshot",
+      "schema": {
+        "name": "AIAgentTaskThreadAgentSnapshot",
+        "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
+        "type": "object",
+        "required": [
+          "agent_id"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string"
+          },
+          {
+            "name": "tmp_color",
+            "type": "string"
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_kind",
+            "ref": "RuntimeKind"
+          },
+          {
+            "name": "model_id",
+            "type": "string"
+          },
+          {
+            "name": "model_label",
+            "type": "string"
+          },
+          {
+            "name": "captured_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskActionResponse",
+      "schema": {
+        "name": "AIAgentTaskActionResponse",
+        "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "agent_id",
+          "thread_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "comment_kind",
+          "message"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_snapshot",
+            "ref": "AIAgentTaskThreadAgentSnapshot"
+          },
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "result_message",
+            "type": "string",
+            "description": "completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. 진행 로그(lines)와 분리해 화면 결과 영역에 표시합니다."
+          },
+          {
+            "name": "failure_diagnostics",
+            "ref": "AIAgentTaskThreadFailureDiagnostics"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "AIAgentTaskThreadRecord",
       "schema": {
         "name": "AIAgentTaskThreadRecord",
@@ -2243,6 +2578,10 @@
             "type": "string"
           },
           {
+            "name": "agent_snapshot",
+            "ref": "AIAgentTaskThreadAgentSnapshot"
+          },
+          {
             "name": "run_id",
             "type": "string"
           },
@@ -2263,12 +2602,21 @@
             "ref": "AgentAssignmentState"
           },
           {
+            "name": "failure_diagnostics",
+            "ref": "AIAgentTaskThreadFailureDiagnostics"
+          },
+          {
             "name": "comment_kind",
             "ref": "AgentTaskCommentKind"
           },
           {
             "name": "message",
             "type": "string"
+          },
+          {
+            "name": "result_message",
+            "type": "string",
+            "description": "completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. lines에는 진행 로그만 유지합니다."
           },
           {
             "name": "started_at",
@@ -2286,6 +2634,14 @@
             "items": {
               "ref": "AgentThreadProgressLine"
             }
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
           }
         ]
       }
@@ -2437,6 +2793,109 @@
             "items": {
               "ref": "AIAgentTaskThreadStreamTarget"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentTaskNotificationEvent",
+      "schema": {
+        "name": "AgentTaskNotificationEvent",
+        "description": "배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "event_id",
+          "occurred_at",
+          "workspace_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "created_by",
+          "recipient_principal_id",
+          "notification_type",
+          "work_status",
+          "assignment_state"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_task_notification"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "event_id",
+            "type": "string"
+          },
+          {
+            "name": "occurred_at",
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "team_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "created_by",
+            "type": "string"
+          },
+          {
+            "name": "recipient_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "notification_type",
+            "type": "string",
+            "enum": [
+              "result_ready",
+              "answer_required",
+              "approval_required",
+              "failed"
+            ]
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
           }
         ]
       }
@@ -3022,6 +3481,41 @@
       ]
     },
     {
+      "operation_id": "listAIAgentDeviceDaemons",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/devices/{device_id}/daemons",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "devices",
+          "daemons",
+          "list"
+        ],
+        "generated_path": "aiAgent.devices.daemons.list",
+        "cache_tag": "aiAgent.devices.daemons"
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonListResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles"
+      ]
+    },
+    {
       "operation_id": "startAIAgentDeviceDaemon",
       "kind": "command",
       "method": "POST",
@@ -3432,6 +3926,45 @@
       },
       "scenario_ids": [
         "stopAIAgentTask.task-stop-emits-thread-status"
+      ]
+    },
+    {
+      "operation_id": "createAIAgentProfileThumbnailUpload",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v1/client/ai-agent/profile-thumbnails/uploads",
+      "resource": "agent",
+      "action": "create",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "profileThumbnails",
+          "uploads",
+          "create"
+        ],
+        "generated_path": "aiAgent.profileThumbnails.uploads.create"
+      },
+      "summary": "AI agent 프로필 썸네일 업로드 intent를 발급합니다",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_profile_thumbnail_upload.v1",
+      "request": {
+        "ref": "CreateAgentProfileThumbnailUploadRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentProfileThumbnailUploadResponse"
+      },
+      "scenario_ids": [
+        "createAIAgentProfileThumbnailUpload.profile-image-upload-precedes-agent-save",
+        "createAIAgentProfileThumbnailUpload.media-storage-stays-deployment-owned"
       ]
     },
     {
@@ -3961,6 +4494,39 @@
       }
     },
     {
+      "operation_id": "listAIAgentDeviceDaemonsV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemons",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "devices",
+          "daemons",
+          "list"
+        ],
+        "generated_path": "v2.aiAgent.devices.daemons.list",
+        "cache_tag": "v2.aiAgent.devices.daemons"
+      },
+      "summary": "runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read",
+          "ai-agent:device:{device_id}:read"
+        ]
+      },
+      "rbac_policy": "runtime_liveness.v1",
+      "response": {
+        "status": 200,
+        "ref": "DeviceDaemonListResponse"
+      }
+    },
+    {
       "operation_id": "startAIAgentDeviceDaemonV2",
       "kind": "command",
       "method": "POST",
@@ -4383,6 +4949,45 @@
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
       }
+    },
+    {
+      "operation_id": "createAIAgentProfileThumbnailUploadV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/profile-thumbnails/uploads",
+      "resource": "agent",
+      "action": "create",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "profileThumbnails",
+          "uploads",
+          "create"
+        ],
+        "generated_path": "v2.aiAgent.profileThumbnails.uploads.create"
+      },
+      "summary": "AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "ai-agent:create"
+        ]
+      },
+      "rbac_policy": "agent_profile_thumbnail_upload.v1",
+      "request": {
+        "ref": "CreateAgentProfileThumbnailUploadRequest",
+        "required": true
+      },
+      "response": {
+        "status": 201,
+        "ref": "AgentProfileThumbnailUploadResponse"
+      },
+      "scenario_ids": [
+        "createAIAgentProfileThumbnailUploadV2.workspace-scoped-profile-image-upload-precedes-agent-save"
+      ]
     },
     {
       "operation_id": "createAIAgentV2",
@@ -4985,6 +5590,14 @@
       "then": "the response is addressed by device_id and does not require the client to choose an arbitrary agent_id"
     },
     {
+      "scenario_id": "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles",
+      "operation_id": "listAIAgentDeviceDaemons",
+      "name": "figma my device daemon profiles",
+      "given": "the runtime settings UI needs to show multiple daemon profiles for one physical device",
+      "when": "the device owner opens the 내 기기 daemon profile list",
+      "then": "the response returns every visible daemon for that device instead of collapsing to the preferred daemon"
+    },
+    {
       "scenario_id": "startAIAgentDeviceDaemon.figma-my-device-daemon-start",
       "operation_id": "startAIAgentDeviceDaemon",
       "name": "figma my device daemon start",
@@ -5143,6 +5756,22 @@
       "given": "the Figma task thread shows a running AI agent response",
       "when": "the user presses the task stop action",
       "then": "the response and event stream use stopped_by_user_request so the client can render the stopped agent thread row"
+    },
+    {
+      "scenario_id": "createAIAgentProfileThumbnailUpload.profile-image-upload-precedes-agent-save",
+      "operation_id": "createAIAgentProfileThumbnailUpload",
+      "name": "profile image upload precedes agent save",
+      "given": "the Figma agent add/edit screen AvatarInput receives a local image file",
+      "when": "the client requests an upload intent with image content type and size",
+      "then": "the API returns one-time S3 POST form fields plus a CDN profile_thumbnail_url that the client can save through createAIAgent or updateAIAgentConfiguration"
+    },
+    {
+      "scenario_id": "createAIAgentProfileThumbnailUpload.media-storage-stays-deployment-owned",
+      "operation_id": "createAIAgentProfileThumbnailUpload",
+      "name": "media storage stays deployment-owned",
+      "given": "production uses an existing CDN and S3 media bucket path",
+      "when": "the upload intent is created",
+      "then": "the public contract exposes only the upload intent and resulting profile_thumbnail_url while bucket, IAM, and lifecycle details stay in infra/operator configuration"
     },
     {
       "scenario_id": "createAIAgent.agent-add-screen-creates-owned-agent",
@@ -5335,6 +5964,14 @@
       "given": "the client has workspace_id from the existing workspace route, task_id from the task route, and selected a visible agent_id",
       "when": "client calls riido.v2.aiAgent.tasks.assign",
       "then": "the URL scopes workspace_id and task_id while the request body carries agent_id only; team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are not generated assignment inputs"
+    },
+    {
+      "scenario_id": "createAIAgentProfileThumbnailUploadV2.workspace-scoped-profile-image-upload-precedes-agent-save",
+      "operation_id": "createAIAgentProfileThumbnailUploadV2",
+      "name": "workspace-scoped profile image upload precedes agent save",
+      "given": "the v2 workspace-scoped Figma agent add/edit screen AvatarInput receives a local image file",
+      "when": "the client calls riido.v2.aiAgent.profileThumbnails.uploads.create",
+      "then": "the API returns one-time S3 POST form fields plus a CDN profile_thumbnail_url that the client can save through v2 agent create/update"
     },
     {
       "scenario_id": "createAIAgentV2.workspace-scoped-agent-creation",

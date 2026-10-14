@@ -1,0 +1,21 @@
+{
+  "schema_version": "riido-control-plane-repository-readme.v1",
+  "id": "control-plane-repository-readme",
+  "title": "riido-control-plane",
+  "riido_task": "RIID-4964",
+  "generated_doc": "README.md",
+  "workflow": ".github/workflows/repository-readme.yml",
+  "evidence_artifact": "repository-readme-evidence",
+  "loop_source": "docs/readme/evidence-loop.riido.json",
+  "module_path": "github.com/teamswyg/riido-control-plane",
+  "license": "Apache-2.0",
+  "fragments": [
+    "docs/readme/overview.riido.json",
+    "docs/readme/navigation.riido.json",
+    "docs/readme/development.riido.json",
+    "docs/readme/public-qa-status.riido.json",
+    "docs/readme/runtime-cd.riido.json",
+    "docs/readme/verification.riido.json",
+    "docs/readme/evidence-loop.riido.json"
+  ]
+}

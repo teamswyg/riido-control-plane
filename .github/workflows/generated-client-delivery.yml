@@ -25,8 +25,8 @@ jobs:
       short_sha: ${{ steps.meta.outputs.short_sha }}
       target_branch: ${{ steps.meta.outputs.target_branch }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
@@ -59,6 +59,13 @@ jobs:
         run: |
           go test ./tools/reactquerygen -count=1
           go test ./tools/generatedclienthandoff -count=1
+      - name: Verify generated client delivery executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/apiclientdelivery -count=1
+          go run ./tools/apiclientdelivery \
+            -check-doc \
+            -evidence-out out/generated-client-delivery-evidence.json
       - name: Build generated client handoff artifact
         run: |
           out="dist/src/generated/react-query/riido-control-plane"
@@ -78,10 +85,18 @@ jobs:
             -source-commit "${{ steps.meta.outputs.source_commit }}" \
             -target-branch "${{ steps.meta.outputs.target_branch }}"
       - name: Upload generated client handoff artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: riido-control-plane-generated-client
           path: dist
+          if-no-files-found: error
+      - name: Upload generated client delivery evidence
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: generated-client-delivery-evidence
+          path: out/generated-client-delivery-evidence.json
+          if-no-files-found: error
 
   deliver:
     needs: package
@@ -126,10 +141,10 @@ jobs:
           echo "A temporary RIIDO_CLIENT_DELIVERY_TOKEN secret is accepted only as a fallback."
           exit 1
       - name: Checkout control-plane source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: control-plane
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: control-plane/go.mod
           cache: false
@@ -139,7 +154,7 @@ jobs:
           name: riido-control-plane-generated-client
           path: dist
       - name: Checkout riido-client
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: teamswyg/riido-client
           token: ${{ steps.delivery-token.outputs.token }}

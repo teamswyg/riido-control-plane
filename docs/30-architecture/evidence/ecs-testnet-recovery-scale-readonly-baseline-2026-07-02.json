@@ -1,0 +1,111 @@
+{
+  "schema_version": "riido-ecs-readiness-evidence.v1",
+  "id": "ecs-testnet-recovery-scale-readonly-baseline-2026-07-02",
+  "captured_at": "2026-07-02T07:04:41Z",
+  "environment": "testnet",
+  "redacted": true,
+  "commands": [
+    {
+      "id": "ecs_service_state",
+      "command": "aws ecs describe-services --cluster riido-ai-server-testnet --services riido-ai-server-testnet --output json",
+      "mode": "read_only",
+      "status": "pass"
+    },
+    {
+      "id": "ecs_scaling_policies",
+      "command": "aws application-autoscaling describe-scaling-policies --service-namespace ecs --output json",
+      "mode": "read_only",
+      "status": "pass"
+    }
+  ],
+  "service": {
+    "name": "riido-ai-server-testnet",
+    "status": "ACTIVE",
+    "launch_type": "FARGATE",
+    "desired_count": 1,
+    "running_count": 1,
+    "pending_count": 0,
+    "task_definition_revision": "164",
+    "deployment_controller": "ECS",
+    "deployment_strategy": "ROLLING",
+    "maximum_percent": 200,
+    "minimum_healthy_percent": 100,
+    "deployment_circuit_breaker_enabled": false,
+    "deployment_circuit_breaker_rollback": false,
+    "health_check_grace_period_seconds": 30,
+    "availability_zone_rebalancing": "ENABLED",
+    "primary_rollout_state": "COMPLETED",
+    "primary_rollout_reason": "ECS deployment completed.",
+    "primary_deployment_created_at": "2026-07-02T14:43:27.957000+09:00",
+    "primary_deployment_updated_at": "2026-07-02T14:46:03.925000+09:00"
+  },
+  "recent_rollout_events": [
+    {
+      "created_at": "2026-07-02T14:46:03.934000+09:00",
+      "message": "service reached a steady state"
+    },
+    {
+      "created_at": "2026-07-02T14:46:03.933000+09:00",
+      "message": "deployment completed"
+    },
+    {
+      "created_at": "2026-07-02T14:45:12.169000+09:00",
+      "message": "previous task set began draining connections"
+    },
+    {
+      "created_at": "2026-07-02T14:45:12.163000+09:00",
+      "message": "previous target deregistered"
+    },
+    {
+      "created_at": "2026-07-02T14:45:01.470000+09:00",
+      "message": "previous running task stopped"
+    },
+    {
+      "created_at": "2026-07-02T14:44:10.197000+09:00",
+      "message": "new target registered"
+    },
+    {
+      "created_at": "2026-07-02T14:43:40.225000+09:00",
+      "message": "new task started"
+    }
+  ],
+  "autoscaling": {
+    "testnet_policy_count": 1,
+    "policy_name": "riido-ai-server-testnet-cpu-target-tracking",
+    "policy_type": "TargetTrackingScaling",
+    "metric": "ECSServiceAverageCPUUtilization",
+    "target_value": 60,
+    "scale_out_cooldown_seconds": 60,
+    "scale_in_cooldown_seconds": 120,
+    "disable_scale_in": false,
+    "alarm_count": 2
+  },
+  "findings": [
+    {
+      "id": "rolling_deploy_baseline_observed",
+      "severity": "info",
+      "signal": "The current testnet service is steady with desired=1, running=1, pending=0 and the latest rollout completed."
+    },
+    {
+      "id": "autoscaling_policy_observed",
+      "severity": "info",
+      "signal": "Target tracking autoscaling exists for testnet on ECS average CPU utilization at 60 percent with 60s scale-out and 120s scale-in cooldowns."
+    },
+    {
+      "id": "chaos_timing_missing",
+      "severity": "partial",
+      "signal": "This read-only baseline does not measure crash recovery time, forced task replacement, cold-start packet burst behavior, or post-scale error rate."
+    },
+    {
+      "id": "single_task_blast_radius",
+      "severity": "partial",
+      "signal": "Testnet currently runs one desired task, so a single task crash can still be user-visible until ECS replaces and the target group registers the new task."
+    },
+    {
+      "id": "deployment_circuit_breaker_disabled",
+      "severity": "partial",
+      "signal": "ECS deployment circuit breaker and rollback are disabled in the observed testnet service configuration."
+    }
+  ],
+  "decision": "Use this artifact as the current read-only ECS recovery/scale baseline. It strengthens server_crash_recovery and scale_out_recovery, but both checks remain partial until a controlled chaos or load run records recovery seconds, scale-out timing, and post-event client-visible error rate."
+}

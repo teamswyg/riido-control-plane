@@ -1,0 +1,49 @@
+{
+  "schema_version": "riido-control-plane-stream-target-capacity-evidence.v1",
+  "id": "control_plane_stream_target_capacity_after_2026_07_02",
+  "captured_at": "2026-07-02T14:39:35Z",
+  "redacted": true,
+  "candidate_id": "control-plane-pressure:thread_stream_subscription",
+  "external_contract_changed": false,
+  "endpoint_changed": false,
+  "changed_files": [
+    "internal/riidoaiserver/ai_agent_client_development_method_active_task_thread_stream_targets_locked.go",
+    "internal/riidoaiserver/ai_agent_client_stream_targets_fixture_test.go",
+    "internal/riidoaiserver/ai_agent_client_stream_targets_test.go",
+    "internal/riidoaiserver/ai_agent_client_stream_targets_legacy_benchmark_test.go"
+  ],
+  "benchmark_command": "go test ./internal/riidoaiserver -run 'TestActiveTaskThreadStreamTargets|^$' -bench 'Benchmark(AIAgentTaskThreadStreamSubscriptionTargets|LegacyAIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -count=6",
+  "observations": [
+    {
+      "case": "legacy_inactive_heavy",
+      "description": "Old capacity strategy on 50 historical threads with only 2 active stream targets.",
+      "ns_per_op_min": 591.3,
+      "ns_per_op_max": 613.5,
+      "bytes_per_op": 2688,
+      "allocs_per_op": 1
+    },
+    {
+      "case": "current_inactive_heavy",
+      "description": "New capacity strategy on the same inactive-heavy fixture.",
+      "ns_per_op_min": 571.5,
+      "ns_per_op_max": 622.7,
+      "bytes_per_op": 96,
+      "allocs_per_op": 1
+    },
+    {
+      "case": "current_all_active",
+      "description": "All-active fast path keeps the previous capacity behavior for live-heavy screens.",
+      "ns_per_op_min": 2324,
+      "ns_per_op_max": 2467,
+      "bytes_per_op_min": 2689,
+      "bytes_per_op_max": 2690,
+      "allocs_per_op": 1
+    }
+  ],
+  "decision": {
+    "status": "adopted",
+    "summary": "Keep all-active capacity behavior while reducing inactive-heavy stream target allocation from 2688 B/op to 96 B/op.",
+    "allocation_reduction_fraction": 0.9642857143,
+    "remaining_partial": "visible_threads_copy_lines still dominates full v3 thread history projection allocation and remains a separate candidate."
+  }
+}

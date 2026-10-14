@@ -1,0 +1,29 @@
+{
+  "schema_version": "riido-production-observation.v1",
+  "id": "production-false-queued-client-projection-2026-07-15",
+  "environment": "production",
+  "redacted": true,
+  "captured_at": "2026-07-15T08:00:21Z",
+  "observation_window": {
+    "start": "2026-07-15T05:05:00Z",
+    "end": "2026-07-15T05:25:00Z"
+  },
+  "checks": {
+    "beta_qa": {
+      "infinite_loading_fixed": true,
+      "terminal_result_visible": true,
+      "false_busy_notice_present": true
+    },
+    "control_plane_metrics": {
+      "assignments_queued": 0,
+      "assignments_total_delta": 1,
+      "assignments_completed_delta": 1
+    },
+    "contract_drift": {
+      "v2_queued_assignment_state_visible": true,
+      "client_treats_queued_assignment_as_working": true,
+      "durable_queue_required": true
+    }
+  },
+  "decision": "Hide queued assignment_state only at the v2 client display projection. Preserve stable identity fields and active_stream there, and preserve queued state in the durable scheduler and v3 history."
+}

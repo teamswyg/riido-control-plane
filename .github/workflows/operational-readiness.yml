@@ -1,0 +1,200 @@
+name: operational-readiness
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "29 22 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/operational-readiness.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "docs/30-architecture/loop-registry.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "tools/aiagentthreadsnapshot/**"
+      - "tools/operationalreadiness/**"
+      - "tools/publicpageslive/**"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_counters_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_units_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope_http.go"
+      - "internal/riidoaiserver/cloudwatch_emf_fixture_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_metric_specs.go"
+      - "internal/riidoaiserver/cloudwatch_emf_write_test.go"
+      - "internal/riidoaiserver/http_client_surface.go"
+      - "internal/riidoaiserver/http_client_surface_metrics.go"
+      - "internal/riidoaiserver/http_client_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+      - "internal/riidoaiserver/http_transaction_metrics_observe.go"
+      - "internal/riidoaiserver/http_transaction_metrics_snapshot.go"
+      - "internal/riidoaiserver/http_transaction_metrics_sort.go"
+      - "internal/riidoaiserver/http_transaction_metrics_state.go"
+      - "internal/riidoaiserver/http_transaction_metrics_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_types.go"
+      - "internal/riidoaiserver/http_tracing.go"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/operational-readiness.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "tools/aiagentthreadsnapshot/**"
+      - "tools/operationalreadiness/**"
+      - "tools/publicpageslive/**"
+      - "internal/riidoaiserver/assignment_api.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_counters_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_assert_units_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope.go"
+      - "internal/riidoaiserver/cloudwatch_emf_envelope_http.go"
+      - "internal/riidoaiserver/cloudwatch_emf_fixture_test.go"
+      - "internal/riidoaiserver/cloudwatch_emf_metric_specs.go"
+      - "internal/riidoaiserver/cloudwatch_emf_write_test.go"
+      - "internal/riidoaiserver/http_client_surface.go"
+      - "internal/riidoaiserver/http_client_surface_metrics.go"
+      - "internal/riidoaiserver/http_client_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+      - "internal/riidoaiserver/http_transaction_metrics_observe.go"
+      - "internal/riidoaiserver/http_transaction_metrics_snapshot.go"
+      - "internal/riidoaiserver/http_transaction_metrics_sort.go"
+      - "internal/riidoaiserver/http_transaction_metrics_state.go"
+      - "internal/riidoaiserver/http_transaction_metrics_surface_test.go"
+      - "internal/riidoaiserver/http_transaction_metrics_types.go"
+      - "internal/riidoaiserver/http_tracing.go"
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: operational_readiness_release_harness
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Run operational readiness checks
+        run: |
+          go test ./tools/operationalreadiness -count=1
+          go test ./internal/riidoaiserver -run 'TestTraceHTTPClientSurface|TestHTTPTracingRecordsClientSurface|TestHTTPTransactionMetricsTrackClientSurfaceTotals|TestWriteCloudWatchEMF' -count=1
+      - name: Generate operational readiness evidence
+        if: always()
+        run: |
+          mkdir -p out
+          RIIDO_OPERATIONAL_READINESS_NOW=2026-07-05T00:00:00Z \
+            go run ./tools/operationalreadiness -check-doc
+          go run ./tools/operationalreadiness \
+            -evidence-out out/operational-readiness-evidence.json \
+            -candidate-out out/operational-readiness-closed-loop-candidates.json \
+            -public-status-out out/operational-readiness-public-status.md \
+            -public-status-json-out out/operational-readiness-public-status.json \
+            -public-status-html-out out/operational-readiness-public-status.html \
+            -public-status-badge-json-out out/operational-readiness-public-status-badge.json \
+            -public-status-github-annotation-out out/operational-readiness-public-status.annotation
+      - name: Publish public QA status summary
+        if: always()
+        run: cat out/operational-readiness-public-status.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish public QA status annotation
+        if: always()
+        run: cat out/operational-readiness-public-status.annotation
+      - name: Capture GitHub Pages status evidence
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" > out/github-pages.raw.json 2>/dev/null; then
+            jq \
+              --arg generated_at "$generated_at" \
+              --arg source_workflow "$GITHUB_WORKFLOW" \
+              --arg source_commit "$GITHUB_SHA" \
+              --arg source_run_id "$GITHUB_RUN_ID" \
+              --arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+              '{
+                schema_version: "riido-public-qa-pages-evidence.v1",
+                generated_at: $generated_at,
+                status: "enabled",
+                visibility: "public_repository",
+                html_url: (.html_url // ""),
+                build_type: (.build_type // ""),
+                source_workflow: $source_workflow,
+                source_commit: $source_commit,
+                source_run_id: $source_run_id,
+                source_run_url: $source_run_url,
+                raw_response_included: false,
+                secrets_included: false
+              }' \
+              out/github-pages.raw.json > out/operational-readiness-pages-status.json
+          else
+            jq -n \
+              --arg generated_at "$generated_at" \
+              --arg source_workflow "$GITHUB_WORKFLOW" \
+              --arg source_commit "$GITHUB_SHA" \
+              --arg source_run_id "$GITHUB_RUN_ID" \
+              --arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+              '{
+                schema_version: "riido-public-qa-pages-evidence.v1",
+                generated_at: $generated_at,
+                status: "disabled_or_unavailable",
+                visibility: "public_repository",
+                html_url: "",
+                build_type: "",
+                source_workflow: $source_workflow,
+                source_commit: $source_commit,
+                source_run_id: $source_run_id,
+                source_run_url: $source_run_url,
+                raw_response_included: false,
+                secrets_included: false
+              }' > out/operational-readiness-pages-status.json
+          fi
+          rm -f out/github-pages.raw.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-evidence
+          path: out/operational-readiness-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-closed-loop-candidates
+          path: out/operational-readiness-closed-loop-candidates.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status
+          path: out/operational-readiness-public-status.md
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-json
+          path: out/operational-readiness-public-status.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-page
+          path: out/operational-readiness-public-status.html
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-badge
+          path: out/operational-readiness-public-status-badge.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-public-status-annotation
+          path: out/operational-readiness-public-status.annotation
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: operational-readiness-pages-status
+          path: out/operational-readiness-pages-status.json
+          if-no-files-found: error

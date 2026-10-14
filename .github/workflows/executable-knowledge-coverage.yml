@@ -1,0 +1,56 @@
+name: executable-knowledge-coverage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/executable-knowledge-coverage.yml"
+      - "README.md"
+      - "README.riido.json"
+      - "contracts/**"
+      - "dependency_allowlist.riido.json"
+      - "docs/**"
+      - "internal/riidoaiserver/review_account_seed.riido.json"
+      - "packaging/**"
+      - "tools/knowledgecoverage/**"
+      - "tools/repositoryreadme/**"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/executable-knowledge-coverage.yml"
+      - "README.md"
+      - "README.riido.json"
+      - "contracts/**"
+      - "dependency_allowlist.riido.json"
+      - "docs/**"
+      - "internal/riidoaiserver/review_account_seed.riido.json"
+      - "packaging/**"
+      - "tools/knowledgecoverage/**"
+      - "tools/repositoryreadme/**"
+      - "go.mod"
+      - "go.sum"
+
+jobs:
+  executable-knowledge-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify executable knowledge coverage
+        run: |
+          mkdir -p out
+          go test ./tools/knowledgecoverage -count=1
+          go run ./tools/knowledgecoverage \
+            -check-doc \
+            -evidence-out out/executable-knowledge-coverage.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: executable-knowledge-coverage
+          path: out/executable-knowledge-coverage.json
+          if-no-files-found: error

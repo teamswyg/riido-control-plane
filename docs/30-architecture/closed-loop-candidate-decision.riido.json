@@ -1,0 +1,348 @@
+{
+  "schema_version": "riido-control-plane-closed-loop-candidate-decision.v1",
+  "id": "control-plane-closed-loop-candidate-decision",
+  "title": "Control Plane Closed Loop Candidate Decision",
+  "generated_doc": "docs/30-architecture/closed-loop-candidate-decision.md",
+  "workflow": ".github/workflows/closed-loop-candidate-decision.yml",
+  "evidence_artifact": "closed-loop-candidate-decision-evidence",
+  "command_artifact": "closed-loop-candidate-decision-commands",
+  "evidence_tool": "tools/closedloopcandidatedecision",
+  "intake_manifest": "docs/30-architecture/closed-loop-candidate-intake.riido.json",
+  "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+  "decisions": [
+    {
+      "candidate_id": "ai-agent-client-testnet-smoke:source_coverage_seed",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "decision_record",
+      "review_by": "2026-07-29",
+      "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template."
+    },
+    {
+      "candidate_id": "ai-agent-client-testnet-load:load_harness_client_read_pressure",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates."
+    },
+    {
+      "candidate_id": "ai-agent-client-testnet-load:load_harness_closed_loop_promotion",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner."
+    },
+    {
+      "candidate_id": "control-plane-performance:control_plane_performance_hot_path_benchmarks",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates."
+    },
+    {
+      "candidate_id": "control-plane-performance:control_plane_performance_closed_loop_promotion",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership."
+    },
+    {
+      "candidate_id": "control-plane-pressure:http_endpoint_threads_v3",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate."
+    },
+    {
+      "candidate_id": "control-plane-pressure:http_metrics_observe",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-29",
+      "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately."
+    },
+    {
+      "candidate_id": "control-plane-pressure:store_metrics_observe",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately."
+    },
+    {
+      "candidate_id": "control-plane-pressure:progress_ingest_fragment",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision."
+    },
+    {
+      "candidate_id": "control-plane-pressure:thread_stream_subscription",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate."
+    },
+    {
+      "candidate_id": "control-plane-pressure:client_event_subscriber_fanout",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision."
+    },
+    {
+      "candidate_id": "control-plane-pressure:thread_history_v3",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision."
+    },
+    {
+      "candidate_id": "control-plane-pressure:assignment_long_poll_wait",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate."
+    },
+    {
+      "candidate_id": "control-plane-pressure:tool_approval_waiters",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates."
+    },
+    {
+      "candidate_id": "loop-closure-audit:source_coverage_seed",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "decision_record",
+      "review_by": "2026-07-29",
+      "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage."
+    },
+    {
+      "candidate_id": "loop-closure-audit:syntax_hash_graph_spike",
+      "disposition": "adopted",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "syntax_hash_manifest",
+      "review_by": "2026-07-10",
+      "reason": "Syntax hash coverage must expand only through golden-locked packages before broader Go-code restructuring, while preserving existing semantic hash generation unchanged."
+    },
+    {
+      "candidate_id": "loop-refresh-dispatch:source_coverage_seed",
+      "disposition": "deferred",
+      "priority": "P2",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "decision_record",
+      "review_by": "2026-07-29",
+      "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates."
+    },
+    {
+      "candidate_id": "operational-readiness:otel_xray_client_surface",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "client_surface_alarm_plan_apply_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists."
+    },
+    {
+      "candidate_id": "operational-readiness:staging_client_p0_visual_retest",
+      "disposition": "deferred",
+      "priority": "P0",
+      "owner": "client-qa-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "staging_client_p0_visual_screenshot_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work."
+    },
+    {
+      "candidate_id": "operational-readiness:daemon_network_disconnect_waiting",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "daemon_network_disconnect_release_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision."
+    },
+    {
+      "candidate_id": "operational-readiness:single_pc_agent_limit",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "single_pc_agent_capacity_evidence",
+      "review_by": "2026-07-29",
+      "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims."
+    },
+    {
+      "candidate_id": "operational-readiness:boot_burst_capacity",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "cold_start_packet_burst_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness."
+    },
+    {
+      "candidate_id": "operational-readiness:server_crash_recovery",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "ecs_service_recovery_chaos_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness."
+    },
+    {
+      "candidate_id": "operational-readiness:scale_out_recovery",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "scale_out_timing_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims."
+    },
+    {
+      "candidate_id": "operational-readiness:all_servers_down_daemon_behavior",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "daemon_reconnect_storm_evidence",
+      "review_by": "2026-07-29",
+      "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness."
+    },
+    {
+      "candidate_id": "operational-readiness:desktop_body_only_change",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "desktop_body_only_golden_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff."
+    }
+  ],
+  "decision_templates": [
+    {
+      "subject_kind": "harness_failure",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "claim_binding",
+      "review_by": "2026-07-29",
+      "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit."
+    },
+    {
+      "subject_kind": "loop_refresh_ignored_command",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "verifier",
+      "review_by": "2026-07-29",
+      "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit."
+    },
+    {
+      "subject_kind": "loop_refresh_stale_source",
+      "disposition": "triage_required",
+      "priority": "P1",
+      "owner": "agent-platform-loop",
+      "next_loop": "closed_loop_candidate_decision",
+      "next_artifact": "redacted_evidence",
+      "review_by": "2026-07-29",
+      "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record."
+    }
+  ],
+  "assertions": [
+    "every candidate consumed by intake must have exactly one decision record",
+    "decision records for the consumed candidate source without a matching candidate are stale loop residue and must fail verification",
+    "decision records must name owner, priority, disposition, next loop, and next artifact",
+    "decision templates must name subject kind, owner, priority, disposition, next loop, review date, and next artifact",
+    "decision verification may synthesize a decision from a template only when a consumed candidate subject kind matches that template",
+    "decision next_artifact must be one of the required_next_artifacts declared by the consumed candidate artifact",
+    "decision next_artifact must equal subject.next_artifact when the consumed candidate subject declares a machine-routable next artifact",
+    "decision verification must reject candidates whose adoption_plan does not cover every required_next_artifact",
+    "decision evidence must expose the executable command selected from the consumed candidate adoption_plan",
+    "decision verification must export selected next commands as loop refresh command evidence when requested",
+    "refresh command evidence must bind copied, derived, and candidate-subject lookup fields through a static binding registry",
+    "decision evidence must expose registered, consumed, disposition, priority, next artifact, and decision-source summary counts while generated docs expose the stable registered decision summary",
+    "decision evidence must expose owner, priority, disposition, and review_by next to the selected executable command",
+    "decision evidence and refresh command evidence must expose whether the selected command came from an explicit decision record or a subject-kind decision template",
+    "decision evidence must expose the consumed candidate promotion_edge for the selected next artifact",
+    "decision verification must reject candidates whose source_ref drifts from the consumed candidate artifact envelope",
+    "candidate decision evidence must expose candidate_source_refs for every consumed candidate item",
+    "candidate decision evidence and refresh command evidence must expose subject kind for every consumed candidate item that carries a subject",
+    "triage-required or deferred candidates must name a non-expired review_by date",
+    "review_by expiry must use the same evidence clock as candidate artifact freshness so scheduled and local QA make deterministic expiry decisions",
+    "triage-required candidates must stay redacted and carry enough context for a follow-up claim binding",
+    "candidate decision verification must run on a schedule so decision ownership does not rely on memory",
+    "candidate decision verification must fail when no candidate artifact is supplied",
+    "scheduled candidate decision must download live candidate artifacts from every intake source and verify non-empty candidate sets against decision records",
+    "candidate decision workflow path triggers must include linked intake, producer, and loop registry manifests",
+    "candidate decision fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry",
+    "candidate decision must reject consumed candidate artifacts unless source_generated_at < source_expires_at and now < source_expires_at",
+    "candidate decision evidence must publish generated_at and expires_at",
+    "candidate decision evidence must expose consumed candidate artifact path, source workflow, freshness window, and candidate ids",
+    "candidate decision records must include at least one owned seed decision for every intake source so new harness sources cannot be passive",
+    "candidate decision workflow path triggers must include every producer source workflow from intake",
+    "candidate decision PR verification must consume a performance-specific candidate fixture",
+    "candidate decision PR verification must publish explicit skipped evidence when a sampled candidate artifact has zero open candidates"
+  ],
+  "loop": {
+    "observation": "Candidate intake can prove adoption requirements, but candidates can still wait for an implicit human priority decision.",
+    "hypothesis": "A candidate decision sidecar can force every redacted candidate to bind owner, priority, disposition, next loop, next artifact, and review expiry.",
+    "execute": "Generate this reader from the decision manifest, generate deterministic candidate fixtures, verify intake, verify candidate decisions with explicit candidate artifacts, publish selected next commands with decision provenance as loop refresh command evidence, publish decision summary counts in generated docs and evidence, verify the refresh command binding registry for copied, derived, and candidate-subject lookup fields, publish skipped evidence for sampled artifacts with zero candidates, download latest live candidate artifacts on non-PR runs, verify non-empty live candidate sets, and publish decision evidence in CI.",
+    "evaluate": "The verifier fails on missing candidate input, missing candidate decisions, orphan decision records, duplicate decisions, unknown dispositions, missing owners, invalid priorities, expired review dates under the evidence clock, expired or exact-expiry candidate artifacts, stale docs, missing decision summary evidence, missing command artifact binding, missing refresh command binding registry coverage, missing live artifact download wiring, missing scheduled workflow evidence, missing sampled skip evidence, or unredacted candidate content.",
+    "retrospective": "This moves prioritization metadata, summary counts, and selected follow-up commands into executable knowledge: humans can still choose implementation order, but candidates cannot exist without an owned disposition, review deadline, machine-readable queue summary, and machine-readable next command."
+  }
+}

@@ -6,7 +6,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-api-port.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -18,7 +20,9 @@ on:
     paths:
       - ".github/workflows/agent-catalog-api-port.yml"
       - "docs/20-domain/agent-catalog-rbac.md"
+      - "docs/20-domain/agent-catalog-rbac.riido.json"
       - "docs/migration/control-plane.md"
+      - "tools/agentcatalogrbac/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -31,19 +35,13 @@ jobs:
   port:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify catalog API import boundary
         run: |
           disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
@@ -51,5 +49,19 @@ jobs:
             printf 'Disallowed catalog API imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify catalog API executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/agentcatalogrbac -count=1
+          go run ./tools/agentcatalogrbac \
+            -profile api-port \
+            -check-doc \
+            -evidence-out out/agent-catalog-api-port-evidence.json
       - name: Test agent catalog API port
         run: go test ./internal/riidoaiserver -run 'AgentCatalogAPI|AgentCatalogStorePort' -count=1
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: agent-catalog-api-port-evidence
+          path: out/agent-catalog-api-port-evidence.json
+          if-no-files-found: error

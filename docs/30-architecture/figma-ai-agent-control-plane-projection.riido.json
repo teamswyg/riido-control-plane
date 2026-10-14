@@ -2,6 +2,10 @@
   "schema_version": "riido-control-plane-figma-ai-agent-projection.v1",
   "id": "figma-ai-agent-control-plane-generated-client-projection",
   "riido_task": "RIID-4810",
+  "generated_doc": "docs/30-architecture/figma-ai-agent-control-plane-projection.md",
+  "workflow": ".github/workflows/api-client-delivery.yml",
+  "evidence_artifact": "api-client-delivery-evidence",
+  "evidence_tool": "tools/figmaprojection",
   "source_contracts_manifest": {
     "repo": "riido-contracts",
     "path": "docs/30-architecture/figma-ai-agent-coverage.riido.json",
@@ -394,5 +398,12 @@
         "v2.aiAgent.devices.runtimes"
       ]
     }
-  ]
+  ],
+  "loop": {
+    "observation": "The control-plane projection depends on a contracts-owned Figma coverage mirror, so local generated-client decisions can drift if mirror limits and projection rules are only prose.",
+    "hypothesis": "A projection manifest can make the upstream Figma SSOT, mirrored limitations, absorbed legacy nodes, and generated-client path checks executable in this repository.",
+    "execute": "Verify the local projection against the mirrored contracts coverage, generated TypeScript paths, annotation policies, and forbidden endpoint fragments.",
+    "evaluate": "The projection tests fail on stale mirrors, missing generated paths, unexpected endpoint claims, annotation policy drift, or source-coverage mismatch.",
+    "retrospective": "This lets control-plane consume design coverage without becoming the Figma source of truth or inventing API paths from local prose."
+  }
 }

@@ -6,8 +6,10 @@ on:
     paths:
       - ".github/workflows/assignment-operation-journal.yml"
       - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/assignment-operation-journal.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
+      - "tools/assignmentjournal/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -19,8 +21,10 @@ on:
     paths:
       - ".github/workflows/assignment-operation-journal.yml"
       - "docs/20-domain/assignment-operation-journal.md"
+      - "docs/20-domain/assignment-operation-journal.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
+      - "tools/assignmentjournal/**"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/doc.go"
@@ -33,19 +37,13 @@ jobs:
   journal:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify assignment journal import boundary
         run: |
           disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
@@ -53,5 +51,18 @@ jobs:
             printf 'Disallowed assignment journal imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify assignment journal executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/assignmentjournal -count=1
+          go run ./tools/assignmentjournal \
+            -check-doc \
+            -evidence-out out/assignment-operation-journal-evidence.json
       - name: Test assignment operation journal
         run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease' -count=1
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: assignment-operation-journal-evidence
+          path: out/assignment-operation-journal-evidence.json
+          if-no-files-found: error

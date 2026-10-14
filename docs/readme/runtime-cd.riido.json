@@ -1,0 +1,21 @@
+{
+  "schema_version": "riido-control-plane-repository-readme-fragment.v1",
+  "id": "control-plane-readme-runtime-cd",
+  "runtime_cd": {
+    "notes": [
+      "RIID-4839 기준으로 runtime CD ownership SSOT가 public CD configuration key의 최소 공개 집합입니다. 정확한 secret/variable 이름 목록은 README에서 반복하지 않고 `docs/30-architecture/runtime-cd-ownership.md`와 `runtime-cd-ownership.riido.json`에서 관리합니다.",
+      "RIID-4842 기준으로 public configuration key 이름도 민감 표면 예산으로 봅니다. 새 `RIIDO_AI_SERVER_*` key 이름은 manifest가 먼저 갱신되지 않으면 README/docs/workflow에 등장할 수 없습니다.",
+      "CodeDeploy blue/green으로 전환하더라도 CD 실행 owner는 `riido-control-plane`입니다. topology, IAM, rollback policy, private operator evidence는 `riido-infra`가 소유합니다.",
+      "public repo가 외부로 남겨도 되는 CD 정보는 stable key 이름, workflow 이름, git tag/commit, aggregate pass/fail 상태뿐입니다."
+    ]
+  },
+  "contract_flow": [
+    "riido-contracts canonical DSL/IR",
+    "control-plane AI Agent client API sub-DSL",
+    "control-plane API IR",
+    "OpenAPI projection",
+    "contracts/ai-agent-client/*.json",
+    "tools/reactquerygen",
+    "web/generated/aiAgentClient.ts"
+  ]
+}

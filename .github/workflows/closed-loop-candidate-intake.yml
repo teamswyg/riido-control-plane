@@ -1,0 +1,342 @@
+name: closed-loop-candidate-intake
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 2 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/closed-loop-candidate-intake.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - ".github/workflows/ai-agent-client-testnet-load.yml"
+      - ".github/workflows/control-plane-performance.yml"
+      - ".github/workflows/loop-closure-audit.yml"
+      - ".github/workflows/loop-refresh-dispatch.yml"
+      - ".github/workflows/operational-readiness.yml"
+      - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-performance.md"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-closure-audit.riido.json"
+      - "docs/30-architecture/loop-refresh-dispatch.riido.json"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
+      - "docs/30-architecture/closed-loop-candidate-intake.md"
+      - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
+      - "tools/closedloopcandidateintake/**"
+      - "tools/controlplanepressure/**"
+      - "tools/harnesspromotion/**"
+      - "tools/loopclosureaudit/**"
+      - "tools/looprefreshdispatch/**"
+      - "tools/operationalreadiness/**"
+  pull_request:
+    paths:
+      - ".github/workflows/closed-loop-candidate-intake.yml"
+      - ".github/workflows/ai-agent-client-testnet-smoke.yml"
+      - ".github/workflows/ai-agent-client-testnet-load.yml"
+      - ".github/workflows/control-plane-performance.yml"
+      - ".github/workflows/loop-closure-audit.yml"
+      - ".github/workflows/loop-refresh-dispatch.yml"
+      - ".github/workflows/operational-readiness.yml"
+      - "docs/30-architecture/control-plane-performance.riido.json"
+      - "docs/30-architecture/control-plane-performance.md"
+      - "docs/30-architecture/harness-promotion.riido.json"
+      - "docs/30-architecture/loop-closure-audit.riido.json"
+      - "docs/30-architecture/loop-refresh-dispatch.riido.json"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/loop-registry.riido.json"
+      - "docs/30-architecture/evidence-graph.riido.json"
+      - "docs/30-architecture/closed-loop-candidate-intake.riido.json"
+      - "docs/30-architecture/closed-loop-candidate-intake.md"
+      - "docs/30-architecture/fixtures/harness-failure-summary.fixture.json"
+      - "docs/30-architecture/fixtures/performance-failure-summary.fixture.json"
+      - "tools/closedloopcandidateintake/**"
+      - "tools/controlplanepressure/**"
+      - "tools/harnesspromotion/**"
+      - "tools/loopclosureaudit/**"
+      - "tools/looprefreshdispatch/**"
+      - "tools/operationalreadiness/**"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  closed-loop-candidate-intake:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate_intake
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify closed-loop candidate intake
+        run: |
+          mkdir -p out
+          go test ./tools/closedloopcandidateintake -count=1
+          RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/harnesspromotion \
+            -summary docs/30-architecture/fixtures/harness-failure-summary.fixture.json \
+            -candidate-out out/sample-closed-loop-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -check-doc \
+            -candidate-in out/sample-closed-loop-candidates.json \
+            -evidence-out out/closed-loop-candidate-intake-evidence.json
+          RIIDO_HARNESS_PROMOTION_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/harnesspromotion \
+            -summary docs/30-architecture/fixtures/performance-failure-summary.fixture.json \
+            -candidate-out out/sample-performance-closed-loop-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-performance-closed-loop-candidates.json \
+            -evidence-out out/sample-performance-intake-evidence.json
+          go run ./tools/controlplanepressure \
+            -duration 20ms \
+            -concurrency 1 \
+            -threads 2 \
+            -lines 1 \
+            -candidate-out out/sample-pressure-closed-loop-candidates.json \
+            -evidence-out out/sample-pressure-local-pressure.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-pressure-closed-loop-candidates.json \
+            -evidence-out out/sample-pressure-intake-evidence.json
+          RIIDO_LOOP_CLOSURE_AUDIT_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/loopclosureaudit \
+            -candidate-out out/sample-loop-closure-audit-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-loop-closure-audit-candidates.json \
+            -evidence-out out/sample-loop-closure-audit-intake-evidence.json
+          cat > out/sample-loop-refresh-commands.json <<'JSON'
+          {
+            "schema_version": "riido-control-plane-loop-refresh-commands.v1",
+            "status": "refresh_required",
+            "generated_at": "2026-06-24T00:00:00Z",
+            "expires_at": "2026-06-25T00:00:00Z",
+            "command_count": 1,
+            "commands": [
+              {
+                "loop_id": "control_plane_pressure_candidate",
+                "kind": "target_verifier",
+                "command": "go test ./tools/controlplaneperf"
+              }
+            ]
+          }
+          JSON
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/looprefreshdispatch \
+            -commands-in out/sample-loop-refresh-commands.json \
+            -evidence-out out/sample-loop-refresh-dispatch-plan.json \
+            -candidate-out out/sample-loop-refresh-dispatch-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-24T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-loop-refresh-dispatch-candidates.json \
+            -evidence-out out/sample-loop-refresh-dispatch-intake-evidence.json
+          RIIDO_OPERATIONAL_READINESS_NOW=2026-07-02T12:00:00Z \
+            go run ./tools/operationalreadiness \
+            -candidate-out out/sample-operational-readiness-candidates.json
+          RIIDO_EVIDENCE_NOW=2026-06-29T12:00:00Z \
+            go run ./tools/closedloopcandidateintake \
+            -candidate-in out/sample-operational-readiness-candidates.json \
+            -evidence-out out/sample-operational-readiness-intake-evidence.json
+      - name: Download latest live candidate artifacts
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/live-candidates
+          : > out/live-candidate-files.txt
+          download_candidate_artifact() {
+            local workflow="$1"
+            local artifact="$2"
+            local dest="$3"
+            local run_id
+            run_id="$(gh run list \
+              --workflow "$workflow" \
+              --branch main \
+              --limit 20 \
+              --json databaseId,status \
+              --jq '[.[] | select(.status == "completed")][0].databaseId // ""')"
+            mkdir -p "$dest"
+            if [[ -z "$run_id" ]]; then
+              echo "::notice::No completed run found for $workflow; $artifact will be skipped."
+              return 0
+            fi
+            if gh run download "$run_id" --name "$artifact" --dir "$dest"; then
+              find "$dest" -type f -name '*.json' -print >> out/live-candidate-files.txt
+            else
+              echo "::notice::No artifact named $artifact in $workflow run $run_id; source will be skipped."
+            fi
+          }
+          download_candidate_artifact \
+            ai-agent-client-testnet-smoke.yml \
+            ai-agent-client-testnet-smoke-closed-loop-candidates \
+            out/live-candidates/smoke
+          download_candidate_artifact \
+            ai-agent-client-testnet-load.yml \
+            ai-agent-client-testnet-load-closed-loop-candidates \
+            out/live-candidates/load
+          download_candidate_artifact \
+            control-plane-performance.yml \
+            control-plane-performance-closed-loop-candidates \
+            out/live-candidates/performance
+          download_candidate_artifact \
+            control-plane-performance.yml \
+            control-plane-pressure-closed-loop-candidates \
+            out/live-candidates/pressure
+          download_candidate_artifact \
+            loop-closure-audit.yml \
+            loop-closure-audit-closed-loop-candidates \
+            out/live-candidates/loop-closure-audit
+          download_candidate_artifact \
+            loop-refresh-dispatch.yml \
+            loop-refresh-dispatch-closed-loop-candidates \
+            out/live-candidates/loop-refresh-dispatch
+          download_candidate_artifact \
+            operational-readiness.yml \
+            operational-readiness-closed-loop-candidates \
+            out/live-candidates/operational-readiness
+      - name: Verify live candidate intake
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          write_skipped_live_intake() {
+            local source="$1"
+            local out="$2"
+            jq -n \
+              --arg source "$source" \
+              --arg reason "live candidate artifact missing" \
+              '{
+                schema_version: "riido-control-plane-closed-loop-candidate-intake-live.v1",
+                status: "skipped",
+                source: $source,
+                reason: $reason
+              }' > "$out"
+          }
+          candidate_file() {
+            find "$1" -type f -name '*.json' | head -n 1 || true
+          }
+          smoke_candidate="$(candidate_file out/live-candidates/smoke)"
+          if [[ -z "$smoke_candidate" ]]; then
+            write_skipped_live_intake smoke out/live-intake-smoke-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$smoke_candidate" \
+              -evidence-out out/live-intake-smoke-evidence.json
+          fi
+          load_candidate="$(candidate_file out/live-candidates/load)"
+          if [[ -z "$load_candidate" ]]; then
+            write_skipped_live_intake load out/live-intake-load-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$load_candidate" \
+              -evidence-out out/live-intake-load-evidence.json
+          fi
+          performance_candidate="$(candidate_file out/live-candidates/performance)"
+          if [[ -z "$performance_candidate" ]]; then
+            write_skipped_live_intake performance out/live-intake-performance-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$performance_candidate" \
+              -evidence-out out/live-intake-performance-evidence.json
+          fi
+          pressure_candidate="$(candidate_file out/live-candidates/pressure)"
+          if [[ -z "$pressure_candidate" ]]; then
+            write_skipped_live_intake pressure out/live-intake-pressure-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$pressure_candidate" \
+              -evidence-out out/live-intake-pressure-evidence.json
+          fi
+          loop_closure_candidate="$(candidate_file out/live-candidates/loop-closure-audit)"
+          if [[ -z "$loop_closure_candidate" ]]; then
+            write_skipped_live_intake loop-closure-audit out/live-intake-loop-closure-audit-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$loop_closure_candidate" \
+              -evidence-out out/live-intake-loop-closure-audit-evidence.json
+          fi
+          loop_refresh_candidate="$(candidate_file out/live-candidates/loop-refresh-dispatch)"
+          if [[ -z "$loop_refresh_candidate" ]]; then
+            write_skipped_live_intake loop-refresh-dispatch out/live-intake-loop-refresh-dispatch-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$loop_refresh_candidate" \
+              -evidence-out out/live-intake-loop-refresh-dispatch-evidence.json
+          fi
+          operational_readiness_candidate="$(candidate_file out/live-candidates/operational-readiness)"
+          if [[ -z "$operational_readiness_candidate" ]]; then
+            write_skipped_live_intake operational-readiness out/live-intake-operational-readiness-evidence.json
+          else
+            go run ./tools/closedloopcandidateintake \
+              -candidate-in "$operational_readiness_candidate" \
+              -evidence-out out/live-intake-operational-readiness-evidence.json
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-evidence
+          path: out/closed-loop-candidate-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-loop-closure-sample-evidence
+          path: out/sample-loop-closure-audit-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-loop-refresh-sample-evidence
+          path: |
+            out/sample-loop-refresh-dispatch-plan.json
+            out/sample-loop-refresh-dispatch-candidates.json
+            out/sample-loop-refresh-dispatch-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-operational-readiness-sample-evidence
+          path: |
+            out/sample-operational-readiness-candidates.json
+            out/sample-operational-readiness-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-performance-sample-evidence
+          path: out/sample-performance-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: closed-loop-candidate-intake-pressure-sample-evidence
+          path: |
+            out/sample-pressure-local-pressure.json
+            out/sample-pressure-intake-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always() && github.event_name != 'pull_request'
+        with:
+          name: closed-loop-candidate-intake-live-evidence
+          path: |
+            out/live-intake-smoke-evidence.json
+            out/live-intake-load-evidence.json
+            out/live-intake-performance-evidence.json
+            out/live-intake-pressure-evidence.json
+            out/live-intake-loop-closure-audit-evidence.json
+            out/live-intake-loop-refresh-dispatch-evidence.json
+            out/live-intake-operational-readiness-evidence.json
+          if-no-files-found: error

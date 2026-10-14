@@ -1,0 +1,11 @@
+{
+  "schema_version": "riido-control-plane-repository-readme-fragment.v1",
+  "id": "control-plane-readme-evidence-loop",
+  "loop": {
+    "observation": "루트 README가 운영 경계와 검증 명령을 담고 있었지만 executable knowledge coverage가 docs/만 스캔해 evidence 밖에 남아 있었다.",
+    "hypothesis": "README를 manifest에서 생성하고 coverage scan_files에 포함하면 repo entrypoint도 generated/evidence 루프 안으로 들어온다.",
+    "execute": "README.riido.json에서 README.md를 생성하고, repositoryreadme tool이 링크/required marker/forbidden literal/doc freshness/evidence artifact를 검증한다.",
+    "evaluate": "CI는 repository-readme evidence와 executable-knowledge coverage evidence를 업로드하고, coverage count가 README를 포함한 generated reader 수로 증가해야 한다.",
+    "retrospective": "루트 entrypoint도 사람이 쓰는 설명문이 아니라 실행 가능한 repository knowledge manifest의 reader가 된다."
+  }
+}

@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestHTTPMetricsReturnsAssignmentSnapshot(t *testing.T) {
@@ -54,6 +55,43 @@ func TestHTTPMetricsReturnsAssignmentSnapshot(t *testing.T) {
 	}
 	if snapshot.PollRequestsTotal != 1 || snapshot.PollActionsTotal[PollStart] != 1 || snapshot.AgentEventsTotal != 1 || snapshot.TaskEventsTotal != 3 {
 		t.Fatalf("metrics counters = %+v", snapshot)
+	}
+	if snapshot.EventAppendLatencySamplesTotal != snapshot.TaskEventsTotal {
+		t.Fatalf("event append samples = %d, want task events %d", snapshot.EventAppendLatencySamplesTotal, snapshot.TaskEventsTotal)
+	}
+	if snapshot.StoreOperationCallsTotal != 5 || len(snapshot.StoreOperations) != 5 {
+		t.Fatalf("metrics store operations = %+v", snapshot.StoreOperations)
+	}
+}
+
+func TestRecordEventAppendLatencyCountsSubMillisecondSamples(t *testing.T) {
+	state := newStoreState()
+
+	recordEventAppendLatency(&state, time.Nanosecond)
+
+	if state.eventAppendLatency.samplesTotal != 1 ||
+		state.eventAppendLatency.totalMilliseconds != 1 ||
+		state.eventAppendLatency.maxMilliseconds != 1 ||
+		state.eventAppendLatency.lastMilliseconds != 1 {
+		t.Fatalf("event append latency = %+v", state.eventAppendLatency)
+	}
+}
+
+func TestRebuildStateMetricsRepairsHistoricalEventLatencyLowerBound(t *testing.T) {
+	state := newStoreState()
+	state.events["task-a"] = []TaskEvent{
+		{Seq: 1, TaskID: "task-a", AssignmentID: "asn-1", AgentID: "agent-a", Type: EventAssignmentQueued},
+		{Seq: 2, TaskID: "task-a", AssignmentID: "asn-1", AgentID: "agent-a", Type: EventAssignmentLeased},
+		{Seq: 3, TaskID: "task-a", AssignmentID: "asn-1", AgentID: "agent-a", Type: EventAssignmentRunning},
+	}
+
+	rebuildStateMetricsFromHistory(&state)
+
+	if state.eventAppendLatency.samplesTotal != 3 ||
+		state.eventAppendLatency.totalMilliseconds != 3 ||
+		state.eventAppendLatency.maxMilliseconds != 1 ||
+		state.eventAppendLatency.lastMilliseconds != 1 {
+		t.Fatalf("event append latency lower bound = %+v", state.eventAppendLatency)
 	}
 }
 

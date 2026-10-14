@@ -4,9 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
+
+	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
 type AIAgentDaemonRuntimeStore interface {
@@ -45,6 +50,9 @@ func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context
 	for i := range s.devices {
 		if s.devices[i].DeviceID == deviceID {
 			s.devices[i].ConnectedWorkspaceIDs = addConnectedWorkspace(s.devices[i].ConnectedWorkspaceIDs, principal.WorkspaceID)
+			s.upsertDeviceConnectionGrantLocked(deviceID, principal, time.Now().UTC())
+			revision, principalCount := s.deviceConnectionSummaryLocked(deviceID)
+			log.Printf("riido_ai_agent_device event=account_connected device_id=%q workspace_id=%q connected_principal_count=%d connection_revision=%q", deviceID, principal.WorkspaceID, principalCount, revision)
 			return copyDevice(s.devices[i]), nil
 		}
 	}
@@ -56,16 +64,22 @@ func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context
 		DaemonLastSeenAt:      time.Now().UTC(),
 		ConnectedWorkspaceIDs: []string{principal.WorkspaceID},
 	}
+	s.upsertDeviceConnectionGrantLocked(deviceID, principal, time.Now().UTC())
 	s.devices = append(s.devices, device)
 	return copyDevice(device), nil
 }
 
 func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
+	response, _, err := s.syncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
+	return response, err
+}
+
+func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, bool, error) {
 	if err := ctx.Err(); err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
+		return DeviceRuntimeSnapshotSyncResponse{}, false, err
 	}
 	if s == nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("ai agent client store is not configured")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("ai agent client store is not configured")
 	}
 	principal.PrincipalID = strings.TrimSpace(principal.PrincipalID)
 	principal.WorkspaceID = strings.TrimSpace(principal.WorkspaceID)
@@ -80,17 +94,21 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		req.UptimeSeconds = 0
 	}
 	if principal.PrincipalID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("principal_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("principal_id is required")
 	}
 	if req.DeviceID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("device_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("device_id is required")
 	}
 	if req.DaemonID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, errors.New("daemon_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("daemon_id is required")
 	}
-	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.Runtimes)
+	expectedProfile, changed, err := s.rejectUnexpectedDaemonProfileSnapshot(req)
 	if err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
+		return DeviceRuntimeSnapshotSyncResponse{}, changed, err
+	}
+	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.DaemonID, req.Profile, req.Runtimes)
+	if err != nil {
+		return DeviceRuntimeSnapshotSyncResponse{}, false, err
 	}
 	now := time.Now().UTC()
 	startedAt := req.StartedAt
@@ -107,9 +125,10 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	profilePruned := s.pruneExpectedDaemonProfilesForSnapshotLocked(req.DeviceID, expectedProfile)
 	if credential, ok := s.deviceCredentials[req.DeviceID]; ok {
 		if credential.ownerPrincipalID != principal.PrincipalID {
-			return DeviceRuntimeSnapshotSyncResponse{}, ErrAuthorizationForbidden
+			return DeviceRuntimeSnapshotSyncResponse{}, false, ErrAuthorizationForbidden
 		}
 		if principal.WorkspaceID == "" {
 			principal.WorkspaceID = credential.workspaceID
@@ -120,9 +139,6 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 	}
 	if existing, ok := s.deviceByIDLocked(req.DeviceID); ok && req.DeviceDisplayName == "" && existing.DisplayName != "" {
 		displayName = existing.DisplayName
-	}
-	for i := range runtimes {
-		runtimes[i].HasAssignedAgent = s.runtimeHasAssignedAgentLocked(runtimes[i].RuntimeID)
 	}
 	device := DeviceRecord{
 		DeviceID:         req.DeviceID,
@@ -136,15 +152,14 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 	if ws := strings.TrimSpace(principal.WorkspaceID); ws != "" {
 		device.ConnectedWorkspaceIDs = []string{ws}
 	}
-	previousDevice, previousDeviceOK := s.deviceByIDLocked(req.DeviceID)
-	device = s.upsertDeviceRuntimeSnapshotLocked(device)
-	previousDaemon, previousDaemonOK := s.daemons[req.DeviceID]
+	previousDaemon, previousDaemonOK := s.daemonByIdentityLocked(req.DeviceID, req.Profile, req.DaemonID)
 	daemon := DeviceDaemonRecord{
 		DeviceID:          req.DeviceID,
 		OwnerPrincipalID:  principal.PrincipalID,
 		DeviceDisplayName: displayName,
 		DaemonID:          req.DaemonID,
 		Profile:           req.Profile,
+		AppVersion:        strings.TrimSpace(req.AppVersion),
 		PID:               req.PID,
 		UptimeSeconds:     req.UptimeSeconds,
 		StartedAt:         startedAt,
@@ -153,33 +168,48 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		ControlState:      DaemonControlStateIdle,
 		SupportedActions:  []DaemonControlAction{DaemonControlActionRestart, DaemonControlActionStop},
 	}
-	if existing, ok := s.daemons[req.DeviceID]; ok {
+	if previousDaemonOK {
 		if daemon.PID == 0 {
-			daemon.PID = existing.PID
+			daemon.PID = previousDaemon.PID
 		}
 		if daemon.UptimeSeconds == 0 {
-			daemon.UptimeSeconds = existing.UptimeSeconds
+			daemon.UptimeSeconds = previousDaemon.UptimeSeconds
 		}
 		if daemon.StartedAt.IsZero() {
-			daemon.StartedAt = existing.StartedAt
+			daemon.StartedAt = previousDaemon.StartedAt
 		}
 		if daemon.Profile == "" {
-			daemon.Profile = existing.Profile
+			daemon.Profile = previousDaemon.Profile
+		}
+		if daemon.AppVersion == "" {
+			daemon.AppVersion = previousDaemon.AppVersion
 		}
 	}
-	s.daemons[req.DeviceID] = daemon
+	previousDevice, previousDeviceOK := s.deviceByIDLocked(req.DeviceID)
+	if staleDaemonRuntimeSnapshot(previousDaemon, previousDaemonOK, daemon) {
+		return DeviceRuntimeSnapshotSyncResponse{
+			SchemaVersion: SchemaVersion,
+			Device:        copyDevice(previousDevice),
+			Daemon:        copyDeviceDaemon(previousDaemon),
+		}, false, nil
+	}
+	device = s.upsertDeviceRuntimeSnapshotLocked(device)
+	s.putDaemonLocked(daemon)
 	// Only emit client stream events when something a viewer cares about actually
 	// changed (runtimes, availability, connected workspaces, daemon status). A
 	// plain liveness heartbeat (only last_seen_at/uptime advanced) is suppressed
 	// so the SSE stream isn't flooded with identical snapshots every ~5s.
-	if deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device) {
+	deviceChanged := deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device)
+	if deviceChanged {
+		logProviderHealthChanges(previousDevice, previousDeviceOK, device)
 		s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
 			EventType:     AgentClientEventDeviceRuntimeSnapshot,
 			SchemaVersion: SchemaVersion,
 			Device:        copyDevice(device),
 		})
 	}
-	if daemonStatusChangedForEvent(previousDaemon, previousDaemonOK, daemon) {
+	daemonChanged := daemonStatusChangedForEvent(previousDaemon, previousDaemonOK, daemon)
+	if daemonChanged {
 		s.appendClientEventLocked(AgentClientEventDeviceDaemonStatus, DeviceDaemonStatusEvent{
 			EventType:     AgentClientEventDeviceDaemonStatus,
 			SchemaVersion: SchemaVersion,
@@ -190,7 +220,7 @@ func (s *DevelopmentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx con
 		SchemaVersion: SchemaVersion,
 		Device:        copyDevice(device),
 		Daemon:        copyDeviceDaemon(daemon),
-	}, nil
+	}, deviceChanged || daemonChanged || profilePruned.changed(), nil
 }
 
 func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx context.Context, principal AuthorizationResult, deviceID string) (AgentRuntimeBindingListResponse, error) {
@@ -223,23 +253,20 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 	if !ok || device.OwnerPrincipalID != principal.PrincipalID {
 		return AgentRuntimeBindingListResponse{}, ErrAuthorizationForbidden
 	}
-	bindings := make([]AgentRuntimeBinding, 0, len(s.agents))
-	scope := s.workspaceScope(principal)
+	s.repairStaleActiveTaskThreadsLocked(time.Now().UTC())
+	bindings := []AgentRuntimeBinding{}
 	for _, agent := range s.agents {
-		// A physical machine connects to many workspaces under one device
-		// credential, so surface bindings for agents in ANY workspace this device
-		// is connected to — not just the credential's enroll workspace. Otherwise
-		// an agent assigned from another connected workspace is never polled and
-		// its assignment stays queued forever. The binding.DeviceID guard below
-		// still restricts the result to agents bound to THIS device's runtimes.
-		agentWS := s.agentWorkspaceID(agent)
-		if agentWS != scope && !deviceConnectedToWorkspace(device, agentWS) {
-			continue
-		}
+		// The runtime binding is authoritative for daemon execution. Agent creation
+		// already verifies that the caller can select the runtime, including an
+		// owner using the same physical runtime from another workspace. Requiring
+		// ConnectedWorkspaceIDs again here creates a split contract: creation
+		// succeeds, but the daemon never sees the binding and work stays queued.
 		binding, ok := s.agentRuntimeBindingLocked(agent)
 		if !ok || binding.DeviceID != deviceID {
 			continue
 		}
+		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
+		s.agents[agent.AgentID] = agent
 		bindings = append(bindings, binding)
 	}
 	sort.Slice(bindings, func(i, j int) bool {
@@ -248,7 +275,13 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx conte
 		}
 		return bindings[i].AgentID < bindings[j].AgentID
 	})
-	return AgentRuntimeBindingListResponse{SchemaVersion: SchemaVersion, Bindings: bindings}, nil
+	revision, principalCount := s.deviceConnectionSummaryLocked(deviceID)
+	return AgentRuntimeBindingListResponse{
+		SchemaVersion:           SchemaVersion,
+		Bindings:                bindings,
+		ConnectionRevision:      revision,
+		ConnectedPrincipalCount: principalCount,
+	}, nil
 }
 
 func (s *DevelopmentAIAgentClientStore) LookupAgent(agentID string) (AgentRuntimeBinding, bool) {
@@ -266,74 +299,6 @@ func (s *DevelopmentAIAgentClientStore) LookupAgent(agentID string) (AgentRuntim
 		return AgentRuntimeBinding{}, false
 	}
 	return s.agentRuntimeBindingLocked(agent)
-}
-
-func (s *DevelopmentAIAgentClientStore) LookupAgentRuntimeFact(agentID string) (AgentRuntimeBinding, RuntimeRecord, bool) {
-	if s == nil {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	agentID = strings.TrimSpace(agentID)
-	if agentID == "" {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	agent, ok := s.agents[agentID]
-	if !ok {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	binding, ok := s.agentRuntimeBindingLocked(agent)
-	if !ok {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
-	if !ok {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	projected := projectDeviceRuntimeLiveness(device, time.Now().UTC())
-	if runtime, ok = runtimeByID(projected.Runtimes, agent.RuntimeID); !ok || !runtimeAvailableForBinding(runtime) {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	return binding, copyRuntime(runtime), true
-}
-
-func (s *DevelopmentAIAgentClientStore) agentRuntimeBindingLocked(agent AgentClientRecord) (AgentRuntimeBinding, bool) {
-	agent.AgentID = strings.TrimSpace(agent.AgentID)
-	agent.RuntimeID = strings.TrimSpace(agent.RuntimeID)
-	if agent.AgentID == "" || agent.RuntimeID == "" {
-		return AgentRuntimeBinding{}, false
-	}
-	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(agent.RuntimeID)
-	if !ok {
-		return AgentRuntimeBinding{}, false
-	}
-	now := time.Now().UTC()
-	device = projectDeviceRuntimeLiveness(device, now)
-	if runtime, ok = runtimeByID(device.Runtimes, agent.RuntimeID); !ok || !runtimeAvailableForBinding(runtime) {
-		return AgentRuntimeBinding{}, false
-	}
-	daemon, ok := s.daemons[device.DeviceID]
-	if !ok || strings.TrimSpace(daemon.DaemonID) == "" {
-		return AgentRuntimeBinding{}, false
-	}
-	daemon = projectDeviceDaemonLiveness(daemon, now)
-	if daemon.Availability != DaemonAvailabilityOnline {
-		return AgentRuntimeBinding{}, false
-	}
-	provider := runtimeProviderForAIAgentRuntime(agent.RuntimeKind)
-	if provider == "" {
-		provider = runtimeProviderForAIAgentRuntime(runtime.Kind)
-	}
-	if provider == "" {
-		return AgentRuntimeBinding{}, false
-	}
-	return normalizeAgentRuntimeBinding(AgentRuntimeBinding{
-		AgentID:         agent.AgentID,
-		DaemonID:        daemon.DaemonID,
-		DeviceID:        device.DeviceID,
-		RuntimeID:       runtime.RuntimeID,
-		RuntimeProvider: provider,
-	}), true
 }
 
 // deviceRuntimeSnapshotChangedForEvent reports whether anything a client cares
@@ -363,8 +328,14 @@ func deviceRuntimeSnapshotChangedForEvent(prev DeviceRecord, prevOK bool, next D
 			return true
 		}
 		if p.Kind != rt.Kind ||
+			p.DaemonID != rt.DaemonID ||
+			p.DaemonProfile != rt.DaemonProfile ||
 			p.Availability != rt.Availability ||
 			p.DetectionState != rt.DetectionState ||
+			p.ProviderVersion != rt.ProviderVersion ||
+			p.HealthStatus != rt.HealthStatus ||
+			p.DiagnosticCode != rt.DiagnosticCode ||
+			p.DiagnosticSummary != rt.DiagnosticSummary ||
 			p.HasAssignedAgent != rt.HasAssignedAgent ||
 			p.RequiresExperimentalOptIn != rt.RequiresExperimentalOptIn ||
 			!equalRuntimeModelRecords(p.Models, rt.Models) {
@@ -383,6 +354,7 @@ func daemonStatusChangedForEvent(prev DeviceDaemonRecord, prevOK bool, next Devi
 	if prev.Availability != next.Availability ||
 		prev.ControlState != next.ControlState ||
 		prev.Profile != next.Profile ||
+		prev.AppVersion != next.AppVersion ||
 		prev.PID != next.PID ||
 		prev.DaemonID != next.DaemonID ||
 		prev.DeviceDisplayName != next.DeviceDisplayName ||
@@ -509,26 +481,14 @@ func (s *DevelopmentAIAgentClientStore) deviceRuntimeByRuntimeIDLocked(runtimeID
 	return DeviceRecord{}, RuntimeRecord{}, false
 }
 
-func (s *DevelopmentAIAgentClientStore) runtimeHasAssignedAgentLocked(runtimeID string) bool {
-	runtimeID = strings.TrimSpace(runtimeID)
-	if runtimeID == "" {
-		return false
-	}
-	for _, agent := range s.agents {
-		if strings.TrimSpace(agent.RuntimeID) == runtimeID {
-			return true
-		}
-	}
-	return false
-}
-
-func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []RuntimeSnapshotRecord) ([]RuntimeRecord, error) {
+func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemonProfile string, in []RuntimeSnapshotRecord) ([]RuntimeRecord, error) {
 	if len(in) == 0 {
 		return nil, errors.New("runtimes is required")
 	}
 	out := make([]RuntimeRecord, 0, len(in))
 	seen := map[string]struct{}{}
 	now := time.Now().UTC()
+	daemonProfile, daemonID = normalizeDaemonRuntimeScope(daemonProfile, daemonID)
 	for i, runtime := range in {
 		runtime.RuntimeID = strings.TrimSpace(runtime.RuntimeID)
 		if runtime.RuntimeID == "" {
@@ -556,12 +516,26 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []Run
 			runtime.DetectionState != RuntimeDetectionStateError {
 			return nil, fmt.Errorf("runtimes[%d].detection_state is invalid", i)
 		}
+		providerVersion, err := normalizeRuntimeProviderVersion(runtime.ProviderVersion)
+		if err != nil {
+			return nil, fmt.Errorf("runtimes[%d].provider_version: %w", i, err)
+		}
+		healthStatus, diagnosticCode, diagnosticSummary, err := normalizeRuntimeProviderHealth(runtime)
+		if err != nil {
+			return nil, fmt.Errorf("runtimes[%d].provider_health: %w", i, err)
+		}
 		out = append(out, RuntimeRecord{
 			RuntimeID:                 runtime.RuntimeID,
 			DeviceID:                  deviceID,
+			DaemonID:                  daemonID,
+			DaemonProfile:             daemonProfile,
 			Kind:                      runtime.Kind,
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,
+			ProviderVersion:           providerVersion,
+			HealthStatus:              healthStatus,
+			DiagnosticCode:            diagnosticCode,
+			DiagnosticSummary:         diagnosticSummary,
 			OwnerPrincipalID:          ownerPrincipalID,
 			LastDetectedAt:            now,
 			RequiresExperimentalOptIn: runtime.RequiresExperimentalOptIn,
@@ -569,6 +543,22 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID string, in []Run
 		})
 	}
 	return out, nil
+}
+
+func normalizeRuntimeProviderVersion(value string) (string, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "", nil
+	}
+	if utf8.RuneCountInString(value) > 128 {
+		return "", errors.New("must be 128 characters or fewer")
+	}
+	for _, r := range value {
+		if unicode.IsControl(r) {
+			return "", errors.New("must not contain control characters")
+		}
+	}
+	return value, nil
 }
 
 func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {
@@ -620,15 +610,15 @@ func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []Run
 func defaultRuntimeModel(kind RuntimeKind) RuntimeModelRecord {
 	switch kind {
 	case RuntimeKindCodex:
-		return RuntimeModelRecord{ModelID: "codex-default", Label: "Codex 기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultCodexModelID, Label: "Codex 기본 모델", IsDefault: true}
 	case RuntimeKindClaudeCode:
-		return RuntimeModelRecord{ModelID: "claude-default", Label: "Claude Code 기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultClaudeModelID, Label: "Claude Code 기본 모델", IsDefault: true}
 	case RuntimeKindCursor:
-		return RuntimeModelRecord{ModelID: "cursor-auto", Label: "Cursor Auto", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultCursorModelID, Label: "Cursor Auto", IsDefault: true}
 	case RuntimeKindOpenClaw:
-		return RuntimeModelRecord{ModelID: "openclaw-default", Label: "OpenClaw 기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultOpenClawModelID, Label: "OpenClaw 기본 모델", IsDefault: true}
 	default:
-		return RuntimeModelRecord{ModelID: "runtime-default", Label: "기본 모델", IsDefault: true}
+		return RuntimeModelRecord{ModelID: providercatalog.DefaultRuntimeModelID, Label: "기본 모델", IsDefault: true}
 	}
 }
 

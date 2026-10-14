@@ -57,6 +57,7 @@ func stateFromAssignmentOperations(records []AssignmentOperationRecord) (storeSt
 		})
 	}
 	rebuildAssignmentIndexes(&state)
+	rebuildStateMetricsFromHistory(&state)
 	return state, nil
 }
 

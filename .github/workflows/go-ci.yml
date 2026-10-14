@@ -1,0 +1,51 @@
+name: Go CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Verify Go CI baseline executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/gocibaseline -count=1
+          go run ./tools/gocibaseline \
+            -check-doc \
+            -evidence-out out/go-ci-baseline-evidence.json
+
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+
+      - name: Lint
+        run: golangci-lint run ./... --timeout=5m
+
+      - name: Test with coverage
+        run: |
+          mkdir -p out
+          go test ./... -coverprofile=out/go-test-cover.out -covermode=count
+          go tool cover -func=out/go-test-cover.out | tee out/go-test-coverage-summary.txt
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: go-ci-baseline-evidence
+          path: |
+            out/go-ci-baseline-evidence.json
+            out/go-test-cover.out
+            out/go-test-coverage-summary.txt
+          if-no-files-found: error

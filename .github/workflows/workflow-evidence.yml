@@ -1,0 +1,54 @@
+name: workflow-evidence
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "47 20 * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+      - "docs/30-architecture/workflow-evidence.md"
+      - "docs/30-architecture/workflow-evidence.riido.json"
+      - "docs/30-architecture/syntax-hash.md"
+      - "docs/30-architecture/syntax-hash.riido.json"
+      - "tools/syntaxhash/**"
+      - "tools/workflowevidence/**"
+      - "go.mod"
+      - "go.sum"
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "docs/30-architecture/workflow-evidence.md"
+      - "docs/30-architecture/workflow-evidence.riido.json"
+      - "docs/30-architecture/syntax-hash.md"
+      - "docs/30-architecture/syntax-hash.riido.json"
+      - "tools/syntaxhash/**"
+      - "tools/workflowevidence/**"
+      - "go.mod"
+      - "go.sum"
+
+jobs:
+  workflow-evidence:
+    runs-on: ubuntu-latest
+    env:
+      RIIDO_LOOP_IDS: closed_loop_candidate
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify workflow evidence coverage
+        run: |
+          mkdir -p out
+          go test ./tools/workflowevidence -count=1
+          go run ./tools/workflowevidence \
+            -check-doc \
+            -evidence-out out/workflow-evidence.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: workflow-evidence
+          path: out/workflow-evidence.json
+          if-no-files-found: error

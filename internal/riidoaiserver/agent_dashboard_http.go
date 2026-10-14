@@ -85,7 +85,12 @@ func (s Server) handleAgentDashboard(w http.ResponseWriter, r *http.Request, age
 			writeError(w, http.StatusServiceUnavailable, "request-scoped task context is unavailable")
 			return
 		}
-		context, err := contextReader.GetAIAgentTaskContextForRequest(r.Context(), AIAgentTaskContextRequest{ComponentID: assignment.TaskID, WorkspaceID: principal.WorkspaceID, BearerToken: token})
+		request := AIAgentTaskContextRequest{ComponentID: assignment.TaskID, WorkspaceID: principal.WorkspaceID, BearerToken: token}
+		readTask := contextReader.GetAIAgentTaskContextForRequest
+		if metadata, ok := s.taskContext.(agentDashboardTaskReader); ok {
+			readTask = metadata.GetAgentDashboardTask
+		}
+		context, err := readTask(r.Context(), request)
 		if errors.Is(err, ErrAuthorizationForbidden) || errors.Is(err, errDashboardTaskUnavailable) {
 			continue
 		}

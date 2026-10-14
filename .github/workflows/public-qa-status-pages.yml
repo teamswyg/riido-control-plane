@@ -1,0 +1,204 @@
+name: public-qa-status-pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "39 22 * * *"
+  pull_request:
+    paths:
+      - ".github/workflows/public-qa-status-pages.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "tools/operationalreadiness/**"
+      - "tools/publicpageslive/**"
+      - "go.mod"
+      - "go.sum"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/public-qa-status-pages.yml"
+      - "docs/30-architecture/operational-readiness.md"
+      - "docs/30-architecture/operational-readiness.riido.json"
+      - "tools/operationalreadiness/**"
+      - "tools/publicpageslive/**"
+      - "go.mod"
+      - "go.sum"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: public-qa-status-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Generate redacted public QA status site
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RIIDO_OPERATIONAL_READINESS_NOW: 2026-07-05T00:00:00Z
+        run: |
+          mkdir -p out site
+          go test ./tools/operationalreadiness -count=1
+          go run ./tools/operationalreadiness \
+            -check-doc \
+            -evidence-out out/public-qa-status-pages-evidence.json \
+            -public-status-html-out site/index.html \
+            -public-status-json-out site/status.json \
+            -public-status-badge-json-out site/status-badge.json \
+            -public-status-out site/status.md \
+            -public-status-github-annotation-out out/status.annotation
+          generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          page_url="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.html_url // ""' 2>/dev/null || true)"
+          build_type="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.build_type // ""' 2>/dev/null || true)"
+          jq -n \
+            --arg generated_at "$generated_at" \
+            --arg html_url "$page_url" \
+            --arg build_type "$build_type" \
+            --arg source_workflow "$GITHUB_WORKFLOW" \
+            --arg source_commit "$GITHUB_SHA" \
+            --arg source_run_id "$GITHUB_RUN_ID" \
+            --arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{
+              schema_version: "riido-public-qa-pages-publish.v1",
+              generated_at: $generated_at,
+              status: (if $html_url == "" then "pages_unavailable" else "published" end),
+              visibility: "public_repository",
+              html_url: $html_url,
+              build_type: $build_type,
+              source_workflow: $source_workflow,
+              source_commit: $source_commit,
+              source_run_id: $source_run_id,
+              source_run_url: $source_run_url,
+              raw_response_included: false,
+              secrets_included: false
+            }' > site/pages-status.json
+          cat site/status.md >> "$GITHUB_STEP_SUMMARY"
+          cat out/status.annotation
+          ! grep -R -E 'eyJ|AKIA|RIIDO_DEVICE_SECRET|device_secret|Bearer |arn:aws:|amazonaws.com/|cloudfront.net/|execute-api\.' site
+      - uses: actions/upload-artifact@v7
+        with:
+          name: public-qa-status-pages-evidence
+          path: out/public-qa-status-pages-evidence.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: public-qa-status-pages-site
+          path: site
+          if-no-files-found: error
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          path: site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Cancel stale GitHub Pages deployments
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          api="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY"
+          curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$api/deployments?environment=github-pages&per_page=20" \
+            | jq -r '.[].sha' \
+            | awk 'NF && !seen[$0]++' \
+            | while read -r sha; do
+                status="$(curl -fsSL \
+                  -H "Authorization: Bearer $GH_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  "$api/pages/deployments/$sha" \
+                  | jq -r '.status // ""')"
+                case "$status" in
+                  deployment_queued|deployment_in_progress|deployment_progress)
+                    echo "cancel stale pages deployment sha=$sha status=$status"
+                    curl -fsSL -X POST \
+                      -H "Authorization: Bearer $GH_TOKEN" \
+                      -H "Accept: application/vnd.github+json" \
+                      "$api/pages/deployments/$sha/cancel" \
+                      >/dev/null
+                    ;;
+                  *)
+                    echo "keep pages deployment sha=$sha status=${status:-none}"
+                    ;;
+                esac
+              done
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        with:
+          timeout: 600000
+      - name: Verify live public QA status page
+        if: steps.deployment.outcome == 'success'
+        run: |
+          mkdir -p out
+          go test ./tools/publicpageslive -count=1
+          go run ./tools/publicpageslive \
+            -base-url "${{ steps.deployment.outputs.page_url }}" \
+            -out out/public-qa-status-pages-live-evidence.json
+      - name: Record failed public QA status deployment
+        if: steps.deployment.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p out
+          generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          page_url="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq '.html_url // ""' 2>/dev/null || true)"
+          jq -n \
+            --arg generated_at "$generated_at" \
+            --arg html_url "$page_url" \
+            --arg source_workflow "$GITHUB_WORKFLOW" \
+            --arg source_commit "$GITHUB_SHA" \
+            --arg source_run_id "$GITHUB_RUN_ID" \
+            --arg source_run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg deployment_outcome "${{ steps.deployment.outcome }}" \
+            '{
+              schema_version: "riido-public-qa-pages-live.v1",
+              generated_at: $generated_at,
+              status: "deploy_failed",
+              visibility: "public_repository",
+              html_url: $html_url,
+              source_workflow: $source_workflow,
+              source_commit: $source_commit,
+              source_run_id: $source_run_id,
+              source_run_url: $source_run_url,
+              deployment_outcome: $deployment_outcome,
+              public_page_freshness: "stale_or_unknown",
+              build_artifact_available: true,
+              raw_response_included: false,
+              secrets_included: false
+            }' > out/public-qa-status-pages-live-evidence.json
+          echo "::warning::public QA status Pages deployment failed; uploaded degraded live evidence artifact"
+          echo "### Public QA status Pages deploy failed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- deployment_outcome: ${{ steps.deployment.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- build artifact: public-qa-status-pages-site" >> "$GITHUB_STEP_SUMMARY"
+          echo "- live evidence artifact: public-qa-status-pages-live-evidence" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: public-qa-status-pages-live-evidence
+          path: out/public-qa-status-pages-live-evidence.json
+          if-no-files-found: error

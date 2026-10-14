@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 func TestAssignmentOperationRuntimeCapturesStateMutations(t *testing.T) {
@@ -178,7 +180,10 @@ func TestOpenStoreWithConfigReplaysAssignmentOperationsWithoutSnapshot(t *testin
 	}
 	source.Close()
 
-	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{OperationStore: operations})
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return fixedNow },
+		OperationStore: operations,
+	})
 	if err != nil {
 		t.Fatalf("OpenStoreWithConfig: %v", err)
 	}
@@ -197,6 +202,176 @@ func TestOpenStoreWithConfigReplaysAssignmentOperationsWithoutSnapshot(t *testin
 	}
 	if poll.Action != PollActive || poll.Assignment == nil || poll.Assignment.State != AssignmentReady {
 		t.Fatalf("poll reloaded = %+v", poll)
+	}
+}
+
+func TestOpenStoreWithConfigOverlaysAssignmentProjections(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 18, 1, 2, 3, 0, time.UTC)
+	running := Assignment{
+		ID:              "asn-000001",
+		TaskID:          "task-a",
+		ComponentID:     "component-1",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "make hello world",
+		State:           AssignmentRunning,
+		CreatedAt:       createdAt,
+		UpdatedAt:       createdAt.Add(time.Minute),
+	}
+	completed := running
+	completed.State = AssignmentCompleted
+	completed.UpdatedAt = createdAt.Add(2 * time.Minute)
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{{
+			SchemaVersion: AssignmentOperationSchemaVersion,
+			OperationID:   "agent-event:asn-000001:1",
+			OperationType: AssignmentOperationAgentEvent,
+			TaskID:        running.TaskID,
+			AssignmentID:  running.ID,
+			AgentID:       running.AgentID,
+			Assignment:    running,
+			Events: []TaskEvent{{
+				Seq:          1,
+				TaskID:       running.TaskID,
+				AssignmentID: running.ID,
+				AgentID:      running.AgentID,
+				Type:         EventAssignmentRunning,
+				State:        AssignmentRunning,
+				At:           running.UpdatedAt,
+			}},
+			RecordedAt: running.UpdatedAt,
+		}}},
+		projections: map[string]AssignmentProjection{
+			completed.ID: {
+				Assignment:   completed,
+				LastEventSeq: 2,
+			},
+		},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{OperationStore: operations})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentRunning] != 0 || metrics.AssignmentsByState[AssignmentCompleted] != 1 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	poll, err := reloaded.PollAgent(ctx, "agent-1", daemonPollRequest())
+	if err != nil {
+		t.Fatalf("PollAgent: %v", err)
+	}
+	if poll.Action != PollNone || poll.Assignment != nil {
+		t.Fatalf("poll after projection overlay = %+v", poll)
+	}
+}
+
+func TestOpenStoreWithConfigFailsStaleReplayActiveWithoutProjection(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 18, 1, 2, 3, 0, time.UTC)
+	replayNow := createdAt.Add(time.Hour)
+	running := Assignment{
+		ID:              "asn-000001",
+		TaskID:          "task-a",
+		ComponentID:     "component-1",
+		AgentID:         "agent-1",
+		RuntimeProvider: "codex",
+		Prompt:          "make hello world",
+		State:           AssignmentRunning,
+		CreatedAt:       createdAt,
+		UpdatedAt:       createdAt.Add(time.Minute),
+	}
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{
+			runtimeAssignmentOperationRecord(running, EventAssignmentRunning, 1),
+		}},
+		projections: map[string]AssignmentProjection{},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:                 func() time.Time { return replayNow },
+		ActiveLeaseDuration: time.Minute,
+		OperationStore:      operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentRunning] != 0 || metrics.AssignmentsByState[AssignmentFailed] != 1 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	if len(operations.records) != 2 || operations.records[1].Assignment.State != AssignmentFailed {
+		t.Fatalf("repair operation not persisted: %+v", operations.records)
+	}
+}
+
+func TestOpenStoreWithConfigFailsStaleReplayQueuedWithoutProjection(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 16, 18, 0, 0, 0, time.UTC)
+	replayNow := createdAt.Add(staleReplayQueuedAssignmentMaxAge + time.Minute)
+	queued := replayOperationRecord("task-a", "asn-000001", "agent-1", AssignmentQueued, 1, createdAt)
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{queued}},
+		projections:                         map[string]AssignmentProjection{},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return replayNow },
+		OperationStore: operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentQueued] != 0 || metrics.AssignmentsByState[AssignmentFailed] != 1 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	last := operations.records[len(operations.records)-1]
+	if last.Assignment.State != AssignmentFailed || len(last.Events) != 1 {
+		t.Fatalf("repair operation = %+v", last)
+	}
+	categoryKey := metadatakeys.AssignmentFailureCategory.String()
+	if last.Events[0].Metadata[categoryKey] != "stale_replay_queued_assignment" {
+		t.Fatalf("repair metadata = %+v", last.Events[0].Metadata)
+	}
+}
+
+func TestOpenStoreWithConfigKeepsFreshReplayQueuedWithoutProjection(t *testing.T) {
+	ctx := context.Background()
+	createdAt := time.Date(2026, 6, 18, 1, 2, 3, 0, time.UTC)
+	replayNow := createdAt.Add(time.Hour)
+	queued := replayOperationRecord("task-a", "asn-000001", "agent-1", AssignmentQueued, 1, createdAt)
+	operations := &runtimeFakeProjectionReaderOperationStore{
+		runtimeFakeAssignmentOperationStore: runtimeFakeAssignmentOperationStore{records: []AssignmentOperationRecord{queued}},
+		projections:                         map[string]AssignmentProjection{},
+	}
+	reloaded, err := OpenStoreWithConfig(ctx, StoreConfig{
+		Now:            func() time.Time { return replayNow },
+		OperationStore: operations,
+	})
+	if err != nil {
+		t.Fatalf("OpenStoreWithConfig: %v", err)
+	}
+	defer reloaded.Close()
+	metrics, err := reloaded.Metrics(ctx)
+	if err != nil {
+		t.Fatalf("Metrics: %v", err)
+	}
+	if metrics.AssignmentsByState[AssignmentQueued] != 1 || metrics.AssignmentsByState[AssignmentFailed] != 0 {
+		t.Fatalf("metrics states = %+v", metrics.AssignmentsByState)
+	}
+	if len(operations.records) != 1 {
+		t.Fatalf("fresh queue should not persist repair operation: %+v", operations.records)
 	}
 }
 
@@ -434,6 +609,29 @@ type runtimeFakeAssignmentOperationStore struct {
 	closed  bool
 }
 
+func runtimeAssignmentOperationRecord(assignment Assignment, eventType string, seq int64) AssignmentOperationRecord {
+	event := TaskEvent{
+		Seq:          seq,
+		TaskID:       assignment.TaskID,
+		AssignmentID: assignment.ID,
+		AgentID:      assignment.AgentID,
+		Type:         eventType,
+		State:        assignment.State,
+		At:           assignment.UpdatedAt,
+	}
+	return AssignmentOperationRecord{
+		SchemaVersion: AssignmentOperationSchemaVersion,
+		OperationID:   assignmentOperationID(AssignmentOperationAgentEvent, assignment, []TaskEvent{event}),
+		OperationType: AssignmentOperationAgentEvent,
+		TaskID:        assignment.TaskID,
+		AssignmentID:  assignment.ID,
+		AgentID:       assignment.AgentID,
+		Assignment:    assignment,
+		Events:        []TaskEvent{event},
+		RecordedAt:    assignment.UpdatedAt,
+	}
+}
+
 func (s *runtimeFakeAssignmentOperationStore) SaveAssignmentOperation(_ context.Context, record AssignmentOperationRecord) error {
 	s.records = append(s.records, record)
 	return nil
@@ -446,6 +644,16 @@ func (s *runtimeFakeAssignmentOperationStore) LoadAssignmentOperations(context.C
 func (s *runtimeFakeAssignmentOperationStore) Close() error {
 	s.closed = true
 	return nil
+}
+
+type runtimeFakeProjectionReaderOperationStore struct {
+	runtimeFakeAssignmentOperationStore
+	projections map[string]AssignmentProjection
+}
+
+func (s *runtimeFakeProjectionReaderOperationStore) LoadAssignmentProjection(_ context.Context, assignmentID string) (AssignmentProjection, bool, error) {
+	projection, ok := s.projections[assignmentID]
+	return projection, ok, nil
 }
 
 type runtimeFakeClaimingAssignmentOperationStore struct {

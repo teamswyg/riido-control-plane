@@ -31,6 +31,11 @@ func TestDeviceRuntimeSnapshotChangedForEvent(t *testing.T) {
 	if !deviceRuntimeSnapshotChangedForEvent(base, true, off) {
 		t.Fatal("availability change should be a change")
 	}
+	version := base
+	version.Runtimes = []RuntimeRecord{{RuntimeID: "dev_x:claude", Kind: RuntimeKindClaudeCode, Availability: RuntimeAvailabilityOnline, DetectionState: RuntimeDetectionStateDetected, ProviderVersion: "2.1.142 (Claude Code)", LastDetectedAt: t0}}
+	if !deviceRuntimeSnapshotChangedForEvent(base, true, version) {
+		t.Fatal("provider_version change should be a change")
+	}
 }
 
 func TestDaemonStatusChangedForEvent(t *testing.T) {
@@ -49,5 +54,10 @@ func TestDaemonStatusChangedForEvent(t *testing.T) {
 	restarted.PID = 200
 	if !daemonStatusChangedForEvent(base, true, restarted) {
 		t.Fatal("PID change (restart) should be a change")
+	}
+	version := base
+	version.AppVersion = "riido-daemon v0.0.39"
+	if !daemonStatusChangedForEvent(base, true, version) {
+		t.Fatal("app_version change should be a change")
 	}
 }

@@ -1,0 +1,89 @@
+{
+  "schema_version": "riido-staging-public-burst-load-evidence.v1",
+  "id": "staging-public-burst-load-256-evidence-2026-07-02",
+  "captured_at": "2026-07-02T08:38:50Z",
+  "environment": "staging",
+  "redacted": true,
+  "workflow": {
+    "name": "ai-agent-client-testnet-load",
+    "path": ".github/workflows/ai-agent-client-testnet-load.yml",
+    "scenario": "public",
+    "duration": "120s",
+    "concurrency": 256
+  },
+  "authoritative_run": {
+    "id": "28576806795",
+    "url": "https://github.com/teamswyg/riido-control-plane/actions/runs/28576806795",
+    "status": "success",
+    "head_sha": "d67374f9053bcafe1e1cbf9ebd958ec360937ee1",
+    "event": "workflow_dispatch",
+    "started_at": "2026-07-02T08:36:49.690940311Z",
+    "ended_at": "2026-07-02T08:38:49.846147527Z",
+    "base_host": "staging.ai-api.riido.io",
+    "duration_ms": 120155,
+    "concurrency": 256,
+    "total_requests": 151137,
+    "success": 151137,
+    "failures": 0,
+    "requests_per_second": 1257.848107475732,
+    "success_per_second": 1257.848107475732,
+    "failure_rate_pct": 0,
+    "status_counts": {
+      "200": 151137
+    },
+    "latency_ms": {
+      "min": 185,
+      "p50": 187,
+      "p90": 202,
+      "p95": 222,
+      "p99": 591,
+      "max": 1396
+    },
+    "endpoints": {
+      "/healthz": {
+        "total": 75570,
+        "success": 75570,
+        "failures": 0,
+        "p95_latency_ms": 222,
+        "p99_latency_ms": 588,
+        "max_latency_ms": 1395
+      },
+      "/readyz": {
+        "total": 75567,
+        "success": 75567,
+        "failures": 0,
+        "p95_latency_ms": 223,
+        "p99_latency_ms": 592,
+        "max_latency_ms": 1396
+      }
+    },
+    "load_generator_resource_delta": {
+      "heap_alloc_bytes": 5878440,
+      "total_alloc_bytes": 1015618504,
+      "total_alloc_bytes_per_request": 6719.853536857288,
+      "mallocs": 9311031,
+      "frees": 9291002,
+      "goroutines": 2
+    },
+    "candidate_count": 0,
+    "expires_at": "2026-07-03T08:38:50Z"
+  },
+  "findings": [
+    {
+      "id": "staging_public_burst_256_success",
+      "severity": "info",
+      "signal": "Staging accepted 151,137 public health/ready requests at concurrency 256 for 120 seconds with 0 failures, p95 latency 222ms, and p99 latency 591ms."
+    },
+    {
+      "id": "load_harness_no_closed_loop_candidates",
+      "severity": "info",
+      "signal": "The redacted workflow summary reported live_status=success and the closed-loop candidate artifact reported candidate_count=0 for run 28576806795."
+    },
+    {
+      "id": "cold_start_not_exercised",
+      "severity": "partial",
+      "signal": "This run measured a warm staging burst against public health and readiness endpoints. It did not force an ECS task restart, server cold start, or client-visible post-deployment packet storm."
+    }
+  ],
+  "decision": "Bind this artifact as higher-pressure warm staging public burst evidence for boot_burst_capacity, but keep the readiness check partial until a controlled cold-start or force-new-deployment burst run records time-to-ready, accepted requests during startup, and post-event error rate."
+}

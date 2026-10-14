@@ -2,24 +2,29 @@
   "schema_version": "riido-control-plane-runtime-cd-ownership.v1",
   "id": "runtime-cd-ownership",
   "riido_task": "RIID-4825",
+  "generated_doc": "docs/30-architecture/runtime-cd-ownership.md",
+  "workflow": ".github/workflows/architecture-docs.yml",
+  "evidence_artifact": "runtime-cd-ownership-evidence",
   "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845", "RIID-4853", "RIID-4855"],
   "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
     "id": "ecs-rolling-task-definition-revision",
-    "status": "active-testnet-and-development-manual-dispatch",
+    "status": "active-development-testnet-production-manual-dispatch",
     "cd_owner": "riido-control-plane",
     "topology_owner": "riido-infra",
     "workflow": ".github/workflows/deploy-ai-agent-testnet.yml",
     "allowed_actions": [
-      "select the configured testnet or development GitHub environment for manual dispatch without accepting live URL inputs",
+      "select the configured development, testnet, or production GitHub environment for manual dispatch without accepting live URL inputs",
       "build checked-in container contract",
       "push immutable ECR image tag",
+      "reuse an existing immutable ECR image tag by resolving its digest instead of overwriting the tag",
       "resolve image digest",
+      "preserve infra-owned runtime task-definition shape by copying the live ECS task definition and replacing only the configured container image",
       "register ECS task-definition revision",
       "update ECS service",
       "wait for ECS service stability",
-      "run healthz readyz and v2 bootstrap smoke"
+      "run healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke"
     ]
   },
   "optional_workflow_modes": [
@@ -38,7 +43,7 @@
         "create CodeDeploy AppSpec content in same-job runner temp files",
         "create a CodeDeploy deployment from infra-provided application and deployment group names",
         "wait for CodeDeploy deployment success",
-        "run healthz readyz and v2 bootstrap smoke after the deployment succeeds"
+        "run healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke after the deployment succeeds"
       ],
       "must_not_own": [
         "CodeDeploy application or deployment group topology",
@@ -76,7 +81,7 @@
       "both optional CodeDeploy GitHub environment variables are configured together",
       "the deploy workflow still registers the task-definition revision from the same immutable image value",
       "the deploy workflow creates and waits for the CodeDeploy deployment in the same job",
-      "post-shift healthz readyz and v2 bootstrap smoke run after CodeDeploy success"
+      "post-shift healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke run after CodeDeploy success"
     ],
     "public_repo_may_keep": [
       "the activation rule",
@@ -112,7 +117,7 @@
       "control_plane_may_own": [
         "create CodeDeploy deployment from the same-job immutable image value and infra-provided deployment target",
         "wait for CodeDeploy deployment completion",
-        "run healthz readyz and v2 bootstrap smoke after traffic shift",
+        "run healthz readyz v2 bootstrap and profile thumbnail upload-intent smoke after traffic shift",
         "tighten public workflow redaction without changing AWS topology"
       ],
       "infra_must_own": [
@@ -228,7 +233,8 @@
       "stable GitHub secret and variable key names",
       "stable infra output key names that operators map into GitHub environment variables",
       "control-plane git tag or commit identifiers",
-      "aggregate pass or fail status without live payload values"
+      "aggregate pass or fail status without live payload values",
+      "redacted live workflow summary artifact names and paths"
     ],
     "forbidden_public_exports": [
       "live deployment URLs",
@@ -284,7 +290,6 @@
       "https?://[^\\s`\"'<>]*(?:elb\\.amazonaws\\.com|cloudfront\\.net|execute-api\\.)[^\\s`\"'<>]*"
     ],
     "workflow_forbidden_mechanisms": [
-      "actions/upload-artifact",
       "GITHUB_OUTPUT",
       "inputs.base_url",
       "cross-workflow live value handoff"
@@ -294,7 +299,8 @@
       "stable infra output key names",
       "non-live workflow behavior descriptions",
       "placeholder host examples that use angle brackets",
-      "AWS CLI response field names inside the deploy workflow"
+      "AWS CLI response field names inside the deploy workflow",
+      "redacted live workflow summary artifact names and paths"
     ],
     "infra_must_treat_scan_as": "awareness policy only; scan results are not infra inputs, release artifacts, or operator evidence"
   },
@@ -396,8 +402,36 @@
         "reason": "optional fake-endpoint/local-development runtime override; it is not a deploy/smoke GitHub configuration key"
       },
       {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_BUCKET",
+        "reason": "profile thumbnail upload-intent runtime source name mapped by infra/operator configuration; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_PREFIX",
+        "reason": "profile thumbnail upload-intent object-prefix runtime source name; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_CDN_BASE_URL",
+        "reason": "profile thumbnail saved-URL base runtime source name mapped by infra/operator configuration; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES",
+        "reason": "profile thumbnail upload-intent size limit runtime source name; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS",
+        "reason": "profile thumbnail upload-intent expiry runtime source name; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT",
+        "reason": "profile thumbnail upload-intent endpoint override for tests or compatible S3 endpoints; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
         "name": "RIIDO_AI_SERVER_ADDR",
         "reason": "container listen-address contract documented as non-live runtime shape; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_PPROF_ADDR",
+        "reason": "optional operator/debug pprof listen-address contract documented as non-live runtime shape; it is not a deploy/smoke GitHub configuration key"
       },
       {
         "name": "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY",
@@ -452,5 +486,12 @@
   "dependency_direction": {
     "top_down": "Runtime artifact CD behavior changes in control-plane first; infra consumes the required topology/evidence needs.",
     "bottom_up": "Infra may discover topology or security constraints and request a control-plane workflow change, but that does not move CD execution out of control-plane."
+  },
+  "loop": {
+    "observation": "Terraform, GitHub deployment workflows, and live ECS revisions can drift unless runtime ownership and public redaction rules are executable.",
+    "hypothesis": "A runtime CD ownership manifest can keep public artifact promotion separate from private topology evidence while still allowing CI to scan the public surface.",
+    "execute": "Verify the deploy policy, workflow redaction behavior, public export contract, and linked runtime-boundary evidence from this manifest.",
+    "evaluate": "The deploy policy tests fail on live payload exports, forbidden public operational detail, workflow drift, or missing ownership boundary evidence.",
+    "retrospective": "This keeps deployment review evidence-based without moving AWS topology, Terraform state, or operator evidence into the public repository."
   }
 }

@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -113,7 +114,7 @@ func (p AgentCatalogPrincipal) Validate() error {
 		return fmt.Errorf("%w: principal_id is required", ErrInvalidAgentCatalogPrincipal)
 	}
 	if _, err := normalizeAgentCatalogRoles(p.Roles); err != nil {
-		return fmt.Errorf("%w: %v", ErrInvalidAgentCatalogPrincipal, err)
+		return fmt.Errorf("%w: %w", ErrInvalidAgentCatalogPrincipal, err)
 	}
 	return nil
 }
@@ -123,12 +124,7 @@ func (p AgentCatalogPrincipal) HasRole(role AgentCatalogRole) bool {
 	if err != nil {
 		return false
 	}
-	for _, candidate := range roles {
-		if candidate == role {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(roles, role)
 }
 
 func (r AgentCatalogRecord) Validate() error {

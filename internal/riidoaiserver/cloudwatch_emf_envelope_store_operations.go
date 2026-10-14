@@ -1,0 +1,11 @@
+package riidoaiserver
+
+func applyCloudWatchEMFStoreOperations(envelope *cloudWatchEMFEnvelope, snapshot MetricsSnapshot) {
+	envelope.StoreOperationCallsTotal = snapshot.StoreOperationCallsTotal
+	envelope.StoreOperationErrorsTotal = snapshot.StoreOperationErrorsTotal
+	envelope.StoreOperationLatencySamplesTotal = snapshot.StoreOperationLatencySamplesTotal
+	envelope.StoreOperationLatencyTotalMilliseconds = snapshot.StoreOperationLatencyTotalMilliseconds
+	envelope.StoreOperationLatencyMaxMilliseconds = snapshot.StoreOperationLatencyMaxMilliseconds
+	envelope.StoreOperationLatencyLastMilliseconds = snapshot.StoreOperationLatencyLastMilliseconds
+	envelope.StoreOperations = snapshot.StoreOperations
+}

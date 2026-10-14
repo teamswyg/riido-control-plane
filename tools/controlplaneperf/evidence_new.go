@@ -1,0 +1,43 @@
+package main
+
+func newEvidence(m manifest) evidence {
+	generatedAt, expiresAt := evidenceWindow(controlPlanePerformanceEvidenceTTLHours)
+	fileIndex := architectureFileIndex(m.ArchitectureComponents, m.HotPaths)
+	dimensions := pressureDimensionSummary(fileIndex)
+	return evidence{
+		SchemaVersion:                  evidenceSchema,
+		Status:                         "verified",
+		GeneratedAt:                    generatedAt,
+		ExpiresAt:                      expiresAt,
+		HotPathCount:                   len(m.HotPaths),
+		BenchmarkCount:                 benchmarkCount(m.HotPaths),
+		TestCount:                      testCount(m.HotPaths),
+		CandidateCount:                 len(m.HotPaths),
+		ArchitectureComponentCount:     len(m.ArchitectureComponents),
+		ArchitectureFileCount:          len(fileIndex),
+		ArchitectureTargetCommandCount: architectureTargetCommandCount(fileIndex),
+		AssertionCount:                 len(m.Assertions),
+		BenchmarkCommand:               m.BenchmarkCommand,
+		RaceArtifact:                   m.RaceArtifact,
+		LocalPressureCommand:           m.LocalPressureCommand,
+		PressureCandidateArtifact:      m.PressureCandidateArtifact,
+		ArchitectureQueryArtifact:      m.ArchitectureQueryArtifact,
+		BenchmarkHistory:               m.BenchmarkHistory,
+		ManualPressureCommand:          m.ManualPressureCommand,
+		BenchmarkHistoryCommand:        m.BenchmarkHistoryCommand,
+		LocalPprofCommand:              m.LocalPprofCommand,
+		ArchitectureQueryCommand:       m.ArchitectureQueryCommand,
+		RaceCommand:                    m.RaceCommand,
+		PprofCommand:                   m.PprofCommand,
+		LiveLoadCommand:                m.LiveLoadCommand,
+		LocalPressureScenarios:         append([]string(nil), m.LocalPressureScenarios...),
+		Sources:                        append([]pressureSource(nil), m.Sources...),
+		Assertions:                     append([]string(nil), m.Assertions...),
+		ArchitectureComponents:         architectureEvidenceRows(m.ArchitectureComponents),
+		FileArchitectureIndex:          fileIndex,
+		PressureDimensionSummary:       dimensions,
+		HotPaths:                       hotPathEvidenceRows(m.HotPaths),
+		Candidates:                     candidateEvidenceRows(m.HotPaths),
+		Loop:                           m.Loop,
+	}
+}

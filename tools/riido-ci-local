@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+riido_ci_root="${RIIDO_CI_ROOT:-"${repo_root}/../riido-ci"}"
+required_riido_ci_revision="4795cdebfcf4bccaa71ec2344368ad9adf6b1974"
+evidence_relative="out/riido-ci/local-run-evidence.json"
+evidence_path="${repo_root}/${evidence_relative}"
+
+if [[ ! -f "${riido_ci_root}/go.mod" || ! -d "${riido_ci_root}/tools/riidoctl" ]]; then
+  echo "riido-ci checkout not found: ${riido_ci_root}" >&2
+  echo "set RIIDO_CI_ROOT to the local riido-ci repository root" >&2
+  exit 1
+fi
+
+observed_riido_ci_revision="$(git -C "${riido_ci_root}" rev-parse --verify HEAD^{commit} 2>/dev/null || true)"
+if [[ "${observed_riido_ci_revision}" != "${required_riido_ci_revision}" ]]; then
+  echo "riido-ci revision is not the reviewed local evidence runner" >&2
+  exit 1
+fi
+if [[ -n "$(git -C "${riido_ci_root}" status --porcelain --untracked-files=all)" ]]; then
+  echo "riido-ci checkout must be clean" >&2
+  exit 1
+fi
+
+env \
+  -u AWS_ACCESS_KEY_ID \
+  -u AWS_SECRET_ACCESS_KEY \
+  -u AWS_SESSION_TOKEN \
+  -u GITHUB_TOKEN \
+  -u GH_TOKEN \
+  -u OPENAI_API_KEY \
+  -u ANTHROPIC_API_KEY \
+  -u NPM_TOKEN \
+  -u VERCEL_TOKEN \
+  go -C "${riido_ci_root}" run ./tools/riidoctl local-run \
+  -pipeline "${repo_root}/pipelines/control-plane.local-self-check.riido.json" \
+  -repo-root "${repo_root}" \
+  -evidence-out "${evidence_relative}"
+
+if [[ -L "${evidence_path}" || ! -f "${evidence_path}" ]]; then
+  echo "riido-ci evidence is not a regular file" >&2
+  exit 1
+fi
+evidence_mode="$(stat -f '%Lp' "${evidence_path}" 2>/dev/null || stat -c '%a' "${evidence_path}")"
+if [[ "${evidence_mode}" != "600" ]]; then
+  echo "riido-ci evidence must be mode 0600" >&2
+  exit 1
+fi

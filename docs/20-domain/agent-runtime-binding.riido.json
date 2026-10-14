@@ -1,0 +1,64 @@
+{
+  "schema_version": "riido-agent-runtime-binding.v1",
+  "id": "agent-runtime-binding",
+  "title": "Agent Runtime Binding",
+  "riido_task": "RIID-4665",
+  "generated_doc": "docs/20-domain/agent-runtime-binding.md",
+  "workflow": ".github/workflows/agent-runtime-binding.yml",
+  "evidence_artifact": "agent-runtime-binding-evidence",
+  "owner_package": "internal/riidoaiserver",
+  "binding_fields": [
+    {"name": "agent_id", "required": true},
+    {"name": "daemon_id", "required": true},
+    {"name": "device_id", "required": false},
+    {"name": "runtime_id", "required": true},
+    {"name": "runtime_provider", "required": true}
+  ],
+  "binding_rules": [
+    {"id": "unique-agent", "kind": "registry", "rule": "normalized agent_id must be unique"},
+    {"id": "assignment-provider-match", "kind": "assignment", "rule": "requested runtime_provider must match the registered binding"},
+    {"id": "daemon-id-match", "kind": "daemon", "rule": "poll daemon_id must match the registered binding"},
+    {"id": "runtime-id-match", "kind": "daemon", "rule": "poll runtime_id must match the registered binding"},
+    {"id": "device-id-if-bound", "kind": "daemon", "rule": "poll device_id must match only when the binding has a non-empty device_id"},
+    {"id": "daemon-poll-durable-identity", "kind": "daemon", "rule": "a daemon poll validates the current durable agent/runtime/device/daemon identity without applying time-based liveness projection; deleted, rebound, explicitly unavailable, or mismatched bindings remain rejected"},
+    {"id": "nil-registry-no-gate", "kind": "fallback", "rule": "nil registry imposes no binding gate"}
+  ],
+  "device_rules": [
+    {"id": "machine-device-id", "rule": "machine_id derives a stable physical-machine DeviceID"},
+    {"id": "connected-workspaces", "rule": "workspace connections are unioned across enroll/snapshot/connect paths"},
+    {"id": "account-connection-grants", "rule": "each authenticated account and workspace connection is preserved as a device grant without replacing device ownership or credentials"},
+    {"id": "cross-account-binding-routing", "rule": "an agent created by a connected account routes through the existing physical daemon by stable device and runtime ids"},
+    {"id": "legacy-grant-backfill", "rule": "snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants"},
+    {"id": "cross-workspace-bindings", "rule": "daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids"},
+    {"id": "legacy-runtime-prune", "rule": "agentd-local runtimes are pruned from restored snapshots"},
+    {"id": "runtime-liveness-heartbeat-tolerance", "rule": "runtime and daemon bindings remain live across two legacy heartbeat windows and become stale only after 45 seconds without a snapshot"}
+  ],
+  "source_checks": [
+    {"name": "registry-core", "file": "internal/riidoaiserver/agent_registry.go", "contains": ["NewStaticAgentRegistry", "validateAssignmentBinding", "validateDaemonBinding"]},
+    {"name": "registry-tests", "file": "internal/riidoaiserver/agent_registry_test.go", "contains": ["TestStaticAgentRegistryRejectsInvalidBindings", "TestValidateAssignmentBinding", "TestValidateDaemonBinding"]},
+    {"name": "device-identity", "file": "internal/riidoaiserver/device_credential_identity.go", "contains": ["deviceIDForMachine"]},
+    {"name": "connected-workspaces", "file": "internal/riidoaiserver/device_credential_device_upsert.go", "contains": ["ConnectedWorkspaceIDs", "addConnectedWorkspace"]},
+    {"name": "account-connection-grants", "file": "internal/riidoaiserver/device_connection_grant.go", "contains": ["DeviceConnectionGrant", "deviceConnectionSummaryLocked", "deviceConnectionGrantKey"]},
+    {"name": "cross-account-routing-test", "file": "internal/riidoaiserver/device_cross_account_binding_test.go", "contains": ["TestConnectedAccountAgentRoutesThroughExistingDaemonWithoutReplacingDevice", "bindingListContainsAgent"]},
+    {"name": "connection-grant-persistence-test", "file": "internal/riidoaiserver/device_connection_grant_persistence_test.go", "contains": ["TestDeviceConnectionGrantsSurviveSnapshotAndKeepOriginalCredential"]},
+    {"name": "connection-grant-migration-test", "file": "internal/riidoaiserver/device_connection_grant_migration_test.go", "contains": ["TestLegacySnapshotBackfillsOwnerConnectionGrant"]},
+    {"name": "connection-grant-device-index-benchmark", "file": "internal/riidoaiserver/device_connection_grant_benchmark_test.go", "contains": ["BenchmarkDeviceConnectionSummaryIsDeviceScoped", "10_000"]},
+    {"name": "grant-snapshot-part", "file": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go", "contains": ["DEVICE_CONNECTION_GRANTS"]},
+    {"name": "legacy-runtime-prune", "file": "internal/riidoaiserver/device_runtime_legacy.go", "contains": ["pruneLegacyRuntimeRecords"]},
+    {"name": "cross-workspace-bindings", "file": "internal/riidoaiserver/device_daemon_binding_test.go", "contains": ["TestDaemonAgentBindingsIncludeAgentsFromOtherConnectedWorkspaces", "TestDaemonAgentBindingsIncludeOwnerRuntimeAgentWithoutWorkspaceConnection", "stuck \"queued\" forever"]},
+    {"name": "daemon-bindings", "file": "internal/riidoaiserver/ai_agent_daemon_runtime.go", "contains": ["ListAIAgentDaemonAgentBindings", "runtime binding is authoritative", "binding.DeviceID"]},
+    {"name": "daemon-poll-durable-binding", "file": "internal/riidoaiserver/ai_agent_daemon_binding_lookup.go", "contains": ["LookupDaemonBinding", "authenticated poll is fresh liveness evidence", "runtimeAvailableForBinding"]},
+    {"name": "runtime-liveness-heartbeat-tolerance", "file": "internal/riidoaiserver/device_runtime_liveness_binding_test.go", "contains": ["TestAgentBindingRemainsAvailableAcrossLegacyHeartbeatJitter", "21 * time.Second"]},
+    {"name": "daemon-poll-stale-binding-test", "file": "internal/riidoaiserver/device_daemon_poll_stale_binding_test.go", "contains": ["TestDaemonPollUsesDurableBindingAcrossStaleSnapshot", "stale snapshot must remain unavailable", "wrong daemon poll"]},
+    {"name": "daemon-poll-unavailable-binding-test", "file": "internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go", "contains": ["TestDaemonPollRejectsExplicitlyUnavailableRuntime", "RuntimeAvailabilityOffline", "RuntimeDetectionStateMissing"]},
+    {"name": "focused-ci", "file": ".github/workflows/agent-runtime-binding.yml", "contains": ["ValidateAssignmentBinding|ValidateDaemonBinding|DaemonPoll", "Verify binding import boundary"]}
+  ],
+  "loop": {
+    "observation": "A second account could connect to an existing physical daemon, while long-window testnet evidence still showed sporadic binding_agent_not_registered poll rejections whenever an otherwise valid daemon snapshot aged past the read-model liveness threshold.",
+    "hypothesis": "Stable physical identity, persisted account grants, and a daemon-poll-specific durable identity lookup can preserve security boundaries without treating an authenticated matching poll as an unregistered agent merely because its preceding snapshot is stale.",
+    "execute": "Persist connection grants, expose a semantic revision, backfill legacy snapshots, retain read-model liveness projection, and validate daemon polls against the current durable binding while rejecting explicit unavailability and identity mismatch.",
+    "evaluate": "The verifier and focused tests prove stable device/runtime ids, cross-account routing, credential survival, legacy backfill, stale read-model exclusion, successful matching polls across stale snapshots, and fail-closed mismatched or explicitly unavailable polls.",
+    "retrospective": "Registration identity and availability projection are different facts: UI and binding discovery remain time-sensitive, while a matching authenticated poll is itself liveness evidence and must be checked against durable identity rather than a stale projection."
+  },
+  "non_goals": ["assignment queue state", "active lease refresh", "provider status persistence", "HTTP routing ownership", "AWS/DynamoDB/EventBridge/Terraform wiring"]
+}
