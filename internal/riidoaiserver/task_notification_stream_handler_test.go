@@ -32,14 +32,14 @@ func TestNotificationMultiplexOneConnectionAndDeliveryScope(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	request, _ := http.NewRequestWithContext(ctx, "GET", httpServer.URL+query, nil)
+	request, _ := http.NewRequestWithContext(ctx, http.MethodGet, httpServer.URL+query, nil)
 	request.Header.Set("Authorization", "Bearer local-test")
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		t.Fatal(response.StatusCode)
 	}
 	store.mu.Lock()
@@ -71,7 +71,7 @@ func TestNotificationMultiplexOneConnectionAndDeliveryScope(t *testing.T) {
 func TestNotificationMultiplexRejectsUnapprovedWorkspace(t *testing.T) {
 	server := Server{aiAgent: NewDevelopmentAIAgentClientStore()}
 	server.config.Authorizer = multiplexNotificationAuthorizer{}
-	request := httptest.NewRequest("GET", "/?notifications=1&workspace_id=allowed-0&workspace_id=outside", nil)
+	request := httptest.NewRequest(http.MethodGet, "/?notifications=1&workspace_id=allowed-0&workspace_id=outside", nil)
 	request.Header.Set("Authorization", "Bearer local-test")
 	response := httptest.NewRecorder()
 	server.handleAIAgentClientEvents(response, request)

@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -121,7 +122,7 @@ func (a notificationAuthorizer) Authorize(_ context.Context, _ string, req Autho
 }
 
 func TestTaskNotificationRechecksTaskAccess(t *testing.T) {
-	request := httptest.NewRequest("GET", "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	request.Header.Set("Authorization", "Bearer token")
 	principal := AuthorizationResult{PrincipalID: "assigner", WorkspaceID: "ws"}
 	event := ClientStreamEvent{EventType: AgentClientEventTaskNotification, Payload: AgentTaskNotificationEvent{RecipientPrincipalID: "assigner", WorkspaceID: "ws", TaskID: "task"}}
@@ -145,7 +146,7 @@ func TestNotificationRecipientComesFromAuthenticatedAssignment(t *testing.T) {
 	defer store.Close()
 	server := Server{assignment: store}
 	server.config.Authorizer = notificationAssignAuthorizer{}
-	request := httptest.NewRequest("POST", "/v1/component-tasks/task/assignment", strings.NewReader(`{"component_id":"task","agent_id":"agent","runtime_provider":"codex","prompt":"work","created_by":"victim","workspace_id":"other"}`))
+	request := httptest.NewRequest(http.MethodPost, "/v1/component-tasks/task/assignment", strings.NewReader(`{"component_id":"task","agent_id":"agent","runtime_provider":"codex","prompt":"work","created_by":"victim","workspace_id":"other"}`))
 	request.Header.Set("Authorization", "Bearer token")
 	response := httptest.NewRecorder()
 	server.handleComponentTaskAssign(response, request, "task")
@@ -226,7 +227,7 @@ func TestTaskNotificationIsNotReplayedOnNewSubscription(t *testing.T) {
 	client.events = []ClientStreamEvent{{Seq: 1, EventType: AgentClientEventTaskNotification, Payload: AgentTaskNotificationEvent{EventType: AgentClientEventTaskNotification, WorkspaceID: "workspace", RecipientPrincipalID: "assigner", TaskID: "task", EventID: "old"}}}
 	server := Server{aiAgent: client}
 	server.config.Authorizer = notificationAssignAuthorizer{}
-	request := httptest.NewRequest("GET", "/v1/client/ai-agent/events?replay=1", nil)
+	request := httptest.NewRequest(http.MethodGet, "/v1/client/ai-agent/events?replay=1", nil)
 	request.Header.Set("Authorization", "Bearer token")
 	response := httptest.NewRecorder()
 	server.handleAIAgentClientEvents(response, request)
