@@ -383,7 +383,10 @@
         "client: use task_agent_participants for assigned participants and assigned_agent_profiles for legacy active avatar hints; use separate APIs for candidate selection and task-thread history",
         "server: retain completed, stopped, and failed Agents in task_agent_participants until explicit participant removal; execution status does not delete membership",
         "server: explicit participant removal omits that Agent from task_agent_participants without deleting or rewriting terminal execution history",
-        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution"
+        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution",
+        "server: latest_assignment_id identifies the latest retained execution of this task Agent regardless of execution status; omit it when no execution is retained",
+        "client: use latest_assignment_id only as the observed removal guard; membership and execution ownership are independent of this identifier",
+        "server: participant removal cancels the observed active executions before removing membership and returns 409 without removing membership if a new execution appears before the removal commit, including requests without assignment_id"
       ]
     },
     {
@@ -1413,7 +1416,12 @@
           {
             "name": "is_stop_required",
             "type": "boolean",
-            "description": "At least one active execution for this participant requires stopping before removal."
+            "description": "At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID."
+          },
+          {
+            "name": "latest_assignment_id",
+            "type": "string",
+            "description": "Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained."
           }
         ]
       }
@@ -2031,6 +2039,11 @@
           {
             "name": "agent_id",
             "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string",
+            "description": "Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership."
           },
           {
             "name": "reason",
@@ -2834,6 +2847,25 @@
           }
         ]
       }
+    },
+    {
+      "name": "DeleteAIAgentTaskAgentAssignmentRequest",
+      "schema": {
+        "name": "DeleteAIAgentTaskAgentAssignmentRequest",
+        "description": "Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.",
+        "type": "object",
+        "properties": [
+          {
+            "name": "assignment_id",
+            "type": "string",
+            "description": "Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained."
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
     }
   ],
   "operations": [
@@ -3464,7 +3496,8 @@
         "ref": "AIAgentTaskActionResponse"
       },
       "scenario_ids": [
-        "unassignAIAgentTask.participant-removal-stops-agent-work"
+        "unassignAIAgentTask.participant-removal-stops-agent-work",
+        "unassignAIAgentTask.interleaved-execution-prevents-participant-removal"
       ]
     },
     {
@@ -4381,7 +4414,8 @@
       "scenario_ids": [
         "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
         "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
-        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history"
+        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+        "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state"
       ]
     },
     {
@@ -4501,7 +4535,10 @@
       "response": {
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
-      }
+      },
+      "scenario_ids": [
+        "unassignAIAgentTaskV2.interleaved-execution-prevents-participant-removal"
+      ]
     },
     {
       "operation_id": "listAIAgentTaskThreadsV2",
@@ -4955,7 +4992,7 @@
           "v2.aiAgent.tasks.threadStreamSubscription"
         ]
       },
-      "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+      "summary": "task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)",
       "auth": {
         "scheme": "apiKey",
         "header": "X-Riido-AI-Agent-Token",
@@ -4966,12 +5003,16 @@
         ]
       },
       "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "DeleteAIAgentTaskAgentAssignmentRequest"
+      },
       "response": {
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
       },
       "scenario_ids": [
-        "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
+        "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
+        "deleteAIAgentTaskAgentAssignmentV2.interleaved-execution-prevents-participant-removal"
       ]
     },
     {
@@ -5328,6 +5369,14 @@
       "then": "response와 event stream은 stopped_by_user_request를 사용하고, 중지된 row를 숨길지는 client presentation이 결정합니다"
     },
     {
+      "scenario_id": "unassignAIAgentTask.interleaved-execution-prevents-participant-removal",
+      "operation_id": "unassignAIAgentTask",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a participant removal observes retained execution A while a newer durable execution B exists before removal commits, including B not yet published to the task-thread read model",
+      "when": "the DELETE commits membership removal with or without assignment_id, regardless of the new execution status",
+      "then": "the DELETE returns 409 and preserves membership and B; any already-cancelled A stays cancelled and other task/Agent executions are unaffected"
+    },
+    {
       "scenario_id": "listAIAgentTaskThreads.completed-task-does-not-open-stream",
       "operation_id": "listAIAgentTaskThreads",
       "name": "completed task does not open stream",
@@ -5616,12 +5665,28 @@
       "then": "only the removed Agent is absent from task_agent_participants; its completed result, failure diagnostics, and thread history remain unchanged"
     },
     {
+      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state",
+      "operation_id": "listWorkspaceAssignedAgentProfilesV2",
+      "name": "latest removal guard is independent of historical waiting state",
+      "given": "a retained waiting-for-user execution A is followed by the same Agent execution B, which may be running, completed, or failed",
+      "when": "the client reads the workspace task Agent participants",
+      "then": "membership stays selected and latest_assignment_id is B; is_stop_required reflects only current active execution; no retained history omits the optional ID"
+    },
+    {
       "scenario_id": "assignAIAgentTaskV2.workspace-scoped-assignment-excludes-team-and-openapi-key",
       "operation_id": "assignAIAgentTaskV2",
       "name": "workspace scoped assignment excludes team and OpenAPI key",
       "given": "the client has workspace_id from the existing workspace route, task_id from the task route, and selected a visible agent_id",
       "when": "client calls riido.v2.aiAgent.tasks.assign",
       "then": "the URL scopes workspace_id and task_id while the request body carries agent_id only; team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are not generated assignment inputs"
+    },
+    {
+      "scenario_id": "unassignAIAgentTaskV2.interleaved-execution-prevents-participant-removal",
+      "operation_id": "unassignAIAgentTaskV2",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a participant removal observes retained execution A while a newer durable execution B exists before removal commits, including B not yet published to the task-thread read model",
+      "when": "the DELETE commits membership removal with or without assignment_id, regardless of the new execution status",
+      "then": "the DELETE returns 409 and preserves membership and B; any already-cancelled A stays cancelled and other task/Agent executions are unaffected"
     },
     {
       "scenario_id": "createAIAgentProfileThumbnailUploadV2.workspace-scoped-profile-image-upload-precedes-agent-save",
@@ -5659,9 +5724,17 @@
       "scenario_id": "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
       "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
       "name": "path agent id selects removed assignment",
-      "given": "a task has multiple active AI Agent threads",
+      "given": "a task has multiple active executions for one Agent and other Agent participants",
       "when": "client removes one agent through riido.v2.aiAgent.tasks.agentAssignments.delete",
-      "then": "only the path agent_id target is stopped and other active thread filters remain active"
+      "then": "all observed active executions for the path agent_id are cancelled and its membership is removed; other task/Agent executions and terminal results, failure diagnostics, and thread history remain unchanged"
+    },
+    {
+      "scenario_id": "deleteAIAgentTaskAgentAssignmentV2.interleaved-execution-prevents-participant-removal",
+      "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a participant removal observes retained execution A while a newer durable execution B exists before removal commits, including B not yet published to the task-thread read model",
+      "when": "the DELETE commits membership removal with or without assignment_id, regardless of the new execution status",
+      "then": "the DELETE returns 409 and preserves membership and B; any already-cancelled A stays cancelled and other task/Agent executions are unaffected"
     },
     {
       "scenario_id": "stopAIAgentTaskAgentAssignmentV2.path-agent-id-selects-stopped-assignment",

@@ -2,16 +2,19 @@ package riidoaiserver
 
 import (
 	"sort"
+	"strings"
 	"time"
 )
 
 // Membership belongs to the task, independently of retained execution history.
 // Removed records are tombstones: restoring a snapshot must not reassign an agent.
 type AIAgentTaskMembership struct {
-	AgentID       string                          `json:"agent_id"`
-	AgentSnapshot *AIAgentTaskThreadAgentSnapshot `json:"agent_snapshot,omitempty"`
-	AssignedAt    time.Time                       `json:"assigned_at"`
-	RemovedAt     *time.Time                      `json:"removed_at,omitempty"`
+	DurableGeneration      string                          `json:"durable_generation,omitempty"`
+	IntentGateAssignmentID string                          `json:"intent_gate_assignment_id,omitempty"`
+	AgentID                string                          `json:"agent_id"`
+	AgentSnapshot          *AIAgentTaskThreadAgentSnapshot `json:"agent_snapshot,omitempty"`
+	AssignedAt             time.Time                       `json:"assigned_at"`
+	RemovedAt              *time.Time                      `json:"removed_at,omitempty"`
 }
 
 type TaskAgentParticipantCollection struct {
@@ -24,6 +27,7 @@ type TaskAgentParticipantRecord struct {
 	ProfileThumbnailURL string `json:"profile_thumbnail_url,omitempty"`
 	IsOwnedByViewer     bool   `json:"is_owned_by_viewer"`
 	IsStopRequired      bool   `json:"is_stop_required"`
+	LatestAssignmentID  string `json:"latest_assignment_id,omitempty"`
 }
 
 func copyTaskAgentMemberships(source map[string]map[string]AIAgentTaskMembership) map[string]map[string]AIAgentTaskMembership {
@@ -133,6 +137,13 @@ func (s *DevelopmentAIAgentClientStore) taskAgentParticipantsLocked(principal Au
 			participant := TaskAgentParticipantRecord{
 				AgentID: agentID, Name: snapshot.Name, ProfileThumbnailURL: snapshot.ProfileThumbnailURL,
 				IsOwnedByViewer: snapshot.OwnerPrincipalID == principal.PrincipalID,
+			}
+			if latest, ok := s.latestTaskThreadForAgentLocked(taskID, agentID); ok {
+				// A cached ordinary writer may retain an older thread. Expose an
+				// optional retained ID only when it agrees with durable membership.
+				if member.DurableGeneration == "" || member.IntentGateAssignmentID == latest.AssignmentID || strings.SplitN(member.DurableGeneration, "@", 2)[0] == latest.AssignmentID {
+					participant.LatestAssignmentID = latest.AssignmentID
+				}
 			}
 			for _, run := range s.taskThreads[taskID] {
 				if run.AgentID == agentID && taskThreadHasActiveStream(run) && run.AssignmentState != AgentAssignmentStateStopping {

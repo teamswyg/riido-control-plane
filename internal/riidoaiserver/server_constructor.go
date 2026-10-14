@@ -42,6 +42,10 @@ func NewServer(config ServerConfig) Server {
 	if store, ok := config.AIAgentClient.(AIAgentDaemonRuntimeStore); ok {
 		daemonRuntime = store
 	}
+	executionGate := taskAgentExecutionGate(newTaskAgentExecutionGates())
+	if owner, ok := config.Assignment.(interface{ sharedTaskAgentExecutionGate() taskAgentExecutionGate }); ok {
+		executionGate = owner.sharedTaskAgentExecutionGate()
+	}
 	return Server{
 		assignment:               config.Assignment,
 		agentCatalog:             agentCatalog,
@@ -53,6 +57,7 @@ func NewServer(config ServerConfig) Server {
 		providerRead:             providerRead,
 		devices:                  devices,
 		aiAgentGlobalReconcile:   newAIAgentGlobalReconcileGate(config.AIAgentGlobalReconcileMinInterval),
+		taskAgentExecutionGate:   executionGate,
 		config:                   config,
 	}
 }

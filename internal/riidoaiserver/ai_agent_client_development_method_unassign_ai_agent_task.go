@@ -21,19 +21,21 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	agent, ok := s.visibleAgent(principal, req.AgentID)
+	if err := validateTaskAgentMembershipRemovalObservation(taskID, req.AgentID, req.membershipRemovalFence, s.taskThreads[taskID]); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
+	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && isIntentGateAssignmentID(req.AssignmentID) && req.membershipRemovalFence.intentGateAssignmentID != req.AssignmentID {
+		return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
+	}
+	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && !isIntentGateAssignmentID(req.AssignmentID) {
+		if req.AssignmentID != "" && strings.SplitN(req.membershipRemovalFence.durableGeneration, "@", 2)[0] != req.AssignmentID {
+			return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
+		}
+		req.AssignmentID = ""
+	}
+	agent, ok := s.taskAgentForMembershipRemovalLocked(principal, taskID, req.AgentID, req.AssignmentID)
 	if !ok {
-		if thread, found := s.taskThreadForUnassignTargetLocked(taskID, req.AgentID, req.AssignmentID); found {
-			agent, ok = s.agentFromTaskThreadLocked(principal, thread)
-		}
-		if !ok && req.AssignmentID == "" {
-			if member, found := s.taskAgentMemberships[taskID][req.AgentID]; found && member.RemovedAt == nil {
-				agent, ok = s.agentFromTaskThreadLocked(principal, AIAgentTaskThreadRecord{AgentID: member.AgentID, AgentSnapshot: member.AgentSnapshot})
-			}
-		}
-		if !ok {
-			return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
-		}
+		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
 	if err := validateMembershipRemovalAssignment(req.AgentID, req.AssignmentID, s.taskThreads[taskID]); err != nil {
 		return AIAgentTaskActionResponse{}, err
@@ -67,7 +69,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
-	if req.AssignmentID != "" {
+	if req.AssignmentID != "" && req.membershipRemovalFence == nil {
 		s.markTaskAgentAssignmentThreadStoppedLocked(taskID, agent.AgentID, req.AssignmentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	} else {
 		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)

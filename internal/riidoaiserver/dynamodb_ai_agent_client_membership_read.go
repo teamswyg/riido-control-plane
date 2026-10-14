@@ -18,8 +18,15 @@ func (s *DynamoDBAIAgentClientSnapshot) readMembershipCommit(ctx context.Context
 	type action struct {
 		Get get `json:"Get"`
 	}
-	actions := make([]action, 0, 2)
-	for _, sk := range []string{dynamoDBAIAgentClientSnapshotSK, dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships)} {
+	keys := []string{dynamoDBAIAgentClientSnapshotSK, dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships)}
+	if fresh, _ := ctx.Value(taskAgentFreshSnapshotContextKey{}).(bool); fresh {
+		keys = []string{dynamoDBAIAgentClientSnapshotSK}
+		for _, part := range dynamoDBAIAgentClientSnapshotPartNames {
+			keys = append(keys, dynamoDBAIAgentClientSnapshotPartSK(part))
+		}
+	}
+	actions := make([]action, 0, len(keys))
+	for _, sk := range keys {
 		actions = append(actions, action{get{s.tableName, map[string]map[string]string{"pk": {"S": dynamoDBAIAgentClientSnapshotPK}, "sk": {"S": sk}}}})
 	}
 	payload, err := json.Marshal(struct {
@@ -42,12 +49,24 @@ func (s *DynamoDBAIAgentClientSnapshot) readMembershipCommit(ctx context.Context
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
-	if len(response.Responses) != 2 || len(response.Responses[0].Item) == 0 {
+	if len(response.Responses) != len(keys) {
+		return nil, fmt.Errorf("dynamodb membership commit response is incomplete")
+	}
+	if len(response.Responses[0].Item) == 0 {
+		if len(items) == 0 {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("dynamodb membership commit response is incomplete")
 	}
 	result := make([]map[string]map[string]string, 0, len(items))
 	for _, item := range items {
-		if dynamoDBStringValue(item, "sk") != dynamoDBAIAgentClientSnapshotSK && dynamoDBAIAgentClientSnapshotPartName(item) != dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships {
+		replaced := false
+		for _, sk := range keys {
+			if dynamoDBStringValue(item, "sk") == sk {
+				replaced = true
+			}
+		}
+		if !replaced {
 			result = append(result, item)
 		}
 	}
