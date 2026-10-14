@@ -21310,7 +21310,63 @@
       "decision": "Admit only a source-ready, public, exact two-operation owner receiver registered at /owner/graphql. healthCheck is exactly 200; fireError always returns null plus the pinned error; aliases, repeated selections, fragments, unknown operations, malformed JSON, and missing handler configuration fail closed. The changed route and syntax-hash surfaces are now bound to executable evidence, while runtime_wired, deployment, effect, performance improvement, and public schema credit remain zero.",
       "next_loop": "closed_loop_candidate"
     },
-    {"id": "agent_execution_delivery_modular_integration_20261013", "observation": "The reviewed 5827 source predates main module decomposition. Partial message keys disappeared from the public wire and replacement lines reused sequence numbers; shared state updates also needed serialization for local file snapshots.", "hypothesis": "An additive public discriminator, monotonic progress sequence and serialized snapshot boundary can improve live execution visibility while preserving current main replay cursors, v3 conversations, authentication and performance controls.", "claims": ["sse_reconnect_must_resume_after_last_event_id", "thread_history_v3_must_expose_stable_conversation_grouping"], "changes": [{"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_api.go"}, {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_next_thread_progress_seq_locked.go"}, {"kind": "code", "path": "internal/riidoaiserver/server_assignment_request.go"}, {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"}], "verifiers": [{"kind": "test", "path": "internal/riidoaiserver/execution_delivery_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"}, {"kind": "tool", "path": "tools/loopregistry"}], "evidence": [{"kind": "artifact", "path": "agent-execution-modular-integration-local-tests-20261013", "redacted": true}], "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence.", "next_loop": "ai_agent_load_harness"}
+    {"id": "agent_execution_delivery_modular_integration_20261013", "observation": "The reviewed 5827 source predates main module decomposition. Partial message keys disappeared from the public wire and replacement lines reused sequence numbers; shared state updates also needed serialization for local file snapshots.", "hypothesis": "An additive public discriminator, monotonic progress sequence and serialized snapshot boundary can improve live execution visibility while preserving current main replay cursors, v3 conversations, authentication and performance controls.", "claims": ["sse_reconnect_must_resume_after_last_event_id", "thread_history_v3_must_expose_stable_conversation_grouping"], "changes": [{"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_api.go"}, {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_next_thread_progress_seq_locked.go"}, {"kind": "code", "path": "internal/riidoaiserver/server_assignment_request.go"}, {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"}], "verifiers": [{"kind": "test", "path": "internal/riidoaiserver/execution_delivery_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"}, {"kind": "tool", "path": "tools/loopregistry"}], "evidence": [{"kind": "artifact", "path": "agent-execution-modular-integration-local-tests-20261013", "redacted": true}], "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence.", "next_loop": "ai_agent_load_harness"},
+    {
+      "id": "persistent_agent_participant_review_5841",
+      "observation": "Terminal participant removal unconditionally overwrote execution data; optional Dynamo membership parts could be restored without CURRENT committing them; additive assignment mutations omitted the participant query invalidation tag.",
+      "hypothesis": "Separating membership deletion from terminal execution projection, verifying CURRENT membership hashes and payload digests, and invalidating the workspace participant cache preserves durable participant semantics.",
+      "claims": [
+        "stop_reassign_must_not_revive_or_mutate_inactive_threads"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_unassign_ai_agent_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_decode.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/participant_invalidation_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/participant_invalidation_test.go"
+        }
+      ],
+      "decision": "Keep terminal threads and peer activity unchanged on explicit removal. Ignore unadvertised stale membership parts and reject advertised missing/mismatched/corrupt parts rather than resurrect or silently discard membership. Preserve each repository projection and regenerate only from its owning DSL. Actual production migration remains a separate deployment gate.",
+      "next_loop": "ai_thread_history"
+    }
   ],
   "loop": {
     "observation": "Evidence artifacts existed, but the reasoning chain from observation to next loop was still scattered across generated readers and PR memory.",

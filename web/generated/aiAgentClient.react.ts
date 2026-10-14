@@ -640,7 +640,7 @@ export interface CreateAIAgentProfileThumbnailUploadV2ReactEndpoint extends core
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
  * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
  * 접근 예시: `riido.v2.aiAgent.tasks.assignedAgentProfiles`
@@ -1356,7 +1356,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.create`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.create`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.create`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly create: CreateAIAgentTaskAgentAssignmentV2ReactEndpoint;
   /**
@@ -1364,7 +1364,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly delete: DeleteAIAgentTaskAgentAssignmentV2ReactEndpoint;
   /**
@@ -1372,7 +1372,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.stop`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.stop`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.stop`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly stop: StopAIAgentTaskAgentAssignmentV2ReactEndpoint;
 }
@@ -1416,7 +1416,7 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsV2ReactEndpoint;
   /**
-   * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+   * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
    * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
    * 접근 예시: `riido.v2.aiAgent.tasks.assignedAgentProfiles`

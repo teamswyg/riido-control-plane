@@ -45,10 +45,20 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         clientMessageTaskStopped,
 	}
+	active := false
 	if thread, ok := s.taskThreadForUnassignTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
+		active = taskThreadHasActiveStream(thread)
+		if !active {
+			response.WorkStatus = thread.WorkStatus
+			response.AssignmentState = thread.AssignmentState
+			response.CommentKind = thread.CommentKind
+			response.Message = thread.Message
+			response.ResultMessage = thread.ResultMessage
+			response.FailureDiagnostics = copyFailureDiagnostics(thread.FailureDiagnostics)
+		}
 	} else if req.AssignmentID != "" {
 		return AIAgentTaskActionResponse{}, errors.New("assignment_id does not belong to task agent")
 	} else {
@@ -59,12 +69,17 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	} else {
 		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	}
-	s.upsertTaskThreadFromActionLocked(response, "")
+	// Removing membership is not a new execution or a terminal status update.
+	if active {
+		s.upsertTaskThreadFromActionLocked(response, "")
+	}
 	if _, ok := s.agents[agent.AgentID]; ok {
 		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 		s.agents[agent.AgentID] = agent
 	}
 	s.removeTaskAgentMemberLocked(taskID, agent)
-	s.appendAgentTaskActionEvent(response)
+	if active {
+		s.appendAgentTaskActionEvent(response)
+	}
 	return response, nil
 }
