@@ -45,19 +45,6 @@ func TestDynamoDBAIAgentClientSnapshotWritePressure(t *testing.T) {
 	}
 }
 
-func decodeDynamoDBAIAgentClientSnapshotPut(t *testing.T, request capturedDynamoDBRequest) struct {
-	Item map[string]map[string]string `json:"Item"`
-} {
-	t.Helper()
-	var payload struct {
-		Item map[string]map[string]string `json:"Item"`
-	}
-	if err := json.Unmarshal(request.body, &payload); err != nil {
-		t.Fatalf("decode PutItem payload: %v", err)
-	}
-	return payload
-}
-
 func drainDynamoDBAIAgentClientSnapshotRequests(requests <-chan capturedDynamoDBRequest) []capturedDynamoDBRequest {
 	out := make([]capturedDynamoDBRequest, 0, len(requests))
 	for len(requests) > 0 {
