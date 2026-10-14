@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -23,7 +24,7 @@ func TestTaskAgentExecutionGateScopesAndReleasesCancelledWaiters(t *testing.T) {
 	cancel()
 	select {
 	case err := <-waiting:
-		if err != context.Canceled {
+		if !errors.Is(err, context.Canceled) {
 			t.Fatalf("cancel err=%v", err)
 		}
 	case <-time.After(time.Second):

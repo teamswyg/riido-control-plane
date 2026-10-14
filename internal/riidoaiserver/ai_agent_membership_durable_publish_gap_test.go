@@ -29,18 +29,22 @@ func (s *durableBeforePublishGate) waitPublication(ctx context.Context, a Assign
 		return Assignment{}, ctx.Err()
 	}
 }
+
 func (s *durableBeforePublishGate) AssignTaskReplacement(ctx context.Context, taskID string, req AssignRequest) (Assignment, error) {
 	a, err := s.Store.AssignTaskReplacement(ctx, taskID, req)
 	return s.waitPublication(ctx, a, err)
 }
+
 func (s *durableBeforePublishGate) AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (Assignment, error) {
 	a, err := s.Store.AssignTaskAdditive(ctx, taskID, req)
 	return s.waitPublication(ctx, a, err)
 }
+
 func (s *durableBeforePublishGate) AssignTask(ctx context.Context, taskID string, req AssignRequest) (Assignment, error) {
 	a, err := s.Store.AssignTask(ctx, taskID, req)
 	return s.waitPublication(ctx, a, err)
 }
+
 func TestHTTPMembershipRemovalWaitsForDurablePublication(t *testing.T) {
 	for _, mode := range []string{"replacement", "additive", "reply"} {
 		for _, state := range []string{"queued", "completed"} {
@@ -48,7 +52,9 @@ func TestHTTPMembershipRemovalWaitsForDurablePublication(t *testing.T) {
 		}
 	}
 }
+
 func checkMembershipRemovalDurablePublication(t *testing.T, mode, state string) {
+	t.Helper()
 	const taskID, agentID, token = "task-review-durable-before-publish", "agent-public-openclaw", "ai-agent-token"
 	client := NewDevelopmentAIAgentClientStore()
 	assignments := &durableBeforePublishGate{Store: NewStoreWithConfig(StoreConfig{AgentRegistry: client}), entered: make(chan Assignment, 1), resume: make(chan struct{})}
@@ -86,7 +92,7 @@ func checkMembershipRemovalDurablePublication(t *testing.T, mode, state string) 
 	}
 
 	if state == "completed" {
-		poll, err := assignments.Store.PollAgent(context.Background(), agentID, PollRequest{DaemonID: "daemon-shared-studio", DeviceID: "device-shared-studio", RuntimeID: "runtime-openclaw-shared"})
+		poll, err := assignments.PollAgent(context.Background(), agentID, PollRequest{DaemonID: "daemon-shared-studio", DeviceID: "device-shared-studio", RuntimeID: "runtime-openclaw-shared"})
 		if err != nil || poll.Assignment == nil || poll.Assignment.ID != next.ID {
 			t.Fatalf("unpublished poll=%+v err=%v", poll, err)
 		}

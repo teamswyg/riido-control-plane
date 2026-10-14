@@ -5,7 +5,7 @@ import "context"
 func (s *PersistentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
 	s.operationMu.Lock()
 	defer s.operationMu.Unlock()
-	// Replies that only append dialogue do not own membership.
+	// Replies that only append dialog do not own membership.
 	if req.membershipPublicationGeneration == "" && req.AssignmentID == "" {
 		if err := s.reloadSnapshot(ctx); err != nil {
 			return AIAgentTaskActionResponse{}, err

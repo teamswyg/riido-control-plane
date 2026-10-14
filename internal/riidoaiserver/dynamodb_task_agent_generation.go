@@ -9,7 +9,10 @@ import (
 const taskAgentGenerationSK = "GENERATION"
 
 func dynamoDBTaskAgentPK(taskID, agentID string) string {
-	identity, _ := json.Marshal([2]string{taskID, agentID})
+	identity, err := json.Marshal([2]string{taskID, agentID})
+	if err != nil {
+		panic(fmt.Sprintf("encode task Agent string identity: %v", err))
+	}
 	return "TASK_AGENT_EXECUTION#" + sha256Hex(identity)
 }
 
@@ -54,18 +57,17 @@ func (s *DynamoDBAssignmentOperationStore) saveTaskAgentCreation(ctx context.Con
 	if err == nil {
 		return nil
 	}
-	if isDynamoDBTransactionContention(err) {
-		// A canceled transaction is not automatically an idempotent replay.
-		journal, found, readErr := s.getTaskAgentItem(ctx, map[string]map[string]string{"pk": {"S": dynamoDBAssignmentOperationPK}, "sk": {"S": assignmentOperationSortKey(record)}}, credentials)
-		if readErr != nil {
-			return readErr
-		}
-		if found {
-			previous, decodeErr := assignmentOperationRecordFromDynamoDBItem(journal)
-			projection, exists, projectionErr := s.loadAssignmentProjection(ctx, record.AssignmentID, credentials)
-			if decodeErr == nil && projectionErr == nil && exists && sameTaskAgentCreation(previous.Assignment, record.Assignment) && sameTaskAgentCreation(projection.Assignment, record.Assignment) {
-				return nil
-			}
+	// Any failed response may follow a committed transaction. Confirm the exact
+	// creation before reporting failure; a missing or different record is not success.
+	journal, found, readErr := s.getTaskAgentItem(ctx, map[string]map[string]string{"pk": {"S": dynamoDBAssignmentOperationPK}, "sk": {"S": assignmentOperationSortKey(record)}}, credentials)
+	if readErr != nil {
+		return readErr
+	}
+	if found {
+		previous, decodeErr := assignmentOperationRecordFromDynamoDBItem(journal)
+		projection, exists, projectionErr := s.loadAssignmentProjection(ctx, record.AssignmentID, credentials)
+		if decodeErr == nil && projectionErr == nil && exists && sameTaskAgentCreation(previous.Assignment, record.Assignment) && sameTaskAgentCreation(projection.Assignment, record.Assignment) {
+			return nil
 		}
 	}
 	return fmt.Errorf("dynamodb create task Agent execution: %w", err)

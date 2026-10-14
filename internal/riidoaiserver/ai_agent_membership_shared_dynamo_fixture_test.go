@@ -18,6 +18,9 @@ type membershipSharedDynamoFixture struct {
 	beforeOwnedSnapshotRead   func()
 	rejectScopedPublication   bool
 	ambiguousScopedCommit     bool
+	ambiguousCreationCommit   bool
+	loseCreationResponse      bool
+	rejectCreation            bool
 	beforePublicationRecovery func()
 }
 

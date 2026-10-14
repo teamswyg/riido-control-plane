@@ -116,6 +116,14 @@ func (f *membershipSharedDynamoFixture) handle(t *testing.T, w http.ResponseWrit
 		}
 		write(map[string]any{"Responses": responses})
 	case dynamoDBTransactWriteTarget:
+		if f.rejectCreation {
+			for _, action := range p.TransactItems {
+				if action.Put != nil && action.Put.Item["sk"]["S"] == taskAgentGenerationSK {
+					fail("TransactionCanceledException")
+					return
+				}
+			}
+		}
 		for _, action := range p.TransactItems {
 			if action.Delete != nil {
 				if !f.condition(t, action.Delete) {
@@ -139,6 +147,18 @@ func (f *membershipSharedDynamoFixture) handle(t *testing.T, w http.ResponseWrit
 			}
 			if action.Delete != nil {
 				delete(f.items, membershipDynamoKey(action.Delete.Key))
+			}
+		}
+		if f.ambiguousCreationCommit || f.loseCreationResponse {
+			for _, action := range p.TransactItems {
+				if action.Put != nil && action.Put.Item["sk"]["S"] == taskAgentGenerationSK {
+					if f.loseCreationResponse {
+						panic(http.ErrAbortHandler)
+					}
+					w.WriteHeader(http.StatusServiceUnavailable)
+					write(map[string]string{"__type": "InternalServerError", "message": "creation committed response lost"})
+					return
+				}
 			}
 		}
 		if f.ambiguousScopedCommit {

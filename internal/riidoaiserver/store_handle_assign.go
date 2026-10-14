@@ -3,9 +3,10 @@ package riidoaiserver
 import (
 	"errors"
 	"fmt"
-	"github.com/teamswyg/riido-contracts/provider/capability"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/teamswyg/riido-contracts/provider/capability"
 )
 
 func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest, allowConcurrentTaskAgents, forceNewAssignment bool) (Assignment, error) {
