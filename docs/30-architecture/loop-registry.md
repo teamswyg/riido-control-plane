@@ -257,7 +257,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `114` | `46` | `b2cf14c6aaa1` |
 | `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `26` | `6` | `bfdfd18c9542` |
 | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` | `closed_loop_candidate` | `26` | `9` | `73b3a4e47881` |
-| `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `59` | `27` | `4e27dfdc372d` |
+| `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `59` | `27` | `725dcf8ce832` |
 | `public_aws_adapter_facade_must_preserve_contract` | `closed_loop_candidate` | `16` | `3` | `435e80144989` |
 | `review_account_seed_must_preserve_redacted_seed_evidence` | `closed_loop_candidate` | `31` | `10` | `fa2b64c7adab` |
 | `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `76` | `14` | `040d7b8b7102` |
@@ -274,7 +274,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `snapshot_cqrs_gate_must_scope_store_split_decisions` | `closed_loop_candidate` | `14` | `1` | `38a5f5a08b0f` |
 | `store_safe_routing_must_preserve_provider_status_decisions` | `closed_loop_candidate` | `33` | `21` | `cd5a2ed64752` |
 | `go_ci_baseline_must_preserve_broad_ci_contract` | `closed_loop_candidate` | `19` | `2` | `20e5c5e1bd83` |
-| `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `9745c0ff181f` |
+| `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `4012211450e0` |
 | `web_frontend_api_must_preserve_cors_contract` | `closed_loop_candidate` | `20` | `4` | `4741b61978f1` |
 | `ai_agent_risk_evidence_must_preserve_boundary_manifest` | `closed_loop_candidate` | `20` | `3` | `b57ec8523966` |
 | `migration_ledger_must_preserve_historical_evidence` | `closed_loop_candidate` | `20` | `2` | `aa5ee3767e13` |
