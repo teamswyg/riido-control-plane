@@ -27,6 +27,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok && canReuseActiveTaskThreadForAssignment(thread, req.AssignmentID) {
+		s.assignTaskAgentMemberLocked(taskID, agent)
 		return actionResponseFromThread(thread, principal.WorkspaceID), nil
 	}
 	if stopExistingTaskThreads {
@@ -61,6 +62,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	agent.AssignedTaskCount++
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, "")
+	s.assignTaskAgentMemberLocked(taskID, agent)
 	s.appendAgentTaskActionEvent(response)
 	return clientVisibleQueuedActionResponse(response), nil
 }

@@ -26,6 +26,11 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		if thread, found := s.taskThreadForUnassignTargetLocked(taskID, req.AgentID, req.AssignmentID); found {
 			agent, ok = s.agentFromTaskThreadLocked(principal, thread)
 		}
+		if !ok && req.AssignmentID == "" {
+			if member, found := s.taskAgentMemberships[taskID][req.AgentID]; found && member.RemovedAt == nil {
+				agent, ok = s.agentFromTaskThreadLocked(principal, AIAgentTaskThreadRecord{AgentID: member.AgentID, AgentSnapshot: member.AgentSnapshot})
+			}
+		}
 		if !ok {
 			return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 		}
@@ -59,6 +64,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 		s.agents[agent.AgentID] = agent
 	}
+	s.removeTaskAgentMemberLocked(taskID, agent)
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
 }
