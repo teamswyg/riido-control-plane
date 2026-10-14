@@ -4216,7 +4216,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       }
@@ -4453,7 +4454,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       }

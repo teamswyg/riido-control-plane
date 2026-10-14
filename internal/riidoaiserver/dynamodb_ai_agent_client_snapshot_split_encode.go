@@ -16,7 +16,9 @@ func encodeSplitDynamoDBAIAgentClientSnapshot(snapshot AIAgentClientSnapshot, pr
 	for _, part := range parts {
 		hashes[part.name] = part.hash
 		encodedBytes += int64(len(part.gzip))
-		if previousHashes != nil && previousHashes[part.name] == part.hash {
+		// Always couple membership to CURRENT, including unchanged membership.
+		// A different writer may have replaced the physical part since our load.
+		if part.name != dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships && previousHashes != nil && previousHashes[part.name] == part.hash {
 			continue
 		}
 		items = append(items, dynamoDBAIAgentClientSnapshotPartItem(snapshot, part))

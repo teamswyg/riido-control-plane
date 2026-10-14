@@ -10,12 +10,13 @@ import (
 )
 
 type snapshotDynamoDBFixture struct {
-	requests chan capturedDynamoDBRequest
-	mu       sync.Mutex
-	items    map[string]map[string]map[string]string
-	server   *httptest.Server
-	store    *DynamoDBAIAgentClientSnapshot
-	metrics  *AIAgentClientPersistenceMetrics
+	requests             chan capturedDynamoDBRequest
+	mu                   sync.Mutex
+	items                map[string]map[string]map[string]string
+	server               *httptest.Server
+	store                *DynamoDBAIAgentClientSnapshot
+	metrics              *AIAgentClientPersistenceMetrics
+	failMembershipCommit bool
 }
 
 func newSnapshotDynamoDBFixture(t *testing.T, now time.Time, items map[string]map[string]map[string]string, metrics *AIAgentClientPersistenceMetrics) *snapshotDynamoDBFixture {
@@ -45,6 +46,10 @@ func (f *snapshotDynamoDBFixture) handle(t *testing.T, w http.ResponseWriter, r 
 	switch r.Header.Get("X-Amz-Target") {
 	case dynamoDBPutItemTarget:
 		f.put(t, body, w)
+	case dynamoDBTransactWriteTarget:
+		f.membershipCommit(t, body, w)
+	case dynamoDBSnapshotTransactGetTarget:
+		f.membershipRead(t, body, w)
 	case dynamoDBQueryTarget:
 		f.query(w)
 	default:

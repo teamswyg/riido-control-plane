@@ -9,11 +9,23 @@ const dynamoDBAIAgentClientSnapshotPartWriteParallelism = 4
 
 func (s *DynamoDBAIAgentClientSnapshot) putSnapshotItems(ctx context.Context, items []map[string]map[string]string, credentials AWSCredentials) error {
 	plan := dynamoDBAIAgentClientSnapshotPlanWrites(items)
-	if err := s.putSnapshotPartItems(ctx, plan.parts, credentials); err != nil {
+	var membership map[string]map[string]string
+	parts := make([]map[string]map[string]string, 0, len(plan.parts))
+	for _, item := range plan.parts {
+		if plan.manifest != nil && dynamoDBAIAgentClientSnapshotPartName(item) == dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships {
+			membership = item
+		} else {
+			parts = append(parts, item)
+		}
+	}
+	if err := s.putSnapshotPartItems(ctx, parts, credentials); err != nil {
 		return err
 	}
 	if plan.manifest == nil {
 		return nil
+	}
+	if membership != nil {
+		return s.putMembershipCommit(ctx, membership, plan.manifest, credentials)
 	}
 	return s.putSnapshotItem(ctx, plan.manifest, credentials)
 }

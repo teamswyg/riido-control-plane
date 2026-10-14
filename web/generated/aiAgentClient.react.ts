@@ -1386,7 +1386,7 @@ export interface RiidoV2AIAgentTasksThreadMessagesReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.threadMessages.create`
    * 검색용 generated 경로: `aiAgent.tasks.threadMessages.create`
    * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.create`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly create: CreateAIAgentTaskThreadMessageV2ReactEndpoint;
 }
@@ -1428,7 +1428,7 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.stop`
    * 검색용 generated 경로: `aiAgent.tasks.stop`
    * 접근 예시: `riido.v2.aiAgent.tasks.stop`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly stop: StopAIAgentTaskV2ReactEndpoint;
   /**

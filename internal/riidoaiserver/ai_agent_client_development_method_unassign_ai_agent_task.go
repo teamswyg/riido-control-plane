@@ -35,6 +35,9 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 			return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 		}
 	}
+	if err := validateMembershipRemovalAssignment(req.AgentID, req.AssignmentID, s.taskThreads[taskID]); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
 		TaskID:          taskID,
