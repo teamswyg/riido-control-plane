@@ -19,6 +19,7 @@ func (multiplexNotificationAuthorizer) Authorize(_ context.Context, _ string, re
 	}
 	return AuthorizationResult{PrincipalID: "owner", WorkspaceID: req.WorkspaceID}, nil
 }
+
 func TestNotificationMultiplexOneConnectionAndDeliveryScope(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	server := Server{aiAgent: store}
@@ -66,6 +67,7 @@ func TestNotificationMultiplexOneConnectionAndDeliveryScope(t *testing.T) {
 	}
 	t.Fatalf("missing live notification: %v", scanner.Err())
 }
+
 func TestNotificationMultiplexRejectsUnapprovedWorkspace(t *testing.T) {
 	server := Server{aiAgent: NewDevelopmentAIAgentClientStore()}
 	server.config.Authorizer = multiplexNotificationAuthorizer{}

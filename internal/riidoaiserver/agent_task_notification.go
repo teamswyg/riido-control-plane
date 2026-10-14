@@ -19,6 +19,8 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 		kind = "result_ready"
 	case AgentWorkStatusFailed:
 		kind = "failed"
+	case AgentWorkStatusIdle, AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusOffline:
+		return
 	}
 	if kind == "" {
 		return

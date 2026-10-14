@@ -3,11 +3,12 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
-	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
 func TestTaskNotificationTransitionsAndRecipient(t *testing.T) {
@@ -118,6 +119,7 @@ func (a notificationAuthorizer) Authorize(_ context.Context, _ string, req Autho
 	}
 	return AuthorizationResult{PrincipalID: "assigner", WorkspaceID: "ws"}, nil
 }
+
 func TestTaskNotificationRechecksTaskAccess(t *testing.T) {
 	request := httptest.NewRequest("GET", "/", nil)
 	request.Header.Set("Authorization", "Bearer token")
@@ -137,6 +139,7 @@ type notificationAssignAuthorizer struct{}
 func (notificationAssignAuthorizer) Authorize(context.Context, string, AuthorizationRequest) (AuthorizationResult, error) {
 	return AuthorizationResult{PrincipalID: "assigner", WorkspaceID: "workspace"}, nil
 }
+
 func TestNotificationRecipientComesFromAuthenticatedAssignment(t *testing.T) {
 	store := NewStore()
 	defer store.Close()
