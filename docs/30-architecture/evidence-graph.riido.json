@@ -35,10 +35,7 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/server_thread_message_assignment.go"
-        },
-        {
-          "kind": "manifest",
-          "path": "docs/30-architecture/agent-task-context.riido.json"
+
         }
       ],
       "verifiers": [
