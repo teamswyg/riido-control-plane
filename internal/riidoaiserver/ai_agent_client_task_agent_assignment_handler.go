@@ -23,6 +23,12 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	release, err := s.taskAgentExecutionGate.beginPublication(r.Context(), taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	defer release()
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
 		writeError(w, http.StatusBadGateway, err.Error())
 		return

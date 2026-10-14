@@ -577,6 +577,17 @@ export type DaemonControlAction = "start" | "restart" | "stop";
 export type DaemonControlState = "idle" | "starting" | "restarting" | "stopping" | "failed";
 
 /**
+ * Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.
+ */
+export interface DeleteAIAgentTaskAgentAssignmentRequest {
+  /**
+   * Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained.
+   */
+  assignment_id?: string;
+  reason?: string;
+}
+
+/**
  * agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.
  */
 export interface DeleteAgentResponse {
@@ -790,6 +801,10 @@ export interface TaskAgentParticipantRecord {
  */
 export interface UnassignAIAgentTaskRequest {
   agent_id: string;
+  /**
+   * Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership.
+   */
+  assignment_id?: string;
   reason?: string;
 }
 
@@ -2992,7 +3007,7 @@ export function createAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoC
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
 export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
@@ -3002,23 +3017,24 @@ export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  */
-export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments/${params.agent_id}`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * mutation 함수에 전달하는 변수입니다.
  */
 export interface DeleteAIAgentTaskAgentAssignmentV2MutationVariables {
   params: DeleteAIAgentTaskAgentAssignmentV2PathParams;
+  body: DeleteAIAgentTaskAgentAssignmentRequest;
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 이 mutation을 구분하는 React Query mutation key입니다.
  */
 export function deleteAIAgentTaskAgentAssignmentV2MutationKey(): readonly unknown[] {
@@ -3026,14 +3042,14 @@ export function deleteAIAgentTaskAgentAssignmentV2MutationKey(): readonly unknow
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * useMutation에 전달할 수 있는 옵션입니다.
  */
 export function deleteAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) {
   return {
     ...options,
     mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, {}),
   };
 }
 
@@ -5518,7 +5534,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2Endpoint {
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
  * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
  * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -5528,7 +5544,7 @@ export interface DeleteAIAgentTaskAgentAssignmentV2Endpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  readonly request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -6561,7 +6577,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
    */
   readonly create: CreateAIAgentTaskAgentAssignmentV2Endpoint;
   /**
-   * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+   * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -7288,7 +7304,7 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               },
             },
             delete: {
-              request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentTaskAgentAssignmentV2(config, params, options),
+              request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options?: RiidoRequestOptions) => deleteAIAgentTaskAgentAssignmentV2(config, params, body, options),
               mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey,
               mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => deleteAIAgentTaskAgentAssignmentV2MutationOptions(config, options),
               mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => deleteAIAgentTaskAgentAssignmentV2MutationOptions(config, options),

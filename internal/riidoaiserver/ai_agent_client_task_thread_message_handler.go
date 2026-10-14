@@ -19,6 +19,12 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	release, err := s.taskAgentExecutionGate.beginPublication(r.Context(), taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	defer release()
 	response, handled, err := s.createThreadMessageToolApprovalDecision(r.Context(), principal, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)

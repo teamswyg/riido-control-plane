@@ -19,6 +19,12 @@ func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.R
 		writeAIAgentClientError(w, err)
 		return
 	}
+	release, err := s.taskAgentExecutionGate.beginRemoval(r.Context(), taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	defer release()
 	req.membershipRemovalFence = fence
 	if fence != nil {
 		req.AgentID = fence.agentID
@@ -52,6 +58,12 @@ func (s Server) handleAIAgentClientDeleteTaskAgentAssignment(w http.ResponseWrit
 		writeAIAgentClientError(w, err)
 		return
 	}
+	release, err := s.taskAgentExecutionGate.beginRemoval(r.Context(), taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	defer release()
 	req.membershipRemovalFence = fence
 	response, err := s.aiAgent.DeleteAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {

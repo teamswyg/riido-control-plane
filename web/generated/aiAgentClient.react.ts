@@ -668,7 +668,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2ReactEndpoint extends core.Cr
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
  * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
  * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -1360,7 +1360,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
    */
   readonly create: CreateAIAgentTaskAgentAssignmentV2ReactEndpoint;
   /**
-   * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+   * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`

@@ -40,10 +40,10 @@ func TestGeneratedClientHandoffRejectsNonRiidoWorkBranch(t *testing.T) {
 func assertGeneratedClientHandoffHashes(t *testing.T, out string) {
 	t.Helper()
 	want := map[string]string{
-		"README.generated.md":           "0390ed997464ec25bf54f15220f73cc9d14dee80a580f1d5b72d5ea56bd22848",
-		"PR_BODY.generated.md":          "dc5fd4c6d606423bd154fe62dab2b8c3c93407649932a901ae4d401a1e16aa89",
+		"README.generated.md":           "c3960c30c4911eaf32436f8ce7c2be901dd06e3b7d334ef42f9839e26a651ea6",
+		"PR_BODY.generated.md":          "fd19082d0eff638d8fba8c088ae1275781be5865238a2249821e463665bf947c",
 		"apiHistory.generated.ts":       "ef8d1bbfee8cb5b34cc4d5ad46a21bd2f54d9ce351f51413fa7c49eedee01e99",
-		"contractManifest.generated.ts": "3a96e1242f2b4f0ceca6e6007b75173025d928be1dec8bee6dd36dd433def830",
+		"contractManifest.generated.ts": "ca1e545a82582a8d8e6315707bf4b267d6d125618cd92b1149f3e8fa6b306f97",
 		"index.ts":                      "4f8d1b47853ebfa45c713d0ee5e40c13d19bfcb136418e6b2f4769f494909508",
 		"react.ts":                      "079eead5d4755055e92e09c456893f45fdc10eadbbbb1f32bd1b26ac893136c3",
 	}

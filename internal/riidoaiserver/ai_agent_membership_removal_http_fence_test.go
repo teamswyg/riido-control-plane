@@ -10,21 +10,19 @@ import (
 )
 
 type membershipRemovalHTTPGate struct {
-	*DevelopmentAIAgentClientStore
+	taskAgentExecutionGate
 	entered chan struct{}
 	resume  chan struct{}
 }
 
-func (s *membershipRemovalHTTPGate) UnassignAIAgentTask(ctx context.Context, p AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+func (s *membershipRemovalHTTPGate) beginRemoval(ctx context.Context, taskID string) (func(), error) {
 	close(s.entered)
-	<-s.resume
-	return s.DevelopmentAIAgentClientStore.UnassignAIAgentTask(ctx, p, taskID, req)
-}
-
-func (s *membershipRemovalHTTPGate) DeleteAIAgentTaskAgentAssignment(ctx context.Context, p AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
-	close(s.entered)
-	<-s.resume
-	return s.DevelopmentAIAgentClientStore.DeleteAIAgentTaskAgentAssignment(ctx, p, taskID, agentID, req)
+	select {
+	case <-s.resume:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+	return s.taskAgentExecutionGate.beginRemoval(ctx, taskID)
 }
 
 func TestHTTPMembershipRemovalRejectsInterleavedAssignment(t *testing.T) {
@@ -41,13 +39,16 @@ func checkMembershipRemovalHTTPInterleave(t *testing.T, version, history string)
 	t.Helper()
 	const taskID, agentID = "task-removal-fence", "agent-public-openclaw"
 	ctx := context.Background()
-	client := &membershipRemovalHTTPGate{DevelopmentAIAgentClientStore: NewDevelopmentAIAgentClientStore(), entered: make(chan struct{}), resume: make(chan struct{})}
+	client := NewDevelopmentAIAgentClientStore()
 	assignment := NewStoreWithConfig(StoreConfig{AgentRegistry: client})
 	defer assignment.Close()
 	auth := aiAgentClientHTTPAuthorizer(t, []string{"ai-agent:*"}, "user-1")
 	// The standard helper uses this credential; keep the public HTTP path real.
 	const requestToken = "ai-agent-token"
-	handler := NewServer(ServerConfig{AIAgentClient: client, Assignment: assignment, TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}, Authorizer: auth}).Handler()
+	server := NewServer(ServerConfig{AIAgentClient: client, Assignment: assignment, TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}, Authorizer: auth})
+	gate := &membershipRemovalHTTPGate{taskAgentExecutionGate: server.taskAgentExecutionGate, entered: make(chan struct{}), resume: make(chan struct{})}
+	server.taskAgentExecutionGate = gate
+	handler := server.Handler()
 	base := "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent"
 	var observed string
 	if history != "absent" {
@@ -75,18 +76,18 @@ func checkMembershipRemovalHTTPInterleave(t *testing.T, version, history string)
 	resumed := false
 	defer func() {
 		if !resumed {
-			close(client.resume)
+			close(gate.resume)
 		}
 	}()
 	select {
-	case <-client.entered:
+	case <-gate.entered:
 	case <-finished:
 		t.Fatalf("DELETE failed before cancellation: status=%d body=%s", recorder.Code, recorder.Body.String())
 	case <-time.After(3 * time.Second):
 		t.Fatalf("DELETE did not reach the post-cancellation barrier: status=%d", recorder.Code)
 	}
 	next := createProviderMultiAssignment(t, handler, base, requestToken, taskID, agentID)
-	close(client.resume)
+	close(gate.resume)
 	resumed = true
 	<-finished
 	if recorder.Code != http.StatusConflict {
