@@ -35,6 +35,7 @@ type AIAgentClientSnapshot struct {
 	Daemons                 []DeviceDaemonRecord                         `json:"daemons"`
 	Agents                  []AgentClientRecord                          `json:"agents"`
 	Fixtures                []AgentOnboardingFixture                     `json:"fixtures"`
+	TaskAgentMemberships    map[string]map[string]AIAgentTaskMembership  `json:"task_agent_memberships"`
 	TaskThreads             map[string][]AIAgentTaskThreadRecord         `json:"task_threads"`
 	TaskThreadMessages      map[string][]AIAgentTaskThreadHistoryMessage `json:"task_thread_messages,omitempty"`
 	Events                  []AIAgentClientEventSnapshot                 `json:"events"`
@@ -294,6 +295,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		Agents:                  agents,
 		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
 		TaskThreads:             taskThreads,
+		TaskAgentMemberships:    copyTaskAgentMemberships(s.taskAgentMemberships),
 		TaskThreadMessages:      taskThreadMessages,
 		Events:                  events,
 		NextDeviceCredentialSeq: s.nextDeviceCredentialSeq,
@@ -437,6 +439,10 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
+	s.taskAgentMemberships = copyTaskAgentMemberships(snapshot.TaskAgentMemberships)
+	if s.taskAgentMemberships == nil {
+		s.taskAgentMemberships = legacyTaskAgentMemberships(taskThreads)
+	}
 	s.taskThreadMessages = taskThreadMessages
 	s.taskThreadProgressCache = map[string]taskThreadProgressMessageCache{}
 	s.events = events

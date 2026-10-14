@@ -311,9 +311,10 @@ type AssignedAgentProfile struct {
 }
 
 type AssignedAgentProfileMapResponse struct {
-	SchemaVersion         string                          `json:"schema_version"`
-	WorkspaceID           string                          `json:"workspace_id"`
-	AssignedAgentProfiles map[string]AssignedAgentProfile `json:"assigned_agent_profiles"`
+	SchemaVersion         string                                    `json:"schema_version"`
+	WorkspaceID           string                                    `json:"workspace_id"`
+	AssignedAgentProfiles map[string]AssignedAgentProfile           `json:"assigned_agent_profiles"`
+	TaskAgentParticipants map[string]TaskAgentParticipantCollection `json:"task_agent_participants"`
 }
 
 type ClientBootstrapResponse struct {

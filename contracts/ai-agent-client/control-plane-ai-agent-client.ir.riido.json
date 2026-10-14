@@ -372,15 +372,18 @@
     {
       "policy_id": "workspace_assigned_agent_profile_map.v1",
       "kind": "read_model",
-      "description": "Workspace task/card 목록은 workspace_id 하나로 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다.",
+      "description": "Workspace task/card lists read active legacy profile hints and persistent Agent participants through separate task ID keyed maps.",
       "rules": [
-        "server: include only currently active queued/running/stopping AI Agent assignments in the workspace map",
-        "server: omit completed, stopped, failed, unassigned, and historical-only task threads from the map",
-        "server: use the actual Riido component_id/task_id string as the map key without renaming it to a literal component_id field",
-        "server: because a task/subtask can have only one active AI Agent assignment, each component_id maps to one AssignedAgentProfile value",
+        "server: include only currently active queued/running/stopping AI Agent assignments in assigned_agent_profiles",
+        "server: omit completed, stopped, failed, unassigned, and historical-only task threads from assigned_agent_profiles only",
+        "server: use the actual Riido component_id/task_id string as the key of both assigned_agent_profiles and task_agent_participants",
+        "server: assigned_agent_profiles maps each task to one legacy active AssignedAgentProfile value; task_agent_participants maps each task to a collection of visible persistent Agent participants",
         "profile: avatar_url is copied from the assigned agent's profile_thumbnail_url when present",
         "profile: tmp_color is the fixture-provided avatar fallback color copied into fixture-created agents; direct-created agents may omit it",
-        "client: use this query for list/card avatar hints, not for participant dropdown candidate selection or task-thread history"
+        "client: use task_agent_participants for assigned participants and assigned_agent_profiles for legacy active avatar hints; use separate APIs for candidate selection and task-thread history",
+        "server: retain completed, stopped, and failed Agents in task_agent_participants until explicit participant removal; execution status does not delete membership",
+        "server: explicit participant removal omits that Agent from task_agent_participants without deleting or rewriting terminal execution history",
+        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution"
       ]
     },
     {
@@ -1378,6 +1381,63 @@
       }
     },
     {
+      "name": "TaskAgentParticipantRecord",
+      "schema": {
+        "name": "TaskAgentParticipantRecord",
+        "description": "A persistent Agent participant, independent of execution state.",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "name",
+          "is_owned_by_viewer",
+          "is_stop_required"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "is_owned_by_viewer",
+            "type": "boolean"
+          },
+          {
+            "name": "is_stop_required",
+            "type": "boolean",
+            "description": "At least one active execution for this participant requires stopping before removal."
+          }
+        ]
+      }
+    },
+    {
+      "name": "TaskAgentParticipantCollection",
+      "schema": {
+        "name": "TaskAgentParticipantCollection",
+        "type": "object",
+        "required": [
+          "agents"
+        ],
+        "properties": [
+          {
+            "name": "agents",
+            "type": "array",
+            "items": {
+              "ref": "TaskAgentParticipantRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AssignedAgentProfileMapResponse",
       "schema": {
         "name": "AssignedAgentProfileMapResponse",
@@ -1402,6 +1462,12 @@
             "type": "object",
             "description": "실제 Riido component_id/task_id 문자열을 key로 사용합니다. 예: {\"23958923859\":{\"avatar_url\":\"https://...\",\"tmp_color\":\"#C9A452\"}}",
             "additional_properties_ref": "AssignedAgentProfile"
+          },
+          {
+            "name": "task_agent_participants",
+            "type": "object",
+            "description": "Task ID keyed persistent Agent membership collections. Includes completed and stopped Agents until explicit participant removal. The legacy assigned_agent_profiles field remains active-only.",
+            "additional_properties_ref": "TaskAgentParticipantCollection"
           }
         ]
       }
@@ -2064,6 +2130,64 @@
       }
     },
     {
+      "name": "AIAgentTaskThreadAgentSnapshot",
+      "schema": {
+        "name": "AIAgentTaskThreadAgentSnapshot",
+        "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
+        "type": "object",
+        "required": [
+          "agent_id"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string"
+          },
+          {
+            "name": "tmp_color",
+            "type": "string"
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_kind",
+            "ref": "RuntimeKind"
+          },
+          {
+            "name": "model_id",
+            "type": "string"
+          },
+          {
+            "name": "model_label",
+            "type": "string"
+          },
+          {
+            "name": "captured_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
       "name": "AIAgentTaskActionResponse",
       "schema": {
         "name": "AIAgentTaskActionResponse",
@@ -2461,64 +2585,6 @@
           {
             "name": "run_id",
             "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "AIAgentTaskThreadAgentSnapshot",
-      "schema": {
-        "name": "AIAgentTaskThreadAgentSnapshot",
-        "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
-        "type": "object",
-        "required": [
-          "agent_id"
-        ],
-        "properties": [
-          {
-            "name": "agent_id",
-            "type": "string"
-          },
-          {
-            "name": "workspace_id",
-            "type": "string"
-          },
-          {
-            "name": "owner_principal_id",
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "profile_thumbnail_url",
-            "type": "string"
-          },
-          {
-            "name": "tmp_color",
-            "type": "string"
-          },
-          {
-            "name": "visibility",
-            "ref": "AgentVisibility"
-          },
-          {
-            "name": "runtime_kind",
-            "ref": "RuntimeKind"
-          },
-          {
-            "name": "model_id",
-            "type": "string"
-          },
-          {
-            "name": "model_label",
-            "type": "string"
-          },
-          {
-            "name": "captured_at",
-            "type": "string",
-            "format": "date-time"
           }
         ]
       }
@@ -4299,7 +4365,7 @@
         "generated_path": "v2.aiAgent.tasks.assignedAgentProfiles",
         "cache_tag": "v2.aiAgent.tasks.assignedAgentProfiles"
       },
-      "summary": "workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)",
+      "summary": "workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)",
       "auth": {
         "scheme": "apiKey",
         "header": "X-Riido-AI-Agent-Token",
@@ -4314,7 +4380,8 @@
       },
       "scenario_ids": [
         "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
-        "listWorkspaceAssignedAgentProfilesV2.historical-threads-are-omitted"
+        "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
+        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history"
       ]
     },
     {
@@ -4528,7 +4595,8 @@
         "invalidates": [
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
-          "v2.aiAgent.tasks.threads"
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles"
         ]
       },
       "summary": "task thread message로 AI agent에게 다음 작업 지시를 전달합니다 (v2 workspace-scoped)",
@@ -4567,7 +4635,8 @@
         "invalidates": [
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
-          "v2.aiAgent.tasks.threads"
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles"
         ]
       },
       "summary": "task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)",
@@ -4835,6 +4904,7 @@
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
           "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles",
           "v2.aiAgent.tasks.threadStreamSubscription"
         ]
       },
@@ -4881,6 +4951,7 @@
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
           "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles",
           "v2.aiAgent.tasks.threadStreamSubscription"
         ]
       },
@@ -4923,6 +4994,7 @@
           "v2.aiAgent.bootstrap",
           "v2.aiAgent.tasks.assignableAgents",
           "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles",
           "v2.aiAgent.tasks.threadStreamSubscription"
         ]
       },
@@ -5166,6 +5238,14 @@
       "given": "the Figma runtime settings current-device daemon row is composed from a device row returned by devices.runtimes",
       "when": "the device owner opens the 내 기기 daemon detail area",
       "then": "the response is addressed by device_id and does not require the client to choose an arbitrary agent_id"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles",
+      "operation_id": "listAIAgentDeviceDaemons",
+      "name": "figma my device daemon profiles",
+      "given": "the runtime settings UI needs to show multiple daemon profiles for one physical device",
+      "when": "the device owner opens the 내 기기 daemon profile list",
+      "then": "the response returns every visible daemon for that device instead of collapsing to the preferred daemon"
     },
     {
       "scenario_id": "startAIAgentDeviceDaemon.figma-my-device-daemon-start",
@@ -5520,12 +5600,20 @@
       "then": "assigned_agent_profiles is keyed by the exact component_id/task_id string and each value contains avatar_url and/or tmp_color for list/card presentation"
     },
     {
-      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.historical-threads-are-omitted",
+      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
       "operation_id": "listWorkspaceAssignedAgentProfilesV2",
-      "name": "historical threads are omitted",
-      "given": "a task has completed, stopped, failed, unassigned, or historical-only AI Agent threads",
+      "name": "terminal participants persist independently of legacy active hints",
+      "given": "a task retains completed, stopped, or failed Agent membership without explicit removal",
       "when": "the client reads the workspace assigned profile map",
-      "then": "that component_id is omitted so the task/card list does not show an active assigned-agent avatar from history"
+      "then": "the task ID is omitted from assigned_agent_profiles when no active run remains but task_agent_participants still lists every visible retained Agent"
+    },
+    {
+      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+      "operation_id": "listWorkspaceAssignedAgentProfilesV2",
+      "name": "explicit removal preserves execution history",
+      "given": "one persistent task Agent participant is explicitly removed while other participants remain",
+      "when": "the client reads task_agent_participants and task-thread history",
+      "then": "only the removed Agent is absent from task_agent_participants; its completed result, failure diagnostics, and thread history remain unchanged"
     },
     {
       "scenario_id": "assignAIAgentTaskV2.workspace-scoped-assignment-excludes-team-and-openapi-key",

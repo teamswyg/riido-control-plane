@@ -14,12 +14,15 @@ func (s Server) handleAIAgentClientUnassignTask(w http.ResponseWriter, r *http.R
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if err := s.validateAIAgentMembershipRemoval(r.Context(), principal, taskID, req.AgentID, req.AssignmentID); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
 	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, req.AgentID, req.AssignmentID, req.Reason); err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	} else if ok {
 		req.AgentID = target.AgentID
-		req.AssignmentID = target.AssignmentID
 	}
 	response, err := s.aiAgent.UnassignAIAgentTask(r.Context(), principal, taskID, req)
 	if err != nil {
@@ -45,11 +48,13 @@ func (s Server) handleAIAgentClientDeleteTaskAgentAssignment(w http.ResponseWrit
 			return
 		}
 	}
-	if target, ok, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, agentID, req.AssignmentID, req.Reason); err != nil {
+	if err := s.validateAIAgentMembershipRemoval(r.Context(), principal, taskID, agentID, req.AssignmentID); err != nil {
 		writeAIAgentClientError(w, err)
 		return
-	} else if ok {
-		req.AssignmentID = target.AssignmentID
+	}
+	if _, _, err := s.cancelAIAgentAssignmentBeforeAction(r.Context(), principal, taskID, agentID, req.AssignmentID, req.Reason); err != nil {
+		writeAIAgentClientError(w, err)
+		return
 	}
 	response, err := s.aiAgent.DeleteAIAgentTaskAgentAssignment(r.Context(), principal, taskID, agentID, req)
 	if err != nil {
