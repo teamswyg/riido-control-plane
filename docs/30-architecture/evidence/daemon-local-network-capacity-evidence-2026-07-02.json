@@ -1,0 +1,36 @@
+{
+  "schema_version": "riido-daemon-local-evidence.v1",
+  "id": "daemon-local-network-capacity-evidence-2026-07-02",
+  "captured_at": "2026-07-02T06:51:09Z",
+  "environment": "local",
+  "redacted": true,
+  "daemon_repo": {
+    "path": "../riido-daemon",
+    "branch": "RIID-5001-QA-runner-workflow-evidence-doc-sync",
+    "commit": "eb7976f00bfe843eb58f556713a309de29a4f110"
+  },
+  "checks": [
+    {
+      "id": "daemon_long_poll_default_wait",
+      "command": "go test ./cmd/riido -run TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait -count=1",
+      "status": "pass",
+      "component": "riido-daemon:cmd/riido",
+      "duration_seconds": 0.969
+    },
+    {
+      "id": "daemon_saas_poll_retry_and_timeout",
+      "command": "go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1",
+      "status": "pass",
+      "component": "riido-daemon:agentbridge/controlplane/saasplane",
+      "duration_seconds": 0.734
+    },
+    {
+      "id": "daemon_runtime_actor_local_capacity",
+      "command": "go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1",
+      "status": "pass",
+      "component": "riido-daemon:agentbridge/runtimeactor",
+      "duration_seconds": 0.396
+    }
+  ],
+  "decision": "Local daemon retry, long-poll wait, and runtime actor capacity tests pass on the current QA runner branch. This strengthens daemon-network and one-PC local evidence, but does not replace release chaos evidence for real internet disconnect, all-server-down reconnect storm, or desktop golden acceptance."
+}

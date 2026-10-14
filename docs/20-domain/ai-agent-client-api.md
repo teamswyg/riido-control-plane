@@ -1,887 +1,220 @@
 # AI Agent Client API
 
-> Riido task: RIID-4721 `[Server] AI Agent client-facing endpoint handlers`
-
-This file is the control-plane SSOT for the development AI Agent client API
-implemented by `internal/riidoaiserver`.
-
-## Contract Source
-
-The contract projection is checked in under
-`contracts/ai-agent-client/`:
-
-- DSL: `control-plane-ai-agent-client.dsl.riido.json`
-- IR: `control-plane-ai-agent-client.ir.riido.json`
-- OpenAPI: `control-plane-ai-agent-client.openapi.json`
-- generated React Query: `web/generated/aiAgentClient.ts`
-- generated React hook wrapper: `web/generated/aiAgentClient.react.ts`
-
-Canonical vocabulary, shared enum semantics, lifecycle/deprecation grammar, and
-generated-client metadata are owned by `riido-contracts`. This repository keeps
-the executable mirror under `contracts/ai-agent-client/` so the running development
-API, smoke tests, and generated frontend client can be verified in the same PR.
-
-Client-usability API changes can be proposed from `riido-control-plane`, but the
-canonical contract change must land in `riido-contracts` before this repository
-refreshes the mirrored DSL/IR/OpenAPI and generated output.
-
-Client library metadata is part of the sub-DSL, not a second `dsl2`/`ir2`
-source:
-
-- `client_modules` owns generated module and namespace comments.
-- `client.module` and `client.facade_path` own the nested facade path.
-- `client.generated_path` is projected from `module + facade_path` by
-  `riido-contracts` and must be emitted into generated comments.
-- query operation `client.cache_tag` owns the root query key.
-- command operation `client.invalidates` owns the deterministic cache roots that
-  a client may invalidate after a mutation.
-
-The metadata is projected to IR without loss and to OpenAPI as
-`x-riido-client-modules` plus `x-riido-client`, then consumed by the generated
-TypeScript client. The generator must fail when the metadata is missing or when
-`invalidates` references an unknown query `cache_tag`; facade namespaces are not
-owned by generator-local hard-coded operation-id switches.
-
-The v2 AI Agent client API is additive, not a migration. v1 routes remain
-registered so existing UI tests and temporary client work do not break, while
-new workspace-aware client code should call
-`/v2/client/workspaces/{workspace_id}/ai-agent/...` through generated facade
-paths such as `riido.v2.aiAgent.agents.create`. The `workspace_id` comes from
-the existing Riido workspace surface and is a path parameter; AI Agent client
-requests do not create or list workspaces.
-
-Generated TypeScript comments must include both the contract path
-(`aiAgent.tasks.threadMessages.create`) and the module-local search path
-(`tasks.threadMessages.create`). This is intentionally searchable because
-frontend developers often know the generated facade route before they know the
-operation id or HTTP endpoint.
-
-Generated comments must also preserve the agent-list source distinction. For
-AI Agent settings and onboarding entry, `riido.aiAgent.bootstrap` and
-`riido.v2.aiAgent.bootstrap` return `agents[]`; that array is the settings/list
-agent list and the source of `agent_id` for settings actions such as edit,
-delete, and daemon detail. Task participant dropdowns must instead read
-`riido.aiAgent.tasks.assignableAgents` or
-`riido.v2.aiAgent.tasks.assignableAgents`, because that response is scoped by
-the current task/subtask and returns the `agent_id` that `tasks.assign` accepts.
-This distinction belongs in contracts DSL/OpenAPI/JSDoc, not only in Notion or
-Figma comments.
-
-The generated core client does not own screen composition or React hook policy.
-`riido-client` owns when hooks are called, when invalidation helpers run, retry
-policy, optimistic updates, token refresh, and global error UX. The generated
-React wrapper only makes that surface easier to consume and must import hooks
-through `@/lib/react-query` so client-owned policies are preserved.
-
-Cross-repository React Query delivery to `riido-client` is owned by
-[`api-client-delivery.md`](../30-architecture/api-client-delivery.md).
-
-## SSOT Dependency Direction
-
-This file is downstream of the canonical AI Agent policy in `riido-contracts`.
-It may repeat policy words only to explain local HTTP behavior, seeded development data,
-generator output, and black-box harness coverage.
-
-For agent settings:
-
-- `riido-contracts` owns the meaning of `profile_thumbnail_url` and
-  `description` and `instruction`, including URL-only thumbnail policy, the 160
-  character description limit, and the 1000 character instruction limit.
-- `riido-contracts` owns onboarding fixture catalog semantics. This repository
-  projects the catalog through `GET /v1/client/ai-agent/onboarding/fixtures`
-  and its v2 workspace-scoped duplicate
-  `GET /v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures`
-  and seeds deterministic development fixtures for frontend development. Fixture
-  records carry copyable profile fields, a safe `default_visibility`, and a
-  `recommended_runtime_kind` hint. They do not carry a `model_id`, and they are
-  not backend-managed template entities. Agents created from fixtures are
-  ordinary agents: duplicate display names are accepted, no `리도(1)` suffix is
-  generated by the server, and later update/delete/editability checks use the
-  normal agent endpoints.
-- `riido-contracts` owns onboarding runtime-selectability semantics. This
-  repository projects protected `DeviceRecord.runtimes` values through
-  `GET /v1/client/ai-agent/devices` and validates selected `runtime_id` values
-  when agents are created or updated.
-- `riido-contracts` owns runtime model catalog semantics. This repository
-  projects `RuntimeRecord.models`, accepts omitted `model_id` as the selected
-  runtime default, and validates a supplied `model_id` against that runtime.
-- This repository owns POST/PATCH validation, create/save/update behavior,
-  response projection, generated TypeScript shape, and smoke-test coverage.
-- `riido-control-plane` copies the saved agent `instruction` into
-  `Assignment.agent_instruction` when a task assignment is created. That value is
-  an assignment-time snapshot, so later agent edits do not mutate queued or
-  running assignments.
-- Generated `riido.aiAgent.tasks.assign` is both a client read-model mutation
-  and a daemon-facing assignment enqueue. The handler must write the immutable
-  `AssignRequest` into the assignment polling store before it projects the
-  task-thread row, so a successful client assignment can be leased by the
-  owning daemon through `/v1/agents/{agent_id}/poll`.
-- `riido-control-plane` also owns the provider-neutral assignment prompt
-  composer. Client-facing assignment requests keep only `agent_id`; task title,
-  document markdown, branch name, hierarchy, and repository candidates are read
-  from the server-side task context snapshot and composed into
-  `Assignment.prompt`.
-- The existing Riido API server owns the read-only task context endpoint used by
-  the composer. This AI Agent client API does not add task body, branch, or
-  repository fields to generated client assignment requests.
-- Workspace list/create remains outside this API. v2 request handling accepts
-  the selected `workspace_id` from the URL, stamps created agents with that
-  value, filters agent/task-thread visibility by that workspace, and keeps
-  device/runtime ownership account-scoped.
-- In production assignment wiring, the task-context read is server-to-server
-  only. The generated client does not receive or send
-  `X-Workspace-Api-Key`, `team_id`, or `teamId`. For browser/desktop-webview
-  generated assignment, `team_id`, `teamId`, OpenAPI task-context paths, and
-  Open API key transport such as `X-Workspace-Api-Key` are not problem inputs,
-  implementation dependencies, or acceptance criteria. Control-plane forwards
-  the already-authorized user JWT to the existing Riido API server, resolves the
-  task's team location from `task_id`, and then reads the private component
-  document. The resolved team value is an internal lookup result that must not
-  become an agent field, a generated request field, or a deployment requirement.
-  The agent itself remains team-less.
-- `riido-daemon` owns runtime consumption of `Assignment.agent_instruction`;
-  this server doc does not define provider prompt placement.
-- `riido-infra` owns deployment/storage changes only when the API requires new
-  media storage, secrets, persistence topology, or release evidence.
-- Figma menu placement (`node-id=156-19307`) is a client route affordance, not
-  a server menu contract. This repository owns the protected data endpoints used
-  after a client opens the AI Agent, runtime, or agent-management route.
-- Figma task-thread annotations (`node-id=153-15931`) cite
-  `riido.aiAgent.events.stream` and `riido.aiAgent.tasks.stop` as generated
-  client consumption paths. This repository owns the matching HTTP/SSE behavior
-  and generated shape. It does not own client scroll-to-thread behavior, hover
-  states, modal layout, viewer-away notification rendering, or progress
-  animation references.
-- Figma stopped-by-deleted-agent screen (`node-id=227-19354`) confirms that
-  deleting an agent with queued or running assignments projects stopped
-  task-thread rows. This repository owns the executable delete behavior,
-  `running_tasks_force_stopped` response count, task-thread cold collection
-  projection, and `stopped_by_agent_deleted` generated enum value. It does not
-  own the Korean display copy, Riido actor label, timestamp wording, hidden
-  action state, avatar, or row layout.
-- Figma participant dropdown annotations (`node-id=153-12742`) confirm the
-  `assignable-agents` API consumption context. This repository owns only the
-  visible AI Agent list, owned-first ordering, generated DTO shape, and black-box
-  tests. It does not own member sorting, long-name truncation, max dropdown
-  height, scrollbar width, checkbox layout, or the mixed member/agent visual
-  composition.
-- The same task participant flow uses generated `riido.aiAgent.tasks.assign` and
-  `riido.aiAgent.tasks.unassign` commands for selecting or removing an AI Agent.
-  Assignment creates the initial typed task-thread row with
-  `comment_kind=assignment_started` unless the agent is busy; unassign maps
-  participant removal to `stopped_by_user_request`. Hiding stopped rows remains
-  client presentation.
-- Participant selection is not equivalent to "latest task-thread has
-  `agent_id`". Terminal task threads (`failed`, `stopped`, `completed`,
-  `unassigned`) remain visible as history, but clients must not render them as
-  checked AI Agent participants. Explicit unassign/stop actions target the
-  latest thread for that agent when no active stream exists, so a failed
-  historical run is updated in place instead of creating a synthetic stopped
-  row without the original `assignment_id`.
-- A successful `tasks.assign` response means the daemon-facing assignment queue
-  also accepted the work. If task-context lookup, prompt composition, runtime
-  binding lookup, or assignment-store validation fails, the handler must fail
-  before projecting a running task-thread row.
-- `riido.aiAgent.tasks.assign` intentionally does not accept task body, branch
-  name, repository, or instruction fields. Those values are server-owned
-  assignment snapshots, so frontend code cannot accidentally diverge from the
-  daemon prompt context by constructing its own prompt.
-- Figma still labels the task input as "댓글", but this repository treats the
-  AI-Agent-directed user input as a task-thread message. The canonical generated
-  command is `riido.aiAgent.tasks.threadMessages.create`, backed by
-  `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`.
-  The older `tasks.submitComment` command remains a compatibility route for
-  existing task-comment surfaces until the client migration is complete.
-- Figma additional planning section (`node-id=153-15935`) confirms the
-  assignment target scope. This repository owns task/subtask-scoped generated
-  behavior under `/v1/client/ai-agent/tasks/{task_id}/...`. It does not expose
-  project, milestone, intake, existing AI property filler, or agent mention
-  operations from this screen. Those surfaces need a separate owning SSOT and a
-  new generated operation before the server accepts them.
-- Figma runtime settings annotations (`node-id=162-23090`) confirm the
-  `devices` and `agents.daemon` API consumption context. This repository owns
-  the protected device/runtime read model, device-bound daemon detail and
-  start/restart/stop command requests for `내 기기`, agent-bound daemon detail
-  and commands for explicit selected-agent access, `device_runtime_snapshot` and
-  `device_daemon_status_changed` event shapes, generated DTOs, and black-box
-  tests for current-device and other-device grouping, runtime
-  name/version/status, attached-agent records, daemon detail labels, and daemon
-  command acceptance. It does not own the agent hover popover, daemon stop modal
-  layout, or restart animation rendering.
-- The device/runtime read model is a merged view of daemon runtime snapshots,
-  not a last-write-wins replacement of a device. A daemon can report Codex,
-  Claude Code, OpenClaw, and Cursor runtime actors as separate snapshot batches.
-  `riido.aiAgent.devices.runtimes` and bootstrap must continue to expose the
-  previously reported assigned runtime after another runtime on the same device
-  reports later. Missing-runtime removal policy still follows the existing rule:
-  an assigned runtime remains visible as offline, while an unassigned missing
-  runtime can disappear from the read model.
-- Figma onboarding annotations (`node-id=42-3014`) confirm the bootstrap and
-  device/runtime consumption context. `node-id=137-6746` maps runtime selection
-  to `GET /v1/client/ai-agent/devices`: Claude Code/Codex can be rendered as
-  detected/selectable rows when their runtime records are online and detected,
-  while OpenClaw/Cursor Agent can be rendered as non-detected disabled rows.
-  `node-id=138-7389` maps fixture selection to
-  `AgentOnboardingFixtureListResponse.fixtures`: the development fixture catalog exposes
-  the `리도`, `영실`, `홍도`, and `지원` onboarding fixtures in order, while
-  `직접 설정`, disabled-next state before selection, row selection, and preview
-	  skeleton/popover rendering are client presentation. Each fixture also carries
-	  `default_visibility`, `recommended_runtime_kind`, and fixture `tmp_color` so
-	  clients can prefill the create form and avatar fallback without making fixture
-	  copy or color a frontend SSOT. The selected model still comes from the chosen
-	  runtime's `RuntimeRecord.models` catalog.
-  This repository owns the protected fixture projection, fixture-based agent
-  creation endpoint, protected runtime read-model projection, selected
-  `runtime_id` validation, and development coverage. It does not own workspace
-  selection, workspace list scrolling
-  or the `새 워크스페이스` row shown in `node-id=164-30192`, runtime radio
-  rendering, detected/non-detected Korean labels, row dimming, direct-setting
-  row/rendering, disabled-next presentation, scrolling, two-line ellipsis,
-  preview skeleton/popover layout,
-  all-disconnected provider-list rendering and the `시작하기` CTA shown in
-  `node-id=164-30206`, or the client decision to skip fixture selection when
-  no selectable runtime exists.
-- Figma web onboarding annotations (`node-id=236-29749`) confirm that sign-up,
-  terms consent, member invite, macOS app download, Windows waitlist, and
-  animation references are outside this protected AI Agent API unless a separate
-  owning SSOT promotes them. This repository must not add generated operations
-  for auth/team/product/distribution presentation from that screen alone.
-
-Bottom-up findings from this repository, such as validation cost, generator
-shape, or frontend usability, can start here. If the finding changes domain
-meaning, the next PR must update `riido-contracts` first and then refresh this
-sub-DSL and generated output.
-
-## Development Runtime
-
-The development surface is enabled by
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT=true`.
-When disabled, protected AI Agent client routes fail closed with `503` instead
-of returning seeded development data.
-
-Development runtime state is durable. `cmd/riido_ai_server` opens both
-`DynamoDBAIAgentClientSnapshot` and `DynamoDBAssignmentOperationStore` when
-development mode is enabled and requires
-`RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE`, an AWS region runtime
-configuration, and an ECS container credential endpoint supplied by the runtime.
-The snapshot item stores
-`AIAgentClientPersistenceSchemaVersion`
-(`riido-ai-agent-client-persistence.v2`) as JSON under a single DynamoDB
-`pk/sk`. Task thread cold collections, device credentials, daemon/device
-projection, agent configuration, and onboarding fixtures are durable in that
-snapshot. The generated client event stream is not an audit log; the snapshot
-stores only the newest 200 replay events so the development projection stays
-inside DynamoDB's single-item limit while still supporting recent SSE reconnects.
-Because the development API may run behind an ALB with more than one ECS task,
-the DynamoDB snapshot is the durable SSOT and each task's in-memory store is
-only a reloadable cache. Client reads, device credential authorization, daemon
-agent-binding reads, daemon runtime snapshots, and AI Agent mutations must
-reload the latest snapshot before evaluating state. Runtime snapshot writes
-then save the merged projection back to the same snapshot. This keeps Desktop,
-daemon, and web requests consistent when the ALB routes related requests to
-different tasks.
-The assignment operation store writes the generated assignment journal, agent
-queue projection, and active lease records in the same table. This is the
-development persistence boundary, not the final production single-table
-projection.
-
-The deterministic seed devices `device-dev-macbook` and `device-shared-studio`
-belong only to the static fixture principals used by local/generated API tests
-(`user-1`, `user-2`, and static admin principals). External-authorized
-development workspaces are not mock/review accounts; their device/runtime
-collections must be projected from desktop enrollment and daemon runtime sync
-only. This keeps the development environment aligned with the desktop
-DevicePrincipal flow while preserving deterministic fixture coverage for
-generated API tests.
-
-Generated `tasks.assign`, `tasks.unassign`, `tasks.threadMessages.create`, and
-daemon poll/heartbeat/event flows must not require a team id or Open API
-workspace key. Those values are legacy task-context reader configuration only
-and are outside the AI Agent assignment/auth problem. In the generated client
-flow, the request's bearer token is the authority source and task/team lookup is
-resolved inside the control plane.
-
-The development API implements:
-
-- `GET /v1/client/ai-agent/bootstrap`
-- `GET /v1/client/ai-agent/onboarding/fixtures`
-- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
-- `GET /v1/client/ai-agent/devices`
-- `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
-- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
-- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`
-- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`
-- `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
-- `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
-- `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
-- `GET /v1/client/ai-agent/tasks/{task_id}/threads`
-- `POST /v1/client/ai-agent/tasks/{task_id}/comments`
-- `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
-- `POST /v1/client/ai-agent/tasks/{task_id}/stop`
-- `POST /v1/client/ai-agent/agents`
-- `GET /v1/client/ai-agent/agents/{agent_id}/editability`
-- `PATCH /v1/client/ai-agent/agents/{agent_id}`
-- `DELETE /v1/client/ai-agent/agents/{agent_id}`
-- `GET /v1/client/ai-agent/events`
-
-The same client-facing AI Agent surface is also exposed under
-`/v2/client/workspaces/{workspace_id}/ai-agent/...`. v2 responses include the
-selected `workspace_id` on v2 agent records and use v2 generated paths such as
-`riido.v2.aiAgent.bootstrap`, `riido.v2.aiAgent.agents.create`, and
-`riido.v2.aiAgent.tasks.threads`.
-
-The v2 surface also adds
-`GET /v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles`
-as `riido.v2.aiAgent.tasks.assignedAgentProfiles`. It returns a workspace
-read-model map keyed by the actual component/task id string. Values contain only
-`avatar_url` and/or `tmp_color` so task/card lists can render assigned-agent
-avatar hints without querying every task thread. It includes only active
-queued/running/stopping assignments and does not replace
-`tasks.assignableAgents` or `tasks.threads`.
-
-The SSE endpoint supports `?replay=1` for deterministic smoke checks. Without
-`replay=1`, it keeps the connection open as a client event stream.
-
-## Policy
-
-- visible agents are the viewer's owned agents plus other users' public agents
-- v2 visible agents are additionally scoped to the requested `workspace_id`;
-  agents created in one workspace must not appear in another workspace
-- v2 agent creation stamps `workspace_id` from the URL path and
-  `owner_principal_id` from authorization; request bodies cannot override
-  workspace ownership
-- v1 remains the compatibility surface. New client code that knows the current
-  workspace should prefer generated `riido.v2.aiAgent.*` calls.
-- task participant dropdown responses are ordered owned-first, then by display
-  name, then by `agent_id` when display names are equal
-- task participant dropdown UI presentation, member sorting, and overflow
-  behavior are client-owned and do not rewrite the returned agent order
-- AI Agent assignment targets are task and subtask surfaces only; `task_id`
-  path parameters in generated AI Agent APIs represent a task or subtask id
-- project, milestone, intake, AI property filler, and agent mention surfaces
-  must not call the task-scoped assignable-agent, comment, stop, or thread
-  endpoints; future target surfaces require a separate SSOT and generated API
-- `GET /v1/client/ai-agent/onboarding/fixtures` returns an ordered fixture
-  catalog used by the Figma onboarding fixture selection screen
-- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents` creates a
-  normal owned agent from a selected fixture and a complete
-  `CreateAgentConfigurationRequest` body
-- the current deterministic development catalog returns the Figma `node-id=138-7389`
-  onboarding fixtures in order: `리도`, `영실`, `홍도`, `지원`
-- fixture rows carry fallback avatar colors from Figma onboarding:
-  `#C9A452`, `#6AA437`, `#B87EAD`, and `#2F84DE` in fixture order; fixture-created
-  agents preserve that value as optional `tmp_color`
-- `직접 설정` is a client route into explicit agent creation, not a fifth
-  `AgentOnboardingFixture`
-- runtime selection uses ordinary device/runtime records; SaaS validates the
-  selected `runtime_id` through create/update and does not expose a separate
-  runtime-selection mutation
-- the agent settings `에이전트 추가` affordance is client presentation over the
-  authorized device/runtime read model; Figma `node-id=337-24013` hides it when
-  no member-visible runtime is selectable and this does not add an eligibility
-  endpoint
-- if no runtime is selectable, clients use existing device/runtime data to skip
-  the fixture-selection step; SaaS does not add a separate onboarding skip
-  command
-- non-owner, non-admin users cannot mutate other users' public agents
-- client-facing agent creation stamps `owner_principal_id` from authorization,
-  requires `name`, `visibility`, and an authorized selectable `runtime_id`, and
-  starts as editable with zero assigned tasks; non-admin users are normally
-  limited to viewer-owned runtimes, while admin users may use runtime rows made
-  visible by RBAC
-- Figma `node-id=417-21803` / `node-id=432-35544` marks name, runtime, model,
-  and visibility as required controls; HTTP create still accepts omitted
-  `model_id` because the selected runtime default model is deterministic
-- editing is blocked while `assigned_task_count` is greater than zero
-- `profile_thumbnail_url` is saved as an optional HTTPS image URL string on the
-  agent record; binary image upload/storage is outside this development API
-- `tmp_color` is saved as an optional fixture-provided avatar fallback color on
-  fixture-created agents; direct-created agents can omit it and client rendering
-  precedence remains client-owned
-- `description` is saved as optional client-authored one-line agent summary
-  text and is rejected when it exceeds 160 characters; UI truncation/wrapping is
-  a client concern and does not rewrite the stored value
-- `instruction` is saved as optional client-authored agent guidance text and is
-  rejected when it exceeds 1000 characters
-- `created_at` is a server-authored RFC3339 date-time on every
-  `AgentClientRecord`; it is stamped when the agent is created and remains
-  immutable so clients can render creation dates or absolute-time tooltips
-- `updated_at` is a server-authored RFC3339 date-time on every
-  `AgentClientRecord`; it is refreshed when editable agent configuration is
-  saved and lets clients render update dates or absolute-time tooltips
-- delete returns forced assignment effects for queued/running development tasks
-- agent deletion uses the existing `DELETE /v1/client/ai-agent/agents/{agent_id}`
-  command; if queued/running task threads are affected, the response increments
-  `running_tasks_force_stopped` and the read model exposes
-  `comment_kind=stopped_by_agent_deleted` with `assignment_state=stopped`
-- task-thread messages can enqueue work when the selected agent is busy
-- `POST /v1/client/ai-agent/tasks/{task_id}/comments` is a compatibility route
-  for Figma/task surfaces that still submit a generic comment-like action with
-  `agent_id`; new client code should target a known `thread_id` through
-  `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
-- task-thread messages are not a read-model-only append. When a viewer sends a
-  message to a completed AI Agent thread, the control-plane must create a new
-  assignment for that thread's `agent_id`, append the user's message to the
-  assignment prompt under `## Follow-up Thread Message`, and keep the existing
-  client-facing `thread_id` active so daemon progress updates continue in the
-  same visible thread.
-- busy-agent enqueue responses use `comment_kind=queued_by_busy_agent`,
-  `assignment_state=queued`, and `work_status=queued`; user-facing Korean copy
-  is client presentation over those typed fields
-- assignment `ready` events mean the daemon/runtime has accepted the work and
-  must surface as `comment_kind=assignment_started`,
-  `assignment_state=running`, and `work_status=running`; they must not reuse
-  `queued_by_busy_agent`
-- task-thread stop actions return `stopped_by_user_request`
-- task-thread stop and participant-removal actions are generated client
-  commands and daemon-facing cancellation commands at the same time. After the
-  AI Agent client read model is projected as stopped, the handler must also
-  write a durable assignment cancellation intent for the same `assignment_id`
-  when one exists. Queued assignments move directly to `cancelled`; leased,
-  ready, or running assignments move to `cancelling` so the owning daemon sees
-  `PollCancel` on its next poll and can confirm the terminal `cancelled` event.
-  The frontend does not call a second endpoint for this.
-- once a task thread is stopped or terminal, a late runtime-progress event must
-  not re-activate it. The read model fences ingestion: a `riido_log` on
-  `/events` or a `/thread-progress` batch only advances a thread whose
-  `assignment_state` is `queued` or `running`. For any other state
-  (`stopping` / `stopped` / `completed` / `failed`) the late progress is dropped
-  — it does not flip the thread back to `running`, re-open `active_stream`, or
-  re-arm the agent. `stopping` is intentionally excluded so a stop in progress
-  cannot be reverted by an in-flight log that raced the user's Stop. This guards
-  against the race where a daemon log is already on the wire when Stop is
-  applied; the daemon-side session terminal guard does not cover it because the
-  client read model is a separate projection.
-- task-thread status updates use typed `AgentTaskCommentKind` values
-- task-thread screens first call `GET /v1/client/ai-agent/tasks/{task_id}/threads`
-  to render historical AI Agent thread rows; `active_stream` is present only
-  when the screen should also connect to the client event stream
-- v1 `tasks.assignment` and the v2 compatibility duplicate
-  `v2.aiAgent.tasks.assign` keep the existing demo behavior: assigning a
-  different agent to the same task stops/replaces the previous active task
-  thread and returns at most one `active_stream`
-- new multi-agent task assignment is additive and v2-only:
-  `POST /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments`
-  maps to generated path `riido.v2.aiAgent.tasks.agentAssignments.create`
-- additive unassign/stop target a specific path `agent_id`; clients use
-  `riido.v2.aiAgent.tasks.agentAssignments.delete` or
-  `riido.v2.aiAgent.tasks.agentAssignments.stop` so one agent can be stopped
-  without selecting another active agent implicitly
-- for multi-agent active tasks, clients call
-  `riido.v2.aiAgent.tasks.threadStreamSubscription` after or alongside the cold
-  thread collection. The response returns one shared SSE stream handoff and
-  `active_thread_filters[]` with `(agent_id, thread_id, run_id)` per active
-  thread. If the filter array is empty, the client should not open the stream.
-- task-thread messages created while the viewer was on another screen are still
-  returned by the later cold collection; scroll/focus presentation remains a
-  client concern
-- daemon progress ingest accepts parsed
-  `<riido_log>{"code":...,"args":{...}}<end>` batches through
-  `POST /v1/agents/{agent_id}/thread-progress`; `message_code` /
-  `message_args` are internal daemon/control-plane projection fields and are
-  rendered to the existing frontend-facing `message` string before SSE fanout
-- if that daemon progress ingest omits `thread_id`, the control-plane must
-  attach the batch to the current active thread for the same `(task_id,
-  agent_id)` instead of creating a second visible thread from the assignment
-  run id. The assignment response thread remains the client-facing thread id.
-- daemon standard assignment events on `POST /v1/agents/{agent_id}/events`
-  also update the same client task-thread read model. `riido_log` appends
-  progress lines, while terminal assignment states clear `active_stream` so
-  generated clients do not keep reconnecting to completed work.
-- generated assignment action responses, task-thread rows,
-  `agent_work_status_changed` events, and `agent_thread_progress` events include
-  `assignment_id` when the server has accepted durable daemon work. This value
-  is a server-projected trace key, not a client input requirement. The durable
-  assignment projection is the truth source; if client task-thread fanout misses
-  a terminal assignment event, or if the client read model eagerly projected a
-  task as running before the daemon poll moved the durable assignment out of
-  `queued`, the next generated bootstrap/thread/profile read repairs
-  `active_stream` from that projection before projecting `work_status`,
-  `assigned_task_count`, and stream links.
-- non-`riido_log` daemon/provider events for active states (`queued`,
-  `leased`, `ready`, `running`, `cancelling`) are lifecycle heartbeats, not
-  client copy. They must not overwrite the task-thread representative
-  `message`; the visible in-progress copy is owned by rendered progress
-  `lines[]` and terminal assignment messages.
-- assignment event messages can contain provider-internal `<riido_log>...<end>`
-  blocks when the daemon forwards a terminal provider response. Those blocks are
-  internal progress transport and must be stripped from client-visible
-  task-thread `message`; the rendered progress remains available through
-  `lines[]` and `agent_thread_progress`.
-- assignment event messages can also contain daemon/runtime-local absolute file
-  paths such as macOS workspace paths or temporary smoke-test paths. Those paths
-  are runtime evidence, not frontend copy. Generated client-facing task-thread
-  representative `message` values and assignment action responses must hide the
-  absolute path while preserving useful labels such as `go/hello.go` and a
-  generic local-file marker.
-- client task-thread progress is streamed as the typed
-  `agent_thread_progress` event with `thread_id` on
-  `GET /v1/client/ai-agent/events` and the v2 duplicate
-  `GET /v2/client/workspaces/{workspace_id}/ai-agent/events`
-- repeated daemon/provider assignment events that keep the same
-  `(work_status, assignment_state, comment_kind)` must not be fanned out as new
-  `agent_work_status_changed` events. The client status stream is a state
-  transition surface; live text/progress belongs to `agent_thread_progress`.
-  This keeps SSE volume bounded for long-running providers while preserving
-  terminal transitions such as completed, failed, stopped, or queued.
-- runtime settings consume `GET /v1/client/ai-agent/devices`,
-  `GET /v1/client/ai-agent/agents/{agent_id}/daemon`, daemon command
-  endpoints, `device_runtime_snapshot`, and `device_daemon_status_changed`
-- daemon detail/control is agent-bound. Public agent access lets workspace
-  members indirectly trigger the connected daemon/runtime; private agent access
-  limits that path to admins and owners. Knowing only a `device_id` is not enough
-  to inspect or control another user's desktop local daemon.
-
-## Figma Handoff Evidence
-
-Confirmed in Chrome against `v.1.22 AI Agent` on 2026-05-28 and 2026-05-29:
-
-- `node-id=153-12742`: task participant dropdown section; annotations confirm
-  member 가나다 sorting, AI Agent owned-first then name ordering, long-name UI,
-  and max-height/scrollbar behavior
-- `node-id=153-15935`: additional planning section; visible planning text says
-  only tasks and subtasks can receive Agent assignment, existing Riido AI
-  property filling does not recommend agents, agent mentions are unsupported,
-  and device/runtime actions are agent-bound. Public agents delegate indirect
-  daemon/runtime execution to workspace members; private agents limit that path
-  to admins and owners. No annotation nodes were found on this section, so the
-  visible planning text plus RIID-4784 SSOT correction is the evidence.
-- `node-id=153-15931`: task-thread communication section; Dev Mode annotations
-  include `riido.aiAgent.events.stream` on `node-id=153-8545` and
-  `riido.aiAgent.tasks.stop` on `node-id=236-20768`
-- `node-id=236-21379`: normal task thread with the generic task comment input,
-  an AI Agent reply row, an AI Agent reply input, and a `중지` action in the same
-  task view
-- `node-id=153-8761`: queued task comment when the agent is already busy; the
-  annotation on `node-id=153-8835` says "다른 작업 진행 중인 에이전트한테
-  참여자 할당했을 때 나오는 댓글 문구"
-- `node-id=227-19354`: stopped-by-deleted-agent task thread row; the screen
-  shows Riido-authored copy that the agent was deleted and the running task was
-  stopped
-- `node-id=156-19307`: AI Agent menu placement in the workspace sidebar,
-  including `Menubar/default` and `Menubar/setting` dark/light variants
-- `node-id=162-23090`: runtime settings page; Dev Mode annotations identify the
-  agent hover popover, daemon stop modal, and restart-in-progress animation
-- `node-id=275-22731`: runtime settings empty-state section; annotations mark
-  provider install-card hover states, while the screen text shows no-daemon,
-  no-current-runtime, Windows app waitlist, and marketing-consent variants
-- `node-id=432-37336`: agent setting page with profile image, name,
-  description, runtime, model, visibility, and instruction fields
-- `node-id=134-6542`: agent add page with profile image, name, description,
-  runtime, model, visibility, instruction, and save controls
-- `node-id=42-3014`: onboarding planning page; annotations include runtime
-  selection (`node-id=137-6746`), fixture/direct-setting selection
-  (`node-id=138-7389`, `node-id=164-26969`), workspace selection/list scrolling
-  and the `새 워크스페이스` row (`node-id=164-30192`), two-line fixture
-  description ellipsis (`node-id=164-27719`), and no-installed-AI start behavior
-  with all provider rows marked `연결 안 됨` (`node-id=164-30206`). The inspected
-  `node-id=137-6746` screen shows Claude Code/Codex as `감지됨` selectable rows
-  and OpenClaw/Cursor Agent as `감지 안 됨` non-selectable rows. The inspected
-  `node-id=138-7389` screen shows `리도`, `영실`, `홍도`, and `지원` onboarding
-  fixture rows, followed by `직접 설정`, with a disabled-looking `다음` button
-  before selection and a right-side preview skeleton. The inspected
-  `node-id=164-26969` expansion is annotated `직접 설정 선택 시 스크롤`; it dims
-  onboarding fixture rows and opens `이름`, `설명`, and `지침` inputs with
-  placeholder copy.
-- `node-id=236-29749`: web onboarding section; annotations include chat
-  animation reference, Google sign-up wording, Google sign-up requiring terms
-  consent, email sign-up terms row click behavior, and button progress-bar
-  references. The section also shows macOS app download, email sign-up, member
-  invite/link-copy, Windows launch notification, waitlist completion, and
-  marketing-consent variants.
-
-`node-id=156-19307` does not add a new endpoint. It confirms that the frontend
-needs visible entry points into AI Agent/runtime/agent-management surfaces; the
-current server responsibility remains `bootstrap`, `devices`, agent mutation,
-task-thread actions, and `events`.
-
-`node-id=153-15931` confirms that frontend thread composition needs a cold read
-before optional streaming. `tasks.assign` maps to `POST
-/v1/client/ai-agent/tasks/{task_id}/assignment`, `tasks.unassign` maps to
-`DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`, `tasks.threads` maps to
-`GET /v1/client/ai-agent/tasks/{task_id}/threads`, `tasks.stop` maps to
-`POST /v1/client/ai-agent/tasks/{task_id}/stop`, and `events.stream` maps to the
-`GET /v1/client/ai-agent/events` SSE surface. The server returns
-`active_stream` only for a currently active task thread. If a thread was created
-while the viewer was elsewhere, the server responsibility is to return that
-persisted visible thread on the later cold read; the client owns any scroll or
-focus behavior that makes the newly relevant thread visible in the task view.
-
-Task participant selection is not inferred from generic comments. The generated
-assignment command returns an `AIAgentTaskActionResponse` so the task screen can
-show the first agent-authored row immediately. If the user removes the agent from
-participants while it is queued or running, `tasks.unassign` returns the same
-response shape with `stopped_by_user_request` and writes the corresponding
-assignment cancellation intent for daemon polling. The server keeps the stopped
-thread in the cold collection; the client decides whether that stopped content is
-rendered or hidden.
-
-`node-id=236-21379` confirms that the normal task screen consumes three
-generated concepts as one route composition: `tasks.threads` for historical
-thread rows, `tasks.threadMessages.create` for AI-Agent-directed next
-instructions against a known `thread_id`, and `tasks.stop` for the visible
-active-thread stop affordance. The right details panel, generic task comment
-box layout, reply input presentation, and send button state stay client/task
-surface behavior. The server only treats the user input as AI-Agent-directed
-once the client targets a task thread through
-`POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages` with a
-message `body`. The legacy
-`POST /v1/client/ai-agent/tasks/{task_id}/comments` route remains accepted for
-client surfaces that have not yet carried `thread_id` through their composition.
-
-`node-id=153-8761` confirms the busy-agent queued branch of the same task-thread
-composition. `tasks.threadMessages.create` is the canonical next-instruction
-command. When the selected agent is already working on another active thread,
-the server rejects the request as a task-thread conflict; when a compatible
-queued path is used by the legacy comment route, the response returns a queued
-task-thread row with `comment_kind=queued_by_busy_agent`,
-`assignment_state=queued`, and `work_status=queued`; `tasks.threads` later
-returns that row as part of the cold collection, and `events.stream` may replay
-or stream the typed status change.
-The visible Korean copy, "방금 전" timestamp, avatar, row layout, and other
-comment presentation remain client-owned. The visible `중지` affordance still
-maps to `tasks.stop`; the server must not expose a second queued-cancel endpoint
-for this screen.
-
-`node-id=227-19354` confirms the forced-stop projection after agent deletion.
-The generated client command is still `riido.aiAgent.agents.delete`, backed by
-`DELETE /v1/client/ai-agent/agents/{agent_id}`. When the deleted agent had
-queued or running assignments, `DeleteAgentResponse.running_tasks_force_stopped`
-reports the affected count. The same server-side effect updates task-thread
-read models so `riido.aiAgent.tasks.threads` can return a stopped row with
-`comment_kind=stopped_by_agent_deleted` and `assignment_state=stopped`; if a
-viewer is connected, `riido.aiAgent.events.stream` may deliver the typed status
-update. The server does not add a separate `deleted-agent stop` endpoint and
-does not own the Korean copy, Riido actor label, "방금 전" timestamp, hidden
-stop affordance, avatar, or row layout shown in Figma.
-
-`node-id=153-15935` confirms that AI Agent target selection is not a general
-workspace object feature. `riido.aiAgent.tasks.assignableAgents`,
-`riido.aiAgent.tasks.assign`, `riido.aiAgent.tasks.unassign`,
-`riido.aiAgent.tasks.threadMessages.create`, `riido.aiAgent.tasks.threads`, and
-`riido.aiAgent.tasks.stop` are task/subtask route composition only. The
-compatibility `riido.aiAgent.tasks.submitComment` route follows the same target
-scope while it exists. A client
-opening a project, milestone, intake, existing AI property filler, or mention
-surface should not use these calls as a fallback. The control plane also must
-not add placeholder endpoint families for those surfaces until a separate
-owning SSOT names the target and policy.
-
-`node-id=153-12742` maps to the existing
-`GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents` endpoint and the
-generated `listAIAgentTaskAssignableAgents` query. The server must preserve the
-agent response policy, while the client composes that response with member rows
-and renders truncation, max height, and scrollbars.
-
-`node-id=162-23090` maps to `GET /v1/client/ai-agent/devices`, the generated
-`listAIAgentDeviceRuntimes` query, and the generated
-`riido.aiAgent.devices.daemon.details/start/restart/stop` endpoints for the
-current viewer's own device. The device response is the source for visible device/runtime rows, runtime
-name/version/status, and attached-agent records used by the `내 기기` and
-`다른 기기` groups. The device-bound daemon detail endpoint is the source for
-`내 기기` daemon labels such as status, uptime, PID, daemon ID, profile, and
-device name; it takes `device_id` from the devices response and never asks the
-client to choose an arbitrary `agent_id`. The existing
-`riido.aiAgent.agents.daemon.details/start/restart/stop` endpoints remain
-agent-bound: they are used when the client intentionally controls or reads the
-daemon through a selected agent and its public/private access policy. When a
-persisted device/daemon owner projection is not enough to resolve a viewer-owned
-device, control-plane may recover the same decision through a viewer-owned agent
-runtime attached to that `device_id`; the client contract still remains
-device-bound and does not add an `agent_id` parameter. Daemon start/restart/stop
-are SaaS command requests; the daemon later reads and executes accepted commands
-locally. A stop command makes affected runtimes client-visible as offline
-through the runtime read model. The agent hover
-popover, stop modal layout, and restart animation are still client presentation.
-
-`node-id=275-22731` also maps to `GET /v1/client/ai-agent/devices`. The server
-returns ordinary device/runtime rows or empty arrays; the client decides whether
-to render no-current-device runtime, no daemon, no installed runtime, other
-device rows, or provider install cards. Provider install-card hover behavior,
-external provider installation links, Windows app waitlist copy, and
-marketing-consent button states are not generated AI Agent API operations in
-this slice. `Q-CP-007` resolves that boundary as no-diff for the AI Agent
-control-plane API; a future product/marketing SSOT must define a separate
-generated surface before waitlist or marketing-consent helpers can exist.
-
-`node-id=432-37336` maps to existing agent bootstrap/update behavior plus the
-read-model fields `AgentClientRecord.created_at`,
-`AgentClientRecord.updated_at`, `model_id`, and `model_label`.
-`node-id=134-6542` adds the client-facing create behavior:
-`POST /v1/client/ai-agent/agents` returns the created `AgentClientRecord`,
-derives `runtime_kind` from the selected runtime, and validates optional
-`model_id` against the selected runtime's `RuntimeRecord.models` catalog. If
-`model_id` is omitted, the server saves the selected runtime's default model.
-This intentionally differs from the client form presentation: the model dropdown
-can be rendered as required because every selectable runtime has a default model
-that can be preselected, but generated HTTP clients do not need to send
-`model_id` to express that default.
-`node-id=337-24001` and `node-id=432-35713` add the agent-list requirement that
-clients can render separate 생성일 and 업데이트일 columns from server-authored
-timestamps. The client can use `created_at` for the list's creation date,
-`updated_at` for the list's update date, and either value for absolute-time
-tooltips shown in Figma. `node-id=337-24013` also confirms that the
-`에이전트 추가` affordance is hidden when no member-visible runtime is
-selectable; that condition is derived from bootstrap/device runtime read-model
-data and does not add a separate endpoint. Row click, meatball edit/delete
-entry, no-description row layout, status-label copy/color, save-button
-enablement, long-description truncation, dropdown layout, and timestamp
-formatting remain client-owned.
-
-`node-id=42-3014` maps to existing bootstrap/devices/create behavior plus the
-explicit fixture endpoints. `GET /v1/client/ai-agent/onboarding/fixtures` gives
-clients stable fixture names, descriptions, role labels, thumbnail URLs,
-instructions, safe private visibility defaults, and recommended runtime-kind
-hints without hard-coding product copy in the frontend.
-`node-id=138-7389` is the fixture-selection initial state for that response.
-Selecting a fixture creates a normal agent through
-`POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`; direct
-setting uses `POST /v1/client/ai-agent/agents` and is not represented as an
-extra fixture record.
-The resolved discussion evidence from `node-id=162-23468` / `node-id=162-23475`
-means the development API keeps submitted duplicate names exactly and relies on
-`agent_id` plus normal lifecycle endpoints rather than fixture-specific state.
-The direct-setting expansion from `node-id=164-26969` maps those expanded
-`이름`, `설명`, and `지침` inputs to
-`CreateAgentConfigurationRequest.name`, `description`, and `instruction`.
-Dimmed onboarding fixture rows, placeholder copy, and scroll behavior remain
-client presentation. The server still validates `runtime_id`, `visibility`,
-optional profile image URL, and optional `model_id` through the normal create
-request.
-Fixture runtime hints are advisory: if the recommended runtime is not detected
-or not selectable for the current principal, the client must choose from the
-authorized `devices.runtimes` projection. Fixture records do not ship a model
-default; omitted `model_id` continues to resolve to the selected runtime default.
-No-installed-AI branching is derived from `devices.runtimes` and does not add a
-new SaaS command.
-
-`node-id=236-29749` does not add a generated AI Agent client operation. Sign-up,
-login, Google-auth terms consent, email/password validation, terms row default
-state/click target, and member invitation are auth/team/client product surfaces.
-The macOS app download CTA is a distribution route, not a provider install or
-daemon lifecycle command. Windows launch notification and marketing-consent
-variants follow the `Q-CP-007` no-diff decision; this API must not expose a
-waitlist or marketing mutation. Chat and progress-bar animation references stay
-client presentation facts.
-
-The `model` field from `node-id=432-37336` is implemented as a runtime-scoped
-catalog projection. This repository must not hard-code model candidates as
-generated enum values. It only mirrors the contracts decision
-`runtime_model_catalog.v1`: clients render `RuntimeRecord.models`, send an
-optional `model_id`, and receive the saved `model_id` plus `model_label` on
-agent records. Figma required-control annotations for the save button are
-therefore UI validation state, not a breaking change to the generated request
-schema.
-
-`RuntimeRecord.requires_experimental_opt_in` is a daemon-reported runtime fact.
-Clients may display or inspect it, but they do not send an opt-in flag when
-assigning an agent to a task. When the selected runtime requires experimental
-opt-in, control-plane snapshots that fact into
-`Assignment.allow_experimental_runtime=true` before the assignment enters the
-daemon polling store.
-
-Confirmed through the Figma plugin/Dev Mode annotations on 2026-05-29:
-
-- `node-id=153-12742`: task participant dropdown. The annotation says members
-  sort 가나다순, agents show viewer-owned agents first and then 가나다순, long
-  member/agent names need contained UI, and the dropdown presentation caps at
-  520px with scrollbar width handled by the client. This server owns only the
-  deterministic agent response order; member ordering and pixel sizing remain
-  client presentation behavior.
-
-## Desktop Device Enrollment Boundary
-
-Desktop device enrollment exists so the Electron main process can register an
-account-owned device and launch `riido-daemon` with a daemon-only credential.
-It is not a web/generated client feature.
-
-Current route:
-
-- `POST /v2/desktop/workspaces/{workspace_id}/devices/enroll`
-
-The request is authorized with `X-Riido-AI-Agent-Token` because enrollment
-starts from an already logged-in UserPrincipal. The response returns
-`device_id` and a one-time `device_secret`. After that, daemon polling and
-heartbeat use `X-Riido-Device-ID` and `X-Riido-Device-Secret`. The secret is not
-included in generated React Query output, browser/webview JavaScript, status
-responses, SSE events, or logs.
-
-If Desktop already has a local `device_id`, it can send that `device_id` in the
-enrollment request to rotate only the secret. Control-plane must keep the
-DevicePrincipal stable for the same user/workspace instead of minting a new
-device for stale credential recovery. Secret rotation must not clear daemon
-runtime projection, daemon detail facts, or any runtime records previously
-reported by `POST /v1/daemon/runtime-snapshot`; those facts are owned by the
-daemon runtime snapshot boundary, not by enrollment. Runtime snapshots likewise keep
-`runtime_id` single-owned: if the same runtime is later reported by another
-device, it moves to the latest reporting device so `agent-bindings` and
-generated client read models do not point at stale device rows.
-
-In development persistence, this single-owner runtime move is evaluated against
-the latest DynamoDB snapshot, not only the current ECS task memory. Otherwise a
-daemon could sync on one task while the web-generated devices query or
-`agent-bindings` poll lands on another task and observes stale device/runtime
-projection.
-
-`workspace_id` on this route is the selected workspace context, not device
-ownership. Devices/runtimes remain account-owned; agents remain
-workspace-owned.
-
-## Boundary
-
-This repository owns the development HTTP behavior, API sub-DSL projection,
-generated client drift gate, DynamoDB snapshot request adapter, and future
-generated-client delivery workflow. It does not own final production
-single-table topology, daemon runtime probing, Terraform state, live AWS
-evidence, final DNS naming, or direct edits to the target frontend repository.
-
-## Testnet Smoke
-
-The `ai-agent-client-testnet-smoke` GitHub Actions workflow is intentionally
-separate from the local API/generator workflow. It calls the deployed testnet
-ALB for:
-
-- `GET /healthz`
-- `GET /readyz`
-- `GET /v1/client/ai-agent/bootstrap`
-- `GET /v1/client/ai-agent/onboarding/fixtures`
-- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
-- `GET /v1/client/ai-agent/devices`
-- `GET /v1/client/ai-agent/agents/{agent_id}/daemon`
-- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/start`
-- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/restart`
-- `POST /v1/client/ai-agent/agents/{agent_id}/daemon/stop`
-- `GET /v1/client/ai-agent/tasks/{task_id}/assignable-agents`
-- `POST /v1/client/ai-agent/tasks/{task_id}/assignment`
-- `DELETE /v1/client/ai-agent/tasks/{task_id}/assignment`
-- `GET /v1/client/ai-agent/tasks/{task_id}/threads`
-- `POST /v1/client/ai-agent/tasks/{task_id}/comments`
-- `POST /v1/client/ai-agent/tasks/{task_id}/threads/{thread_id}/messages`
-- `POST /v1/client/ai-agent/tasks/{task_id}/stop`
-- `POST /v1/client/ai-agent/agents`
-- `GET /v1/client/ai-agent/onboarding/fixtures`
-
-The `deploy-ai-agent-testnet` workflow runs before its own live smoke when a
-`v*` tag or manual dispatch is used for runtime artifact deployment. Tag pushes
-deploy the configured testnet environment. Manual dispatch may select only the
-preconfigured testnet or development GitHub environment; it still reads live URL
-and token values from environment variables/secrets, not from manual inputs.
-That CD workflow is the only public-repo path that may assume the configured AWS
-deploy role, push the control-plane image, register an ECS task-definition
-revision, and wait for service stability. Pull request API/generator checks
-remain AWS-free.
-- `POST /v1/client/ai-agent/onboarding/fixtures/{fixture_id}/agents`
-- `GET /v1/client/ai-agent/events?replay=1`
-- `POST /v1/agents/{agent_id}/thread-progress`
-- `GET /v2/client/workspaces/{workspace_id}/ai-agent/bootstrap`
-- `POST /v2/client/workspaces/{workspace_id}/ai-agent/agents`
-- `POST /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment`
-- `GET /v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads`
-
-The workflow reads the ALB base URL and AI Agent SaaS token only from configured
-GitHub environment variable/secret names owned by
-[`../30-architecture/runtime-cd-ownership.riido.json`](../30-architecture/runtime-cd-ownership.riido.json),
-not from a manual workflow input. This keeps live URL values out of public
-dispatch metadata. The workflow masks both values before any smoke call. Smoke
-calls send the token through `X-Riido-AI-Agent-Token`, matching the generated
-client transport.
+<!-- Generated by go run ./tools/aiagentclientapi -write-doc. Do not edit by hand. -->
+
+> Riido task: RIID-4721
+
+Executable SSOT: [`ai-agent-client-api.riido.json`](ai-agent-client-api.riido.json).
+
+Canonical domain changes start in `riido-contracts`; this repo verifies the executable mirror.
+
+## Mirror Files
+
+| Kind | Path |
+| --- | --- |
+| DSL | `contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json` |
+| IR | `contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json` |
+| OpenAPI | `contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json` |
+| Smoke matrix | `contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json` |
+| Core client | `web/generated/aiAgentClient.ts` |
+| React client | `web/generated/aiAgentClient.react.ts` |
+
+## Operation Coverage
+
+| Class | Count |
+| --- | ---: |
+| OpenAPI operations | 57 |
+| v1 operations | 26 |
+| v2 operations | 31 |
+| smoke matrix entries | 57 |
+
+## Required Generated Paths
+
+- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.devices.daemons.list`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.devices.daemons.list`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`
+
+## Runtime Config Keys
+
+- `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT`
+
+## Public Field And Endpoint Signals
+
+- `workspace_id`, `profile_thumbnail_url`, `provider_version`, `health_status`, `diagnostic_code`, `diagnostic_summary`, `assigned-agent-profiles`, `agent-assignments`, `thread-stream-subscription`, `conversation_id`, `parent_thread_id`, `agent_snapshot_id`, `agent_snapshots`, `messages`, `author_principal_id`, `is_owned_by_viewer`, `desktop_app_version`, `client_status`, `minimum_daemon_version`, `latest_daemon_version`, `agent_capability`, `agent_supported`, `update_required`, `download_url`
+
+## Deployment Evidence Phrases
+
+- `not from a manual`, `The workflow masks both values`
+
+## Device Client Guidance
+
+- read endpoint: `GET /v2/client/workspaces/{workspace_id}/ai-agent/devices`
+- purpose: Distinguish a registered Desktop device, an offline daemon, an unsupported daemon version, and an Agent-ready daemon without guessing from an empty runtime list.
+
+## Device Guidance Rules
+
+- `Use is_owned_by_viewer instead of comparing owner_principal_id with an identifier from another auth system.`, `desktop_app_version is the version reported during Desktop device enrollment.`, `client_status.daemon_version is the daemon build version reported by runtime snapshots.`, `agent_capability=update_required means the Desktop is registered and the daemon is online, but daemon_version is below minimum_daemon_version.`, `agent_capability=offline means the device remains registered but the daemon heartbeat is stale or absent; do not describe this as not installed.`, `agent_capability=version_unknown means an online daemon did not report a parseable release version; show diagnostics or update guidance rather than an installation claim.`, `agent_capability=ready and agent_supported=true mean the daemon meets the configured minimum version.`, `download_url is server-owned update guidance; clients must not hard-code a different release URL.`, `RIID-5827: authenticated loopback local-state mode preserves assignment workspace identity, serializes client snapshots, and rejects stale file versions. Provider errors remain visible before terminal state; coalesced assistant snapshots keep monotonic sequence numbers.`, `RIID-5829 desktop task notifications: Assignment의 created_by·workspace_id·team_id는 배정 시 인증 주체와 검증된 작업 맥락에서 저장한다. 과거 created_by가 비어 있으면 소유자로 추정하지 않는다.`, `RIID-5829 desktop task notifications: Assignment.state는 기존 실행 FSM을 유지한다. running과 confirmation_reason(answer_required/approval_required)이 함께 있으면 WorkStatus는 waiting_for_user다. 로그는 대기를 해제하지 않고 명시적 running 재개와 terminal 결과만 해제한다.`, `RIID-5829 desktop task notifications: TaskEvent의 event_id는 assignment ID와 영속 event sequence로 구성하고 at이 발생 시각이다. 별도 agent_task_notification에 workspace/task/agent/assignment/run ID, created_by, recipient_principal_id, notification_type, confirmation_reason, work_status, assignment_state, team_id를 제공한다.`, `RIID-5829 desktop task notifications: 알림 종류는 result_ready, answer_required, approval_required, failed다. completed는 실행 결과 준비이며 업무 완료 상태를 변경하지 않는다. 일반 로그·경고·복구 중 provider_error·사용자 취소는 알림을 만들지 않는다.`, `RIID-5829 desktop task notifications: 수신자는 배정자 한 명이다. 공유 에이전트 소유권·관리자 역할로 수신 권한을 확대하지 않는다. SSE 발송 직전 현재 bearer로 해당 workspace/task의 읽기 권한을 재확인하고 실패하면 전달하지 않는다.`, `RIID-5829 desktop task notifications: 최초 연결 및 재연결은 live-only다. SSE 연결이 끊긴 구간은 과거 알림으로 재생하지 않으며 현재 실행 상태는 작업 상세 재조회로 확인한다. 프로세스 완전 종료 원격 푸시는 범위 밖이다.`, `RIID-5829 desktop task notifications: 같은 상태/사유의 재전송과 종료 뒤 늦은 이벤트는 추가 알림을 만들지 않는다. Assignment 저장 이후 알림 투영이 실패해 재시도하더라도 이미 저장한 event ID를 재사용한다. 클라이언트는 사용자·워크스페이스별 event ID를 최대 512개 보존하고 Electron은 창 사이 중복을 막는다.`, `RIID-5829 desktop task notifications: 클릭은 발신 webview의 같은 origin에서 /workspace/teams/team/tasks/task로 이동하고 소유 창을 복원한다. 이전 생산자가 team_id를 제공하지 않으면 현재 작업 메타데이터에서 같은 workspace/task임을 확인한 후 경로를 구성한다. 이동 시 기존 인증·권한 가드가 다시 적용된다.`, `RIID-5829 notification multiplex: GET /v1/client/ai-agent/events?notifications=1&workspace_id=<id>&workspace_id=<id> accepts 1–100 workspace entries, deduplicates IDs, authorizes every workspace to the same principal before subscribing, and emits only live agent_task_notification events over one HTTP connection. Current task access is rechecked per delivery; replay and unrelated client events are excluded. Cancelling the request or closing an underlying subscription releases all subscriptions. Existing workspace event routes remain compatible. This avoids HTTP/1 per-origin connection starvation for accounts with many workspaces.`
+
+## Frontend Thread History v3 Handoff
+
+Use v3 for initial/read refresh, v2 for mutations, and v2 SSE for live progress.
+
+### Endpoint Split
+
+| Name | Method | Path | Purpose | Truth role |
+| --- | --- | --- | --- | --- |
+| thread-history-v3 | `GET` | `/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads` | Task screen initial render and refresh recovery | canonical read model |
+| thread-stream-subscription-v2 | `GET` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/thread-stream-subscription` | Task scoped live progress subscription | live update input |
+| assign-agent-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments` | Assign one AI Agent to the task | mutation |
+| thread-message-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages` | Send a user follow-up message to one AI thread | mutation |
+| stop-agent-v2 | `POST` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}/stop` | Stop one assigned AI Agent in a task | strong UI mutation |
+| delete-agent-assignment-v2 | `DELETE` | `/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}` | Remove one assigned AI Agent from a task while preserving history | strong UI mutation |
+
+### Thread History v3 Frontend Flow
+
+| Rule | Detail |
+| --- | --- |
+| `initial-load-v3` | When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model. |
+| `group-by-conversation-id` | Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key. |
+| `optimistic-v2-mutation` | For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response. |
+| `refetch-v3-after-mutation` | After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots. |
+| `select-runtime-bound-agent` | Populate the participant picker from task-scoped assignable-agents. Bootstrap remains the management catalog, while assignable-agents includes only visible agents whose runtime and daemon are currently online and resolvable by the assignment POST path. |
+
+### Thread History v3 Response Model
+
+#### `AIAgentTaskThreadHistoryCollectionResponse`
+
+Top-level response for one task screen. The frontend should treat threads as timeline records and resolve display metadata through agent_snapshots.
+
+- Fields: `schema_version`, `task_id`, `threads[]`, `agent_snapshots?`, `active_stream?`
+
+#### `AIAgentTaskThreadHistoryRecord`
+
+One persisted AI thread/run record in the task timeline. Multiple records may share conversation_id when they belong to the same visible Agent comment card.
+
+- Fields: `thread_id`, `conversation_id`, `parent_thread_id`, `task_id`, `assignment_id`, `agent_id`, `agent_snapshot_id`, `run_id`, `work_status`, `assignment_state`, `started_at`, `completed_at`, `messages[]`
+
+#### `AIAgentTaskThreadHistoryMessage`
+
+One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply; author_principal_id identifies the user who wrote role=user messages.
+
+- Fields: `message_id`, `role`, `comment_kind`, `assignment_id`, `run_id`, `source_message_id`, `author_principal_id`, `seq`, `body`, `result_message`, `observed_at`
+
+### Identity Rules
+
+| Name | Meaning | Frontend use |
+| --- | --- | --- |
+| `task_id` | Task screen parent scope | Group all AI thread history for one task screen |
+| `conversation_id` | Stable AI comment card key | Render one Agent conversation card; same value means reply chain, different value means separate card even for same agent_id |
+| `thread_id` | Concrete thread/run identity | Route v2 user messages and render sub-run blocks inside a conversation card |
+| `parent_thread_id` | Source thread for a follow-up run | Nest a follow-up run under the original Agent comment when present |
+| `assignment_id` | Durable work assignment | Manage execution status and stop/delete targeting |
+| `run_id` | Runtime execution flow | Deduplicate live progress together with assignment_id and seq |
+| `message_id` | Stable v3 timeline row key | Render messages without collapsing repeated user bodies or repeated progress text |
+| `author_principal_id` | User reply author identity | Render role=user messages with the actual author instead of falling back to the current viewer |
+
+## Thread History v3 Grouping Rules
+
+- Task screen scope is task_id.
+- Agent comment card key is conversation_id, not thread_id.
+- A new participant-dropdown reassignment creates a new conversation_id even when agent_id is the same.
+- A user reply submitted to an existing thread keeps the existing conversation_id.
+- parent_thread_id is present only when a follow-up run is derived from an existing thread.
+- provider, runtime_kind, label, and agent name must never be used for dedupe.
+
+## Thread History v3 Agent Snapshot Rules
+
+- Each thread may carry agent_snapshot_id instead of an embedded agent snapshot.
+- The screen resolves agent_snapshots[thread.agent_snapshot_id] for display.
+- Historical cards must keep the captured snapshot even if the current agent settings change.
+
+### Message Roles
+
+| Role | Meaning |
+| --- | --- |
+| `user` | User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present. |
+| `progress` | Runtime progress log, ordered by seq inside assignment_id and run_id |
+| `agent` | Agent status or final result message. queued_by_busy_agent must not be exposed as a durable reply or live progress copy; the server removes queued status rows from v3 messages[] and hides queued status from v2 client-visible action/list/SSE projections. |
+
+### Thread History v3 Interaction Scenarios
+
+| Rule | Detail |
+| --- | --- |
+| `intent-clarification-before-deliverable` | When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables. |
+| `non-command-component-document-asks-first` | When a project, milestone, task, or subtask has document content but no explicit action signal, classify it as intent-oriented and ask what to do first before the daemon receives runnable work. |
+| `intent-clarification-waits-for-user` | When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user, assignment_state=waiting_for_user, comment_kind=needs_input, and no active_stream; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape. |
+| `concrete-followup-authoritative` | When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document. |
+| `draft-then-research-limit-in-same-conversation` | A marketing-copy task can first ask what to do, then complete a copywriting draft from the user's concrete follow-up, then accept another follow-up for research in the same conversation_id. If provider quota is exhausted during that research run, only the latest run fails with the normalized cloud-credit message; the prior draft result remains visible. |
+| `provider-limit-result` | When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다. |
+| `handoff-after-provider-limit` | When the user assigns another agent after a provider-limit result, the new agent must create a separate conversation_id while the limited research conversation and prior draft remain visible in v3 history. |
+
+### Thread History v3 Message Ordering
+
+| Rule | Detail |
+| --- | --- |
+| `conversation-card-ordering` | First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root. |
+| `message-row-ordering` | Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text. |
+| `queued-status-current-only` | comment_kind=queued_by_busy_agent means the durable assignment is waiting behind busy work. Client-visible v2 projections must not render it as an Agent reply or thinking/progress row: hide queued work_status, assignment_state, comment_kind, message, result_message, queue diagnostics, and queued work-status SSE events. Preserve the existing identity fields and active stream so clients retain participant identity; v3 history and the durable scheduler continue to expose assignment_state=queued. |
+| `queued-stream-current-only` | If the same conversation_id has an active running thread, a superseded queued thread must not expose per-thread active_stream and must not win the collection active_stream. This prevents a stale queued hint from keeping the UI in a thinking/progress state while the conversation is already running. |
+| `progress-dedupe-ordering` | For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility. |
+| `late-terminal-guard` | If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running. |
+| `terminal-active-stream-closure` | When every v3 thread for a task is terminal, omit both the top-level active_stream and each per-thread active_stream. A client refresh or v3 refetch must be able to clear stale optimistic running UI from this server truth. |
+
+### Thread History v3 Mutation Rules
+
+| Rule | Detail |
+| --- | --- |
+| `assign-agent` | POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment. |
+| `send-thread-message` | POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run. |
+| `stop-agent` | POST the task-scoped v2 stop endpoint, preferably including assignment_id. The UI should close the work immediately from control-plane truth; daemon acknowledgement is eventual. |
+| `delete-agent` | DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed. |
+
+## Thread History v3 SSE Handling Rules
+
+- Open one task-level SSE stream from the v2 thread-stream-subscription response.
+- Filter payloads by task_id, agent_id, thread_id, and run_id.
+- Use assignment_id + run_id + seq as the progress dedupe key when assignment_id is present.
+- SSE is a live update input; v3 thread history remains the refresh recovery truth.
+- On an SSE reconnect, the control-plane must honor a numeric Last-Event-ID and replay only events whose SSE id is greater than that cursor. A missing, invalid, or negative cursor keeps the existing bounded replay behavior.
+- Live progress may be dropped under subscriber backpressure, but a terminal agent_thread_progress event must be prioritized over buffered progress and replay-compensated from a recent durable terminal thread when absent.
+- SSE open, close reason, fan-out overflow, and terminal replay compensation must be emitted as structured control-plane logs without credentials or message bodies.
+- Do not revive a terminal assignment when a late runtime progress event arrives.
+- If v3 thread history has no active_stream, the client must not keep a local running spinner for that task.
+
+## Thread History v3 Terminal States
+
+- `completed`, `failed`, `stopped`, `cancelled`, `timeout`
+
+## Thread History v3 Frontend Checklist
+
+- v3-read-model
+- conversation-id-card-key
+- thread-id-inner-run-key
+- message-id-row-key
+- agent-snapshot-map
+- v2-mutations
+- v2-sse
+- optimistic-then-v3-refetch
+- progress-dedupe
+- terminal-sse-priority-delivery
+- terminal-sse-replay-compensation
+- sse-last-event-id-replay
+- sse-lifecycle-observability
+- queued-status-current-only
+- queued-stream-current-only
+- terminal-late-event-guard
+- terminal-active-stream-closure
+- deleted-agent-history-retention
+- runtime-bound-assignable-agents
+
+## Evidence Loop
+
+| Step | Statement |
+| --- | --- |
+| Observe | The AI Agent client API doc repeated contract, generated-client, smoke, deployment, and runtime rules as prose while the machine-readable mirrors already existed. |
+| Hypothesis | A compact SSOT gate can prove the OpenAPI/generated client/smoke matrix mirror and keep required runtime/deployment strings visible without using prose as truth. |
+| Execute | Generate this reader doc from the manifest and run the aiagentclientapi verifier in CI. |
+| Evaluate | The verifier checks contract file presence, OpenAPI operation counts, v1/v2 split, generated path coverage, smoke matrix parity, source anchors, generated doc freshness, and CLI evidence output. |
+| Retrospective | This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts. |
+
+## Non-Goals
+
+- `canonical riido-contracts changes`, `frontend hook policy`, `Figma interpretation`, `live AWS deployment`, `production persistence topology`

@@ -1,0 +1,47 @@
+{
+  "schema_version": "riido-agent-catalog-rbac.v1",
+  "id": "agent-catalog-rbac",
+  "title": "Agent Catalog RBAC",
+  "riido_task": "RIID-4663",
+  "generated_doc": "docs/20-domain/agent-catalog-rbac.md",
+  "workflow": ".github/workflows/agent-catalog-rbac.yml",
+  "evidence_artifact": "agent-catalog-rbac-evidence",
+  "evidence_profiles": [
+    {"id":"rbac","workflow":".github/workflows/agent-catalog-rbac.yml","evidence_artifact":"agent-catalog-rbac-evidence","focus":"RBAC policy, authorization scopes, and generated reader freshness","test_patterns":["AgentCatalogRBAC|StaticTokenAuthorizer"]},
+    {"id":"api-port","workflow":".github/workflows/agent-catalog-api-port.yml","evidence_artifact":"agent-catalog-api-port-evidence","focus":"public DTO shape and narrow AgentCatalogStore port boundary","test_patterns":["AgentCatalogAPI|AgentCatalogStorePort"]},
+    {"id":"http-adapter","workflow":".github/workflows/agent-catalog-http-adapter.yml","evidence_artifact":"agent-catalog-http-adapter-evidence","focus":"stdlib HTTP route adapter and authorization boundary","test_patterns":["HTTPAgentCatalog|AgentCatalogHTTP"]}
+  ],
+  "owner_package": "internal/riidoaiserver",
+  "roles": ["admin"],
+  "visibilities": ["public", "private"],
+  "actions": ["read", "update", "delete"],
+  "visibility_rules": [
+    {"id": "admin-all", "subject": "admin principal", "record": "any public or private record", "allowed_actions": ["read", "update", "delete"], "reason": "admin-role"},
+    {"id": "owner-all", "subject": "record owner", "record": "own public or private record", "allowed_actions": ["read", "update", "delete"], "reason": "owner"},
+    {"id": "public-read", "subject": "non-admin non-owner", "record": "other public record", "allowed_actions": ["read"], "reason": "public"},
+    {"id": "private-deny", "subject": "non-admin non-owner", "record": "other private record", "denied_actions": ["read", "update", "delete"], "reason": "private-agent"},
+    {"id": "public-mutation-deny", "subject": "non-admin non-owner", "record": "other public record", "denied_actions": ["update", "delete"], "reason": "mutation-requires-admin-or-owner"}
+  ],
+  "authorization_scopes": ["riido:*", "agent-catalog:*", "agent-catalog:read", "agent-catalog:write", "agent-catalog:create", "agent-catalog:*:<action>", "agent-catalog:<agent-id>:*", "agent-catalog:<agent-id>:<action>"],
+  "routes": ["GET /v1/agent-catalog", "POST /v1/agent-catalog", "GET /v1/agent-catalog/{agent_id}", "PATCH /v1/agent-catalog/{agent_id}", "DELETE /v1/agent-catalog/{agent_id}"],
+  "request_dtos": ["CreateAgentCatalogRequest", "UpdateAgentCatalogRequest"],
+  "response_dtos": ["AgentCatalogListResponse", "AgentCatalogRecordResponse"],
+  "store_methods": ["ListAgentCatalog", "GetAgentCatalog", "SaveAgentCatalog", "DeleteAgentCatalog"],
+  "source_checks": [
+    {"name": "rbac-policy", "file": "internal/riidoaiserver/agent_catalog_rbac.go", "contains": ["EvaluateAgentCatalogAccess", "VisibleAgentCatalogRecords", "AgentCatalogRoleAdmin"]},
+    {"name": "api-dto-boundary", "file": "internal/riidoaiserver/agent_catalog_api_test.go", "contains": ["TestAgentCatalogAPIDTOsExposeOnlyCatalogShape", "owner_principal_id", "roles"]},
+    {"name": "http-rbac", "file": "internal/riidoaiserver/server_test.go", "contains": ["TestHTTPAgentCatalogRBACAdminSeesAndMutatesPrivateAgents", "TestHTTPAgentCatalogCreateStampsOwnerFromAuthorization"]},
+    {"name": "scope-candidates", "file": "internal/riidoaiserver/authorization.go", "contains": ["AuthorizationResourceAgentCatalog", "agent-catalog:*:", "agent-catalog:\" + req.AgentID + \":\" + string(req.Action)"]},
+    {"name": "rbac-workflow", "file": ".github/workflows/agent-catalog-rbac.yml", "contains": ["AgentCatalogRBAC|StaticTokenAuthorizer", "agent-catalog-rbac-evidence"]},
+    {"name": "api-port-workflow", "file": ".github/workflows/agent-catalog-api-port.yml", "contains": ["AgentCatalogAPI|AgentCatalogStorePort", "agent-catalog-api-port-evidence"]},
+    {"name": "http-adapter-workflow", "file": ".github/workflows/agent-catalog-http-adapter.yml", "contains": ["HTTPAgentCatalog|AgentCatalogHTTP", "agent-catalog-http-adapter-evidence"]}
+  ],
+  "non_goals": ["persistent catalog storage", "DynamoDB/EventBridge/IAM/Terraform wiring", "external identity-provider rollout", "daemon provider execution", "production token values"],
+  "loop": {
+    "observation": "The first public agent catalog RBAC slice originally proved policy shape but did not carry an explicit engineering loop.",
+    "hypothesis": "Keeping the RBAC loop in the executable manifest makes the early migration slice auditable without turning prose into the source of truth.",
+    "execute": "Generate this reader from the RBAC manifest and verify source checks, routes, visibility rules, and doc freshness in CI.",
+    "evaluate": "The verifier fails on missing identity fields, domain values, route coverage, source evidence, generated doc drift, or loop fields.",
+    "retrospective": "This keeps the migration-era RBAC slice aligned with the newer evidence-driven documentation model."
+  }
+}

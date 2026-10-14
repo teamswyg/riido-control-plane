@@ -5,55 +5,61 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/health-ready-cmd.yml"
+      - "docs/30-architecture/health-ready-cmd.md"
+      - "docs/30-architecture/health-ready-cmd.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
-      - "cmd/riido_ai_server/main.go"
-      - "cmd/riido_ai_server/main_test.go"
+      - "cmd/riido_ai_server/**"
+      - "cmd/riido_ai_server/config_core_test.go"
+      - "cmd/riido_ai_server/observability_config_test.go"
       - "internal/riidoaiserver/agent_registry.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/external_authorizer.go"
       - "internal/riidoaiserver/health_http_test.go"
       - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
+      - "tools/healthreadycmd/**"
   pull_request:
     paths:
       - ".github/workflows/health-ready-cmd.yml"
+      - "docs/30-architecture/health-ready-cmd.md"
+      - "docs/30-architecture/health-ready-cmd.riido.json"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
-      - "cmd/riido_ai_server/main.go"
-      - "cmd/riido_ai_server/main_test.go"
+      - "cmd/riido_ai_server/**"
+      - "cmd/riido_ai_server/config_core_test.go"
+      - "cmd/riido_ai_server/observability_config_test.go"
       - "internal/riidoaiserver/agent_registry.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/external_authorizer.go"
       - "internal/riidoaiserver/health_http_test.go"
       - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
+      - "tools/healthreadycmd/**"
 
 jobs:
   health-cmd:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify health/cmd import boundary
         run: |
           disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/riido_ai_server ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
@@ -61,9 +67,22 @@ jobs:
             printf 'Disallowed health/cmd imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify health/cmd executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/healthreadycmd -count=1
+          go run ./tools/healthreadycmd \
+            -check-doc \
+            -evidence-out out/health-ready-cmd-evidence.json
       - name: Test health adapter
         run: go test ./internal/riidoaiserver -run 'HTTPHealth|HTTPReady|HealthAndReady' -count=1
       - name: Test command environment
         run: go test ./cmd/riido_ai_server -count=1
       - name: Build command
         run: go build -o /tmp/riido_ai_server ./cmd/riido_ai_server
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: health-ready-cmd-evidence
+          path: out/health-ready-cmd-evidence.json
+          if-no-files-found: error

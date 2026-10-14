@@ -9,15 +9,20 @@ on:
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/integration-matrix.md"
+      - "docs/30-architecture/web-frontend-api.md"
+      - "docs/30-architecture/web-frontend-api.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
-      - "cmd/riido_ai_server/main.go"
-      - "cmd/riido_ai_server/main_test.go"
+      - "cmd/riido_ai_server/env_names.go"
+      - "cmd/riido_ai_server/web_origin_config.go"
+      - "cmd/riido_ai_server/config_core_test.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/web_frontend_cors.go"
       - "internal/riidoaiserver/web_frontend_cors_test.go"
+      - "tools/webfrontendapi/**"
   pull_request:
     paths:
       - ".github/workflows/web-frontend-api.yml"
@@ -25,33 +30,32 @@ on:
       - "docs/20-domain/request-authorization.md"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/integration-matrix.md"
+      - "docs/30-architecture/web-frontend-api.md"
+      - "docs/30-architecture/web-frontend-api.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
-      - "cmd/riido_ai_server/main.go"
-      - "cmd/riido_ai_server/main_test.go"
+      - "cmd/riido_ai_server/env_names.go"
+      - "cmd/riido_ai_server/web_origin_config.go"
+      - "cmd/riido_ai_server/config_core_test.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/web_frontend_cors.go"
       - "internal/riidoaiserver/web_frontend_cors_test.go"
+      - "tools/webfrontendapi/**"
 
 jobs:
   web-frontend-api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify web frontend API import boundary
         run: |
           disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./cmd/riido_ai_server ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
@@ -67,3 +71,13 @@ jobs:
         run: go test ./internal/riidoaiserver -run 'WebFrontendCORS' -count=1
       - name: Test command environment web origins
         run: go test ./cmd/riido_ai_server -run 'WebAllowedOrigins|ConfigFromEnv' -count=1
+      - name: Publish web frontend API evidence
+        run: |
+          mkdir -p out
+          go test ./tools/webfrontendapi -count=1
+          go run ./tools/webfrontendapi -check-doc -evidence-out out/web-frontend-api-evidence.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: web-frontend-api-evidence
+          path: out/web-frontend-api-evidence.json
+          if-no-files-found: error

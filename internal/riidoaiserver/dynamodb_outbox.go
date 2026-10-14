@@ -10,12 +10,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 const (
@@ -29,6 +32,7 @@ const (
 	dynamoDBUpdateItemTarget      = "DynamoDB_20120810.UpdateItem"
 	dynamoDBService               = "dynamodb"
 	defaultDynamoDBRequestTimeout = 10 * time.Second
+	awsJSONResponseBodyLimit      = 16 << 20
 )
 
 type AWSCredentials struct {
@@ -79,15 +83,9 @@ func NewECSContainerCredentialsProvider(config ECSContainerCredentialsProviderCo
 	if endpoint == "" {
 		return nil, errors.New("riidoaiserver: ECS credentials endpoint is required")
 	}
-	parsed, err := url.Parse(endpoint)
+	endpoint, err := normalizeECSContainerCredentialsEndpoint(endpoint)
 	if err != nil {
-		return nil, fmt.Errorf("parse ECS credentials endpoint: %w", err)
-	}
-	if parsed.Scheme != "http" && parsed.Scheme != "https" {
-		return nil, errors.New("riidoaiserver: ECS credentials endpoint must use http or https")
-	}
-	if parsed.Host == "" {
-		return nil, errors.New("riidoaiserver: ECS credentials endpoint host is required")
+		return nil, err
 	}
 	httpClient := config.HTTPClient
 	if httpClient == nil {
@@ -98,6 +96,37 @@ func NewECSContainerCredentialsProvider(config ECSContainerCredentialsProviderCo
 		authorizationToken: strings.TrimSpace(config.AuthorizationToken),
 		httpClient:         httpClient,
 	}, nil
+}
+
+func normalizeECSContainerCredentialsEndpoint(endpoint string) (string, error) {
+	parsed, err := url.Parse(endpoint)
+	if err != nil {
+		return "", fmt.Errorf("parse ECS credentials endpoint: %w", err)
+	}
+	if parsed.Scheme != "http" && parsed.Scheme != "https" {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must use http or https")
+	}
+	if parsed.Host == "" {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint host is required")
+	}
+	if parsed.User != nil {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must not include userinfo")
+	}
+	if parsed.RawQuery != "" || parsed.Fragment != "" {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must not include query or fragment")
+	}
+	if parsed.Scheme == "http" && !ecsCredentialsEndpointHostAllowsPlainHTTP(parsed.Hostname()) {
+		return "", errors.New("riidoaiserver: ECS credentials endpoint must use https unless it binds to localhost, loopback, or link-local metadata address")
+	}
+	return parsed.String(), nil
+}
+
+func ecsCredentialsEndpointHostAllowsPlainHTTP(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && (ip.IsLoopback() || ip.IsLinkLocalUnicast())
 }
 
 func (p *ECSContainerCredentialsProvider) Credentials(ctx context.Context) (AWSCredentials, error) {
@@ -447,6 +476,7 @@ type dynamoDBRequest struct {
 	credentials  AWSCredentials
 	httpClient   *http.Client
 	now          func() time.Time
+	traceAttrs   []TraceAttribute
 }
 
 type awsJSONRequest struct {
@@ -460,6 +490,7 @@ type awsJSONRequest struct {
 	credentials  AWSCredentials
 	httpClient   *http.Client
 	now          func() time.Time
+	traceAttrs   []TraceAttribute
 }
 
 type awsJSONAPIError struct {
@@ -490,22 +521,29 @@ func doDynamoDBJSON(ctx context.Context, request dynamoDBRequest) ([]byte, error
 		credentials:  request.credentials,
 		httpClient:   request.httpClient,
 		now:          request.now,
+		traceAttrs:   request.traceAttrs,
 	})
 }
 
-// maxAWSJSONResponseBytes bounds how much of an AWS JSON (DynamoDB) HTTP
-// response body we buffer. DynamoDB caps a single Query/Scan response at 1 MB
-// of item data, which—once wrapped in attribute-type JSON—serializes to well
-// over 1 MiB (observed ~1.5 MiB for a full assignment-journal page). The
-// previous 1 MiB cap silently truncated such pages via io.LimitReader,
-// yielding "unexpected end of JSON input" on decode and crashing assignment
-// store rehydrate at startup. 16 MiB leaves ample headroom above any single
-// DynamoDB response while keeping per-call buffering bounded.
-const maxAWSJSONResponseBytes = 16 << 20
-
 func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
+	traceAttrs := []TraceAttribute{
+		StringTraceAttribute(metadatakeys.AWSService.String(), request.service),
+		StringTraceAttribute(metadatakeys.AWSOperation.String(), awsJSONOperationName(request.target)),
+		StringTraceAttribute(metadatakeys.AWSRegion.String(), request.region),
+		StringTraceAttribute(metadatakeys.RiidoTraceSurface.String(), "aws_json"),
+	}
+	traceAttrs = append(traceAttrs, request.traceAttrs...)
+	ctx, span := StartTraceSpan(ctx, nil, TraceSpanStart{
+		Name:       "aws." + request.service + "." + awsJSONOperationName(request.target),
+		Kind:       TraceSpanKindClient,
+		Attributes: traceAttrs,
+	})
+	defer func() {
+		span.End()
+	}()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, request.endpoint, bytes.NewReader(request.payload))
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	req.Host = request.endpointHost
@@ -516,26 +554,41 @@ func doAWSJSON(ctx context.Context, request awsJSONRequest) ([]byte, error) {
 	signAWSJSONRequest(req, request.payload, request.region, request.service, request.credentials, now().UTC(), request.target, request.contentType)
 	resp, err := request.httpClient.Do(req)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	defer resp.Body.Close()
-	// Read one byte past the cap so a response that would overflow is detected
-	// and reported, rather than silently truncated into invalid JSON.
-	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxAWSJSONResponseBytes+1))
+	span.SetAttributes(
+		Int64TraceAttribute(metadatakeys.HTTPResponseStatusCode.String(), int64(resp.StatusCode)),
+		Int64TraceAttribute(metadatakeys.HTTPStatusCode.String(), int64(resp.StatusCode)),
+	)
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, awsJSONResponseBodyLimit+1))
 	if readErr != nil {
+		span.RecordError(readErr)
 		return nil, readErr
 	}
-	if int64(len(body)) > maxAWSJSONResponseBytes {
-		return nil, fmt.Errorf("aws %s response exceeds %d bytes (possible truncation)", request.service, maxAWSJSONResponseBytes)
+	if len(body) > awsJSONResponseBodyLimit {
+		err := fmt.Errorf("%s response body exceeds %d bytes", request.service, awsJSONResponseBodyLimit)
+		span.RecordError(err)
+		return nil, err
 	}
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		return nil, awsJSONAPIError{service: request.service, statusCode: resp.StatusCode, body: body}
+		err := awsJSONAPIError{service: request.service, statusCode: resp.StatusCode, body: body}
+		span.RecordError(err)
+		return nil, err
 	}
 	return body, nil
 }
 
-func signDynamoDBRequest(req *http.Request, payload []byte, region string, credentials AWSCredentials, now time.Time, target string) {
-	signAWSJSONRequest(req, payload, region, dynamoDBService, credentials, now, target, dynamoDBJSONContentType)
+func awsJSONOperationName(target string) string {
+	_, operation, ok := strings.Cut(strings.TrimSpace(target), ".")
+	if ok && operation != "" {
+		return operation
+	}
+	if target == "" {
+		return "unknown"
+	}
+	return target
 }
 
 func signAWSJSONRequest(req *http.Request, payload []byte, region, service string, credentials AWSCredentials, now time.Time, target, contentType string) {

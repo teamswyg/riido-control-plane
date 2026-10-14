@@ -1,0 +1,62 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func renderDoc(m manifest, e evidence) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "# %s\n\n%s\n\n", m.Title, generatedNotice)
+	b.WriteString("Executable SSOT: [`loop-closure-audit.riido.json`](loop-closure-audit.riido.json).\n\n")
+	renderSummary(&b, m, e)
+	renderAssertions(&b, m.Assertions)
+	renderRequirementProofs(&b, e.Requirements)
+	renderResidualGaps(&b, m.ResidualGaps)
+	renderClaimCoverageGaps(&b, e.ClaimCoverageGaps)
+	renderLoop(&b, m.Loop)
+	return strings.TrimRight(b.String(), "\n") + "\n"
+}
+
+func renderSummary(b *strings.Builder, m manifest, e evidence) {
+	b.WriteString("## Evidence Surface\n\n")
+	fmt.Fprintf(b, "- requirements: `%d`\n", e.RequirementCount)
+	fmt.Fprintf(b, "- checks: `%d`\n", e.CheckCount)
+	fmt.Fprintf(b, "- proofs: `%d`\n", e.ProofCount)
+	fmt.Fprintf(b, "- proof surfaces: `%d`\n", e.ProofSurfaceCount)
+	fmt.Fprintf(b, "- proof surface gaps: `%d`\n", e.ProofSurfaceGapCount)
+	fmt.Fprintf(b, "- residual gaps: `%d`\n", e.ResidualGapCount)
+	fmt.Fprintf(b, "- claim coverage gaps: `%d`\n", e.ClaimCoverageGapCount)
+	fmt.Fprintf(b, "- candidate count: `%d`\n", e.CandidateCount)
+	fmt.Fprintf(b, "- candidate artifact: `%s`\n", e.CandidateArtifact)
+	fmt.Fprintf(b, "- candidate promotion target: `%s`\n", e.CandidateTarget)
+	fmt.Fprintf(b, "- evidence artifact: `%s`\n", m.EvidenceArtifact)
+	fmt.Fprintf(b, "- workflow: `%s`\n\n", m.Workflow)
+}
+
+func renderAssertions(b *strings.Builder, assertions []string) {
+	b.WriteString("## Assertions\n\n")
+	for _, assertion := range assertions {
+		fmt.Fprintf(b, "- %s\n", assertion)
+	}
+	b.WriteString("\n")
+}
+
+func renderResidualGaps(b *strings.Builder, gaps []residualGap) {
+	b.WriteString("## Residual Gaps\n\n")
+	b.WriteString("| ID | Next Loop | Next Artifact | Next Command |\n| --- | --- | --- | --- |\n")
+	for _, gap := range gaps {
+		fmt.Fprintf(b, "| `%s` | `%s` | `%s` | `%s` |\n",
+			gap.ID, gap.NextLoop, gap.NextArtifact, gap.NextCommand)
+	}
+	b.WriteString("\n")
+}
+
+func renderLoop(b *strings.Builder, loop loopSpec) {
+	b.WriteString("## Loop\n\n")
+	fmt.Fprintf(b, "- Observe: %s\n", loop.Observation)
+	fmt.Fprintf(b, "- Hypothesis: %s\n", loop.Hypothesis)
+	fmt.Fprintf(b, "- Execute: %s\n", loop.Execute)
+	fmt.Fprintf(b, "- Evaluate: %s\n", loop.Evaluate)
+	fmt.Fprintf(b, "- Retrospective: %s\n", loop.Retrospective)
+}

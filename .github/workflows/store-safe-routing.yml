@@ -7,41 +7,41 @@ on:
       - ".github/workflows/store-safe-routing.yml"
       - "docs/20-domain/provider-status.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/store-safe-routing.md"
+      - "docs/30-architecture/store-safe-routing.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/store_safe_routing.go"
       - "internal/riidoaiserver/store_safe_routing_test.go"
+      - "tools/storesaferouting/**"
   pull_request:
     paths:
       - ".github/workflows/store-safe-routing.yml"
       - "docs/20-domain/provider-status.md"
       - "docs/20-domain/saas-control-plane.md"
+      - "docs/30-architecture/store-safe-routing.md"
+      - "docs/30-architecture/store-safe-routing.riido.json"
       - "docs/migration/control-plane.md"
       - "go.mod"
       - "go.sum"
       - "internal/riidoaiserver/provider_status.go"
       - "internal/riidoaiserver/store_safe_routing.go"
       - "internal/riidoaiserver/store_safe_routing_test.go"
+      - "tools/storesaferouting/**"
 
 jobs:
   store-safe-routing:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify store-safe routing import boundary
         run: |
           disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
@@ -51,3 +51,13 @@ jobs:
           fi
       - name: Test store-safe routing
         run: go test ./internal/riidoaiserver -run 'StoreSafeRouting' -count=1
+      - name: Publish store-safe routing evidence
+        run: |
+          mkdir -p out
+          go test ./tools/storesaferouting -count=1
+          go run ./tools/storesaferouting -check-doc -evidence-out out/store-safe-routing-evidence.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: store-safe-routing-evidence
+          path: out/store-safe-routing-evidence.json
+          if-no-files-found: error

@@ -1,0 +1,36 @@
+{
+  "schema_version": "riido-control-plane-performance-optimization-evidence.v1",
+  "captured_at": "2026-07-03T01:43:00Z",
+  "redacted": true,
+  "change": {
+    "id": "http_transaction_metrics_snapshot_direct_aggregate",
+    "file": "internal/riidoaiserver/http_transaction_metrics_snapshot.go",
+    "contract_impact": "none",
+    "summary": "Aggregate HTTP transaction metric buckets directly while holding the metrics lock, then sort the bounded response outside the lock. This removes an intermediate bucket/map copy from /metrics snapshot generation."
+  },
+  "before": {
+    "command": "go test ./internal/riidoaiserver -run '^$' -bench 'BenchmarkHTTPTransactionMetricsSnapshot' -benchmem -count=3",
+    "median_ns_per_op": 9852,
+    "bytes_per_op": 39000,
+    "allocs_per_op": 22
+  },
+  "after": {
+    "command": "go test ./internal/riidoaiserver -run '^$' -bench 'BenchmarkHTTPTransactionMetricsSnapshot' -benchmem -count=5",
+    "median_ns_per_op": 7556,
+    "bytes_per_op": 26320,
+    "allocs_per_op": 15
+  },
+  "improvement": {
+    "median_latency_reduction_percent": 23.3,
+    "bytes_per_op_reduction_percent": 32.5,
+    "allocs_per_op_reduction_percent": 31.8
+  },
+  "verification": {
+    "tests": [
+      "go test ./internal/riidoaiserver -run 'TestHTTP.*Metrics|TestOpenStore|TestStoreOperation|TestCloudWatch|TestMetrics' -count=1",
+      "go test ./tools/controlplaneperf ./tools/controlplanepressure ./tools/controlplaneaudit -count=1",
+      "go run ./tools/controlplaneperf -check-doc -evidence-out out/control-plane-performance-evidence.json"
+    ],
+    "benchmark_history": "docs/30-architecture/control-plane-performance-averages.jsonl"
+  }
+}

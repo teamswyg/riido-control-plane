@@ -12,6 +12,9 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 	switch response.WorkStatus {
 	case AgentWorkStatusWaitingForUser:
 		kind = response.ConfirmationReason
+		if kind == "" && assignmentMetadataNeedsInput(event.Metadata) {
+			kind = "answer_required"
+		}
 	case AgentWorkStatusCompleted:
 		kind = "result_ready"
 	case AgentWorkStatusFailed:
@@ -19,6 +22,16 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 	}
 	if kind == "" {
 		return
+	}
+
+	for _, previous := range s.events {
+		notification, ok := previous.Payload.(AgentTaskNotificationEvent)
+		if !ok {
+			continue
+		}
+		if notification.EventID == event.EventID || (isTerminal(event.State) && notification.AssignmentID == event.AssignmentID && notification.NotificationType == kind) {
+			return
+		}
 	}
 	s.appendClientEventLocked(AgentClientEventTaskNotification, AgentTaskNotificationEvent{
 		EventType: AgentClientEventTaskNotification, SchemaVersion: SchemaVersion,

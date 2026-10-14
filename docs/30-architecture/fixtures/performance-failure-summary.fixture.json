@@ -1,0 +1,26 @@
+{
+  "schema_version": "riido-control-plane-live-workflow-evidence.v1",
+  "id": "control-plane-performance",
+  "generated_at": "2026-06-24T00:00:00Z",
+  "expires_at": "2026-06-25T00:00:00Z",
+  "live_status": "failure",
+  "evidence_claims": [
+    {
+      "id": "control_plane_performance_hot_path_benchmarks",
+      "summary": "redacted performance hot-path benchmark failure",
+      "status": "not_verified"
+    },
+    {
+      "id": "control_plane_performance_closed_loop_promotion",
+      "summary": "redacted performance closed-loop promotion failure",
+      "status": "not_verified"
+    }
+  ],
+  "run": {
+    "id": "performance-fixture",
+    "attempt": "1",
+    "sha": "redacted",
+    "ref_name": "fixture",
+    "event": "fixture"
+  }
+}

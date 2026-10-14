@@ -1,0 +1,72 @@
+{
+  "schema_version": "riido-daemon-reconnect-runtimeactor-evidence.v1",
+  "id": "daemon_reconnect_runtimeactor_2026_07_02",
+  "captured_at": "2026-07-02T07:53:01Z",
+  "redacted": true,
+  "source": {
+    "repo": "teamswyg/riido-daemon",
+    "local_path": "../riido-daemon",
+    "branch": "RIID-5001-QA-runner-workflow-evidence-doc-sync",
+    "commit": "eb7976f00bfe843eb58f556713a309de29a4f110",
+    "worktree_clean": true
+  },
+  "commands": [
+    {
+      "id": "cmd_riido_long_poll",
+      "command": "go test ./cmd/riido -run 'TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait|TestDaemonControlPlaneLongPoll|TestDaemonControlPlaneLongPollServer' -count=1 -json",
+      "status": "passed",
+      "module": "teamswyg/riido-daemon",
+      "package_path": "cmd/riido",
+      "passed_tests": [
+        "TestBuildDaemonControlPlaneSaaSUsesDefaultLongPollWait"
+      ]
+    },
+    {
+      "id": "saasplane_retry",
+      "command": "go test ./internal/agentbridge/controlplane/saasplane -run 'TestPlaneRetriesTransientPoll|TestPlaneDoesNotRetryPermanentPollFailure|TestPlaneRetriesTransientPollTransportError|TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout' -count=1 -json",
+      "status": "passed",
+      "module": "teamswyg/riido-daemon",
+      "package_path": "internal/agentbridge/controlplane/saasplane",
+      "passed_tests": [
+        "TestPlaneSendsLongPollWaitMsAndExtendsRequestTimeout",
+        "TestPlaneRetriesTransientPoll",
+        "TestPlaneDoesNotRetryPermanentPollFailure",
+        "TestPlaneRetriesTransientPollTransportError"
+      ]
+    },
+    {
+      "id": "runtimeactor_capacity",
+      "command": "go test ./internal/agentbridge/runtimeactor -run 'Test.*Slot|Test.*Goroutine|Test.*Leak' -count=1 -json",
+      "status": "passed",
+      "module": "teamswyg/riido-daemon",
+      "package_path": "internal/agentbridge/runtimeactor",
+      "passed_tests": [
+        "TestRuntimeActorStopReleasesAllGoroutines",
+        "TestRuntimeActorHonorsMaxConcurrentSlots"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "daemon_retry_waiting_path_verified",
+      "severity": "info",
+      "signal": "Daemon SaaS-plane retry tests still pass for transient poll, transport error retry, permanent failure non-retry, and long-poll wait/timeout extension."
+    },
+    {
+      "id": "runtimeactor_slot_goroutine_path_verified",
+      "severity": "info",
+      "signal": "Runtime actor tests still pass for concurrent slot limit and goroutine release behavior on the current QA runner branch."
+    },
+    {
+      "id": "release_chaos_not_exercised",
+      "severity": "partial",
+      "signal": "This is local daemon test evidence, not a live network-disconnect or all-server-down release chaos drill with a running installed desktop daemon."
+    }
+  ],
+  "redaction": {
+    "no_raw_tokens": true,
+    "no_raw_device_credentials": true,
+    "no_raw_customer_paths": true,
+    "json_test_logs_kept_local_only": ".riido-local/daemon-reconnect-2026-07-02"
+  }
+}

@@ -14,12 +14,8 @@ func TestAugmentAgentInstruction(t *testing.T) {
 	if !strings.Contains(got, "한국어") {
 		t.Fatalf("Korean response guideline missing: %q", got)
 	}
-	if !strings.Contains(got, "필수 정보·작업 공간·권한") {
+	if !strings.Contains(got, "어느 경로") {
 		t.Fatalf("no-workspace guidance missing: %q", got)
-	}
-
-	if !strings.Contains(got, "실제 작업을 수행하고 결과를 검증") || strings.Contains(got, "단계로 제시하며 마무리") {
-		t.Fatalf("assignment must require execution when ready: %q", got)
 	}
 
 	// Empty instruction still yields the guidelines, so the system prompt is

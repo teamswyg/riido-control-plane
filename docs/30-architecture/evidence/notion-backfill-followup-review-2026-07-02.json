@@ -1,0 +1,110 @@
+{
+  "schema_version": "riido-notion-backfill-followup-review.v1",
+  "id": "notion_backfill_followup_review_2026_07_02",
+  "captured_at": "2026-07-02T08:05:30Z",
+  "redacted": true,
+  "source": {
+    "parent_page_id": "38e20241-cf7f-804d-bbdb-fdddb2bef165",
+    "parent_page_title": "[v1.24] AI Agent QA",
+    "parent_page_url": "https://app.notion.com/p/38e20241cf7f804dbbdbfdddb2bef165",
+    "cw_structured_page_id": "38f20241-cf7f-813c-be7c-ddf3c6fd8b65",
+    "cw_structured_page_title": "[v1.24] AI Agent QA - CW 피드백 구조화",
+    "fetch_mode": "parent_page_body_with_discussions_plus_cw_structured_subpage"
+  },
+  "reviewed_changes": [
+    {
+      "id": "parent_body_still_contains_stale_dmg_workaround",
+      "severity": "partial",
+      "observed_in": "parent_page_body",
+      "signal": "The parent QA body still contains the older manual Gatekeeper workaround text (`xattr -cr`, ad-hoc `codesign --sign -`) even though later evidence says the CDN staging DMG is Developer ID signed, notarized, stapled, and accepted by spctl.",
+      "latest_truth_refs": [
+        "notion-comment:39120241-cf7f-81c3-8734-001dad625710",
+        "notion-comment:39120241-cf7f-81f2-9d54-001d551d544e",
+        "cdn:https://cdn.riido.io/releases/latest/staging/Riido-Staging-arm64.dmg"
+      ],
+      "decision": "Do not treat the parent page body install workaround as current release truth. Use the signed/notarized DMG comments and repository evidence until the body is cleaned up."
+    },
+    {
+      "id": "cw_structured_page_backfill_matches_readiness_inventory",
+      "severity": "info",
+      "observed_in": "cw_structured_subpage",
+      "signal": "The CW structured page keeps CW-AIA-001..011 normalized, with CW-AIA-003/006/009 marked confirmed and the remaining eight items still open.",
+      "latest_truth_refs": [
+        "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-001",
+        "notion:38f20241cf7f813cbe7cddf3c6fd8b65#CW-AIA-011",
+        "docs/30-architecture/operational-readiness.riido.json:staging_client_p0_visual_retest"
+      ],
+      "decision": "The backfilled CW inventory is still aligned with operational-readiness. Backend/control-plane has no new blocker from this subpage."
+    },
+    {
+      "id": "cw_open_items_are_policy_or_client_visual",
+      "severity": "partial",
+      "observed_in": "cw_structured_subpage",
+      "signal": "CW-AIA-001/002 require product onboarding policy, while CW-AIA-004/005/007/008/010/011 require client/design screenshot comparison. None of these are closable by backend API evidence alone.",
+      "latest_truth_refs": [
+        "notion-comment:39120241-cf7f-8110-ac53-001d16e97a80",
+        "docs/30-architecture/operational-readiness.riido.json:staging_client_p0_visual_retest"
+      ],
+      "decision": "Keep `staging_client_p0_visual_retest` partial until product decisions and screenshot evidence close the open CW-AIA items."
+    },
+    {
+      "id": "recent_comments_extend_evidence_chain_after_backfill",
+      "severity": "info",
+      "observed_in": "parent_page_comments",
+      "signal": "After the earlier Notion backfill, additional page-level comments record staging public burst evidence, deploy-overlap burst evidence, and daemon reconnect/runtimeactor evidence. These comments advance backend/infra readiness without changing the remaining client/design partial boundary.",
+      "latest_truth_refs": [
+        "github:https://github.com/teamswyg/riido-control-plane/pull/755",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/756",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/757"
+      ],
+      "decision": "Treat these as backend/infra evidence extensions. They do not close visual/client QA items."
+    },
+    {
+      "id": "page_level_server_deploy_property_remains_non_authoritative",
+      "severity": "info",
+      "observed_in": "parent_page_properties",
+      "signal": "The parent page still shows `서버 배포: NO`, while page comments and repository PRs record multiple control-plane/backend evidence and deploy-related completions.",
+      "latest_truth_refs": [
+        "github:https://github.com/teamswyg/riido-control-plane/pull/743",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/755",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/756",
+        "github:https://github.com/teamswyg/riido-control-plane/pull/757"
+      ],
+      "decision": "Continue treating the page-level deploy property as client-release scope, not backend/control-plane deployment truth."
+    }
+  ],
+  "cw_structured_summary": {
+    "confirmed": [
+      "CW-AIA-003",
+      "CW-AIA-006",
+      "CW-AIA-009"
+    ],
+    "policy_required": [
+      "CW-AIA-001",
+      "CW-AIA-002"
+    ],
+    "client_design_visual_required": [
+      "CW-AIA-004",
+      "CW-AIA-005",
+      "CW-AIA-007",
+      "CW-AIA-008",
+      "CW-AIA-010",
+      "CW-AIA-011"
+    ],
+    "backend_blocker": false
+  },
+  "next_actions": [
+    {
+      "owner": "product",
+      "action": "Decide whether existing desktop users see a first-run AI Agent feature entry page or land on the list with another visible entry point."
+    },
+    {
+      "owner": "client_design_qa",
+      "action": "Attach Figma-versus-staging screenshots for description clamp, Claude/AI logo presentation, screen composition, and long nickname ellipsis."
+    },
+    {
+      "owner": "release_owner",
+      "action": "Clean or annotate the parent Notion body so the stale Gatekeeper workaround does not conflict with signed/notarized DMG evidence."
+    }
+  ]
+}

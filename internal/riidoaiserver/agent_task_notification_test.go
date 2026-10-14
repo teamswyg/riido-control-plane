@@ -164,7 +164,7 @@ func TestWaitingReasonAndRecipientSurviveAssignmentEventPersistence(t *testing.T
 	store := NewStore()
 	defer store.Close()
 	state := newStoreState()
-	assignment, err := store.handleAssign(&state, "task", AssignRequest{ComponentID: "task", AgentID: "agent", RuntimeProvider: "codex", Prompt: "work", CreatedBy: "assigner", WorkspaceID: "workspace", TeamID: "team"}, true)
+	assignment, err := store.handleAssign(&state, "task", AssignRequest{ComponentID: "task", AgentID: "agent", RuntimeProvider: "codex", Prompt: "work", CreatedBy: "assigner", WorkspaceID: "workspace", TeamID: "team"}, true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,5 +229,41 @@ func TestTaskNotificationIsNotReplayedOnNewSubscription(t *testing.T) {
 	server.handleAIAgentClientEvents(response, request)
 	if response.Code != 200 || strings.Contains(response.Body.String(), AgentClientEventTaskNotification) {
 		t.Fatalf("historical notification replayed: %d %s", response.Code, response.Body.String())
+	}
+}
+
+func TestTaskNotificationAfterTerminalSnapshotRepair(t *testing.T) {
+	s := NewDevelopmentAIAgentClientStore()
+	s.agents["agent"] = AgentClientRecord{AgentID: "agent", WorkspaceID: "ws", OwnerPrincipalID: "assigner"}
+	s.taskThreads["task"] = []AIAgentTaskThreadRecord{{ThreadID: "thread", TaskID: "task", AgentID: "agent", AssignmentID: "assignment", RunID: "run", WorkStatus: AgentWorkStatusCompleted, AssignmentState: AgentAssignmentStateCompleted}}
+	event := TaskEvent{EventID: "assignment:5", Seq: 5, TaskID: "task", AssignmentID: "assignment", AgentID: "agent", WorkspaceID: "ws", CreatedBy: "assigner", State: AssignmentCompleted, Type: EventAssignmentCompleted, At: time.Now()}
+	for i := 0; i < 2; i++ {
+		if err := s.RecordAIAgentAssignmentEvent(context.Background(), "agent", AgentEventRequest{}, event); err != nil {
+			t.Fatal(err)
+		}
+	}
+	count := 0
+	for _, e := range s.events {
+		if n, ok := e.Payload.(AgentTaskNotificationEvent); ok {
+			count++
+			if n.NotificationType != "result_ready" {
+				t.Fatal(n)
+			}
+		}
+	}
+	if count != 1 {
+		t.Fatalf("notifications after snapshot repair: %d", count)
+	}
+}
+
+func TestNeedsInputResultNotifiesAnswerInsteadOfCompletion(t *testing.T) {
+	s := NewDevelopmentAIAgentClientStore()
+	s.events = nil
+	s.appendTaskNotificationLocked(TaskEvent{EventID: "event", AssignmentID: "assignment", WorkspaceID: "ws", CreatedBy: "user", State: AssignmentCompleted, Metadata: map[string]string{"assignment_result_status": "needs_input"}}, AIAgentTaskActionResponse{WorkStatus: AgentWorkStatusWaitingForUser})
+	if len(s.events) != 1 {
+		t.Fatalf("events: %+v", s.events)
+	}
+	if got := s.events[0].Payload.(AgentTaskNotificationEvent).NotificationType; got != "answer_required" {
+		t.Fatal(got)
 	}
 }

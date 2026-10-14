@@ -1,0 +1,120 @@
+{
+  "schema_version": "riido-deploy-overlap-burst-evidence.v1",
+  "id": "staging_deploy_overlap_burst_2026_07_02",
+  "captured_at": "2026-07-02T07:47:00Z",
+  "redacted": true,
+  "target": {
+    "environment": "testnet",
+    "host": "staging.ai-api.riido.io",
+    "scenario": "public",
+    "deployment_mode": "ecs-rolling"
+  },
+  "runs": {
+    "deploy": {
+      "workflow": "deploy-ai-agent-testnet",
+      "run_id": "28573541816",
+      "url": "https://github.com/teamswyg/riido-control-plane/actions/runs/28573541816",
+      "sha": "4cd1ceb358918e73b4037857c721a172a94ee012",
+      "status": "success",
+      "started_at": "2026-07-02T07:36:45Z",
+      "completed_at": "2026-07-02T07:41:34Z",
+      "steps": [
+        {
+          "name": "Build and push immutable image",
+          "started_at": "2026-07-02T07:37:32Z",
+          "completed_at": "2026-07-02T07:38:25Z",
+          "status": "success"
+        },
+        {
+          "name": "Register task definition revision",
+          "started_at": "2026-07-02T07:38:25Z",
+          "completed_at": "2026-07-02T07:38:29Z",
+          "status": "success"
+        },
+        {
+          "name": "Deploy runtime artifact and wait",
+          "started_at": "2026-07-02T07:38:29Z",
+          "completed_at": "2026-07-02T07:41:28Z",
+          "status": "success"
+        },
+        {
+          "name": "Smoke deployed AI Agent API",
+          "started_at": "2026-07-02T07:41:28Z",
+          "completed_at": "2026-07-02T07:41:30Z",
+          "status": "success"
+        }
+      ]
+    },
+    "load": {
+      "workflow": "ai-agent-client-testnet-load",
+      "run_id": "28573547140",
+      "url": "https://github.com/teamswyg/riido-control-plane/actions/runs/28573547140",
+      "sha": "4cd1ceb358918e73b4037857c721a172a94ee012",
+      "status": "success",
+      "started_at": "2026-07-02T07:37:19.3031531Z",
+      "completed_at": "2026-07-02T07:42:19.414057441Z",
+      "duration_ms": 300110,
+      "concurrency": 128,
+      "total": 189043,
+      "success": 189043,
+      "failures": 0,
+      "requests_per_second": 629.9104673157779,
+      "success_per_second": 629.9104673157779,
+      "failure_rate_pct": 0,
+      "latency_ms": {
+        "min": 187,
+        "p50": 188,
+        "p90": 194,
+        "p95": 211,
+        "p99": 625,
+        "max": 1565
+      }
+    }
+  },
+  "overlap": {
+    "load_started_before_image_build": true,
+    "load_covered_build_register_deploy_wait_and_smoke": true,
+    "deploy_job_overlap_seconds": 255,
+    "runtime_deploy_wait_overlap_seconds": 179,
+    "load_finished_after_deploy_smoke": true
+  },
+  "endpoint_results": [
+    {
+      "path": "/healthz",
+      "total": 94522,
+      "success": 94522,
+      "failures": 0,
+      "p95_latency_ms": 210,
+      "p99_latency_ms": 606,
+      "max_latency_ms": 1565
+    },
+    {
+      "path": "/readyz",
+      "total": 94521,
+      "success": 94521,
+      "failures": 0,
+      "p95_latency_ms": 213,
+      "p99_latency_ms": 633,
+      "max_latency_ms": 1564
+    }
+  ],
+  "findings": [
+    {
+      "id": "deploy_overlap_burst_success",
+      "severity": "info",
+      "signal": "A 300s concurrency-128 public load run fully overlapped image build, task definition registration, ECS rolling deploy wait, and deployed API smoke; all 189,043 requests returned HTTP 200.",
+      "next": "Use this as deployment-overlap availability evidence for staging/testnet public health and readiness routes."
+    },
+    {
+      "id": "cold_start_target_attribution_missing",
+      "severity": "partial",
+      "signal": "The run proves zero public endpoint failures during rolling deploy under load, but it does not attribute individual requests to old vs new ECS tasks or prove packets were accepted by a still-booting task before load-balancer health routing.",
+      "next": "Add target/task-level deployment timing or ALB target attribution before marking true cold-start packet acceptance fully covered."
+    }
+  ],
+  "redaction": {
+    "no_raw_secrets": true,
+    "no_raw_aws_resource_ids": true,
+    "no_raw_endpoints_beyond_public_host": true
+  }
+}

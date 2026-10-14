@@ -7,11 +7,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+)
+
+const (
+	defaultAIAgentClientSnapshotReloadInterval        = time.Minute
+	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 5 * time.Minute
 )
 
 type AIAgentClientSnapshotStore interface {
@@ -20,20 +24,22 @@ type AIAgentClientSnapshotStore interface {
 }
 
 type AIAgentClientSnapshot struct {
-	Version                 int64                                   `json:"version,omitempty"`
-	ExpectedVersion         int64                                   `json:"-"`
-	SchemaVersion           string                                  `json:"schema_version"`
-	SavedAt                 time.Time                               `json:"saved_at"`
-	WorkspaceID             string                                  `json:"workspace_id"`
-	Devices                 []DeviceRecord                          `json:"devices"`
-	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot `json:"device_credentials"`
-	Daemons                 []DeviceDaemonRecord                    `json:"daemons"`
-	Agents                  []AgentClientRecord                     `json:"agents"`
-	Fixtures                []AgentOnboardingFixture                `json:"fixtures"`
-	TaskThreads             map[string][]AIAgentTaskThreadRecord    `json:"task_threads"`
-	Events                  []AIAgentClientEventSnapshot            `json:"events"`
-	NextDeviceCredentialSeq int                                     `json:"next_device_credential_seq"`
-	NextDaemonCommand       int                                     `json:"next_daemon_command"`
+	Version                 int64                                        `json:"version,omitempty"`
+	ExpectedVersion         int64                                        `json:"-"`
+	SchemaVersion           string                                       `json:"schema_version"`
+	SavedAt                 time.Time                                    `json:"saved_at"`
+	WorkspaceID             string                                       `json:"workspace_id"`
+	Devices                 []DeviceRecord                               `json:"devices"`
+	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot      `json:"device_credentials"`
+	DeviceConnectionGrants  []DeviceConnectionGrant                      `json:"device_connection_grants,omitempty"`
+	Daemons                 []DeviceDaemonRecord                         `json:"daemons"`
+	Agents                  []AgentClientRecord                          `json:"agents"`
+	Fixtures                []AgentOnboardingFixture                     `json:"fixtures"`
+	TaskThreads             map[string][]AIAgentTaskThreadRecord         `json:"task_threads"`
+	TaskThreadMessages      map[string][]AIAgentTaskThreadHistoryMessage `json:"task_thread_messages,omitempty"`
+	Events                  []AIAgentClientEventSnapshot                 `json:"events"`
+	NextDeviceCredentialSeq int                                          `json:"next_device_credential_seq"`
+	NextDaemonCommand       int                                          `json:"next_daemon_command"`
 }
 
 type AIAgentClientDeviceCredentialSnapshot struct {
@@ -54,9 +60,15 @@ type AIAgentClientEventSnapshot struct {
 
 type PersistentAIAgentClientStore struct {
 	*DevelopmentAIAgentClientStore
-	snapshotStore AIAgentClientSnapshotStore
-	operationMu   sync.Mutex
-	version       int64
+	snapshotStore                 AIAgentClientSnapshotStore
+	operationMu                   sync.Mutex
+	version                       int64
+	snapshotReloadMu              sync.Mutex
+	snapshotReloadInterval        time.Duration
+	snapshotHeartbeatSaveInterval time.Duration
+	snapshotLastReloadAt          time.Time
+	snapshotLastSavedAt           time.Time
+	snapshotClock                 func() time.Time
 }
 
 func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAgentClientStore, snapshotStore AIAgentClientSnapshotStore) (*PersistentAIAgentClientStore, error) {
@@ -69,481 +81,88 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 	if snapshotStore == nil {
 		return nil, errors.New("riidoaiserver: ai agent client snapshot store is required")
 	}
+	store := &PersistentAIAgentClientStore{
+		DevelopmentAIAgentClientStore: base,
+		snapshotStore:                 snapshotStore,
+		snapshotReloadInterval:        defaultAIAgentClientSnapshotReloadInterval,
+		snapshotHeartbeatSaveInterval: defaultAIAgentClientHeartbeatSnapshotSaveInterval,
+		snapshotClock:                 time.Now,
+	}
 	if snapshot, ok, err := snapshotStore.LoadAIAgentClientSnapshot(ctx); err != nil {
 		return nil, err
 	} else if ok {
 		if err := base.restoreSnapshot(snapshot); err != nil {
 			return nil, err
 		}
-		return &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore, version: snapshot.Version}, nil
+		profilePruned := base.pruneUnexpectedDaemonProfiles("snapshot_restore")
+		repaired := base.repairStaleActiveTaskThreads(store.snapshotNow().UTC())
+		store.version = snapshot.Version
+		store.markSnapshotObserved(snapshot.SavedAt)
+		if repaired || profilePruned {
+			return store, store.saveSnapshot(ctx)
+		}
+		return store, nil
 	}
-	store := &PersistentAIAgentClientStore{DevelopmentAIAgentClientStore: base, snapshotStore: snapshotStore}
 	if err := store.saveSnapshot(ctx); err != nil {
 		return nil, err
 	}
 	return store, nil
 }
 
-func (s *PersistentAIAgentClientStore) EnrollDeviceCredential(ctx context.Context, principal AuthorizationResult, workspaceID string, req EnrollDeviceRequest) (EnrollDeviceResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return EnrollDeviceResponse{}, err
+func (s *PersistentAIAgentClientStore) ConfigureSnapshotCadence(reloadInterval, heartbeatSaveInterval time.Duration) error {
+	if s == nil {
+		return nil
 	}
-	response, err := s.DevelopmentAIAgentClientStore.EnrollDeviceCredential(ctx, principal, workspaceID, req)
-	if err != nil {
-		return response, err
+	if reloadInterval < 0 {
+		return errors.New("riidoaiserver: AI Agent client snapshot reload interval must not be negative")
 	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Context, deviceID, deviceSecret string, req AuthorizationRequest) (AuthorizationResult, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AuthorizationResult{}, err
+	if heartbeatSaveInterval < 0 {
+		return errors.New("riidoaiserver: AI Agent client heartbeat snapshot save interval must not be negative")
 	}
-	return s.DevelopmentAIAgentClientStore.AuthorizeDeviceCredential(ctx, deviceID, deviceSecret, req)
-}
-
-func (s *PersistentAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return ClientBootstrapResponse{}, err
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	if reloadInterval > 0 {
+		s.snapshotReloadInterval = reloadInterval
 	}
-	return s.DevelopmentAIAgentClientStore.BootstrapAIAgentClient(ctx, principal, clientKind)
-}
-
-func (s *PersistentAIAgentClientStore) ListAIAgentOnboardingFixtures(ctx context.Context, principal AuthorizationResult) (AgentOnboardingFixtureListResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentOnboardingFixtureListResponse{}, err
+	if heartbeatSaveInterval > 0 {
+		s.snapshotHeartbeatSaveInterval = heartbeatSaveInterval
 	}
-	return s.DevelopmentAIAgentClientStore.ListAIAgentOnboardingFixtures(ctx, principal)
-}
-
-func (s *PersistentAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx context.Context, principal AuthorizationResult, fixtureID string, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentClientRecordResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgentFromOnboardingFixture(ctx, principal, fixtureID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) ListAIAgentDevices(ctx context.Context, principal AuthorizationResult) (DeviceRuntimeListResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceRuntimeListResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.ListAIAgentDevices(ctx, principal)
-}
-
-func (s *PersistentAIAgentClientStore) GetAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string) (DeviceDaemonDetailResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceDaemonDetailResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.GetAIAgentDaemon(ctx, principal, agentID)
-}
-
-func (s *PersistentAIAgentClientStore) ControlAIAgentDaemon(ctx context.Context, principal AuthorizationResult, agentID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceDaemonCommandResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.ControlAIAgentDaemon(ctx, principal, agentID, action, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) GetAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string) (DeviceDaemonDetailResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceDaemonDetailResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.GetAIAgentDeviceDaemon(ctx, principal, deviceID)
-}
-
-func (s *PersistentAIAgentClientStore) ControlAIAgentDeviceDaemon(ctx context.Context, principal AuthorizationResult, deviceID string, action DaemonControlAction, req ControlDeviceDaemonRequest) (DeviceDaemonCommandResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceDaemonCommandResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.ControlAIAgentDeviceDaemon(ctx, principal, deviceID, action, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) ListAIAgentDaemonAgentBindings(ctx context.Context, principal AuthorizationResult, deviceID string) (AgentRuntimeBindingListResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentRuntimeBindingListResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.ListAIAgentDaemonAgentBindings(ctx, principal, deviceID)
-}
-
-func (s *PersistentAIAgentClientStore) LookupAgent(agentID string) (AgentRuntimeBinding, bool) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(context.Background()); err != nil {
-		return AgentRuntimeBinding{}, false
-	}
-	return s.DevelopmentAIAgentClientStore.LookupAgent(agentID)
-}
-
-func (s *PersistentAIAgentClientStore) LookupAgentRuntimeFact(agentID string) (AgentRuntimeBinding, RuntimeRecord, bool) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(context.Background()); err != nil {
-		return AgentRuntimeBinding{}, RuntimeRecord{}, false
-	}
-	return s.DevelopmentAIAgentClientStore.LookupAgentRuntimeFact(agentID)
-}
-
-func (s *PersistentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context, principal AuthorizationResult, machineID string) (DeviceRecord, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceRecord{}, err
-	}
-	device, err := s.DevelopmentAIAgentClientStore.ConnectAIAgentDevice(ctx, principal, machineID)
-	if err != nil {
-		return device, err
-	}
-	return device, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx context.Context, principal AuthorizationResult, taskID string) (AgentClientListResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentClientListResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.ListAIAgentTaskAssignableAgents(ctx, principal, taskID)
-}
-
-func (s *PersistentAIAgentClientStore) ListWorkspaceAssignedAgentProfiles(ctx context.Context, principal AuthorizationResult) (AssignedAgentProfileMapResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AssignedAgentProfileMapResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.ListWorkspaceAssignedAgentProfiles(ctx, principal)
-}
-
-func (s *PersistentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadCollectionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskThreadCollectionResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.ListAIAgentTaskThreads(ctx, principal, taskID)
-}
-
-func (s *PersistentAIAgentClientStore) ReconcileAIAgentActiveThreadProjections(ctx context.Context, principal AuthorizationResult, taskID string, reader AssignmentProjectionReader) (bool, error) {
-	if reader == nil {
-		return false, nil
-	}
-	s.operationMu.Lock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		s.operationMu.Unlock()
-		return false, err
-	}
-	candidates := s.DevelopmentAIAgentClientStore.reconcilableActiveTaskThreadProjectionCandidates(principal, strings.TrimSpace(taskID))
-	s.operationMu.Unlock()
-	type repair struct {
-		thread      AIAgentTaskThreadRecord
-		projection  AssignmentProjection
-		diagnostics *AIAgentTaskThreadQueueDiagnostics
-	}
-	var repairs []repair
-	for _, thread := range candidates {
-		projection, ok, err := reader.LoadAssignmentProjection(ctx, thread.AssignmentID)
-		if err != nil {
-			return false, err
-		}
-		if !ok || !assignmentProjectionMatchesTaskThread(thread, projection) || !assignmentStateCanRepairTaskThread(projection.Assignment.State) {
-			continue
-		}
-		diagnostics, err := queueDiagnosticsFromAssignmentProjection(ctx, reader, projection)
-		if err != nil {
-			return false, err
-		}
-		repairs = append(repairs, repair{thread, projection, diagnostics})
-	}
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return false, err
-	}
-	latest := s.DevelopmentAIAgentClientStore.reconcilableActiveTaskThreadProjectionCandidates(principal, strings.TrimSpace(taskID))
-	changed := false
-	for _, repair := range repairs {
-		for _, current := range latest {
-			// A concurrent event or stop wins over this earlier projection read.
-			if current.ThreadID == repair.thread.ThreadID && reflect.DeepEqual(current, repair.thread) {
-				changed = s.DevelopmentAIAgentClientStore.applyAssignmentProjectionToTaskThread(current, repair.projection, repair.diagnostics) || changed
-				break
-			}
-		}
-	}
-	if !changed {
-		return false, nil
-	}
-	return true, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) AssignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.AssignAIAgentTask(ctx, principal, taskID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) CreateAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgentTaskAgentAssignment(ctx, principal, taskID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req UnassignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.UnassignAIAgentTask(ctx, principal, taskID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) DeleteAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.DeleteAIAgentTaskAgentAssignment(ctx, principal, taskID, agentID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Context, principal AuthorizationResult, taskID string, req SubmitAIAgentTaskCommentRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.SubmitAIAgentTaskComment(ctx, principal, taskID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgentTaskThreadMessage(ctx, principal, taskID, threadID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) StopAIAgentTask(ctx context.Context, principal AuthorizationResult, taskID string, req StopAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.StopAIAgentTask(ctx, principal, taskID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) StopAIAgentTaskAgentAssignment(ctx context.Context, principal AuthorizationResult, taskID, agentID string, req AgentAssignmentActionRequest) (AIAgentTaskActionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.StopAIAgentTaskAgentAssignment(ctx, principal, taskID, agentID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) GetAIAgentTaskThreadStreamSubscription(ctx context.Context, principal AuthorizationResult, taskID string) (AIAgentTaskThreadStreamSubscriptionResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AIAgentTaskThreadStreamSubscriptionResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.GetAIAgentTaskThreadStreamSubscription(ctx, principal, taskID)
-}
-
-func (s *PersistentAIAgentClientStore) CreateAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentClientRecordResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.CreateAIAgent(ctx, principal, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) GetAIAgentEditability(ctx context.Context, principal AuthorizationResult, agentID string) (AgentEditabilityResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentEditabilityResponse{}, err
-	}
-	return s.DevelopmentAIAgentClientStore.GetAIAgentEditability(ctx, principal, agentID)
-}
-
-func (s *PersistentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.Context, principal AuthorizationResult, agentID string, req UpdateAgentConfigurationRequest) (AgentClientRecordResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentClientRecordResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.UpdateAIAgentConfiguration(ctx, principal, agentID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeleteAgentResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.DeleteAIAgent(ctx, principal, agentID)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) AIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return nil, err
-	}
-	return s.DevelopmentAIAgentClientStore.AIAgentClientEvents(ctx, principal)
-}
-
-func (s *PersistentAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.Context, principal AuthorizationResult) ([]ClientStreamEvent, <-chan ClientStreamEvent, func(), error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return nil, nil, nil, err
-	}
-	return s.DevelopmentAIAgentClientStore.SubscribeAIAgentClientEvents(ctx, principal)
-}
-
-func (s *PersistentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.Context, agentID string, req AgentThreadProgressBatchRequest) (AgentThreadProgressBatchResponse, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return AgentThreadProgressBatchResponse{}, err
-	}
-	response, err := s.DevelopmentAIAgentClientStore.RecordAIAgentThreadProgress(ctx, agentID, req)
-	if err != nil {
-		return response, err
-	}
-	return response, s.saveSnapshot(ctx)
-}
-
-func (s *PersistentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return err
-	}
-	if err := s.DevelopmentAIAgentClientStore.RecordAIAgentAssignmentEvent(ctx, agentID, req, event); err != nil {
-		return err
-	}
-	return s.saveSnapshot(ctx)
+	return nil
 }
 
 func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
+	s.snapshotReloadMu.Lock()
+	if !s.shouldReloadSnapshotLocked() {
+		s.snapshotReloadMu.Unlock()
+		return nil
+	}
 	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
 	if err != nil || !ok {
+		s.snapshotReloadMu.Unlock()
 		return err
 	}
 	s.version = snapshot.Version
-	return s.DevelopmentAIAgentClientStore.restoreSnapshotPreservingSubscribers(snapshot)
+	if err := s.restoreSnapshotPreservingSubscribers(snapshot); err != nil {
+		s.snapshotReloadMu.Unlock()
+		return err
+	}
+	repaired := s.repairStaleActiveTaskThreads(s.snapshotNow().UTC())
+	s.snapshotLastReloadAt = s.snapshotNow()
+	s.snapshotReloadMu.Unlock()
+	if repaired {
+		return s.saveSnapshot(ctx)
+	}
+	return nil
 }
 
 func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
-	snapshot, err := s.DevelopmentAIAgentClientStore.snapshot(time.Now().UTC())
+	snapshot, err := s.snapshot(s.snapshotNow().UTC())
 	if err != nil {
 		return err
 	}
@@ -553,7 +172,49 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 		return err
 	}
 	s.version = snapshot.Version
+	s.markSnapshotObserved(snapshot.SavedAt)
 	return nil
+}
+
+func (s *PersistentAIAgentClientStore) shouldSaveHeartbeatSnapshot() bool {
+	if s == nil {
+		return true
+	}
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	if s.snapshotHeartbeatSaveInterval <= 0 || s.snapshotLastSavedAt.IsZero() {
+		return true
+	}
+	return !s.snapshotNow().Before(s.snapshotLastSavedAt.Add(s.snapshotHeartbeatSaveInterval))
+}
+
+func (s *PersistentAIAgentClientStore) shouldReloadSnapshotLocked() bool {
+	if s.snapshotReloadInterval <= 0 || s.snapshotLastReloadAt.IsZero() {
+		return true
+	}
+	return !s.snapshotNow().Before(s.snapshotLastReloadAt.Add(s.snapshotReloadInterval))
+}
+
+func (s *PersistentAIAgentClientStore) markSnapshotObserved(savedAt time.Time) {
+	if s == nil {
+		return
+	}
+	s.snapshotReloadMu.Lock()
+	defer s.snapshotReloadMu.Unlock()
+	now := s.snapshotNow()
+	s.snapshotLastReloadAt = now
+	if !savedAt.IsZero() {
+		s.snapshotLastSavedAt = savedAt.UTC()
+		return
+	}
+	s.snapshotLastSavedAt = now
+}
+
+func (s *PersistentAIAgentClientStore) snapshotNow() time.Time {
+	if s != nil && s.snapshotClock != nil {
+		return s.snapshotClock()
+	}
+	return time.Now()
 }
 
 func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClientSnapshot, error) {
@@ -577,7 +238,15 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 	for _, daemon := range s.daemons {
 		daemons = append(daemons, copyDeviceDaemon(daemon))
 	}
-	sort.Slice(daemons, func(i, j int) bool { return daemons[i].DeviceID < daemons[j].DeviceID })
+	sort.Slice(daemons, func(i, j int) bool {
+		if daemons[i].DeviceID != daemons[j].DeviceID {
+			return daemons[i].DeviceID < daemons[j].DeviceID
+		}
+		if daemons[i].Profile != daemons[j].Profile {
+			return daemons[i].Profile < daemons[j].Profile
+		}
+		return daemons[i].DaemonID < daemons[j].DaemonID
+	})
 
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
@@ -601,9 +270,14 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		copied := make([]AIAgentTaskThreadRecord, len(retainedThreads))
 		for i, thread := range retainedThreads {
 			copied[i] = copyTaskThread(thread)
+			s.ensureTaskThreadAgentSnapshotLocked(&copied[i], savedAt)
 			copied[i].Lines = retainLatestThreadProgressLines(copied[i].Lines)
 		}
 		taskThreads[taskID] = copied
+	}
+	taskThreadMessages := make(map[string][]AIAgentTaskThreadHistoryMessage, len(s.taskThreadMessages))
+	for threadID, messages := range s.taskThreadMessages {
+		taskThreadMessages[threadID] = retainLatestThreadHistoryMessages(messages)
 	}
 	events, err := snapshotEvents(retainLatestClientReplayEvents(s.events))
 	if err != nil {
@@ -615,10 +289,12 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		WorkspaceID:             s.workspaceID,
 		Devices:                 copyDevices(s.devices),
 		DeviceCredentials:       credentials,
+		DeviceConnectionGrants:  copyDeviceConnectionGrants(s.deviceConnectionGrants),
 		Daemons:                 daemons,
 		Agents:                  agents,
 		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
 		TaskThreads:             taskThreads,
+		TaskThreadMessages:      taskThreadMessages,
 		Events:                  events,
 		NextDeviceCredentialSeq: s.nextDeviceCredentialSeq,
 		NextDaemonCommand:       s.nextDaemonCommand,
@@ -659,13 +335,58 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 			issuedAt:         record.IssuedAt,
 		}
 	}
+	deviceConnectionGrants := make(map[string]map[string]DeviceConnectionGrant)
+	for _, grant := range snapshot.DeviceConnectionGrants {
+		grant.DeviceID = strings.TrimSpace(grant.DeviceID)
+		grant.PrincipalID = strings.TrimSpace(grant.PrincipalID)
+		grant.WorkspaceID = strings.TrimSpace(grant.WorkspaceID)
+		if grant.DeviceID == "" || grant.PrincipalID == "" || grant.WorkspaceID == "" {
+			return errors.New("ai agent client snapshot device connection grant identity is required")
+		}
+		if grant.ConnectedAt.IsZero() {
+			grant.ConnectedAt = grant.LastSeenAt
+		}
+		if grant.LastSeenAt.IsZero() {
+			grant.LastSeenAt = grant.ConnectedAt
+		}
+		deviceGrants := deviceConnectionGrants[grant.DeviceID]
+		if deviceGrants == nil {
+			deviceGrants = map[string]DeviceConnectionGrant{}
+			deviceConnectionGrants[grant.DeviceID] = deviceGrants
+		}
+		deviceGrants[deviceConnectionGrantKey(grant.DeviceID, grant.PrincipalID, grant.WorkspaceID)] = grant
+	}
+	// Older v2 snapshots predate explicit account connection grants. The
+	// credential row proves the original account/workspace connection, so seed
+	// that fact without changing the device owner or rotating its secret.
+	for _, credential := range deviceCredentials {
+		if credential.ownerPrincipalID == "" || credential.workspaceID == "" {
+			continue
+		}
+		key := deviceConnectionGrantKey(credential.deviceID, credential.ownerPrincipalID, credential.workspaceID)
+		deviceGrants := deviceConnectionGrants[credential.deviceID]
+		if deviceGrants == nil {
+			deviceGrants = map[string]DeviceConnectionGrant{}
+			deviceConnectionGrants[credential.deviceID] = deviceGrants
+		}
+		if _, ok := deviceGrants[key]; ok {
+			continue
+		}
+		deviceGrants[key] = DeviceConnectionGrant{
+			DeviceID:    credential.deviceID,
+			PrincipalID: credential.ownerPrincipalID,
+			WorkspaceID: credential.workspaceID,
+			ConnectedAt: credential.issuedAt,
+			LastSeenAt:  credential.issuedAt,
+		}
+	}
 	daemons := make(map[string]DeviceDaemonRecord, len(snapshot.Daemons))
 	for _, daemon := range snapshot.Daemons {
 		deviceID := strings.TrimSpace(daemon.DeviceID)
 		if deviceID == "" {
 			return errors.New("ai agent client snapshot daemon device_id is required")
 		}
-		daemons[deviceID] = copyDeviceDaemon(daemon)
+		daemons[daemonStorageKey(daemon)] = copyDeviceDaemon(daemon)
 	}
 	agents := make(map[string]AgentClientRecord, len(snapshot.Agents))
 	for _, agent := range snapshot.Agents {
@@ -687,6 +408,14 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		}
 		taskThreads[taskID] = copied
 	}
+	taskThreadMessages := make(map[string][]AIAgentTaskThreadHistoryMessage, len(snapshot.TaskThreadMessages))
+	for threadID, messages := range snapshot.TaskThreadMessages {
+		threadID = strings.TrimSpace(threadID)
+		if threadID == "" {
+			return errors.New("ai agent client snapshot task thread message thread_id is required")
+		}
+		taskThreadMessages[threadID] = retainLatestThreadHistoryMessages(messages)
+	}
 	events, err := restoreSnapshotEvents(snapshot.Events)
 	if err != nil {
 		return err
@@ -695,9 +424,12 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	defer s.mu.Unlock()
 	subscribers := s.subscribers
 	nextSubscriberID := s.nextSubscriberID
+	devices := pruneLegacyRuntimeRecords(copyDevices(snapshot.Devices))
+	devices = backfillRuntimeProviderVersionsFromSeed(devices, s.devices)
 	s.workspaceID = strings.TrimSpace(snapshot.WorkspaceID)
-	s.devices = pruneLegacyRuntimeRecords(copyDevices(snapshot.Devices))
+	s.devices = devices
 	s.deviceCredentials = deviceCredentials
+	s.deviceConnectionGrants = deviceConnectionGrants
 	s.nextDeviceCredentialSeq = snapshot.NextDeviceCredentialSeq
 	s.daemons = daemons
 	s.nextDaemonCommand = snapshot.NextDaemonCommand
@@ -705,6 +437,8 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
+	s.taskThreadMessages = taskThreadMessages
+	s.taskThreadProgressCache = map[string]taskThreadProgressMessageCache{}
 	s.events = events
 	if preserveSubscribers {
 		s.subscribers = subscribers

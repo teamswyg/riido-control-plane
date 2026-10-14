@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/metrics-http-adapter.yml"
+      - "docs/30-architecture/metrics-http-adapter.md"
+      - "docs/30-architecture/metrics-http-adapter.riido.json"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
@@ -14,12 +16,17 @@ on:
       - "internal/riidoaiserver/assignment_metrics_test.go"
       - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
+      - "tools/metricshttpadapter/**"
   pull_request:
     paths:
       - ".github/workflows/metrics-http-adapter.yml"
+      - "docs/30-architecture/metrics-http-adapter.md"
+      - "docs/30-architecture/metrics-http-adapter.riido.json"
       - "docs/20-domain/request-authorization.md"
       - "docs/20-domain/saas-control-plane.md"
       - "docs/migration/control-plane.md"
@@ -29,27 +36,24 @@ on:
       - "internal/riidoaiserver/assignment_metrics_test.go"
       - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/server.go"
+      - "internal/riidoaiserver/server_*.go"
       - "internal/riidoaiserver/store.go"
+      - "internal/riidoaiserver/store_*.go"
       - "internal/riidoaiserver/store_port.go"
       - "internal/riidoaiserver/store_state.go"
+      - "tools/metricshttpadapter/**"
 
 jobs:
   metrics-http:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
       - name: Verify metrics HTTP boundary
         run: |
           disallowed="$(go list -deps -f '{{if not .Standard}}{{.ImportPath}}{{end}}' ./internal/riidoaiserver | grep -E 'github.com/teamswyg/riido_daemon|github.com/teamswyg/riido-daemon|github.com/aws|internal/(dynamodb|terraform|infra)' || true)"
@@ -57,5 +61,18 @@ jobs:
             printf 'Disallowed metrics HTTP imports:\n%s\n' "$disallowed"
             exit 1
           fi
+      - name: Verify metrics HTTP executable SSOT
+        run: |
+          mkdir -p out
+          go test ./tools/metricshttpadapter -count=1
+          go run ./tools/metricshttpadapter \
+            -check-doc \
+            -evidence-out out/metrics-http-adapter-evidence.json
       - name: Test metrics HTTP adapter
         run: go test ./internal/riidoaiserver -run 'HTTPMetrics|MetricsHTTP' -count=1
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: metrics-http-adapter-evidence
+          path: out/metrics-http-adapter-evidence.json
+          if-no-files-found: error

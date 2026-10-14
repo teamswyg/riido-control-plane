@@ -14,6 +14,7 @@ on:
         options:
           - testnet
           - development
+          - production
 
 concurrency:
   group: deploy-ai-agent-testnet
@@ -27,7 +28,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || 'ai-agent-testnet' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'development' && 'ai-agent-development' || github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'production' && 'ai-agent-production' || 'ai-agent-testnet' }}
     env:
       DEPLOYMENT_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'testnet' }}
       AWS_REGION: ${{ vars.RIIDO_AI_SERVER_AWS_REGION }}
@@ -39,20 +40,22 @@ jobs:
       CODEDEPLOY_DEPLOYMENT_GROUP: ${{ vars.RIIDO_AI_SERVER_CODEDEPLOY_DEPLOYMENT_GROUP }}
       TESTNET_BASE_URL: ${{ vars.RIIDO_AI_SERVER_TESTNET_BASE_URL }}
       TESTNET_WORKSPACE_ID: ${{ vars.RIIDO_AI_SERVER_TESTNET_WORKSPACE_ID }}
+      SMOKE_TOKEN_CONFIGURED: ${{ secrets.RIIDO_AI_SERVER_TESTNET_TOKEN != '' }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
-          cache: false
+          cache: true
 
       - name: Verify deploy configuration
         shell: bash
         run: |
           set -euo pipefail
           case "${DEPLOYMENT_TARGET:-testnet}" in
-            testnet|development) ;;
+            testnet|development|production) ;;
             *)
               echo "unsupported deployment target"
               exit 1
@@ -72,6 +75,10 @@ jobs:
               exit 1
             fi
           done
+          if [ "${SMOKE_TOKEN_CONFIGURED:-false}" != "true" ]; then
+            echo "RIIDO_AI_SERVER_TESTNET_TOKEN is required"
+            exit 1
+          fi
 
           redacted=(
             AWS_REGION
@@ -96,14 +103,8 @@ jobs:
             exit 1
           fi
 
-      - name: Verify no non-Riido Go dependencies
-        run: |
-          allowed="github.com/teamswyg/riido-contracts"
-          disallowed="$(go list -m all | awk -v allowed="$allowed" 'NR > 1 && $1 != allowed { print $1 }')"
-          if [ -n "$disallowed" ]; then
-            printf 'Disallowed Go dependencies:\n%s\n' "$disallowed"
-            exit 1
-          fi
+      - name: Verify Go dependency allowlist
+        run: go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json
 
       - name: Test AI Agent development API and command wiring
         run: |
@@ -116,7 +117,7 @@ jobs:
           go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.RIIDO_AI_SERVER_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -141,14 +142,35 @@ jobs:
           echo "::add-mask::$aws_account_id"
           echo "::add-mask::$registry"
 
+          tagged_image="${registry}/${ECR_REPOSITORY}:${image_tag}"
+          existing_digest="$(
+            aws ecr describe-images \
+              --repository-name "$ECR_REPOSITORY" \
+              --image-ids imageTag="$image_tag" \
+              --query 'imageDetails[0].imageDigest' \
+              --output text 2>/dev/null || true
+          )"
+          if [ -n "${existing_digest:-}" ] && [ "$existing_digest" != "None" ]; then
+            image_uri="${registry}/${ECR_REPOSITORY}@${existing_digest}"
+            echo "::add-mask::$image_uri"
+            echo "image tag already exists; reusing immutable image digest"
+            printf '%s' "$image_uri" > "$RUNNER_TEMP/riido-image-uri"
+            chmod 600 "$RUNNER_TEMP/riido-image-uri"
+            exit 0
+          fi
+
           aws ecr get-login-password --region "$AWS_REGION" \
             | docker login --username AWS --password-stdin "$registry"
 
-          local_image="riido-control-plane:${GITHUB_SHA}"
-          tagged_image="${registry}/${ECR_REPOSITORY}:${image_tag}"
-          docker build -f packaging/containers/riido_ai_server.Dockerfile -t "$local_image" .
-          docker tag "$local_image" "$tagged_image"
-          docker push "$tagged_image"
+          cache_scope="riido-ai-server-${DEPLOYMENT_TARGET:-testnet}"
+          docker buildx create --use --name riido-runtime-builder
+          docker buildx build \
+            --file packaging/containers/riido_ai_server.Dockerfile \
+            --tag "$tagged_image" \
+            --cache-from "type=gha,scope=${cache_scope}" \
+            --cache-to "type=gha,mode=max,scope=${cache_scope}" \
+            --push \
+            .
 
           image_digest="$(
             aws ecr describe-images \
@@ -181,6 +203,16 @@ jobs:
               --output text
           )"
           echo "::add-mask::$current_task_definition"
+          current_desired_count="$(
+            aws ecs describe-services \
+              --cluster "$ECS_CLUSTER" \
+              --services "$ECS_SERVICE" \
+              --query 'services[0].desiredCount' \
+              --output text
+          )"
+          printf '%s' "$current_task_definition" > "$RUNNER_TEMP/riido-previous-task-definition-arn"
+          printf '%s' "$current_desired_count" > "$RUNNER_TEMP/riido-previous-desired-count"
+          chmod 600 "$RUNNER_TEMP/riido-previous-task-definition-arn" "$RUNNER_TEMP/riido-previous-desired-count"
 
           aws ecs describe-task-definition \
             --task-definition "$current_task_definition" \
@@ -229,8 +261,18 @@ jobs:
           set -euo pipefail
           umask 077
           task_definition="$(cat "$RUNNER_TEMP/riido-task-definition-arn")"
+          previous_desired_count="$(cat "$RUNNER_TEMP/riido-previous-desired-count")"
+          deploy_desired_count="$previous_desired_count"
+          if [ "$deploy_desired_count" -eq 0 ]; then
+            deploy_desired_count=1
+          fi
           echo "::add-mask::$task_definition"
+          touch "$RUNNER_TEMP/riido-deployment-started"
           if [ -n "${CODEDEPLOY_APPLICATION:-}" ]; then
+            if [ "$previous_desired_count" -eq 0 ]; then
+              aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --desired-count 1 >/dev/null
+              aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+            fi
             container_port="$(cat "$RUNNER_TEMP/riido-container-port")"
             appspec_json="$RUNNER_TEMP/codedeploy-appspec.json"
             deployment_json="$RUNNER_TEMP/codedeploy-deployment.json"
@@ -293,6 +335,7 @@ jobs:
               --cluster "$ECS_CLUSTER" \
               --service "$ECS_SERVICE" \
               --task-definition "$task_definition" \
+              --desired-count "$deploy_desired_count" \
               --force-new-deployment \
               >/dev/null
             aws ecs wait services-stable \
@@ -311,6 +354,7 @@ jobs:
             echo "RIIDO_AI_SERVER_TESTNET_TOKEN is required"
             exit 1
           fi
+          echo "::add-mask::$TESTNET_TOKEN"
           base_url="${TESTNET_BASE_URL%/}"
           workspace_id="${TESTNET_WORKSPACE_ID:-workspace-smoke}"
           auth_header="X-Riido-AI-Agent-Token: ${TESTNET_TOKEN}"
@@ -327,13 +371,54 @@ jobs:
           curl_json "$base_url/readyz" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ready"' >/dev/null
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
-            | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | length) >= 1' >/dev/null
+            | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | type) == "array"' >/dev/null
           device_id="$(
             curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices" \
-              | jq -re '.devices[0].device_id'
+              | jq -r 'if (.schema_version == "riido-ai-server.v1" and (.devices | type) == "array") then (.devices[0].device_id // "") else error("invalid devices response") end'
           )"
-          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id/daemon" \
-            | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
+          if [ -n "$device_id" ]; then
+            curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id/daemon" \
+              | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .daemon.device_id == $device_id and (.daemon.supported_actions | length) >= 1' >/dev/null
+            curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/devices/$device_id/daemons" \
+              | jq -e --arg device_id "$device_id" '.schema_version == "riido-ai-server.v1" and .device_id == $device_id and any(.daemons[]; .device_id == $device_id)' >/dev/null
+          fi
+          curl_json \
+            -H "$auth_header" \
+            -H "Content-Type: application/json" \
+            -d '{"content_type":"image/png","content_length_bytes":1024}' \
+            "$base_url/v2/client/workspaces/$workspace_id/ai-agent/profile-thumbnails/uploads" \
+            | jq -e '.schema_version == "riido-ai-server.v1" and .method == "POST" and .form_file_field == "file" and (.upload_url | length) > 0 and (.profile_thumbnail_url | startswith("https://")) and (.form_fields | length) >= 6 and .max_content_length_bytes >= 1024' >/dev/null
+
+      - name: Roll back failed ECS deployment
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${CODEDEPLOY_APPLICATION:-}" ] || [ ! -f "$RUNNER_TEMP/riido-deployment-started" ]; then
+            exit 0
+          fi
+          previous_task_definition="$(cat "$RUNNER_TEMP/riido-previous-task-definition-arn")"
+          previous_desired_count="$(cat "$RUNNER_TEMP/riido-previous-desired-count")"
+          echo "::add-mask::$previous_task_definition"
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --task-definition "$previous_task_definition" \
+            --desired-count "$previous_desired_count" \
+            --force-new-deployment \
+            >/dev/null
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+
+      - name: Restore temporary non-production capacity
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          previous_desired_count="$(cat "$RUNNER_TEMP/riido-previous-desired-count")"
+          if [ "$previous_desired_count" -eq 0 ]; then
+            aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --desired-count 0 >/dev/null
+            aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE"
+          fi
 
       - name: Cleanup live handoff files
         if: always()
@@ -343,4 +428,33 @@ jobs:
           rm -f \
             "$RUNNER_TEMP/riido-image-uri" \
             "$RUNNER_TEMP/riido-task-definition-arn" \
-            "$RUNNER_TEMP/riido-container-port"
+            "$RUNNER_TEMP/riido-container-port" \
+            "$RUNNER_TEMP/riido-previous-task-definition-arn" \
+            "$RUNNER_TEMP/riido-previous-desired-count" \
+            "$RUNNER_TEMP/riido-deployment-started"
+
+      - name: Publish redacted deploy summary evidence
+        if: always()
+        env:
+          RIIDO_LIVE_CHECK_STATUS: ${{ job.status }}
+        run: |
+          mkdir -p out
+          if [ -n "${CODEDEPLOY_APPLICATION:-}" ]; then
+            deployment_mode="codedeploy-blue-green"
+          else
+            deployment_mode="ecs-rolling"
+          fi
+          go run ./tools/liveworkflowevidence \
+            -workflow deploy-ai-agent-testnet \
+            -live-status "$RIIDO_LIVE_CHECK_STATUS" \
+            -deployment-target "$DEPLOYMENT_TARGET" \
+            -deployment-mode "$deployment_mode" \
+            -build-cache-mode "buildkit-gha" \
+            -evidence-out out/deploy-ai-agent-testnet-redacted-summary.json
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: deploy-ai-agent-testnet-redacted-summary
+          path: out/deploy-ai-agent-testnet-redacted-summary.json
+          if-no-files-found: error

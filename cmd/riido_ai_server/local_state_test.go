@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 	"testing"
+
+	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
 func TestLocalStateRequiresLoopbackAndAuthentication(t *testing.T) {

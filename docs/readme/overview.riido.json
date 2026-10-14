@@ -1,0 +1,28 @@
+{
+  "schema_version": "riido-control-plane-repository-readme-fragment.v1",
+  "id": "control-plane-readme-overview",
+  "summary": [
+    "`riido-control-plane`은 Riido SaaS control plane의 공개 backend boundary입니다. web client와 desktop app webview가 호출하는 HTTP/SSE API, assignment polling, provider status, authorization port, RBAC read model, development/testnet API를 소유합니다.",
+    "이 레포는 provider CLI를 실행하지 않습니다. 런타임 실행과 로컬 디바이스 제어는 `riido-daemon`의 책임이고, Terraform과 AWS 배포 구성은 `riido-infra`의 책임입니다. 이 레포는 공개 가능한 서버 코드와 검증 가능한 API surface만 담습니다."
+  ],
+  "owns": [
+    "Riido SaaS HTTP/SSE endpoint 구현",
+    "request-token authorization port와 static/external authorizer adapter",
+    "agent catalog, AI Agent client API, provider status, assignment polling control-plane domain slice",
+    "`riido-contracts` canonical DSL/IR 기반 AI Agent client API sub-DSL, OpenAPI projection, generated React Query client drift 검증",
+    "공개 GitHub Actions black-box/domain/generator 검증",
+    "tag/manual 기반 runtime artifact CD workflow와 redacted public evidence"
+  ],
+  "does_not_own": [
+    "Terraform state, AWS 계정 topology, Fargate/ECS resource topology, raw secret 값",
+    "raw request token, IdP secret, customer data export",
+    "provider runtime process 실행 또는 provider CLI binary 번들",
+    "production persistence와 DNS 운영 evidence",
+    "live URL, AWS account id, ARN, image digest, task-definition revision, workflow run URL, smoke payload 값"
+  ],
+  "rationale": [
+    "AI Agent client-facing endpoint는 Riido web과 desktop webview가 직접 호출하는 SaaS API이므로 handler, auth scope gate, development store, SSE replay, React Query generated client를 이 레포에서 함께 검증합니다.",
+    "canonical business vocabulary와 lifecycle/deprecation grammar의 최종 권한은 `riido-contracts`에 있습니다. 이 레포는 그 언어를 import해 AI Agent client API sub-DSL과 handler/generator delivery boundary를 소유합니다.",
+    "새 AI Agent client API는 workspace-aware v2 surface입니다. v1은 기존 UI 테스트와 임시 client 작업을 깨지 않기 위한 호환 경로로 유지합니다."
+  ]
+}

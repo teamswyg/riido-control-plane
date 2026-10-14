@@ -4,7 +4,12 @@ import assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 
 const SchemaVersion = assignmentcontract.SchemaVersion
 
-type AssignmentState = assignmentcontract.AssignmentState
+type (
+	AssignmentState     = assignmentcontract.AssignmentState
+	AssignmentStateCode = assignmentcontract.AssignmentStateCode
+	ApprovalDecision    = assignmentcontract.ApprovalDecision
+	ApprovalStatus      = assignmentcontract.ApprovalStatus
+)
 
 const (
 	AssignmentQueued     = assignmentcontract.AssignmentQueued
@@ -17,6 +22,17 @@ const (
 	AssignmentFailed     = assignmentcontract.AssignmentFailed
 )
 
+const (
+	AssignmentStateCodeQueued     = assignmentcontract.AssignmentStateCodeQueued
+	AssignmentStateCodeLeased     = assignmentcontract.AssignmentStateCodeLeased
+	AssignmentStateCodeReady      = assignmentcontract.AssignmentStateCodeReady
+	AssignmentStateCodeRunning    = assignmentcontract.AssignmentStateCodeRunning
+	AssignmentStateCodeCancelling = assignmentcontract.AssignmentStateCodeCancelling
+	AssignmentStateCodeCancelled  = assignmentcontract.AssignmentStateCodeCancelled
+	AssignmentStateCodeCompleted  = assignmentcontract.AssignmentStateCodeCompleted
+	AssignmentStateCodeFailed     = assignmentcontract.AssignmentStateCodeFailed
+)
+
 type PollAction = assignmentcontract.PollAction
 
 const (
@@ -24,6 +40,29 @@ const (
 	PollStart  = assignmentcontract.PollStart
 	PollCancel = assignmentcontract.PollCancel
 	PollActive = assignmentcontract.PollActive
+)
+
+type (
+	ToolApprovalCreateResponse   = assignmentcontract.ToolApprovalCreateResponse
+	ToolApprovalDecision         = assignmentcontract.ToolApprovalDecision
+	ToolApprovalDecisionResponse = assignmentcontract.ToolApprovalDecisionResponse
+	ToolApprovalListResponse     = assignmentcontract.ToolApprovalListResponse
+	ToolApprovalRequest          = assignmentcontract.ToolApprovalRequest
+	ToolApprovalResult           = assignmentcontract.ToolApprovalResult
+	ToolApprovalWaitRequest      = assignmentcontract.ToolApprovalWaitRequest
+	ToolApprovalWaitResponse     = assignmentcontract.ToolApprovalWaitResponse
+)
+
+const (
+	ApprovalApproved = assignmentcontract.ApprovalApproved
+	ApprovalDenied   = assignmentcontract.ApprovalDenied
+	ApprovalPending  = assignmentcontract.ApprovalPending
+	ApprovalTimedOut = assignmentcontract.ApprovalTimedOut
+)
+
+const (
+	ApprovalDecisionApprove = assignmentcontract.ApprovalDecisionApprove
+	ApprovalDecisionDeny    = assignmentcontract.ApprovalDecisionDeny
 )
 
 const (
@@ -37,19 +76,20 @@ const (
 	EventAssignmentFailed       = assignmentcontract.EventAssignmentFailed
 	EventAssignmentStateUpdated = assignmentcontract.EventAssignmentStateUpdated
 	EventRiidoLog               = assignmentcontract.EventRiidoLog
+	EventProviderSessionPinned  = assignmentcontract.EventProviderSessionPinned
 	EventProviderLog            = assignmentcontract.EventProviderLog
 	EventProviderWarning        = assignmentcontract.EventProviderWarning
 	EventProviderError          = assignmentcontract.EventProviderError
 )
 
 func isAgentActive(state AssignmentState) bool {
-	return assignmentcontract.IsAgentActive(state)
+	return state.Code().IsAgentActive()
 }
 
 func isTerminal(state AssignmentState) bool {
-	return assignmentcontract.IsTerminal(state)
+	return state.Code().IsTerminal()
 }
 
 func canTransitionAssignment(from, to AssignmentState) bool {
-	return assignmentcontract.CanTransition(from, to)
+	return assignmentcontract.CanTransitionCode(from.Code(), to.Code())
 }

@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
 const (
 	TaskContextRepositorySourceConnectedPullRequest   = "connected_pull_request"
 	TaskContextRepositorySourceWorkspaceConnectedRepo = "workspace_connected_repository"
 	taskContextPromptFallbackNotProvided              = "not provided"
+	taskContextUnavailableDocumentContent             = "Task context was not available when this assignment was created. " +
+		"Use the task_id as the stable work item reference, avoid assuming repository state, " +
+		"and ask for missing repository or product context before making code changes."
 )
 
 type AIAgentTaskContext struct {
@@ -66,6 +71,7 @@ type AIAgentAssignmentPrompt struct {
 	Prompt             string
 	SelectedRepository AIAgentTaskContextRepository
 	HasRepository      bool
+	IntentGateRequired bool
 }
 
 func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgentAssignmentPrompt, error) {
@@ -87,11 +93,15 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	if component.Title == "" && document.Content == "" {
 		return AIAgentAssignmentPrompt{}, errors.New("task context title or document content is required")
 	}
+	intentClass := classifyTaskContextIntent(component, document)
 
 	var builder strings.Builder
 	builder.WriteString("# Riido AI Agent Assignment\n\n")
 	builder.WriteString("Use this immutable assignment snapshot as the runtime task context.\n")
 	builder.WriteString("Provider-specific instruction placement is owned by riido-daemon.\n\n")
+
+	writePromptInteractionPolicy(&builder)
+	writePromptTaskInterpretation(&builder, component, document, intentClass)
 
 	builder.WriteString("## Task\n")
 	writePromptLine(&builder, "task_id", taskID)
@@ -138,15 +148,38 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 		Prompt:             builder.String(),
 		SelectedRepository: repository,
 		HasRepository:      hasRepository,
+		IntentGateRequired: intentGateRequiredBool(intentClass),
 	}, nil
+}
+
+func ComposeAIAgentAssignmentPromptWithoutTaskContext(taskID, componentID string) (AIAgentAssignmentPrompt, error) {
+	taskID = strings.TrimSpace(taskID)
+	componentID = strings.TrimSpace(componentID)
+	if componentID == "" {
+		componentID = taskID
+	}
+	return ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
+		TaskID: taskID,
+		Context: AIAgentTaskContext{
+			Component: AIAgentTaskContextComponent{
+				ID:            componentID,
+				ComponentType: "task",
+				Title:         componentID,
+			},
+			Document: AIAgentTaskContextDocument{
+				Content:       taskContextUnavailableDocumentContent,
+				ContentFormat: "markdown",
+			},
+		},
+	})
 }
 
 func SelectAIAgentTaskContextRepository(repositories []AIAgentTaskContextRepository) (AIAgentTaskContextRepository, bool) {
 	normalized := make([]AIAgentTaskContextRepository, 0, len(repositories))
 	for _, repository := range repositories {
 		repository.ID = strings.TrimSpace(repository.ID)
-		repository.FullName = strings.TrimSpace(repository.FullName)
-		repository.RepositoryURL = strings.TrimSpace(repository.RepositoryURL)
+		repository.FullName = safeAIAgentRepositoryFullName(repository.FullName)
+		repository.RepositoryURL = safeAIAgentRepositoryURL(repository.RepositoryURL)
 		repository.Source = strings.TrimSpace(repository.Source)
 		if repository.FullName == "" && repository.RepositoryURL == "" {
 			continue
@@ -179,6 +212,14 @@ func taskContextRepositorySourceRank(source string) int {
 	default:
 		return 2
 	}
+}
+
+func safeAIAgentRepositoryFullName(rawFullName string) string {
+	return assignmentcontract.NormalizePublicGitHubRepositoryFullName(rawFullName)
+}
+
+func safeAIAgentRepositoryURL(rawURL string) string {
+	return assignmentcontract.NormalizePublicGitHubRepositoryURL(rawURL)
 }
 
 func normalizeAIAgentTaskContextComponent(component AIAgentTaskContextComponent) AIAgentTaskContextComponent {

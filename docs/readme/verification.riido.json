@@ -1,0 +1,34 @@
+{
+  "schema_version": "riido-control-plane-repository-readme-fragment.v1",
+  "id": "control-plane-readme-verification",
+  "verification": [
+    "go test ./...",
+    "go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json",
+    "go test ./internal/riidoaiserver -run 'AIAgentClient' -count=1",
+    "go test ./cmd/riido_ai_server -run 'AIAgentClient|ConfigFromEnv' -count=1",
+    "go test ./tools/reactquerygen -count=1",
+    "go run ./tools/reactquerygen -openapi contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json -out web/generated/aiAgentClient.ts",
+    "go test ./tools/containercontract -count=1",
+    "go run ./tools/containercontract -contract packaging/containers/riido_ai_server_container.riido.json -out -",
+    "docker build -f packaging/containers/riido_ai_server.Dockerfile -t riido-control-plane:local ."
+  ],
+  "rules": [
+    "OpenAPI와 generated client는 사람이 임의로 고치는 SSOT가 아닙니다. API surface 계약이 바뀌면 control-plane API sub-DSL을 먼저 바꾸고 projection과 generated client를 다시 생성해야 합니다.",
+    "`riido-client`로 React Query 코드를 전달하는 cross-repo workflow는 `docs/30-architecture/api-client-delivery.md`의 Riido work `branchName` delivery 정책을 따라야 합니다.",
+    "CI는 public repo에서 가벼운 검증을 돌리기 위한 경계입니다. 배포 비용이 생기는 동작은 pull request에서 실행하지 않습니다.",
+    "runtime artifact CD는 tag/manual workflow가 소유하고, AWS resource topology와 Terraform drift 정책은 `riido-infra`가 소유합니다."
+  ],
+  "required_markers": [
+    "RIID-4839",
+    "RIID-4842",
+    "runtime-cd-ownership.md",
+    "live URL, AWS account id, ARN, image digest"
+  ],
+  "forbidden_literals": [
+    "arn:aws:",
+    "AKIA",
+    "amazonaws.com/",
+    "cloudfront.net/",
+    "execute-api."
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": "riido-staging-completion-progress-readonly.v1",
+  "id": "staging_completion_progress_readonly_2026_07_02",
+  "captured_at": "2026-07-02T10:45:00Z",
+  "redacted": true,
+  "source": {
+    "workspace_id": "1IFsD2c8Mnk2VstqJ4iNo",
+    "task_id": "uNYpHxDOzMp3vMy_urWsu",
+    "base_url": "https://staging.ai-api.riido.io",
+    "app_url": "https://staging.app.riido.io/1IFsD2c8Mnk2VstqJ4iNo/teams/SWYG/tasks/uNYpHxDOzMp3vMy_urWsu"
+  },
+  "browser_observation": {
+    "screenshot": "docs/30-architecture/evidence/screenshots/staging-completion-progress-readonly-uNYpHxDOzMp3vMy_urWsu-2026-07-02.png",
+    "visible_thinking_count": 0,
+    "visible_running_count": 0,
+    "visible_queued_copy_count": 0,
+    "visible_stopped_copy_count": 14,
+    "visible_completed_token_count": 3
+  },
+  "api_observation": {
+    "v3": {
+      "thread_count": 40,
+      "active_stream_present": false,
+      "running_threads": 0,
+      "queued_messages": 0,
+      "progress_messages": 88,
+      "terminal_threads": 40
+    },
+    "v2": {
+      "thread_count": 40,
+      "active_stream_present": false,
+      "running_threads": 0,
+      "queued_threads": 0,
+      "progress_line_count": 88
+    },
+    "subscription": {
+      "active_thread_filter_count": 0,
+      "stream_href_present": true
+    }
+  },
+  "decision": {
+    "status": "partial",
+    "summary": "The sampled staging task currently does not reproduce the completed-but-still-progressing symptom: browser-visible thinking/running/queued counts are zero, v2 and v3 expose no active stream or running threads, and the thread-stream subscription has no active filters. Historical progress rows still exist as history, so this evidence is a read-only baseline rather than proof that the reported race cannot recur.",
+    "next_artifact": "reproduced_completion_progress_same_conversation_network_snapshot"
+  },
+  "comments_written": [
+    {
+      "id": "39120241-cf7f-8196-a65c-001d664f0e7a",
+      "target": "completion_progress_after_terminal_discussion",
+      "status": "[codex][진행중][부분증적]"
+    }
+  ]
+}

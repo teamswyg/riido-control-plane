@@ -7,6 +7,7 @@ import (
 
 type AssignmentStore interface {
 	AssignTask(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
+	AssignTaskReplacement(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
 	AssignTaskAdditive(ctx context.Context, taskID string, req AssignRequest) (Assignment, error)
 	PollAgent(ctx context.Context, agentID string, req PollRequest) (PollResponse, error)
 	HeartbeatAgent(ctx context.Context, agentID string, req AgentHeartbeatRequest) (AgentHeartbeatResponse, error)
@@ -30,6 +31,13 @@ type AssignmentHeartbeatEventStore interface {
 // it transparently degrades to the point-in-time PollAgent path.
 type AssignmentLongPollStore interface {
 	WaitForAssignment(ctx context.Context, agentID string, req PollRequest, hold, tick time.Duration) (PollResponse, error)
+}
+
+type AssignmentToolApprovalStore interface {
+	CreateToolApproval(ctx context.Context, agentID string, req ToolApprovalRequest) (ToolApprovalRequest, error)
+	DecideToolApproval(ctx context.Context, taskID string, decision ToolApprovalDecision) (ToolApprovalResult, *ToolApprovalDecision, error)
+	ListTaskToolApprovals(ctx context.Context, taskID string) ([]ToolApprovalRequest, error)
+	WaitForToolApproval(ctx context.Context, agentID, assignmentID, approvalID string, hold, tick time.Duration) (ToolApprovalResult, *ToolApprovalDecision, error)
 }
 
 type MetricsReader interface {

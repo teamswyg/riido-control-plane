@@ -8,11 +8,17 @@ import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/rea
  */
 export interface AIAgentTaskActionResponse {
   agent_id: string;
+  agent_snapshot?: AIAgentTaskThreadAgentSnapshot;
   assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   confirmation_reason?: "answer_required" | "approval_required";
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   message: string;
+  /**
+   * completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. 진행 로그(lines)와 분리해 화면 결과 영역에 표시합니다.
+   */
+  result_message?: string;
   run_id: string;
   schema_version: string;
   task_id: string;
@@ -30,6 +36,23 @@ export interface AIAgentTaskEventStreamLink {
 }
 
 /**
+ * AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.
+ */
+export interface AIAgentTaskThreadAgentSnapshot {
+  agent_id: string;
+  captured_at?: string;
+  model_id?: string;
+  model_label?: string;
+  name?: string;
+  owner_principal_id?: string;
+  profile_thumbnail_url?: string;
+  runtime_kind?: RuntimeKind;
+  tmp_color?: string;
+  visibility?: AgentVisibility;
+  workspace_id?: string;
+}
+
+/**
  * task 화면 진입 시 먼저 읽는 AI Agent thread cold collection 응답입니다.
  */
 export interface AIAgentTaskThreadCollectionResponse {
@@ -40,17 +63,41 @@ export interface AIAgentTaskThreadCollectionResponse {
 }
 
 /**
+ * terminal failure thread에만 붙는 서버 투영 진단입니다. assignment event metadata의 result/failure 분류를 클라이언트가 문자열 파싱 없이 표시하거나 필터링할 수 있게 합니다.
+ */
+export interface AIAgentTaskThreadFailureDiagnostics {
+  /**
+   * control-plane/daemon 공통 failure category입니다. 예: provider_blocked, provider_timeout, process_aborted, provider_result_failed.
+   */
+  failure_category?: string;
+  /**
+   * 사용자에게 노출 가능한 실패 요약입니다. 로컬 파일 경로나 riido_log transport payload는 포함하지 않습니다.
+   */
+  message?: string;
+  /**
+   * daemon/provider terminal result status입니다. 예: failed, blocked, timeout, aborted.
+   */
+  result_status?: string;
+}
+
+/**
  * task 화면에 표시할 AI Agent thread의 cold record입니다.
  */
 export interface AIAgentTaskThreadRecord {
   agent_id: string;
+  agent_snapshot?: AIAgentTaskThreadAgentSnapshot;
   assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   completed_at?: string;
   confirmation_reason?: "answer_required" | "approval_required";
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   lines: AgentThreadProgressLine[];
   message: string;
+  /**
+   * completed/failed/cancelled 같은 terminal 상태에서만 채워지는 최종 결과 본문입니다. lines에는 진행 로그만 유지합니다.
+   */
+  result_message?: string;
   run_id: string;
   source_comment_id?: string;
   source_message_id?: string;
@@ -276,6 +323,40 @@ export interface AgentOnboardingFixtureListResponse {
 }
 
 /**
+ * 브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.
+ */
+export interface AgentProfileThumbnailUploadFormField {
+  name: string;
+  value: string;
+}
+
+/**
+ * agent 프로필 썸네일 S3 POST upload intent입니다. 클라이언트는 form_fields와 file field를 upload_url로 전송하고, 저장 요청에는 profile_thumbnail_url만 전달합니다.
+ */
+export interface AgentProfileThumbnailUploadResponse {
+  expires_at: string;
+  form_fields: AgentProfileThumbnailUploadFormField[];
+  /**
+   * 파일 binary를 담을 multipart field name입니다. 현재 file입니다.
+   */
+  form_file_field: string;
+  max_content_length_bytes: number;
+  /**
+   * S3 upload에 사용할 HTTP method입니다. 현재 POST입니다.
+   */
+  method: string;
+  /**
+   * 업로드 성공 후 agent create/update 요청의 profile_thumbnail_url에 저장할 CDN URL입니다.
+   */
+  profile_thumbnail_url: string;
+  schema_version: string;
+  /**
+   * 브라우저가 multipart/form-data POST를 보낼 S3 endpoint입니다.
+   */
+  upload_url: string;
+}
+
+/**
  * task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.
  */
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
@@ -351,6 +432,11 @@ export interface AgentWorkStatusChangedEvent {
   comment_kind?: AgentTaskCommentKind;
   confirmation_reason?: "answer_required" | "approval_required";
   event_type: "agent_work_status_changed";
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
+  /**
+   * terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.
+   */
+  result_message?: string;
   run_id?: string;
   schema_version: string;
   task_id?: string;
@@ -445,7 +531,7 @@ export interface CreateAIAgentTaskThreadMessageRequest {
 }
 
 /**
- * Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.
+ * Figma agent 추가/설정 화면의 저장 요청입니다. 프로필 사진은 profile_thumbnail_url 문자열로 받으며, 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다. 이름(name), 설명(description), 런타임(runtime_id), 모델(model_id), 공개 범위(visibility), 지침(instruction)을 같은 agent 설정으로 저장합니다.
  */
 export interface CreateAgentConfigurationRequest {
   /**
@@ -465,7 +551,7 @@ export interface CreateAgentConfigurationRequest {
    */
   name: string;
   /**
-   * agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.
+   * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
   /**
@@ -476,6 +562,24 @@ export interface CreateAgentConfigurationRequest {
    * agent 공개 범위 radio 입력값입니다.
    */
   visibility: AgentVisibility;
+}
+
+/**
+ * agent 프로필 썸네일 파일을 기존 CDN/S3 media path로 업로드하기 위한 one-time upload intent 요청입니다.
+ */
+export interface CreateAgentProfileThumbnailUploadRequest {
+  /**
+   * 업로드할 파일 크기입니다. 서버가 허용 범위를 S3 POST policy에 고정합니다.
+   */
+  content_length_bytes: number;
+  /**
+   * 업로드할 이미지 MIME type입니다. 지원 값은 image/png, image/jpeg, image/webp입니다.
+   */
+  content_type: string;
+  /**
+   * 클라이언트가 선택한 원본 파일명입니다. object key나 public URL에는 사용하지 않습니다.
+   */
+  file_name?: string;
 }
 
 /**
@@ -522,6 +626,15 @@ export interface DeviceDaemonCommandResponse {
  */
 export interface DeviceDaemonDetailResponse {
   daemon: DeviceDaemonRecord;
+  schema_version: string;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준으로 접근 가능한 daemon들을 profile별로 모두 표시하기 위한 응답입니다.
+ */
+export interface DeviceDaemonListResponse {
+  daemons: DeviceDaemonRecord[];
+  device_id: string;
   schema_version: string;
 }
 
@@ -592,6 +705,16 @@ export interface ErrorEnvelope {
 }
 
 /**
+ * 원문 오류 대신 사용하는 비민감 provider 진단 코드입니다.
+ */
+export type ProviderDiagnosticCode = "none" | "executable-missing" | "login-required" | "version-unsupported" | "probe-failed" | "runtime-error";
+
+/**
+ * provider probe의 저카디널리티 상태입니다.
+ */
+export type ProviderHealthStatus = "healthy" | "degraded" | "unavailable" | "unknown";
+
+/**
  * client에 노출되는 runtime online/offline 상태입니다.
  */
 export type RuntimeAvailability = "online" | "offline";
@@ -622,11 +745,21 @@ export interface RuntimeRecord {
   availability: RuntimeAvailability;
   detection_state: RuntimeDetectionState;
   device_id: string;
+  diagnostic_code?: ProviderDiagnosticCode;
+  /**
+   * diagnostic_code에서 파생된 고정된 비민감 요약입니다.
+   */
+  diagnostic_summary?: string;
   has_assigned_agent: boolean;
+  health_status?: ProviderHealthStatus;
   kind: RuntimeKind;
   last_detected_at?: string;
   models: RuntimeModelRecord[];
   owner_principal_id?: string;
+  /**
+   * provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다.
+   */
+  provider_version: string;
   requires_experimental_opt_in: boolean;
   runtime_id: string;
 }
@@ -657,7 +790,7 @@ export interface UnassignAIAgentTaskRequest {
 }
 
 /**
- * Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다.
+ * Figma agent 설정 화면에서 기존 agent의 프로필 사진 URL, 이름, 설명, 런타임, 모델, 공개 범위, 지침을 수정하기 위한 요청입니다. 새 이미지 파일은 createAIAgentProfileThumbnailUpload가 발급한 업로드 intent로 먼저 전송합니다.
  */
 export interface UpdateAgentConfigurationRequest {
   /**
@@ -677,7 +810,7 @@ export interface UpdateAgentConfigurationRequest {
    */
   name?: string;
   /**
-   * agent 프로필 사진 URL입니다. 이미지 업로드/저장 자체는 별도 media/storage 계약이 소유합니다.
+   * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
   /**
@@ -1367,6 +1500,52 @@ export function stopAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentDeviceDaemonsPathParams {
+  device_id: string;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ */
+export async function listAIAgentDeviceDaemons(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
+  const path = `/v1/client/ai-agent/devices/${params.device_id}/daemons`;
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * cache tag: `aiAgent.devices.daemons`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentDeviceDaemonsQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.devices.daemons"] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentDeviceDaemonsQueryKey(params: ListAIAgentDeviceDaemonsPathParams): readonly unknown[] {
+  return [...listAIAgentDeviceDaemonsQueryKeyRoot(), params] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentDeviceDaemonsQueryOptions(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsPathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentDeviceDaemonsQueryKey(params),
+    queryFn: () => listAIAgentDeviceDaemons(config, params, { signal }),
+  };
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  */
 export async function streamAIAgentClientEvents(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<Response> {
@@ -1484,6 +1663,42 @@ export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoC
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureMutationKey(),
     mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ */
+export async function createAIAgentProfileThumbnailUpload(config: RiidoClientConfig, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
+  const path = "/v1/client/ai-agent/profile-thumbnails/uploads";
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadMutationVariables {
+  body: CreateAgentProfileThumbnailUploadRequest;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentProfileThumbnailUploadMutationKey(): readonly unknown[] {
+  return ["createAIAgentProfileThumbnailUpload"] as const;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentProfileThumbnailUploadMutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentProfileThumbnailUploadMutationKey(),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadMutationVariables) => createAIAgentProfileThumbnailUpload(config, variables.body, {}),
   };
 }
 
@@ -2451,6 +2666,53 @@ export function stopAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientConf
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentDeviceDaemonsV2PathParams {
+  workspace_id: string;
+  device_id: string;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ */
+export async function listAIAgentDeviceDaemonsV2(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemons`;
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.devices.daemons`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentDeviceDaemonsV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.devices.daemons"] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentDeviceDaemonsV2QueryKey(params: ListAIAgentDeviceDaemonsV2PathParams): readonly unknown[] {
+  return [...listAIAgentDeviceDaemonsV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentDeviceDaemonsV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentDeviceDaemonsV2QueryKey(params),
+    queryFn: () => listAIAgentDeviceDaemonsV2(config, params, { signal }),
+  };
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
@@ -2585,6 +2847,51 @@ export function createAIAgentFromOnboardingFixtureV2MutationOptions(config: Riid
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey(),
     mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ */
+export async function createAIAgentProfileThumbnailUploadV2(config: RiidoClientConfig, params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/profile-thumbnails/uploads`;
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2MutationVariables {
+  params: CreateAIAgentProfileThumbnailUploadV2PathParams;
+  body: CreateAgentProfileThumbnailUploadRequest;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function createAIAgentProfileThumbnailUploadV2MutationKey(): readonly unknown[] {
+  return ["createAIAgentProfileThumbnailUploadV2"] as const;
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function createAIAgentProfileThumbnailUploadV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey(),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, {}),
   };
 }
 
@@ -3762,6 +4069,48 @@ export interface StopAIAgentDeviceDaemonEndpoint {
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+ * 계약 generated path: `aiAgent.devices.daemons.list`
+ * 검색용 generated 경로: `devices.daemons.list`
+ * 접근 예시: `riido.aiAgent.devices.daemons.list`
+ * cache tag: `aiAgent.devices.daemons`
+ */
+export interface ListAIAgentDeviceDaemonsEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentDeviceDaemonsPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => Promise<void>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다
  * 계약 generated path: `aiAgent.events.stream`
  * 검색용 generated 경로: `events.stream`
@@ -3889,6 +4238,37 @@ export interface CreateAIAgentFromOnboardingFixtureEndpoint {
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+ * 계약 generated path: `aiAgent.profileThumbnails.uploads.create`
+ * 검색용 generated 경로: `profileThumbnails.uploads.create`
+ * 접근 예시: `riido.aiAgent.profileThumbnails.uploads.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => Promise<AgentProfileThumbnailUploadResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadMutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadMutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
   };
 }
 
@@ -4833,6 +5213,48 @@ export interface StopAIAgentDeviceDaemonV2Endpoint {
 }
 
 /**
+ * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.devices.daemons.list`
+ * 검색용 generated 경로: `aiAgent.devices.daemons.list`
+ * 접근 예시: `riido.v2.aiAgent.devices.daemons.list`
+ * cache tag: `v2.aiAgent.devices.daemons`
+ */
+export interface ListAIAgentDeviceDaemonsV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoRequestOptions) => Promise<DeviceDaemonListResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentDeviceDaemonsV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => ReturnType<typeof listAIAgentDeviceDaemonsV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => Promise<void>;
+}
+
+/**
  * editability, work status, runtime snapshot, task-thread progress에 대한 AI Agent client update를 스트리밍합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.events.stream`
  * 검색용 generated 경로: `aiAgent.events.stream`
@@ -4960,6 +5382,37 @@ export interface CreateAIAgentFromOnboardingFixtureV2Endpoint {
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.profileThumbnails.uploads.create`
+ * 검색용 generated 경로: `aiAgent.profileThumbnails.uploads.create`
+ * 접근 예시: `riido.v2.aiAgent.profileThumbnails.uploads.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CreateAIAgentProfileThumbnailUploadV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => Promise<AgentProfileThumbnailUploadResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables>) => ReturnType<typeof createAIAgentProfileThumbnailUploadV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
   };
 }
 
@@ -5650,6 +6103,20 @@ export interface RiidoAIAgentDevicesDaemonNamespace {
 }
 
 /**
+ * aiAgent.devices.daemons namespace입니다.
+ */
+export interface RiidoAIAgentDevicesDaemonsNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다
+   * 계약 generated path: `aiAgent.devices.daemons.list`
+   * 검색용 generated 경로: `devices.daemons.list`
+   * 접근 예시: `riido.aiAgent.devices.daemons.list`
+   * cache tag: `aiAgent.devices.daemons`
+   */
+  readonly list: ListAIAgentDeviceDaemonsEndpoint;
+}
+
+/**
  * device와 runtime 상태를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentDevicesNamespace {
@@ -5657,6 +6124,10 @@ export interface RiidoAIAgentDevicesNamespace {
    * aiAgent.devices.daemon namespace입니다.
    */
   readonly daemon: RiidoAIAgentDevicesDaemonNamespace;
+  /**
+   * aiAgent.devices.daemons namespace입니다.
+   */
+  readonly daemons: RiidoAIAgentDevicesDaemonsNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다
    * 계약 generated path: `aiAgent.devices.runtimes`
@@ -5703,6 +6174,29 @@ export interface RiidoAIAgentOnboardingNamespace {
    * 리도, 영실, 홍도, 지원처럼 제품이 제공하는 고정 onboarding fixture 목록과 fixture 기반 agent 생성 진입점입니다.
    */
   readonly fixtures: RiidoAIAgentOnboardingFixturesNamespace;
+}
+
+/**
+ * aiAgent.profileThumbnails.uploads namespace입니다.
+ */
+export interface RiidoAIAgentProfileThumbnailsUploadsNamespace {
+  /**
+   * AI agent 프로필 썸네일 업로드 intent를 발급합니다
+   * 계약 generated path: `aiAgent.profileThumbnails.uploads.create`
+   * 검색용 generated 경로: `profileThumbnails.uploads.create`
+   * 접근 예시: `riido.aiAgent.profileThumbnails.uploads.create`
+   */
+  readonly create: CreateAIAgentProfileThumbnailUploadEndpoint;
+}
+
+/**
+ * aiAgent.profileThumbnails namespace입니다.
+ */
+export interface RiidoAIAgentProfileThumbnailsNamespace {
+  /**
+   * aiAgent.profileThumbnails.uploads namespace입니다.
+   */
+  readonly uploads: RiidoAIAgentProfileThumbnailsUploadsNamespace;
 }
 
 /**
@@ -5805,6 +6299,10 @@ export interface RiidoAIAgentModule {
    * AI Agent 온보딩에서 필요한 서버 제공 초기값을 다루는 namespace입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
    */
   readonly onboarding: RiidoAIAgentOnboardingNamespace;
+  /**
+   * aiAgent.profileThumbnails namespace입니다.
+   */
+  readonly profileThumbnails: RiidoAIAgentProfileThumbnailsNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -5930,6 +6428,20 @@ export interface RiidoV2AIAgentDevicesDaemonNamespace {
 }
 
 /**
+ * v2.aiAgent.devices.daemons namespace입니다.
+ */
+export interface RiidoV2AIAgentDevicesDaemonsNamespace {
+  /**
+   * runtime 설정 화면의 내 기기 영역에서 device_id 기준 daemon 목록을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.devices.daemons.list`
+   * 검색용 generated 경로: `aiAgent.devices.daemons.list`
+   * 접근 예시: `riido.v2.aiAgent.devices.daemons.list`
+   * cache tag: `v2.aiAgent.devices.daemons`
+   */
+  readonly list: ListAIAgentDeviceDaemonsV2Endpoint;
+}
+
+/**
  * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
  */
 export interface RiidoV2AIAgentDevicesNamespace {
@@ -5937,6 +6449,10 @@ export interface RiidoV2AIAgentDevicesNamespace {
    * v2.aiAgent.devices.daemon namespace입니다.
    */
   readonly daemon: RiidoV2AIAgentDevicesDaemonNamespace;
+  /**
+   * v2.aiAgent.devices.daemons namespace입니다.
+   */
+  readonly daemons: RiidoV2AIAgentDevicesDaemonsNamespace;
   /**
    * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.devices.runtimes`
@@ -5983,6 +6499,29 @@ export interface RiidoV2AIAgentOnboardingNamespace {
    * 서버 제공 fixture 목록과 fixture 기반 agent 생성 진입점입니다. 템플릿 엔티티를 만들거나 관리하지 않습니다.
    */
   readonly fixtures: RiidoV2AIAgentOnboardingFixturesNamespace;
+}
+
+/**
+ * v2.aiAgent.profileThumbnails.uploads namespace입니다.
+ */
+export interface RiidoV2AIAgentProfileThumbnailsUploadsNamespace {
+  /**
+   * AI agent 프로필 썸네일 업로드 intent를 발급합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.profileThumbnails.uploads.create`
+   * 검색용 generated 경로: `aiAgent.profileThumbnails.uploads.create`
+   * 접근 예시: `riido.v2.aiAgent.profileThumbnails.uploads.create`
+   */
+  readonly create: CreateAIAgentProfileThumbnailUploadV2Endpoint;
+}
+
+/**
+ * v2.aiAgent.profileThumbnails namespace입니다.
+ */
+export interface RiidoV2AIAgentProfileThumbnailsNamespace {
+  /**
+   * v2.aiAgent.profileThumbnails.uploads namespace입니다.
+   */
+  readonly uploads: RiidoV2AIAgentProfileThumbnailsUploadsNamespace;
 }
 
 /**
@@ -6135,6 +6674,10 @@ export interface RiidoV2AIAgentNamespace {
    * 선택된 workspace에서 빠른 agent 생성을 돕는 onboarding fixture namespace입니다.
    */
   readonly onboarding: RiidoV2AIAgentOnboardingNamespace;
+  /**
+   * v2.aiAgent.profileThumbnails namespace입니다.
+   */
+  readonly profileThumbnails: RiidoV2AIAgentProfileThumbnailsNamespace;
   /**
    * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -6323,6 +6866,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             },
           },
         },
+        daemons: {
+          list: {
+            request: (params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoRequestOptions) => listAIAgentDeviceDaemons(config, params, options),
+            queryKeyRoot: listAIAgentDeviceDaemonsQueryKeyRoot,
+            queryKey: listAIAgentDeviceDaemonsQueryKey,
+            query: (params: ListAIAgentDeviceDaemonsPathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsQueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentDeviceDaemonsPathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsQueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsQueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsQueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsPathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => queryClient.prefetchQuery(listAIAgentDeviceDaemonsQueryOptions(config, params, options)),
+          },
+        },
         runtimes: {
           request: (options?: RiidoRequestOptions) => listAIAgentDeviceRuntimes(config, options),
           queryKeyRoot: listAIAgentDeviceRuntimesQueryKeyRoot,
@@ -6366,6 +6921,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               devicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }),
               tasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() }),
               all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsQueryKeyRoot() })]),
+            },
+          },
+        },
+      },
+      profileThumbnails: {
+        uploads: {
+          create: {
+            request: (body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => createAIAgentProfileThumbnailUpload(config, body, options),
+            mutationKey: createAIAgentProfileThumbnailUploadMutationKey,
+            mutation: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) => createAIAgentProfileThumbnailUploadMutationOptions(config, options),
+            mutationOptions: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadMutationVariables> = {}) => createAIAgentProfileThumbnailUploadMutationOptions(config, options),
+            invalidates: {
             },
           },
         },
@@ -6609,6 +7176,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               },
             },
           },
+          daemons: {
+            list: {
+              request: (params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoRequestOptions) => listAIAgentDeviceDaemonsV2(config, params, options),
+              queryKeyRoot: listAIAgentDeviceDaemonsV2QueryKeyRoot,
+              queryKey: listAIAgentDeviceDaemonsV2QueryKey,
+              query: (params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsV2QueryOptions(config, params, options),
+              queryOptions: (params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoQueryOptions<DeviceDaemonListResponse> = {}) => listAIAgentDeviceDaemonsV2QueryOptions(config, params, options),
+              invalidate: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsV2QueryKey(params) }),
+              invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceDaemonsV2QueryKeyRoot() }),
+              prefetch: (queryClient: QueryClient, params: ListAIAgentDeviceDaemonsV2PathParams, options?: RiidoQueryOptions<DeviceDaemonListResponse>) => queryClient.prefetchQuery(listAIAgentDeviceDaemonsV2QueryOptions(config, params, options)),
+            },
+          },
           runtimes: {
             request: (params: ListAIAgentDeviceRuntimesV2PathParams, options?: RiidoRequestOptions) => listAIAgentDeviceRuntimesV2(config, params, options),
             queryKeyRoot: listAIAgentDeviceRuntimesV2QueryKeyRoot,
@@ -6652,6 +7231,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentDevicesRuntimes: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }),
                 aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
                 all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() })]),
+              },
+            },
+          },
+        },
+        profileThumbnails: {
+          uploads: {
+            create: {
+              request: (params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options?: RiidoRequestOptions) => createAIAgentProfileThumbnailUploadV2(config, params, body, options),
+              mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey,
+              mutation: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) => createAIAgentProfileThumbnailUploadV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<AgentProfileThumbnailUploadResponse, CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) => createAIAgentProfileThumbnailUploadV2MutationOptions(config, options),
+              invalidates: {
               },
             },
           },

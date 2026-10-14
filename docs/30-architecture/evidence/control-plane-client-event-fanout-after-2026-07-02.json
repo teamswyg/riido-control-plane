@@ -1,0 +1,45 @@
+{
+  "schema_version": "riido-control-plane-client-event-fanout-evidence.v1",
+  "id": "control_plane_client_event_fanout_after_2026_07_02",
+  "captured_at": "2026-07-02T14:48:25Z",
+  "redacted": true,
+  "candidate_id": "control-plane-pressure:client_event_subscriber_fanout",
+  "external_contract_changed": false,
+  "endpoint_changed": false,
+  "changed_files": [
+    "internal/riidoaiserver/ai_agent_client_development_func_subscriber_visibility_key.go",
+    "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+    "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
+    "internal/riidoaiserver/ai_agent_client_development_type_ai_agent_client_subscriber.go",
+    "internal/riidoaiserver/ai_agent_client_development_type_subscriber_event_cache.go"
+  ],
+  "pressure_command": "go run ./tools/controlplanepressure -duration 400ms -concurrency 1,8,32 -threads 24 -lines 40 -evidence-out /tmp/control-plane-pressure-after-fanout.json",
+  "before_capacity": {
+    "source": "docs/30-architecture/evidence/control-plane-v3-history-message-id-allocation-after-2026-07-02.json",
+    "scenario": "client_event_subscriber_fanout",
+    "max_concurrent_users": 32,
+    "ops_per_sec": 236834,
+    "p95_latency_us": 1018,
+    "alloc_bytes_per_op": 1792.4416933379498,
+    "cpu_seconds_per_op": 0.000006772980230879007,
+    "goroutine_delta": 0,
+    "error_free": true
+  },
+  "after_capacity": {
+    "source": "/tmp/control-plane-pressure-after-fanout.json",
+    "scenario": "client_event_subscriber_fanout",
+    "max_concurrent_users": 32,
+    "ops_per_sec": 339597.5,
+    "p95_latency_us": 992,
+    "alloc_bytes_per_op": 1584.1144884753273,
+    "cpu_seconds_per_op": 0.000004776168846943802,
+    "goroutine_delta": 0,
+    "error_free": true
+  },
+  "decision": {
+    "status": "adopted",
+    "summary": "Reuse visibility results for adjacent subscribers with the same visibility key during live client event fanout.",
+    "allocation_reduction_fraction": 0.1162231251,
+    "cpu_seconds_per_op_reduction_fraction": 0.2948452605
+  }
+}

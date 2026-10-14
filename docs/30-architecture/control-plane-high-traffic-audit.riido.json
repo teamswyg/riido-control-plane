@@ -1,0 +1,187 @@
+{
+  "schema_version": "riido-control-plane-high-traffic-audit.v1",
+  "id": "control-plane-high-traffic-audit",
+  "title": "Control Plane High Traffic Audit",
+  "generated_doc": "docs/30-architecture/control-plane-high-traffic-audit.md",
+  "workflow": ".github/workflows/control-plane-performance.yml",
+  "evidence_artifact": "control-plane-high-traffic-audit",
+  "race_artifact": "control-plane-race",
+  "evidence_tool": "tools/controlplaneaudit",
+  "benchmark_command": "go test ./internal/riidoaiserver -run '^$' -bench 'Benchmark(HTTPTransactionMetricsObserve|StoreOperationMetricsObserve|RenderProgressMessage|RecordAIAgentThreadProgress|AIAgentTaskThreadStreamSubscriptionTargets)' -benchmem -benchtime=100ms -count=1",
+  "local_pressure_command": "go run ./tools/controlplanepressure -duration 500ms -concurrency 1,8,32 -threads 24 -lines 40 -candidate-out out/control-plane-pressure-closed-loop-candidates.json -evidence-out out/control-plane-local-pressure.json",
+  "manual_pressure_command": "go run ./tools/controlplanepressure -duration 5s -concurrency 1,8,32,128 -threads 48 -lines 80 -candidate-out out/control-plane-pressure-closed-loop-candidates-manual.json -evidence-out out/control-plane-local-pressure-manual.json",
+  "local_pprof_command": "go run ./tools/controlplanepressure -duration 5s -scenario http_endpoint_threads_v3 -concurrency 1,8,32,128 -threads 48 -lines 80 -pprof-dir out/control-plane-local-pprof -candidate-out out/control-plane-pressure-closed-loop-candidates-pprof.json -evidence-out out/control-plane-local-pressure-pprof.json",
+  "race_command": "go test -race ./internal/riidoaiserver -run 'Test(AIAgentTaskThread|Assignment|Store|DynamoDBAssignmentOperationStore|ActiveTaskThread|ProviderMulti|ToolApproval|Subscribe|Fanout)' -count=1",
+  "pprof_commands": [
+    "go tool pprof -top http://127.0.0.1:6060/debug/pprof/profile?seconds=30",
+    "go tool pprof -top http://127.0.0.1:6060/debug/pprof/heap",
+    "curl -fsS http://127.0.0.1:6060/debug/pprof/goroutine?debug=1"
+  ],
+  "required_categories": [
+    "endpoint_hot_path",
+    "db_query_transaction",
+    "lock_contention",
+    "sse_event_streaming",
+    "assignment_scheduling",
+    "in_memory_fanout",
+    "busy_worker_polling",
+    "zombie_goroutine_risk",
+    "runtime_progress_ingest",
+    "read_model_projection"
+  ],
+  "surfaces": [
+    {
+      "id": "v3_thread_history_endpoint",
+      "category": "endpoint_hot_path",
+      "risk": "Task refreshes and recovery screens hit the v3 thread history endpoint, which combines auth, route metrics, reconcile, read-model projection, sorting, and JSON encoding.",
+      "files": ["internal/riidoaiserver/server_ai_agent_client_task_v3.go", "internal/riidoaiserver/server_assignment_action.go", "internal/riidoaiserver/server_json.go"],
+      "patterns": ["handleAIAgentClientTaskThreadsV3", "reconcileAIAgentTaskThreadProjections", "writeJSON"],
+      "candidate": "Keep v3 history endpoint pressure in local evidence and optimize projection/encoding only after before-after pressure data."
+    },
+    {
+      "id": "http_endpoint_dispatch",
+      "category": "endpoint_hot_path",
+      "risk": "High request volume crosses the same handler middleware, route matching, authorization, and JSON response path.",
+      "files": ["internal/riidoaiserver/server_handler.go", "internal/riidoaiserver/server_route_registry.go", "internal/riidoaiserver/server.go", "internal/riidoaiserver/server_json.go"],
+      "patterns": ["registerServerRoutes", "mux.HandleFunc", "withHTTPTransactionMetrics", "writeJSON"],
+      "candidate": "Keep route pattern metrics bounded, avoid per-request dynamic route labels, and benchmark response helpers before changing endpoint shapes."
+    },
+    {
+      "id": "store_actor_polling",
+      "category": "assignment_scheduling",
+      "risk": "Daemon poll, long-poll waiters, and assignment lease decisions can add channel and timer pressure under many idle agents.",
+      "files": ["internal/riidoaiserver/store_type.go", "internal/riidoaiserver/store_poll_api.go", "internal/riidoaiserver/store_wait_assignment_api.go"],
+      "patterns": ["commands            chan any", "make(chan pollResult", "time.NewTimer"],
+      "candidate": "Keep long-poll waiters outside the actor critical path and track goroutine deltas in local pressure evidence."
+    },
+    {
+      "id": "sse_event_streaming",
+      "category": "sse_event_streaming",
+      "risk": "Workspace SSE can accumulate subscribers and copy active thread filters while many clients watch the same task.",
+      "files": ["internal/riidoaiserver/server_client_sse.go", "internal/riidoaiserver/ai_agent_client_development_type_ai_agent_client_subscriber.go", "internal/riidoaiserver/ai_agent_client_development_method_get_ai_agent_task_thread_stream_subscription.go"],
+      "patterns": ["fmt.Fprintf", "events                chan ClientStreamEvent", "GetAIAgentTaskThreadStreamSubscription"],
+      "candidate": "Prefer active stream target projection and add leak checks before increasing SSE fanout."
+    },
+    {
+      "id": "client_event_subscriber_fanout",
+      "category": "in_memory_fanout",
+      "risk": "Workspace client events fan out under one store lock, so many open task screens can add per-event visibility and channel-send cost.",
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_subscribe_ai_agent_client_events.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go",
+        "internal/riidoaiserver/ai_agent_client_sse_delivery.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
+      ],
+      "patterns": ["subscribers             map[int]aiAgentClientSubscriber", "visibilityKey", "make(chan ClientStreamEvent, 32)", "deliverAIAgentClientEvent"],
+      "candidate": "Measure subscriber fanout pressure and terminal compensation counts before changing buffer size or adding richer realtime event types."
+    },
+    {
+      "id": "store_waiter_lifecycle",
+      "category": "busy_worker_polling",
+      "risk": "Long-poll waiters use timers, tickers, and actor-registered channels; leaked waiters would look like idle CPU or goroutine pressure.",
+      "files": ["internal/riidoaiserver/store_waiter_api.go", "internal/riidoaiserver/store_waiter_handlers.go", "internal/riidoaiserver/store_wait_assignment_api.go"],
+      "patterns": ["registerWaiter", "handleUnregisterWaiter", "time.NewTicker"],
+      "candidate": "Keep waiter release mandatory and promote repeated waiter leaks into a closed-loop goroutine verifier."
+    },
+    {
+      "id": "tool_approval_waiters",
+      "category": "busy_worker_polling",
+      "risk": "Headless tool approval waits use the same timer/ticker/waiter pattern and can accumulate under stalled provider approvals.",
+      "files": [
+        "internal/riidoaiserver/tool_approval_http.go",
+        "internal/riidoaiserver/tool_approval_agent_http.go",
+        "internal/riidoaiserver/tool_approval_client_http.go",
+        "internal/riidoaiserver/store_tool_approval_api.go",
+        "internal/riidoaiserver/store_tool_approval_waiter_api.go",
+        "internal/riidoaiserver/store_tool_approval_waiter_handlers.go",
+        "internal/riidoaiserver/store_tool_approval_wait.go",
+        "internal/riidoaiserver/store_tool_approval_types.go"
+      ],
+      "patterns": ["WaitForToolApproval", "registerToolApprovalWaiter", "time.NewTicker"],
+      "candidate": "Measure approval waiter timeout pressure and keep web approval waits bounded by long-poll limits."
+    },
+    {
+      "id": "thread_history_v3_projection",
+      "category": "read_model_projection",
+      "risk": "Thread history v3 reconstructs historical user, progress, and agent messages, so refresh cost can grow with long conversations.",
+      "files": ["internal/riidoaiserver/ai_agent_client_thread_history_projection.go", "internal/riidoaiserver/ai_agent_client_thread_history_messages.go", "internal/riidoaiserver/ai_agent_client_thread_history_sort.go"],
+      "patterns": ["Messages", "sort", "AssignmentID"],
+      "candidate": "Measure per-thread message copy cost, keep agent snapshots by id, and cap projection work before adding richer timelines."
+    },
+    {
+      "id": "progress_ingest",
+      "category": "runtime_progress_ingest",
+      "risk": "Fine-grained provider output can create many normalize, merge, render, and fanout operations.",
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_development_method_record_ai_agent_thread_progress.go",
+        "internal/riidoaiserver/ai_agent_client_development_thread_progress_lookup.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_append_thread_progress_locked.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_normalize_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_filter_unseen_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_progress_lines_after.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go",
+        "internal/riidoaiserver/progress_messages_render.go"
+      ],
+      "patterns": [
+        "RecordAIAgentThreadProgress",
+        "rawTaskThreadForAssignmentLocked",
+        "retainLatestThreadProgressLines",
+        "normalize",
+        "renderProgressMessage",
+        "progressLinesAreStrictlyAfter",
+        "mergeThreadProgressLines"
+      ],
+      "candidate": "Batch tiny provider fragments into line or frame sized updates while preserving v2/v3 response shapes."
+    },
+    {
+      "id": "dynamodb_snapshot_and_journal",
+      "category": "db_query_transaction",
+      "risk": "Snapshot, split snapshot, assignment journal, active assignment, and stream relay paths drive RCU/WCU and transaction contention.",
+      "files": ["internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_load.go", "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_save.go", "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_api.go"],
+      "patterns": ["load", "save", "claim"],
+      "candidate": "Attribute costs by operation vocabulary and keep snapshot read models split from write-command models."
+    },
+    {
+      "id": "metrics_aggregation",
+      "category": "lock_contention",
+      "risk": "HTTP and store metric windows are intentionally bounded but still run on every hot path.",
+      "files": ["internal/riidoaiserver/http_transaction_metrics_observe.go", "internal/riidoaiserver/store_operation_metrics_observe.go", "internal/riidoaiserver/metrics_window.go"],
+      "patterns": ["Lock", "Observe", "metricsObservedAt"],
+      "candidate": "Keep lock scope copy-only, preserve top-N output, and watch allocation per operation in benchmarks."
+    },
+    {
+      "id": "actor_shutdown_paths",
+      "category": "zombie_goroutine_risk",
+      "risk": "Store, outbox, and DynamoDB actor goroutines must close their command loops deterministically during shutdown and tests.",
+      "files": ["internal/riidoaiserver/store.go", "internal/riidoaiserver/file_outbox.go", "internal/riidoaiserver/dynamodb_store_snapshot.go"],
+      "patterns": ["closeCmd", "Close()", "defer close"],
+      "candidate": "Keep actor close paths covered by race tests before adding more background workers or buffered queues."
+    }
+  ],
+  "assertions": [
+    "This audit must not change endpoint paths, request bodies, response fields, or status semantics.",
+    "Every high-traffic surface must bind source files, static patterns, and a next optimization candidate.",
+    "Race/concurrency evidence must be emitted as a workflow artifact before high-traffic fixes are accepted.",
+    "Open-loop pressure evidence must record throughput, latency, allocation, heap, CPU, and goroutine deltas.",
+    "Open-loop pressure evidence must rank measured allocation, latency, CPU, and goroutine findings.",
+    "Open-loop pressure evidence must export closed-loop candidate artifacts for stable pressure scenarios.",
+    "Manual local pressure pprof must record CPU, heap, and goroutine profile metadata without uploading profile bodies by default.",
+    "pprof evidence must remain loopback-only and must cover CPU, heap, and goroutine views.",
+    "Repeated bottlenecks found by this audit should be promoted into closed-loop candidates, not fixed from intuition alone.",
+    "Waiter, subscriber, and shutdown surfaces must be visible in the audit before concurrency fixes are attempted."
+  ],
+  "loop": {
+    "observation": "Control-plane performance work already emits benchmarks and local pressure, but waiter, subscriber, shutdown, and source-risk surfaces need to be compiled into one auditable map.",
+    "hypothesis": "A static high-traffic audit can connect endpoint, store, SSE, scheduling, progress, DynamoDB, metrics, waiter, fanout, and actor lifecycle hot paths to executable evidence before any API-neutral optimization.",
+    "execute": "Scan declared surfaces for high-risk primitives, verify pprof, race, stress, local profile, and pressure candidate commands, publish redacted audit evidence, publish race/concurrency evidence artifact, and keep generated docs in sync.",
+    "evaluate": "The verifier fails on missing files, missing patterns, missing candidates, unsafe pprof commands, missing local pressure profile command, missing local pressure candidate command, missing race artifact upload, missing workflow artifact upload, or generated doc drift.",
+    "retrospective": "This keeps the first slice open-loop: observe pressure and source risk, then decide which bottlenecks deserve closed-loop gates."
+  }
+}

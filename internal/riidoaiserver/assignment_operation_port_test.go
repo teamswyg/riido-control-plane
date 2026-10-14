@@ -116,7 +116,8 @@ func TestAssignmentOperationHelpers(t *testing.T) {
 		t.Fatalf("empty assignmentOperationLastEventSeq = %d, want 0", got)
 	}
 
-	for id, want := range map[string]int64{"asn-000042": 42, " asn-7 ": 7, "task-1": 0, "asn-not-number": 0} {
+	spacedAssignmentID := " asn-7 "
+	for id, want := range map[string]int64{"asn-000042": 42, spacedAssignmentID: 7, "task-1": 0, "asn-not-number": 0} {
 		if got := assignmentSequence(id); got != want {
 			t.Fatalf("assignmentSequence(%q) = %d, want %d", id, got, want)
 		}

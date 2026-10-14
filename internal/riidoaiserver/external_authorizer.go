@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,7 +18,7 @@ const (
 	ExternalAuthorizerRequestSchemaVersion  = "riido-external-authorizer-request.v1"
 	ExternalAuthorizerResponseSchemaVersion = "riido-external-authorizer-response.v1"
 	ExternalAuthorizerAPIKeyHeader          = "X-Riido-Control-Plane-Authorizer-Key"
-	DefaultExternalHTTPAuthorizerTimeout    = 2 * time.Second
+	DefaultExternalHTTPAuthorizerTimeout    = 5 * time.Second
 )
 
 type ExternalHTTPAuthorizerConfig struct {
@@ -29,11 +30,12 @@ type ExternalHTTPAuthorizerConfig struct {
 }
 
 type ExternalHTTPAuthorizer struct {
-	endpoint   string
-	audience   string
-	apiKey     string
-	timeout    time.Duration
-	httpClient *http.Client
+	endpoint    string
+	audience    string
+	apiKey      string
+	timeout     time.Duration
+	httpClient  *http.Client
+	observation externalAuthorizerObservation
 }
 
 type externalAuthorizerRequest struct {
@@ -79,11 +81,11 @@ func NewExternalHTTPAuthorizer(config ExternalHTTPAuthorizerConfig) (*ExternalHT
 		audience:   strings.TrimSpace(config.Audience),
 		apiKey:     apiKey,
 		timeout:    timeout,
-		httpClient: externalAuthorizerHTTPClient(config.HTTPClient),
+		httpClient: externalAuthorizerHTTPClient(config.HTTPClient, timeout),
 	}, nil
 }
 
-func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken string, req AuthorizationRequest) (AuthorizationResult, error) {
+func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken string, req AuthorizationRequest) (result AuthorizationResult, err error) {
 	if err := ctx.Err(); err != nil {
 		return AuthorizationResult{}, err
 	}
@@ -94,6 +96,11 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if bearerToken == "" {
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
+	if externalAuthorizerRequiresWorkspace(req) && strings.TrimSpace(req.WorkspaceID) == "" {
+		return AuthorizationResult{}, ErrAuthorizationForbidden
+	}
+	ctx, finishObservation := a.observation.start(ctx, req, a.timeout)
+	defer func() { finishObservation(err) }()
 	payload, err := json.Marshal(externalAuthorizerRequest{
 		SchemaVersion: ExternalAuthorizerRequestSchemaVersion,
 		BearerToken:   bearerToken,
@@ -120,6 +127,7 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if a.apiKey != "" {
 		httpReq.Header.Set(ExternalAuthorizerAPIKeyHeader, a.apiKey)
 	}
+	InjectTraceContext(requestCtx, httpReq.Header)
 
 	resp, err := a.httpClient.Do(httpReq)
 	if err != nil {
@@ -166,6 +174,10 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	return AuthorizationResult{PrincipalID: out.PrincipalID, WorkspaceID: strings.TrimSpace(req.WorkspaceID), Roles: roles}, nil
 }
 
+func externalAuthorizerRequiresWorkspace(req AuthorizationRequest) bool {
+	return req.Resource == AuthorizationResourceAIAgentClient
+}
+
 func normalizeExternalAuthorizerEndpoint(endpoint string) (string, error) {
 	if endpoint == "" {
 		return "", errors.New("riidoaiserver: external authorizer endpoint is required")
@@ -186,12 +198,16 @@ func normalizeExternalAuthorizerEndpoint(endpoint string) (string, error) {
 	if parsed.RawQuery != "" || parsed.Fragment != "" {
 		return "", errors.New("riidoaiserver: external authorizer endpoint must not include query or fragment")
 	}
+	if parsed.Scheme == "http" && !externalAuthorizerEndpointHostIsLoopback(parsed.Hostname()) {
+		return "", errors.New("riidoaiserver: external authorizer endpoint must use https unless it binds to localhost or a loopback address")
+	}
 	return parsed.String(), nil
 }
 
-func externalAuthorizerHTTPClient(client *http.Client) *http.Client {
-	if client != nil {
-		return client
+func externalAuthorizerEndpointHostIsLoopback(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
 	}
-	return &http.Client{Timeout: DefaultExternalHTTPAuthorizerTimeout}
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && ip.IsLoopback()
 }

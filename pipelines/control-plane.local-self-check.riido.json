@@ -1,0 +1,1062 @@
+{
+  "schema_version": "riido-ci-pipeline.v1",
+  "id": "control-plane-local-self-check",
+  "status": "active",
+  "repo": "riido-control-plane",
+  "visibility": "private",
+  "execution": {
+    "default_engine": "wasm",
+    "native_policy": "explicit",
+    "attestation": "required"
+  },
+  "worker": {
+    "labels": ["local", "go", "riido-ci"],
+    "timeout_minutes": 10
+  },
+  "env": {
+    "RIIDO_CI_MODE": "local",
+    "RIIDO_EVIDENCE_REDACTION": "required",
+    "GOPRIVATE": "github.com/teamswyg/*",
+    "GONOSUMDB": "github.com/teamswyg/*"
+  },
+  "evidence_contract": {
+    "artifact": "control-plane-local-self-check-evidence",
+    "source_check_boundary": "local_repo",
+    "owner_packages": [
+      "dependency_allowlist.riido.json",
+      "go.mod",
+      "go.sum",
+      "tools/dependencyallowlist",
+      "tools/ciworkflowparity",
+      "tools/repositoryreadme",
+      "tools/knowledgecoverage",
+      "tools/contextmap",
+      "tools/gocibaseline",
+      "tools/moduledecomposition",
+      "tools/precommitbaseline",
+      "tools/migrationledger",
+      "tools/syntaxhash",
+      "tools/configreference",
+      "tools/workflowevidence",
+      "tools/openquestions",
+      "tools/harnesspromotion",
+      "tools/integrationmatrix",
+      "tools/loopclosureaudit",
+      "tools/evidencegraph",
+      "tools/riido-ci-local",
+      "config/ci",
+      "pipelines"
+    ],
+    "cases": [
+      {
+        "name": "local-run-envelope",
+        "kind": "result-evidence-envelope",
+        "want_schema_version": "riido-ci-local-run-evidence.v1",
+        "want_decision": "passed",
+        "want_artifact_sha256_present": true
+      },
+      {
+        "name": "baseline-ci-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/baseline-ci-parity-evidence.json"],
+        "want_sha256_present": true
+      },
+      {
+        "name": "dependency-allowlist-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/dependency-allowlist-evidence.json"],
+        "want_sha256_present": true
+      },
+      {
+        "name": "repository-readme-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/repository-readme-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-repository-readme-evidence.v1"
+      },
+      {
+        "name": "executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "context-map-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/control-plane-context-map-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-context-map-evidence.v1"
+      },
+      {
+        "name": "go-ci-baseline-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/go-ci-baseline-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-go-ci-baseline-evidence.v1"
+      },
+      {
+        "name": "go-ci-coverage-profile",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/go-test-cover.out"],
+        "want_sha256_present": true
+      },
+      {
+        "name": "go-ci-coverage-summary",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/go-test-coverage-summary.txt"],
+        "want_sha256_present": true
+      },
+      {
+        "name": "module-decomposition-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/module-decomposition-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-module-decomposition-evidence.v1"
+      },
+      {
+        "name": "module-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "pre-commit-baseline-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/pre-commit-baseline-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-pre-commit-baseline-evidence.v1"
+      },
+      {
+        "name": "migration-ledger-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/migration-ledger-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-migration-ledger-evidence.v1"
+      },
+      {
+        "name": "migration-ledger-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "syntax-hash-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/syntax-hash-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-syntax-hash.v1"
+      },
+      {
+        "name": "config-reference-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/config-reference-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-config-reference-evidence.v1"
+      },
+      {
+        "name": "config-reference-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "dedicated-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "workflow-evidence-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/workflow-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-workflow-evidence.v1"
+      },
+      {
+        "name": "open-questions-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/open-questions-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-open-questions-evidence.v1"
+      },
+      {
+        "name": "open-questions-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "harness-promotion-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/harness-promotion-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-harness-promotion-evidence.v1"
+      },
+      {
+        "name": "integration-matrix-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/integration-matrix-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-integration-matrix-evidence.v1"
+      },
+      {
+        "name": "integration-matrix-executable-knowledge-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/executable-knowledge-coverage.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-executable-knowledge-coverage-result.v1"
+      },
+      {
+        "name": "loop-closure-audit-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/loop-closure-audit-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-loop-closure-audit-evidence.v1"
+      },
+      {
+        "name": "loop-closure-audit-candidates-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/loop-closure-audit-closed-loop-candidates.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-closed-loop-candidates.v1"
+      },
+      {
+        "name": "evidence-graph-parity-evidence",
+        "kind": "artifact-integrity",
+        "want_paths": ["out/evidence-graph-evidence.json"],
+        "want_sha256_present": true,
+        "want_json_schema_version": "riido-control-plane-evidence-graph-evidence.v1"
+      }
+    ],
+    "source_checks": [
+      {
+        "name": "baseline-go-ci-parity-contract",
+        "file": "config/ci/baseline-go-workflow-parity.riido.json",
+        "contains": [
+          "riido-control-plane-baseline-ci-parity.v1",
+          "74430b5f9001bdd6d384c4bae985d7914f825f998b47ffe22826f480e4789f1c",
+          "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
+          "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
+          "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
+          "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
+          "338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104",
+          "636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1",
+          "470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7",
+          "https://github.com/teamswyg/riido-control-plane/issues/1039",
+          "https://github.com/teamswyg/riido-control-plane/issues/1041",
+          "https://github.com/teamswyg/riido-control-plane/issues/1043",
+          "https://github.com/teamswyg/riido-control-plane/issues/1045",
+          "https://github.com/teamswyg/riido-control-plane/issues/1047",
+          "https://github.com/teamswyg/riido-control-plane/issues/1049",
+          "https://github.com/teamswyg/riido-control-plane/issues/1051",
+          "5cbf30d7a80482fc5f29daface720c3418d31448aaac7d18a2b57c3744683d89",
+          "https://github.com/teamswyg/riido-control-plane/issues/1053",
+          "722c8b947b5738d827a4196cbc1716a804a19740277d2ced1fda1dd97497fd04",
+          "https://github.com/teamswyg/riido-control-plane/issues/1055",
+          "daf9a9462e10401ae538e151f0d54daec59438cffc0ff2fce935e3834c28028b",
+          "https://github.com/teamswyg/riido-control-plane/issues/1057",
+          "a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937",
+          "https://github.com/teamswyg/riido-control-plane/issues/1059",
+          "ae94e1d9332d84e5d1f71ee0b7daa22e110d4a32342d8e7b3e874f3c36b0f762",
+          "https://github.com/teamswyg/riido-control-plane/issues/1061",
+          "0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61",
+          "https://github.com/teamswyg/riido-control-plane/issues/1063",
+          "a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781",
+          "https://github.com/teamswyg/riido-control-plane/issues/1065",
+          "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710",
+          "https://github.com/teamswyg/riido-control-plane/issues/1067",
+          "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
+          "required_adapter_count",
+          "workflow_retirement_authorized",
+          "source_workflow_edited"
+        ]
+      },
+      {
+        "name": "baseline-go-ci-parity-verifier-identity",
+        "file": "tools/ciworkflowparity/constants.go",
+        "contains": [
+          "riido-control-plane-baseline-ci-parity-evidence.v1",
+          "riido-control-plane-baseline-ci-parity.v1"
+        ]
+      },
+      {
+        "name": "baseline-go-ci-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify.go",
+        "contains": [
+          "legacy_workflow_digest_is_exact",
+          "native_pipeline_preserves_step_order",
+          "runner_is_pinned_and_credential_free",
+          "retirement_and_runtime_authority_remain_zero"
+        ]
+      },
+      {
+        "name": "repository-readme-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify.go",
+        "contains": [
+          "repository_readme_workflow_digest_is_exact",
+          "repository_readme_steps_are_native",
+          "repository_readme_pipeline_preserves_order",
+          "repository_readme_authority_remains_zero"
+        ]
+      },
+      {
+        "name": "repository-readme-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_readme_child.go",
+        "contains": [
+          "ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c",
+          "umask 077",
+          "repository_readme_native_parity_source_complete",
+          "retain_exact_baseline_until_separate_retirement_parity_review"
+        ]
+      },
+      {
+        "name": "context-map-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_context_map_cases.go",
+        "contains": [
+          "context_map_workflow_digest_is_exact",
+          "context_map_steps_are_native",
+          "context_map_pipeline_preserves_order",
+          "context_map_authority_remains_zero",
+          "context_map_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "context-map-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_context_map_child.go",
+        "contains": [
+          "3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392",
+          "umask 077",
+          "ContextMapCommandExact",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "go-ci-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_go_ci_cases.go",
+        "contains": [
+          "go_ci_workflow_digest_is_exact",
+          "go_ci_eight_source_behaviors_are_native",
+          "go_ci_pipeline_preserves_order",
+          "go_ci_coverage_outputs_are_exact",
+          "go_ci_quality_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "go-ci-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_go_ci_child.go",
+        "contains": [
+          "82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4",
+          "golangci-lint@v2.12.2",
+          "go-test-coverage-summary.txt",
+          "CoverageSummaryBehaviorExact",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "module-decomposition-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_module_decomposition_cases.go",
+        "contains": [
+          "module_decomposition_workflow_digest_is_exact",
+          "module_decomposition_six_source_behaviors_are_native",
+          "module_decomposition_pipeline_preserves_order",
+          "module_decomposition_authority_remains_zero",
+          "module_decomposition_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "module-decomposition-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_module_decomposition_child.go",
+        "contains": [
+          "16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480",
+          "umask 077",
+          "ModuleDecompositionCommandExact",
+          "out/module-decomposition-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "pre-commit-baseline-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_precommit_cases.go",
+        "contains": [
+          "pre_commit_baseline_workflow_digest_is_exact",
+          "pre_commit_baseline_four_source_behaviors_are_native",
+          "pre_commit_baseline_pipeline_preserves_order",
+          "pre_commit_baseline_authority_remains_zero",
+          "pre_commit_baseline_classification_is_bounded",
+          "pre_commit_baseline_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "pre-commit-baseline-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_precommit_child.go",
+        "contains": [
+          "338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104",
+          "umask 077",
+          "PreCommitBaselineCommandExact",
+          "out/pre-commit-baseline-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "migration-ledger-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_migration_ledger_cases.go",
+        "contains": [
+          "migration_ledger_workflow_digest_is_exact",
+          "migration_ledger_six_source_behaviors_are_native",
+          "migration_ledger_pipeline_preserves_order",
+          "migration_ledger_authority_remains_zero",
+          "migration_ledger_classification_is_bounded",
+          "migration_ledger_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "migration-ledger-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_migration_ledger_child.go",
+        "contains": [
+          "636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1",
+          "umask 077",
+          "MigrationLedgerCommandExact",
+          "out/migration-ledger-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "syntax-hash-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_syntax_hash_cases.go",
+        "contains": [
+          "syntax_hash_workflow_digest_is_exact",
+          "syntax_hash_five_source_behaviors_are_native",
+          "syntax_hash_pipeline_preserves_order",
+          "syntax_hash_authority_remains_zero",
+          "syntax_hash_classification_is_bounded",
+          "syntax_hash_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "syntax-hash-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_syntax_hash_child.go",
+        "contains": [
+          "470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7",
+          "syntax_hash_graph_spike_loop",
+          "umask 077",
+          "SyntaxHashGoldenCommandExact",
+          "out/syntax-hash-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "config-reference-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_config_reference_cases.go",
+        "contains": [
+          "config_reference_workflow_digest_is_exact",
+          "config_reference_six_source_behaviors_are_native",
+          "config_reference_pipeline_preserves_order",
+          "config_reference_authority_remains_zero",
+          "config_reference_classification_is_bounded",
+          "config_reference_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "config-reference-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_config_reference_child.go",
+        "contains": [
+          "5cbf30d7a80482fc5f29daface720c3418d31448aaac7d18a2b57c3744683d89",
+          "umask 077",
+          "ConfigReferenceCommandExact",
+          "out/config-reference-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "executable-knowledge-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_executable_knowledge_cases.go",
+        "contains": [
+          "executable_knowledge_workflow_digest_is_exact",
+          "executable_knowledge_four_source_behaviors_are_native",
+          "executable_knowledge_pipeline_preserves_order",
+          "executable_knowledge_authority_remains_zero",
+          "executable_knowledge_classification_is_bounded",
+          "executable_knowledge_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "executable-knowledge-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_executable_knowledge_child.go",
+        "contains": [
+          "722c8b947b5738d827a4196cbc1716a804a19740277d2ced1fda1dd97497fd04",
+          "umask 077",
+          "ExecutableKnowledgeCommandExact",
+          "out/executable-knowledge-coverage.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "workflow-evidence-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_workflow_evidence_cases.go",
+        "contains": [
+          "workflow_evidence_workflow_digest_is_exact",
+          "workflow_evidence_five_source_behaviors_are_native",
+          "workflow_evidence_pipeline_preserves_order",
+          "workflow_evidence_authority_remains_zero",
+          "workflow_evidence_classification_is_bounded",
+          "workflow_evidence_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "workflow-evidence-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_workflow_evidence_child.go",
+        "contains": [
+          "daf9a9462e10401ae538e151f0d54daec59438cffc0ff2fce935e3834c28028b",
+          "closed_loop_candidate",
+          "umask 077",
+          "WorkflowEvidenceLoopEnvironmentExact",
+          "out/workflow-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "open-questions-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_open_questions_cases.go",
+        "contains": [
+          "open_questions_workflow_digest_is_exact",
+          "open_questions_six_source_behaviors_are_native",
+          "open_questions_pipeline_preserves_order",
+          "open_questions_authority_remains_zero",
+          "open_questions_classification_is_bounded",
+          "open_questions_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "open-questions-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_open_questions_child.go",
+        "contains": [
+          "a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937",
+          "open_decision_queue",
+          "umask 077",
+          "OpenQuestionsLoopEnvironmentExact",
+          "out/open-questions-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "harness-promotion-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_harness_promotion_cases.go",
+        "contains": [
+          "harness_promotion_workflow_digest_is_exact",
+          "harness_promotion_five_source_behaviors_are_native",
+          "harness_promotion_pipeline_preserves_order",
+          "harness_promotion_authority_remains_zero",
+          "harness_promotion_classification_is_bounded",
+          "harness_promotion_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "harness-promotion-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_harness_promotion_child.go",
+        "contains": [
+          "ae94e1d9332d84e5d1f71ee0b7daa22e110d4a32342d8e7b3e874f3c36b0f762",
+          "closed_loop_candidate",
+          "umask 077",
+          "HarnessPromotionLoopEnvironmentExact",
+          "out/harness-promotion-evidence.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "integration-matrix-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_integration_matrix_cases.go",
+        "contains": [
+          "integration_matrix_workflow_digest_is_exact",
+          "integration_matrix_six_source_behaviors_are_native",
+          "integration_matrix_pipeline_preserves_order",
+          "integration_matrix_authority_remains_zero",
+          "integration_matrix_classification_is_bounded",
+          "integration_matrix_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "integration-matrix-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_integration_matrix_child.go",
+        "contains": [
+          "0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61",
+          "umask 077",
+          "IntegrationMatrixCommandExact",
+          "out/integration-matrix-evidence.json",
+          "out/executable-knowledge-coverage.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "loop-closure-audit-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_loop_closure_audit_cases.go",
+        "contains": [
+          "loop_closure_audit_workflow_digest_is_exact",
+          "loop_closure_audit_six_source_behaviors_are_native",
+          "loop_closure_audit_pipeline_preserves_order",
+          "loop_closure_audit_authority_remains_zero",
+          "loop_closure_audit_classification_is_bounded",
+          "loop_closure_audit_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "loop-closure-audit-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_loop_closure_audit_child.go",
+        "contains": [
+          "a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781",
+          "loop_closure_audit",
+          "umask 077",
+          "LoopClosureAuditLoopEnvironmentExact",
+          "out/loop-closure-audit-evidence.json",
+          "out/loop-closure-audit-closed-loop-candidates.json",
+          "actions/upload-artifact@v7"
+        ]
+      },
+      {
+        "name": "evidence-graph-parity-case-matrix",
+        "file": "tools/ciworkflowparity/verify_evidence_graph_cases.go",
+        "contains": [
+          "evidence_graph_workflow_digest_is_exact",
+          "evidence_graph_six_source_behaviors_are_native",
+          "evidence_graph_pipeline_preserves_order",
+          "evidence_graph_authority_remains_zero",
+          "evidence_graph_classification_is_bounded",
+          "evidence_graph_native_parity_source_complete"
+        ]
+      },
+      {
+        "name": "evidence-graph-parity-boundary",
+        "file": "tools/ciworkflowparity/verify_evidence_graph_child.go",
+        "contains": [
+          "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710",
+          "FullHistory",
+          "RIIDO_EVIDENCE_GRAPH_IMPACT_BASE",
+          "github-annotations",
+          "EvidenceGraphImpactBaseExact",
+          "out/evidence-graph-evidence.json",
+          "on_success"
+        ]
+      },
+      {
+        "name": "baseline-go-ci-parity-secure-evidence",
+        "file": "tools/ciworkflowparity/write_evidence.go",
+        "contains": [
+          "0o600"
+        ]
+      },
+      {
+        "name": "dependency-allowlist-contract",
+        "file": "dependency_allowlist.riido.json",
+        "contains": [
+          "riido-go-dependency-allowlist.v2",
+          "control-plane-go-dependency-allowlist",
+          "approved direct Go module dependencies",
+          "machine-verifiable"
+        ]
+      },
+      {
+        "name": "exact-central-runner",
+        "file": "tools/riido-ci-local",
+        "contains": [
+          "4795cdebfcf4bccaa71ec2344368ad9adf6b1974",
+          "riido-ci checkout must be clean",
+          "riido-ci evidence must be mode 0600",
+          "-u AWS_ACCESS_KEY_ID",
+          "-u GH_TOKEN"
+        ]
+      }
+    ],
+    "forbidden_terms": [
+      "BEGIN PRIVATE KEY",
+      "gho_",
+      "AKIA"
+    ],
+    "forbidden_term_files": [
+      "config/ci/baseline-go-workflow-parity.riido.json"
+    ],
+    "loop": {
+      "observation": "The baseline Go workflow is fully native in the current migration draft, but no exact local parity receipt is owned by Control Plane.",
+      "hypothesis": "A pinned credential-free local pipeline can preserve dependency policy, failure artifact semantics and the exact full-test command before any owner-reviewed workflow retirement.",
+      "execute": "Verify the unchanged legacy workflow digest and exact mapping, run dependency allowlist evidence, preserve it through the native always artifact step, then run the full Go test suite.",
+      "evaluate": "Require exact source and runner pins, zero adapters, mode-0600 parity and local-run evidence, content-addressed artifacts and no workflow or runtime authority.",
+      "retrospective": "Keep the legacy workflow and blocked private-policy evidence until a separate owner-reviewed retirement change proves the replacement and rollback."
+    }
+  },
+  "steps": [
+    {
+      "id": "checkout",
+      "kind": "checkout",
+      "fetch_depth": 0
+    },
+    {
+      "id": "verify-baseline-ci-parity",
+      "kind": "shell",
+      "command": "go run ./tools/ciworkflowparity -repo-root . -contract config/ci/baseline-go-workflow-parity.riido.json -evidence-out out/baseline-ci-parity-evidence.json"
+    },
+    {
+      "id": "verify-go-dependency-allowlist",
+      "kind": "shell",
+      "command": "mkdir -p out && go run ./tools/dependencyallowlist -contract dependency_allowlist.riido.json -evidence-out out/dependency-allowlist-evidence.json"
+    },
+    {
+      "id": "collect-baseline-policy-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/baseline-ci-parity-evidence.json",
+        "out/dependency-allowlist-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "test-control-plane",
+      "kind": "shell",
+      "command": "go test ./..."
+    },
+    {
+      "id": "verify-repository-readme",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/repositoryreadme -count=1 && go run ./tools/repositoryreadme -check-doc -evidence-out out/repository-readme-evidence.json"
+    },
+    {
+      "id": "verify-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-repository-readme-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/repository-readme-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-context-map",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/contextmap -count=1 && go run ./tools/contextmap -check-doc -evidence-out out/control-plane-context-map-evidence.json"
+    },
+    {
+      "id": "collect-context-map-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/control-plane-context-map-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "download-go-ci-modules",
+      "kind": "shell",
+      "command": "go mod download"
+    },
+    {
+      "id": "verify-go-ci-baseline",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/gocibaseline -count=1 && go run ./tools/gocibaseline -check-doc -evidence-out out/go-ci-baseline-evidence.json"
+    },
+    {
+      "id": "install-go-ci-lint",
+      "kind": "shell",
+      "command": "mkdir -p bin && GOBIN=\"$PWD/bin\" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2"
+    },
+    {
+      "id": "lint-go-ci",
+      "kind": "shell",
+      "command": "bin/golangci-lint run ./... --timeout=5m"
+    },
+    {
+      "id": "test-go-ci-with-coverage",
+      "kind": "shell",
+      "command": "mkdir -p out && go test ./... -coverprofile=out/go-test-cover.out -covermode=count && go tool cover -func=out/go-test-cover.out | tee out/go-test-coverage-summary.txt && chmod 0600 out/go-test-cover.out out/go-test-coverage-summary.txt"
+    },
+    {
+      "id": "collect-go-ci-quality-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/go-ci-baseline-evidence.json",
+        "out/go-test-cover.out",
+        "out/go-test-coverage-summary.txt"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-module-decomposition",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/moduledecomposition -count=1 && go run ./tools/moduledecomposition -check-doc -evidence-out out/module-decomposition-evidence.json"
+    },
+    {
+      "id": "verify-module-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-module-decomposition-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/module-decomposition-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-pre-commit-baseline",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/precommitbaseline -count=1 && go run ./tools/precommitbaseline -check-doc -evidence-out out/pre-commit-baseline-evidence.json"
+    },
+    {
+      "id": "collect-pre-commit-baseline-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/pre-commit-baseline-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-migration-ledger",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/migrationledger -count=1 && go run ./tools/migrationledger -check-doc -evidence-out out/migration-ledger-evidence.json"
+    },
+    {
+      "id": "verify-migration-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-migration-ledger-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/migration-ledger-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-syntax-hash-golden-locks",
+      "kind": "shell",
+      "command": "export RIIDO_LOOP_IDS=syntax_hash_graph_spike_loop && go test ./tools/contextmap ./tools/syntaxhash ./awsadapters ./cmd/riido_ai_server ./internal/riidoaiserver ./internal/repoidentity ./internal/contractscompat ./tools/requestauth ./tools/healthreadycmd ./tools/runtimeboundary ./tools/runtimecdownership ./tools/deploypolicy ./tools/containercontract ./tools/containercontract/dockerfile ./tools/configreference ./tools/storesaferouting ./tools/publicpageslive ./tools/gocibaseline ./tools/moduledecomposition ./tools/controlplaneaudit ./tools/controlplaneperf ./tools/controlplanepressure ./tools/aiagentload ./tools/harnesspromotion ./tools/loopclosureaudit ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/looprefreshdispatch ./tools/evidencegraph ./tools/loopregistry ./tools/operationalreadiness ./tools/precommitbaseline ./tools/workflowevidence ./tools/liveworkflowevidence ./tools/aigeneratedsmokematrix ./tools/apiclientdelivery ./tools/figmaprojection ./tools/aiagentclientapi ./tools/generatedclienthandoff ./tools/reactquerygen ./tools/storesnapshotoutbox ./tools/aiagentthreadsnapshot ./tools/webfrontendapi ./tools/aiagentrisk ./tools/migrationledger ./tools/metricshttpadapter ./tools/agentcatalogrbac ./tools/reviewaccountseed ./tools/integrationmatrix ./tools/openquestions ./tools/repositoryreadme ./tools/knowledgecoverage ./tools/dependencyallowlist ./tools/providerstatus ./tools/agentruntimebinding ./tools/assignmentjournal ./tools/cloudwatchemf ./tools/saascontrolplane ./tools/snapshotcqrsgate -run 'Test(ContextMap|SyntaxHashTool|AWSAdaptersFacade|RuntimeConfig|RiidoAIServer|RepoIdentity|ContractsCompat|RequestAuthorization|HealthReadyCommand|RuntimeBoundary|RuntimeCDOwnership|DeployPolicy|ContainerContract|ConfigReference|StoreSafeRouting|PublicPagesLive|GoCIBaseline|ModuleDecomposition|ControlPlaneAudit|ControlPlanePerformance|ControlPlanePressure|AIAgentLoad|HarnessPromotion|LoopClosureAudit|ClosedLoopCandidateIntake|ClosedLoopCandidateDecision|LoopRefreshDispatch|EvidenceGraph|LoopRegistry|OperationalReadiness|PreCommitBaseline|WorkflowEvidence|LiveWorkflowEvidence|RunWrites|APIClientDelivery|FigmaProjection|WebFrontendAPI|AIAgentRisk|MigrationLedger|MetricsHTTPAdapter|AgentCatalogRBAC|ReviewAccountSeed|IntegrationMatrix|OpenQuestions|RepositoryReadme|KnowledgeCoverage|DependencyAllowlist|ProviderStatus|AgentRuntimeBinding|AssignmentJournal|CloudWatchEMF|SaaSControlPlane|SnapshotCQRSGate|AIAgentThreadSnapshot|ReactQueryGen)BehaviorGolden|GeneratedClientHandoff' -count=1"
+    },
+    {
+      "id": "verify-syntax-hash",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=syntax_hash_graph_spike_loop && mkdir -p out && go test ./tools/syntaxhash -count=1 && go run ./tools/syntaxhash -check-doc -evidence-out out/syntax-hash-evidence.json"
+    },
+    {
+      "id": "collect-syntax-hash-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/syntax-hash-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-config-reference",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/configreference -count=1 && go run ./tools/configreference -check-doc -evidence-out out/config-reference-evidence.json"
+    },
+    {
+      "id": "verify-config-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-config-reference-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/config-reference-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-dedicated-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/knowledgecoverage -count=1 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-dedicated-executable-knowledge-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-workflow-evidence",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=closed_loop_candidate && mkdir -p out && go test ./tools/workflowevidence -count=1 && go run ./tools/workflowevidence -check-doc -evidence-out out/workflow-evidence.json"
+    },
+    {
+      "id": "collect-workflow-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/workflow-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-open-questions",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=open_decision_queue && mkdir -p out && go test ./tools/openquestions -count=1 && go run ./tools/openquestions -check-doc -evidence-out out/open-questions-evidence.json"
+    },
+    {
+      "id": "verify-open-questions-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=open_decision_queue && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-open-questions-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/open-questions-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-harness-promotion",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=closed_loop_candidate && mkdir -p out && go test ./tools/harnesspromotion -count=1 && go run ./tools/harnesspromotion -check-doc -evidence-out out/harness-promotion-evidence.json"
+    },
+    {
+      "id": "collect-harness-promotion-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/harness-promotion-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-integration-matrix",
+      "kind": "shell",
+      "command": "umask 077 && mkdir -p out && go test ./tools/integrationmatrix -count=1 && go run ./tools/integrationmatrix -check-doc -evidence-out out/integration-matrix-evidence.json"
+    },
+    {
+      "id": "verify-integration-matrix-executable-knowledge",
+      "kind": "shell",
+      "command": "umask 077 && go run ./tools/knowledgecoverage -check-doc -evidence-out out/executable-knowledge-coverage.json"
+    },
+    {
+      "id": "collect-integration-matrix-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/integration-matrix-evidence.json",
+        "out/executable-knowledge-coverage.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-loop-closure-audit",
+      "kind": "shell",
+      "command": "umask 077 && export RIIDO_LOOP_IDS=loop_closure_audit && mkdir -p out && go test ./tools/loopclosureaudit -count=1 && go run ./tools/loopclosureaudit -check-doc -evidence-out out/loop-closure-audit-evidence.json -candidate-out out/loop-closure-audit-closed-loop-candidates.json"
+    },
+    {
+      "id": "collect-loop-closure-audit-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/loop-closure-audit-evidence.json",
+        "out/loop-closure-audit-closed-loop-candidates.json"
+      ],
+      "redaction": "required",
+      "run_when": "always"
+    },
+    {
+      "id": "verify-evidence-graph",
+      "kind": "shell",
+      "command": "umask 077 && go test ./tools/evidencegraph -count=1 && mkdir -p out && if [ -n \"${RIIDO_EVIDENCE_GRAPH_IMPACT_BASE:-}\" ]; then go run ./tools/evidencegraph -check-doc -github-annotations -impact-base \"$RIIDO_EVIDENCE_GRAPH_IMPACT_BASE\" -evidence-out out/evidence-graph-evidence.json; else go run ./tools/evidencegraph -check-doc -github-annotations -evidence-out out/evidence-graph-evidence.json; fi"
+    },
+    {
+      "id": "collect-evidence-graph-evidence",
+      "kind": "artifact",
+      "paths": [
+        "out/evidence-graph-evidence.json"
+      ],
+      "redaction": "required",
+      "run_when": "on_success"
+    }
+  ],
+  "success_gate": [
+    "legacy baseline workflow digest remains exact and unedited",
+    "all five baseline job steps map to native riido-ci behavior with zero adapters",
+    "dependency allowlist evidence is redacted and content-addressed",
+    "full Go tests pass",
+    "legacy workflow retirement and runtime authority remain zero",
+    "riido-ci emits a passed mode-0600 local-run evidence envelope",
+    "repository-readme workflow digest remains exact and unedited",
+    "README and executable-knowledge commands map with zero adapters",
+    "repository evidence is redacted, content-addressed and mode 0600",
+    "context-map workflow digest remains exact and unedited",
+    "dependency policy and the Context Map command map with zero adapters",
+    "Context Map evidence is redacted, content-addressed and mode 0600",
+    "Go CI workflow digest remains exact and unedited",
+    "all eight Go CI source behaviors map with zero adapters",
+    "exact lint and coverage-summary behavior passes",
+    "Go CI baseline and coverage evidence is redacted, content-addressed and mode 0600",
+    "module-decomposition workflow digest remains exact and unedited",
+    "dependency, module-decomposition and executable-knowledge behavior maps with zero adapters",
+    "module and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "module-decomposition workflow retirement and runtime authority remain zero",
+    "pre-commit-baseline workflow digest remains exact and unedited",
+    "all four pre-commit-baseline source behaviors map with zero adapters",
+    "pre-commit baseline evidence is redacted, content-addressed and mode 0600",
+    "pre-commit-baseline workflow retirement and runtime authority remain zero",
+    "migration-ledger workflow digest remains exact and unedited",
+    "dependency, migration-ledger and executable-knowledge behavior maps with zero adapters",
+    "migration-ledger and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "migration-ledger workflow retirement and runtime authority remain zero",
+    "syntax-hash workflow digest remains exact and unedited",
+    "all five syntax-hash source behaviors map with zero adapters",
+    "syntax-hash evidence is redacted, content-addressed and mode 0600",
+    "syntax-hash workflow retirement and runtime authority remain zero",
+    "config-reference workflow digest remains exact and unedited",
+    "dependency, config-reference and executable-knowledge behavior maps with zero adapters",
+    "config-reference and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "config-reference workflow retirement and runtime authority remain zero",
+    "executable-knowledge workflow digest remains exact and unedited",
+    "all four executable-knowledge source behaviors map with zero adapters",
+    "executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "executable-knowledge workflow retirement and runtime authority remain zero",
+    "workflow-evidence workflow digest remains exact and unedited",
+    "all five workflow-evidence source behaviors map with zero adapters",
+    "workflow evidence is redacted, content-addressed and mode 0600",
+    "workflow-evidence workflow retirement and runtime authority remain zero",
+    "open-questions workflow digest remains exact and unedited",
+    "dependency, loop, open-questions and executable-knowledge behavior maps with zero adapters",
+    "open-questions and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "open-questions workflow scheduling, retirement and runtime authority remain zero",
+    "harness-promotion workflow digest remains exact and unedited",
+    "loop and harness-promotion behavior maps with zero adapters",
+    "harness-promotion evidence is redacted, content-addressed and mode 0600",
+    "harness-promotion workflow scheduling, retirement and runtime authority remain zero",
+    "integration-matrix workflow digest remains exact and unedited",
+    "dependency, integration-matrix and executable-knowledge behavior maps with zero adapters",
+    "integration-matrix and executable-knowledge evidence is redacted, content-addressed and mode 0600",
+    "integration-matrix workflow retirement and runtime authority remain zero",
+    "loop-closure-audit workflow digest remains exact and unedited",
+    "loop and loop-closure-audit behavior maps with zero adapters",
+    "audit and closed-loop candidate evidence is redacted, content-addressed and mode 0600",
+    "loop-closure-audit scheduling, dispatch, retirement and runtime authority remain zero",
+    "evidence-graph workflow digest remains exact and unedited",
+    "full-history, cached Go, impact-base and annotation behavior maps with zero adapters",
+    "evidence graph output is success-only, redacted, content-addressed and mode 0600",
+    "evidence-graph triggers, retirement and runtime authority remain zero"
+  ]
+}

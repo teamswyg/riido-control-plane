@@ -1,0 +1,64 @@
+{
+  "schema_version": "riido-staging-api-snapshot.v1",
+  "id": "staging-api-terminal-stop-refresh-real-mutation-2026-07-02",
+  "environment": "staging",
+  "redacted": true,
+  "captured_at": "2026-07-02T06:27:00Z",
+  "deployment": {
+    "commit": "c0a13c51c56336ca6cbfe689c3b75e157edd16b6",
+    "run": "https://github.com/teamswyg/riido-control-plane/actions/runs/28569393391"
+  },
+  "subject": {
+    "workspace": "redacted",
+    "task": "uNYpHxDOzMp3vMy_urWsu",
+    "agent": "redacted-codex-agent"
+  },
+  "checks": {
+    "assignment_mutation": {
+      "http": 202,
+      "assignment_id": "asn-000185",
+      "work_status": "running",
+      "assignment_state": "running",
+      "comment_kind": "assignment_started",
+      "message": "작업을 진행 중이에요."
+    },
+    "stop_mutation": {
+      "http": 202,
+      "assignment_id": "asn-000185",
+      "work_status": "idle",
+      "assignment_state": "stopped",
+      "comment_kind": "stopped_by_user_request",
+      "message": "작업이 중지됐어요.",
+      "result_message": null
+    },
+    "v2_threads_after_stop": {
+      "http": 200,
+      "matched_threads": 1,
+      "collection_active_stream": false,
+      "matched_work_status": "idle",
+      "matched_assignment_state": "stopped",
+      "matched_comment_kind": "stopped_by_user_request",
+      "matched_message": "작업이 중지됐어요.",
+      "matched_result_message": "작업이 중지됐어요."
+    },
+    "v3_threads_after_stop": {
+      "http": 200,
+      "matched_threads": 1,
+      "collection_active_stream": false,
+      "thread_active_stream": null,
+      "matched_work_status": "idle",
+      "matched_assignment_state": "stopped",
+      "matched_message_role": "agent",
+      "matched_comment_kind": "stopped_by_user_request",
+      "matched_body": "작업이 중지됐어요.",
+      "matched_result_message": "작업이 중지됐어요."
+    },
+    "stream_subscription_after_stop": {
+      "http": 200,
+      "active_thread_filter_count": 0,
+      "matched_filter_count": 0,
+      "stream_href_present": true
+    }
+  },
+  "decision": "The deployed staging API treats user stop as immediate server truth: v2/v3 read models show stopped terminal state, no collection or per-thread active stream is exposed, and thread stream subscription has no active filters for the stopped assignment."
+}

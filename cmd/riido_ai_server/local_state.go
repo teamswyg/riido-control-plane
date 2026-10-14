@@ -43,6 +43,7 @@ type localTaskContexts map[string]map[string]riidoaiserver.AIAgentTaskContext
 func (c localTaskContexts) GetAIAgentTaskContext(context.Context, string) (riidoaiserver.AIAgentTaskContext, error) {
 	return riidoaiserver.AIAgentTaskContext{}, fmt.Errorf("local task context requires workspace scope")
 }
+
 func (c localTaskContexts) GetAIAgentTaskContextForRequest(ctx context.Context, req riidoaiserver.AIAgentTaskContextRequest) (riidoaiserver.AIAgentTaskContext, error) {
 	if err := ctx.Err(); err != nil {
 		return riidoaiserver.AIAgentTaskContext{}, err
@@ -53,6 +54,7 @@ func (c localTaskContexts) GetAIAgentTaskContextForRequest(ctx context.Context, 
 	}
 	return value, nil
 }
+
 func readLocalTaskContexts(dir string) (riidoaiserver.AIAgentTaskContextReader, error) {
 	body, err := os.ReadFile(filepath.Join(dir, "task-contexts.json"))
 	if os.IsNotExist(err) {

@@ -1,0 +1,177 @@
+{
+  "schema_version": "riido-control-plane-closed-loop-candidate-intake.v1",
+  "id": "control-plane-closed-loop-candidate-intake",
+  "title": "Control Plane Closed Loop Candidate Intake",
+  "generated_doc": "docs/30-architecture/closed-loop-candidate-intake.md",
+  "workflow": ".github/workflows/closed-loop-candidate-intake.yml",
+  "evidence_artifact": "closed-loop-candidate-intake-evidence",
+  "evidence_tool": "tools/closedloopcandidateintake",
+  "producer_manifests": [
+    "docs/30-architecture/harness-promotion.riido.json",
+    "docs/30-architecture/control-plane-performance.riido.json",
+    "docs/30-architecture/loop-closure-audit.riido.json",
+    "docs/30-architecture/loop-refresh-dispatch.riido.json"
+  ],
+  "sources": [
+    {
+      "id": "ai-agent-client-testnet-smoke",
+      "candidate_artifact": "ai-agent-client-testnet-smoke-closed-loop-candidates",
+      "source_workflow": ".github/workflows/ai-agent-client-testnet-smoke.yml",
+      "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "provider_acceptance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
+      "id": "ai-agent-client-testnet-load",
+      "candidate_artifact": "ai-agent-client-testnet-load-closed-loop-candidates",
+      "source_workflow": ".github/workflows/ai-agent-client-testnet-load.yml",
+      "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "ai_agent_load_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
+      "id": "control-plane-performance",
+      "candidate_artifact": "control-plane-performance-closed-loop-candidates",
+      "source_workflow": ".github/workflows/control-plane-performance.yml",
+      "producer_manifest": "docs/30-architecture/harness-promotion.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
+      "id": "control-plane-pressure",
+      "candidate_artifact": "control-plane-pressure-closed-loop-candidates",
+      "source_workflow": ".github/workflows/control-plane-performance.yml",
+      "producer_manifest": "docs/30-architecture/control-plane-performance.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "control_plane_performance_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
+      "id": "loop-closure-audit",
+      "candidate_artifact": "loop-closure-audit-closed-loop-candidates",
+      "source_workflow": ".github/workflows/loop-closure-audit.yml",
+      "producer_manifest": "docs/30-architecture/loop-closure-audit.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "loop_closure_audit",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
+      "id": "loop-refresh-dispatch",
+      "candidate_artifact": "loop-refresh-dispatch-closed-loop-candidates",
+      "source_workflow": ".github/workflows/loop-refresh-dispatch.yml",
+      "producer_manifest": "docs/30-architecture/loop-refresh-dispatch.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "closed_loop_candidate",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    },
+    {
+      "id": "operational-readiness",
+      "candidate_artifact": "operational-readiness-closed-loop-candidates",
+      "source_workflow": ".github/workflows/operational-readiness.yml",
+      "producer_manifest": "docs/30-architecture/operational-readiness.riido.json",
+      "loop_registry_manifest": "docs/30-architecture/loop-registry.riido.json",
+      "evidence_graph_manifest": "docs/30-architecture/evidence-graph.riido.json",
+      "harness_loop": "operational_readiness_release_harness",
+      "promotion_target": "closed_loop_candidate",
+      "required_next_artifacts": [
+        "claim_binding",
+        "verifier",
+        "ci_gate",
+        "redacted_evidence",
+        "decision_record",
+        "evidence_graph_edge"
+      ]
+    }
+  ],
+  "assertions": [
+    "closed-loop candidate artifacts must be redacted before intake",
+    "each candidate must name the adoption artifacts required to become a closed loop",
+    "each candidate must include an adoption_plan that covers every required next artifact with an executable command",
+    "candidate intake evidence must expose candidate_adoption_plans so agents can see required next artifacts and commands without reopening candidate artifacts",
+    "candidate-specific adoption artifacts must be accepted only when they match the machine-routable subject next_artifact",
+    "each candidate promotion_edge must match the source harness loop and closed-loop promotion target",
+    "each candidate source_ref must match the producer source, candidate artifact, source workflow, run id, and freshness window",
+    "candidate intake evidence must expose candidate_source_refs for every consumed candidate item",
+    "candidate intake evidence must expose candidate_subjects for every consumed candidate item that carries a subject",
+    "intake sources must be backed by the producer manifest, loop registry, and evidence graph",
+    "candidate intake must run on a schedule so stale candidates do not rely on human memory",
+    "candidate intake verification must fail when no candidate artifact is supplied",
+    "scheduled candidate intake must download the latest live candidate artifacts from each producer harness workflow instead of validating only a fixture",
+    "candidate intake workflow path triggers must include linked producer, loop registry, and evidence graph manifests",
+    "candidate intake fixture promotion must pin the harness promotion clock so deterministic samples do not fail after real-time expiry",
+    "candidate intake must reject consumed candidate artifacts unless source_generated_at < source_expires_at and now < source_expires_at",
+    "candidate intake evidence must publish generated_at and expires_at",
+    "candidate intake evidence must expose consumed candidate artifact path, source workflow, freshness window, source ids, and candidate ids",
+    "candidate intake sources must cover every closed_loop_candidate producer source from the harness promotion manifest",
+    "candidate intake sources must include loop-closure-audit residual gap candidates",
+    "candidate intake sources must include control-plane pressure measured finding candidates",
+    "candidate intake sources must include loop-refresh-dispatch ignored command candidates",
+    "candidate intake sources must include operational readiness stale partial candidates",
+    "candidate intake workflow path triggers must include every producer source workflow",
+    "candidate intake PR verification must consume a performance-specific candidate fixture"
+  ],
+  "loop": {
+    "observation": "Harness promotion can produce closed-loop candidate artifacts, but without an intake loop those candidates can still become passive reports.",
+    "hypothesis": "A candidate intake sidecar can verify redacted candidate shape, adoption artifact requirements, producer wiring, and graph linkage before humans choose implementation order.",
+    "execute": "Generate this reader from the intake manifest, run a deterministic redacted candidate fixture through harness promotion, validate the candidate artifact through explicit input, download latest live producer candidate artifacts on non-PR runs, and publish intake evidence in CI.",
+    "evaluate": "The verifier fails on missing candidate input, missing producer linkage, missing loop-registry target, missing evidence-graph next loop, missing adoption artifacts, candidate-specific adoption artifacts not bound to subject next_artifact, expired or exact-expiry candidate artifacts, raw endpoint or secret leakage, stale docs, missing live artifact download wiring, or missing scheduled workflow evidence.",
+    "retrospective": "This moves candidate triage one step out of the human loop: failures become structured intake records that already know what artifacts are required for adoption."
+  }
+}

@@ -69,6 +69,114 @@ func TestComposeAIAgentAssignmentPromptUsesTaskContextSnapshot(t *testing.T) {
 	}
 }
 
+func TestComposeAssignRequestWithTaskContextAddsWorktree(t *testing.T) {
+	req, err := composeAssignRequestWithTaskContext("task-1", "component-1", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-a",
+		RuntimeProvider: "codex",
+		Prompt:          "placeholder",
+	}, AIAgentTaskContext{
+		Component: AIAgentTaskContextComponent{
+			ID:         "component-1",
+			Title:      "Ship F3",
+			BranchName: "RIID-4964-agent-profile-upload",
+		},
+		Document: AIAgentTaskContextDocument{Content: "Use real repo."},
+		Repositories: []AIAgentTaskContextRepository{{
+			FullName:      "teamswyg/riido-daemon",
+			RepositoryURL: "https://github.com/teamswyg/riido-daemon",
+			Source:        TaskContextRepositorySourceConnectedPullRequest,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("compose assignment request: %v", err)
+	}
+	if req.Worktree == nil {
+		t.Fatal("expected worktree")
+	}
+	if req.Worktree.RepositoryFullName != "teamswyg/riido-daemon" ||
+		req.Worktree.RepositoryURL != "https://github.com/teamswyg/riido-daemon" ||
+		req.Worktree.BranchName != "RIID-4964-agent-profile-upload" ||
+		req.Worktree.Source != TaskContextRepositorySourceConnectedPullRequest {
+		t.Fatalf("worktree = %+v", req.Worktree)
+	}
+}
+
+func TestComposeAssignRequestDropsSensitiveRepositoryURL(t *testing.T) {
+	req, err := composeAssignRequestWithTaskContext("task-1", "component-1", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-a",
+		RuntimeProvider: "codex",
+		Prompt:          "placeholder",
+	}, AIAgentTaskContext{
+		Component: AIAgentTaskContextComponent{
+			ID:         "component-1",
+			Title:      "Ship F3 safely",
+			BranchName: "RIID-4964-agent-profile-upload",
+		},
+		Document: AIAgentTaskContextDocument{Content: "Use real repo."},
+		Repositories: []AIAgentTaskContextRepository{{
+			FullName:      "teamswyg/riido-daemon",
+			RepositoryURL: "https://github.com/teamswyg/riido-daemon?token=secret",
+			Source:        TaskContextRepositorySourceConnectedPullRequest,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("compose assignment request: %v", err)
+	}
+	if req.Worktree == nil {
+		t.Fatal("expected worktree")
+	}
+	if req.Worktree.RepositoryFullName != "teamswyg/riido-daemon" || req.Worktree.RepositoryURL != "" {
+		t.Fatalf("worktree should keep full_name and drop sensitive URL: %+v", req.Worktree)
+	}
+	for _, forbidden := range []string{"token", "secret"} {
+		if strings.Contains(req.Prompt, forbidden) {
+			t.Fatalf("prompt leaked sensitive repository URL component %q:\n%s", forbidden, req.Prompt)
+		}
+	}
+	if !strings.Contains(req.Prompt, "- repository_url: not provided") {
+		t.Fatalf("prompt should mark unsafe repository URL absent:\n%s", req.Prompt)
+	}
+}
+
+func TestComposeAssignRequestDropsSensitiveRepositoryFullName(t *testing.T) {
+	req, err := composeAssignRequestWithTaskContext("task-1", "component-1", AssignRequest{
+		ComponentID:     "component-1",
+		AgentID:         "agent-a",
+		RuntimeProvider: "codex",
+		Prompt:          "placeholder",
+	}, AIAgentTaskContext{
+		Component: AIAgentTaskContextComponent{
+			ID:    "component-1",
+			Title: "Ship F3 safely",
+		},
+		Document: AIAgentTaskContextDocument{Content: "Use real repo."},
+		Repositories: []AIAgentTaskContextRepository{{
+			FullName:      "teamswyg/riido-daemon?token=secret",
+			RepositoryURL: "https://github.com/teamswyg/riido-daemon",
+			Source:        TaskContextRepositorySourceConnectedPullRequest,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("compose assignment request: %v", err)
+	}
+	if req.Worktree == nil {
+		t.Fatal("expected worktree")
+	}
+	if req.Worktree.RepositoryFullName != "" || req.Worktree.RepositoryURL != "https://github.com/teamswyg/riido-daemon" {
+		t.Fatalf("worktree should drop sensitive full_name and keep safe URL: %+v", req.Worktree)
+	}
+	for _, forbidden := range []string{"token", "secret"} {
+		if strings.Contains(req.Prompt, forbidden) {
+			t.Fatalf("prompt leaked sensitive repository full_name component %q:\n%s", forbidden, req.Prompt)
+		}
+	}
+	if !strings.Contains(req.Prompt, "- full_name: not provided") {
+		t.Fatalf("prompt should mark unsafe repository full_name absent:\n%s", req.Prompt)
+	}
+}
+
 func TestComposeAIAgentAssignmentPromptFallsBackWithoutRepository(t *testing.T) {
 	prompt, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
 		TaskID: "task-2",
@@ -90,6 +198,26 @@ func TestComposeAIAgentAssignmentPromptFallsBackWithoutRepository(t *testing.T) 
 		if !strings.Contains(prompt.Prompt, want) {
 			t.Fatalf("prompt missing %q:\n%s", want, prompt.Prompt)
 		}
+	}
+}
+
+func TestComposeAIAgentAssignmentPromptWithoutTaskContext(t *testing.T) {
+	prompt, err := ComposeAIAgentAssignmentPromptWithoutTaskContext("task-smoke", "")
+	if err != nil {
+		t.Fatalf("compose prompt without task context: %v", err)
+	}
+	for _, want := range []string{
+		"- task_id: task-smoke",
+		"- component_id: task-smoke",
+		"- title: task-smoke",
+		"Task context was not available when this assignment was created.",
+	} {
+		if !strings.Contains(prompt.Prompt, want) {
+			t.Fatalf("prompt missing %q:\n%s", want, prompt.Prompt)
+		}
+	}
+	if prompt.HasRepository {
+		t.Fatalf("fallback prompt should not select repository: %+v", prompt.SelectedRepository)
 	}
 }
 

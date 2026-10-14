@@ -25,6 +25,7 @@ func TestPartialResponseDiscriminatorSurvivesWire(t *testing.T) {
 		t.Fatalf("template args exposed: %s", b)
 	}
 }
+
 func TestRuntimeFailureVisibleBeforeTerminal(t *testing.T) {
 	for _, kind := range []string{EventProviderWarning, EventProviderError} {
 		if got := assignmentEventVisibleThreadMessage(AssignmentRunning, kind, "quota exceeded", "working"); got != "quota exceeded" {

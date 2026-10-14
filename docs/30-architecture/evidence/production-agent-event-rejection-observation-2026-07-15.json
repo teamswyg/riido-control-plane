@@ -1,0 +1,37 @@
+{
+  "schema_version": "riido-control-plane-operational-observation.v1",
+  "id": "production-agent-event-rejection-observation-2026-07-15",
+  "status": "partial",
+  "redacted": true,
+  "observed_at": "2026-07-15T05:55:07Z",
+  "expires_at": "2026-07-16T05:55:07Z",
+  "environment": "production",
+  "observation_window": {
+    "start": "2026-07-15T05:49:00Z",
+    "end": "2026-07-15T05:56:00Z"
+  },
+  "facts": {
+    "agent_event_http_200": 126,
+    "agent_event_http_400": 5,
+    "store_append_event_calls": 131,
+    "store_append_event_errors": 5,
+    "http_5xx": 0,
+    "assignments_queued": 0,
+    "outbox_errors": 0,
+    "correlated_assignment_id": "asn-000064",
+    "correlated_terminal_state": "completed",
+    "terminal_recorded_at": "2026-07-15T05:53:06.192962254Z"
+  },
+  "inference": {
+    "status": "unconfirmed",
+    "candidate": "late non-terminal agent events were rejected after the assignment became terminal",
+    "reason": "the server emitted aggregate 400/store-error metrics but did not log a rejection category or request identity"
+  },
+  "decision": "Preserve the existing API behavior and add redacted structured rejection categories at the agent event HTTP boundary before changing transition or retry semantics.",
+  "verification": [
+    "go test ./internal/riidoaiserver -run 'TestAgentEventErrorCategory|TestLogAgentEventRejectedExcludesSensitivePayload|TestHTTPAssignmentAssignPollHeartbeatAndEvent' -count=1",
+    "go test -race ./internal/riidoaiserver -run 'TestAgentEventErrorCategory|TestLogAgentEventRejectedExcludesSensitivePayload|TestHTTPAssignmentAssignPollHeartbeatAndEvent' -count=1",
+    "go run ./tools/evidencegraph -check-doc",
+    "go run ./tools/loopregistry -check-doc"
+  ]
+}

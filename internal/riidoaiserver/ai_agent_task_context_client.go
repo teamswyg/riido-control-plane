@@ -237,9 +237,13 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	snapshot := detail.toAIAgentTaskContext()
-	snapshot.TeamID = location.Team.ID
-	return snapshot, nil
+	contextSnapshot := detail.toAIAgentTaskContext()
+	contextSnapshot.TeamID = location.Team.ID
+	if providerDocument, ok := c.getProviderDocumentHTML(requestCtx, location.Team.ID, componentID, bearerToken); ok {
+		contextSnapshot.Document.Content = providerDocument.HTML
+		contextSnapshot.Document.ContentFormat = "html"
+	}
+	return contextSnapshot, nil
 }
 
 func (c *AIAgentPrivateTaskContextClient) getComponentWorkspace(ctx context.Context, componentID, bearerToken string) (privateComponentWorkspaceResponse, error) {

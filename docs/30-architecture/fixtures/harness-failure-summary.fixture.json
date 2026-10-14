@@ -1,0 +1,21 @@
+{
+  "schema_version": "riido-control-plane-live-workflow-evidence.v1",
+  "id": "ai-agent-client-testnet-smoke",
+  "generated_at": "2026-06-24T00:00:00Z",
+  "expires_at": "2026-06-25T00:00:00Z",
+  "live_status": "failure",
+  "evidence_claims": [
+    {
+      "id": "provider_smoke",
+      "summary": "redacted provider smoke failed",
+      "status": "not_verified"
+    }
+  ],
+  "run": {
+    "id": "fixture",
+    "attempt": "1",
+    "sha": "redacted",
+    "ref_name": "fixture",
+    "event": "fixture"
+  }
+}

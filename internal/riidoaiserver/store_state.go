@@ -15,10 +15,14 @@ type storeState struct {
 	events                  map[string][]TaskEvent
 	subscribers             map[string]map[int64]chan TaskEvent
 	agentWaiters            map[string]map[int64]chan struct{}
+	toolApprovals           map[string]ToolApprovalRequest
+	toolApprovalDecisions   map[string]ToolApprovalDecision
+	toolApprovalWaiters     map[string]map[int64]chan struct{}
 	nextAssignmentSeq       int64
 	nextEventSeq            int64
 	nextSubscriberSeq       int64
 	nextAgentWaiterSeq      int64
+	nextToolApprovalWaiter  int64
 	pollRequestsTotal       int64
 	pollActionsTotal        map[PollAction]int64
 	agentEventsTotal        int64
@@ -36,14 +40,17 @@ type eventAppendLatencyMetrics struct {
 
 func newStoreState() storeState {
 	return storeState{
-		tasks:            map[string]taskRecord{},
-		assignments:      map[string]Assignment{},
-		agentAssignments: map[string][]string{},
-		providerStatuses: map[string]ProviderStatusSyncResponse{},
-		agentCatalog:     map[string]AgentCatalogRecord{},
-		events:           map[string][]TaskEvent{},
-		subscribers:      map[string]map[int64]chan TaskEvent{},
-		agentWaiters:     map[string]map[int64]chan struct{}{},
-		pollActionsTotal: map[PollAction]int64{},
+		tasks:                 map[string]taskRecord{},
+		assignments:           map[string]Assignment{},
+		agentAssignments:      map[string][]string{},
+		providerStatuses:      map[string]ProviderStatusSyncResponse{},
+		agentCatalog:          map[string]AgentCatalogRecord{},
+		events:                map[string][]TaskEvent{},
+		subscribers:           map[string]map[int64]chan TaskEvent{},
+		agentWaiters:          map[string]map[int64]chan struct{}{},
+		toolApprovals:         map[string]ToolApprovalRequest{},
+		toolApprovalDecisions: map[string]ToolApprovalDecision{},
+		toolApprovalWaiters:   map[string]map[int64]chan struct{}{},
+		pollActionsTotal:      map[PollAction]int64{},
 	}
 }
