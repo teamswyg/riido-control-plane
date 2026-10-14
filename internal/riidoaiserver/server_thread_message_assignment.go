@@ -22,11 +22,11 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	if err := s.reconcileAIAgentTaskThreadProjections(ctx, principal, taskID); err != nil {
 		return AssignRequest{}, err
 	}
-	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
+	history, err := s.aiAgent.ListAIAgentTaskThreadHistory(ctx, principal, taskID)
 	if err != nil {
 		return AssignRequest{}, err
 	}
-	selectedThread, err := selectAIAgentThreadForFollowup(threads, threadID)
+	selectedThread, err := selectAIAgentHistoryThreadForFollowup(history, taskID, threadID)
 	if err != nil {
 		return AssignRequest{}, err
 	}
@@ -36,7 +36,7 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	if err != nil {
 		return AssignRequest{}, err
 	}
-	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req)
+	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req, history.Threads...)
 	return assignmentReq, nil
 }
 

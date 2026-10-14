@@ -2,7 +2,7 @@ package riidoaiserver
 
 import "strings"
 
-func appendAIAgentTaskThreadMessagePrompt(prompt string, thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest) string {
+func appendAIAgentTaskThreadMessagePrompt(prompt string, thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history ...AIAgentTaskThreadHistoryRecord) string {
 	var b strings.Builder
 	b.WriteString(strings.TrimSpace(prompt))
 	b.WriteString("\n\n## Follow-up Thread Message\n")
@@ -15,9 +15,15 @@ func appendAIAgentTaskThreadMessagePrompt(prompt string, thread AIAgentTaskThrea
 	b.WriteString("\n- previous_assignment_state: ")
 	b.WriteString(string(thread.AssignmentState))
 	appendSourceMessageID(&b, req.SourceMessageID)
-	appendPreviousThreadMessage(&b, thread.Message)
+	if !appendTaskConversationContext(&b, thread, req, history) {
+		previous := thread.ResultMessage
+		if previous == "" {
+			previous = thread.Message
+		}
+		appendPreviousThreadMessage(&b, taskMessageContextText(previous, 2000))
+	}
 	b.WriteString("\n\n### New User Instruction\n")
-	b.WriteString(strings.TrimSpace(req.Body))
+	b.WriteString(taskMessageContextText(req.Body, taskDocumentContextLimit))
 	appendFollowupExecutionPolicy(&b)
 	return strings.TrimSpace(b.String())
 }

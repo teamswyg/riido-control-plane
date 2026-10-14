@@ -237,11 +237,11 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	contextSnapshot := detail.toAIAgentTaskContext()
-	if providerDocument, ok := c.getProviderDocumentHTML(requestCtx, location.Team.ID, componentID, bearerToken); ok {
-		contextSnapshot.Document.Content = providerDocument.HTML
-		contextSnapshot.Document.ContentFormat = "html"
+	if detail.ID != componentID {
+		return AIAgentTaskContext{}, errors.New("riidoaiserver: task context component identity mismatch")
 	}
+	contextSnapshot := detail.toAIAgentTaskContext()
+	c.enrichTaskContext(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot)
 	return contextSnapshot, nil
 }
 
@@ -333,6 +333,7 @@ type privateComponentDetailResponse struct {
 	ComponentType string                     `json:"componentType"`
 	Title         string                     `json:"title"`
 	KeyNumber     string                     `json:"keyNumber"`
+	BranchName    string                     `json:"branchName"`
 	Document      *privateComponentDocument  `json:"document"`
 	Project       *privateComponentReference `json:"project"`
 	Milestone     *privateComponentMilestone `json:"milestone"`
@@ -406,6 +407,7 @@ func (r privateComponentDetailResponse) toAIAgentTaskContext() AIAgentTaskContex
 			ComponentType: r.ComponentType,
 			Title:         r.Title,
 			KeyNumber:     r.KeyNumber,
+			BranchName:    strings.TrimSpace(r.BranchName),
 		},
 		Document: document,
 		Hierarchy: AIAgentTaskContextHierarchy{
