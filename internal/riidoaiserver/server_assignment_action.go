@@ -38,13 +38,21 @@ type aiAgentAssignmentActionTarget struct {
 }
 
 func (s Server) cancelAIAgentAssignmentBeforeAction(ctx context.Context, principal AuthorizationResult, taskID, agentID, assignmentID, reason string) (aiAgentAssignmentActionTarget, bool, error) {
-	canceller, ok := s.assignment.(AssignmentCancellationStore)
+	_, ok := s.assignment.(AssignmentCancellationStore)
 	if !ok {
 		return aiAgentAssignmentActionTarget{}, false, nil
 	}
 	targets, ok, err := s.resolveAIAgentAssignmentActionTargets(ctx, principal, taskID, agentID, assignmentID)
 	if err != nil || !ok {
 		return aiAgentAssignmentActionTarget{}, ok, err
+	}
+	return s.cancelAIAgentAssignmentTargets(ctx, targets, reason)
+}
+
+func (s Server) cancelAIAgentAssignmentTargets(ctx context.Context, targets []aiAgentAssignmentActionTarget, reason string) (aiAgentAssignmentActionTarget, bool, error) {
+	canceller, ok := s.assignment.(AssignmentCancellationStore)
+	if !ok || len(targets) == 0 {
+		return aiAgentAssignmentActionTarget{}, false, nil
 	}
 	primary := targets[0]
 	for _, target := range targets {

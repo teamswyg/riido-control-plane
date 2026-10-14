@@ -398,12 +398,15 @@ type UnassignAIAgentTaskRequest struct {
 	AgentID      string `json:"agent_id"`
 	AssignmentID string `json:"assignment_id,omitempty"`
 	Reason       string `json:"reason,omitempty"`
+
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type AgentAssignmentActionRequest struct {
-	AssignmentID string `json:"assignment_id,omitempty"`
-	Reason       string `json:"reason,omitempty"`
-	durableState AssignmentState
+	AssignmentID           string `json:"assignment_id,omitempty"`
+	Reason                 string `json:"reason,omitempty"`
+	durableState           AssignmentState
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type SubmitAIAgentTaskCommentRequest struct {

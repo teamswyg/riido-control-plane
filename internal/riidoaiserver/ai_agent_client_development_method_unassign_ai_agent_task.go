@@ -21,6 +21,9 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if err := validateTaskAgentMembershipRemovalObservation(taskID, req.AgentID, req.membershipRemovalFence, s.taskThreads[taskID]); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
 	agent, ok := s.visibleAgent(principal, req.AgentID)
 	if !ok {
 		if thread, found := s.taskThreadForUnassignTargetLocked(taskID, req.AgentID, req.AssignmentID); found {
@@ -67,7 +70,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
-	if req.AssignmentID != "" {
+	if req.AssignmentID != "" && req.membershipRemovalFence == nil {
 		s.markTaskAgentAssignmentThreadStoppedLocked(taskID, agent.AgentID, req.AssignmentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	} else {
 		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)

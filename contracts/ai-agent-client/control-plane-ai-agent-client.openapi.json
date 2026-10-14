@@ -3536,7 +3536,9 @@
         "x-riido-scenarios": [
           "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
           "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
-          "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history"
+          "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+          "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state",
+          "listWorkspaceAssignedAgentProfilesV2.interleaved-execution-prevents-participant-removal"
         ]
       }
     },
@@ -6166,8 +6168,12 @@
             "type": "boolean"
           },
           "is_stop_required": {
-            "description": "At least one active execution for this participant requires stopping before removal.",
+            "description": "At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID.",
             "type": "boolean"
+          },
+          "latest_assignment_id": {
+            "description": "Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained.",
+            "type": "string"
           },
           "name": {
             "type": "string"

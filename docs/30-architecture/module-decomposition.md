@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `111`; runtime: `1`; internal: `6`; tools: `103`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `105`; max file lines: `792`.
+File line budget target: `75`; files over target: `106`; max file lines: `792`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 105 | 99 | -6 |
+| Files over target | 106 | 99 | -7 |
 | Max file lines | 792 | 2481 | 1689 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -27,7 +27,7 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 96 | 85 | 792 | 838 | 13240 | 13604 |
+| `internal/riidoaiserver` | 97 | 85 | 792 | 838 | 13282 | 13604 |
 | `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
 | `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
 | `cmd/riido_ai_server` | 3 | 3 | 144 | 791 | 94 | 1474 |
@@ -50,7 +50,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/store_operation_runtime_test.go` | 710 |
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
-| `internal/riidoaiserver/ai_agent_client_api.go` | 644 |
+| `internal/riidoaiserver/ai_agent_client_api.go` | 647 |
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 638 |
 | `internal/riidoaiserver/store.go` | 542 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
@@ -61,7 +61,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 96 | 792 | 13240 |
+| `internal/riidoaiserver` | 97 | 792 | 13282 |
 | `internal/authpep` | 6 | 291 | 687 |
 | `cmd/riido_ai_server` | 3 | 144 | 94 |
 

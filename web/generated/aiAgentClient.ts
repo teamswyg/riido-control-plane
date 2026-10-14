@@ -774,9 +774,13 @@ export interface TaskAgentParticipantRecord {
   agent_id: string;
   is_owned_by_viewer: boolean;
   /**
-   * At least one active execution for this participant requires stopping before removal.
+   * At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID.
    */
   is_stop_required: boolean;
+  /**
+   * Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained.
+   */
+  latest_assignment_id?: string;
   name: string;
   profile_thumbnail_url?: string;
 }

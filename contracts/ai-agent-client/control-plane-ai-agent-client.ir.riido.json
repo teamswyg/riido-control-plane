@@ -383,7 +383,10 @@
         "client: use task_agent_participants for assigned participants and assigned_agent_profiles for legacy active avatar hints; use separate APIs for candidate selection and task-thread history",
         "server: retain completed, stopped, and failed Agents in task_agent_participants until explicit participant removal; execution status does not delete membership",
         "server: explicit participant removal omits that Agent from task_agent_participants without deleting or rewriting terminal execution history",
-        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution"
+        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution",
+        "server: latest_assignment_id identifies the latest retained execution of this task Agent regardless of execution status; omit it when no execution is retained",
+        "client: use latest_assignment_id only as the observed removal guard; membership and execution ownership are independent of this identifier",
+        "server: participant removal cancels the observed active executions before removing membership and returns 409 without removing membership if a new execution appears before the removal commit, including requests without assignment_id"
       ]
     },
     {
@@ -1413,7 +1416,12 @@
           {
             "name": "is_stop_required",
             "type": "boolean",
-            "description": "At least one active execution for this participant requires stopping before removal."
+            "description": "At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID."
+          },
+          {
+            "name": "latest_assignment_id",
+            "type": "string",
+            "description": "Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained."
           }
         ]
       }
@@ -4381,7 +4389,9 @@
       "scenario_ids": [
         "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
         "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
-        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history"
+        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+        "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state",
+        "listWorkspaceAssignedAgentProfilesV2.interleaved-execution-prevents-participant-removal"
       ]
     },
     {
@@ -5614,6 +5624,22 @@
       "given": "one persistent task Agent participant is explicitly removed while other participants remain",
       "when": "the client reads task_agent_participants and task-thread history",
       "then": "only the removed Agent is absent from task_agent_participants; its completed result, failure diagnostics, and thread history remain unchanged"
+    },
+    {
+      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state",
+      "operation_id": "listWorkspaceAssignedAgentProfilesV2",
+      "name": "latest removal guard is independent of historical waiting state",
+      "given": "a retained waiting-for-user execution A is followed by the same Agent execution B, which may be running, completed, or failed",
+      "when": "the client reads the workspace task Agent participants",
+      "then": "membership stays selected and latest_assignment_id is B; is_stop_required reflects only current active execution; no retained history omits the optional ID"
+    },
+    {
+      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.interleaved-execution-prevents-participant-removal",
+      "operation_id": "listWorkspaceAssignedAgentProfilesV2",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a DELETE has cancelled observed execution A while a new execution B is created before membership removal",
+      "when": "the DELETE commits membership removal with or without an assignment_id",
+      "then": "the DELETE returns 409 and preserves membership and B projection; the cancelled A remains cancelled and other task/Agent executions are unaffected"
     },
     {
       "scenario_id": "assignAIAgentTaskV2.workspace-scoped-assignment-excludes-team-and-openapi-key",
