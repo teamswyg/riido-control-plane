@@ -28,6 +28,7 @@ type dashboardTestContext struct{ calls []string }
 func (c *dashboardTestContext) GetAIAgentTaskContext(context.Context, string) (AIAgentTaskContext, error) {
 	panic("must not use service credentials")
 }
+
 func (c *dashboardTestContext) GetAIAgentTaskContextForRequest(_ context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error) {
 	c.calls = append(c.calls, req.ComponentID)
 	if req.BearerToken != "viewer-token" {

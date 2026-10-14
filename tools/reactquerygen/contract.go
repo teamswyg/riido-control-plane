@@ -19,9 +19,10 @@ func generateContract(stem string) {
 	for suffix, value := range map[string]any{".ir.riido.json": ir, ".openapi.json": api} {
 		data, err := apicontract.MarshalCanonical(value)
 		checkContract(err)
-		checkContract(os.WriteFile(stem+suffix, data, 0644))
+		checkContract(os.WriteFile(stem+suffix, data, 0o644))
 	}
 }
+
 func checkContract(err error) {
 	if err != nil {
 		panic(err)

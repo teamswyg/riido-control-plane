@@ -30,7 +30,8 @@ func buildAgentDashboard(agent AgentClientRecord, history AgentDashboardHistory,
 			seconds := int64(run.EndedAt.Sub(*run.StartedAt).Seconds())
 			item.DurationSeconds = &seconds
 		}
-		if isDashboardTerminal(assignment.State) {
+		switch {
+		case isDashboardTerminal(assignment.State):
 			out.History = append(out.History, item)
 			if assignment.State == AssignmentCompleted {
 				out.CompletedRuns++
@@ -39,11 +40,11 @@ func buildAgentDashboard(agent AgentClientRecord, history AgentDashboardHistory,
 					completedByDay[day]++
 				}
 			}
-		} else if assignment.State == AssignmentQueued {
+		case assignment.State == AssignmentQueued:
 			if run.QueuePosition > 0 {
 				out.Queue = append(out.Queue, item)
 			}
-		} else {
+		default:
 			if history.UsesActiveLease && history.ActiveAssignmentID != assignment.ID {
 				continue
 			}
@@ -51,8 +52,8 @@ func buildAgentDashboard(agent AgentClientRecord, history AgentDashboardHistory,
 				item.State = "waiting_for_user"
 			}
 			if out.Current == nil || item.QueuedAt.Before(out.Current.QueuedAt) {
-				copy := item
-				out.Current = &copy
+				current := item
+				out.Current = &current
 			}
 		}
 	}

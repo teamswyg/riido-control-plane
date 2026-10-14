@@ -26,10 +26,10 @@ func main() {
 		var b strings.Builder
 		writeGeneratedHeader(&b)
 		writeTypes(&b, spec.Components.Schemas)
-		if err := os.MkdirAll(filepath.Dir(*outPath), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(*outPath), 0o755); err != nil {
 			panic(err)
 		}
-		if err := os.WriteFile(*outPath, []byte(b.String()), 0644); err != nil {
+		if err := os.WriteFile(*outPath, []byte(b.String()), 0o644); err != nil {
 			panic(err)
 		}
 		return

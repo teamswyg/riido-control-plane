@@ -6728,7 +6728,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5f8139b7b348edde0085b527bc26aeb4ae593e4885fecec51a7ef7c675d1243f"
+      "semantic_hash": "66995ac1b6d602ae4f8919a35eea8bd1bcc16aa15872930f73e80cc49c406802"
     },
     {
       "id": "device_client_status_must_distinguish_install_update_and_ready",

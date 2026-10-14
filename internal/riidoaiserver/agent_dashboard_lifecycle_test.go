@@ -2,10 +2,11 @@ package riidoaiserver
 
 import (
 	"context"
-	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 	"path/filepath"
 	"testing"
 	"time"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
 func TestAgentDashboardLifecycleAndDurableRestart(t *testing.T) {

@@ -283,7 +283,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `integration_matrix_must_preserve_public_private_boundary` | `closed_loop_candidate` | `21` | `2` | `d35a53c73437` |
 | `context_map_must_guard_public_boundaries` | `loop_closure_audit` | `37` | `15` | `6e8d0de0550c` |
 | `api_client_delivery_must_preserve_generated_handoff_boundary` | `closed_loop_candidate` | `56` | `10` | `f74dea34f16d` |
-| `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `5f8139b7b348` |
+| `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `66995ac1b6d6` |
 | `device_client_status_must_distinguish_install_update_and_ready` | `closed_loop_candidate` | `6` | `5` | `d80d31106a61` |
 
 ## Claim Surface Evidence
