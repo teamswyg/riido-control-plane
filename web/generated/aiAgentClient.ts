@@ -449,6 +449,10 @@ export interface AssignedAgentProfileMapResponse {
    */
   assigned_agent_profiles: Record<string, AssignedAgentProfile>;
   schema_version: string;
+  /**
+   * Task ID keyed persistent Agent membership collections. Includes completed and stopped Agents until explicit participant removal. The legacy assigned_agent_profiles field remains active-only.
+   */
+  task_agent_participants?: Record<string, TaskAgentParticipantCollection>;
   workspace_id: string;
 }
 
@@ -754,6 +758,27 @@ export interface SubmitAIAgentTaskCommentRequest {
   agent_id: string;
   body: string;
   source_comment_id?: string;
+}
+
+/**
+ * TaskAgentParticipantCollection 타입입니다.
+ */
+export interface TaskAgentParticipantCollection {
+  agents: TaskAgentParticipantRecord[];
+}
+
+/**
+ * A persistent Agent participant, independent of execution state.
+ */
+export interface TaskAgentParticipantRecord {
+  agent_id: string;
+  is_owned_by_viewer: boolean;
+  /**
+   * At least one active execution for this participant requires stopping before removal.
+   */
+  is_stop_required: boolean;
+  name: string;
+  profile_thumbnail_url?: string;
 }
 
 /**

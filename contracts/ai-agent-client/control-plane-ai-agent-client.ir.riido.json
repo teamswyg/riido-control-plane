@@ -1378,6 +1378,63 @@
       }
     },
     {
+      "name": "TaskAgentParticipantRecord",
+      "schema": {
+        "name": "TaskAgentParticipantRecord",
+        "description": "A persistent Agent participant, independent of execution state.",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "name",
+          "is_owned_by_viewer",
+          "is_stop_required"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "format": "uri"
+          },
+          {
+            "name": "is_owned_by_viewer",
+            "type": "boolean"
+          },
+          {
+            "name": "is_stop_required",
+            "type": "boolean",
+            "description": "At least one active execution for this participant requires stopping before removal."
+          }
+        ]
+      }
+    },
+    {
+      "name": "TaskAgentParticipantCollection",
+      "schema": {
+        "name": "TaskAgentParticipantCollection",
+        "type": "object",
+        "required": [
+          "agents"
+        ],
+        "properties": [
+          {
+            "name": "agents",
+            "type": "array",
+            "items": {
+              "ref": "TaskAgentParticipantRecord"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AssignedAgentProfileMapResponse",
       "schema": {
         "name": "AssignedAgentProfileMapResponse",
@@ -1402,6 +1459,12 @@
             "type": "object",
             "description": "실제 Riido component_id/task_id 문자열을 key로 사용합니다. 예: {\"23958923859\":{\"avatar_url\":\"https://...\",\"tmp_color\":\"#C9A452\"}}",
             "additional_properties_ref": "AssignedAgentProfile"
+          },
+          {
+            "name": "task_agent_participants",
+            "type": "object",
+            "description": "Task ID keyed persistent Agent membership collections. Includes completed and stopped Agents until explicit participant removal. The legacy assigned_agent_profiles field remains active-only.",
+            "additional_properties_ref": "TaskAgentParticipantCollection"
           }
         ]
       }
@@ -2064,6 +2127,64 @@
       }
     },
     {
+      "name": "AIAgentTaskThreadAgentSnapshot",
+      "schema": {
+        "name": "AIAgentTaskThreadAgentSnapshot",
+        "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
+        "type": "object",
+        "required": [
+          "agent_id"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "owner_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string"
+          },
+          {
+            "name": "tmp_color",
+            "type": "string"
+          },
+          {
+            "name": "visibility",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_kind",
+            "ref": "RuntimeKind"
+          },
+          {
+            "name": "model_id",
+            "type": "string"
+          },
+          {
+            "name": "model_label",
+            "type": "string"
+          },
+          {
+            "name": "captured_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
       "name": "AIAgentTaskActionResponse",
       "schema": {
         "name": "AIAgentTaskActionResponse",
@@ -2461,64 +2582,6 @@
           {
             "name": "run_id",
             "type": "string"
-          }
-        ]
-      }
-    },
-    {
-      "name": "AIAgentTaskThreadAgentSnapshot",
-      "schema": {
-        "name": "AIAgentTaskThreadAgentSnapshot",
-        "description": "AI Agent task thread가 생성될 때 캡처한 agent 표시/권한 snapshot입니다. live agent가 삭제되거나 수정되어도 과거 thread read-model을 안정적으로 렌더링하기 위해 사용합니다.",
-        "type": "object",
-        "required": [
-          "agent_id"
-        ],
-        "properties": [
-          {
-            "name": "agent_id",
-            "type": "string"
-          },
-          {
-            "name": "workspace_id",
-            "type": "string"
-          },
-          {
-            "name": "owner_principal_id",
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "profile_thumbnail_url",
-            "type": "string"
-          },
-          {
-            "name": "tmp_color",
-            "type": "string"
-          },
-          {
-            "name": "visibility",
-            "ref": "AgentVisibility"
-          },
-          {
-            "name": "runtime_kind",
-            "ref": "RuntimeKind"
-          },
-          {
-            "name": "model_id",
-            "type": "string"
-          },
-          {
-            "name": "model_label",
-            "type": "string"
-          },
-          {
-            "name": "captured_at",
-            "type": "string",
-            "format": "date-time"
           }
         ]
       }
@@ -5166,6 +5229,14 @@
       "given": "the Figma runtime settings current-device daemon row is composed from a device row returned by devices.runtimes",
       "when": "the device owner opens the 내 기기 daemon detail area",
       "then": "the response is addressed by device_id and does not require the client to choose an arbitrary agent_id"
+    },
+    {
+      "scenario_id": "listAIAgentDeviceDaemons.figma-my-device-daemon-profiles",
+      "operation_id": "listAIAgentDeviceDaemons",
+      "name": "figma my device daemon profiles",
+      "given": "the runtime settings UI needs to show multiple daemon profiles for one physical device",
+      "when": "the device owner opens the 내 기기 daemon profile list",
+      "then": "the response returns every visible daemon for that device instead of collapsing to the preferred daemon"
     },
     {
       "scenario_id": "startAIAgentDeviceDaemon.figma-my-device-daemon-start",
