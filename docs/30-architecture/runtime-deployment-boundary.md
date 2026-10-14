@@ -12,7 +12,7 @@ This reader is generated from the public/private runtime deployment boundary man
 
 ## Coverage
 
-Boundaries: `6`; evidence paths: `13`; phrase checks: `24`; rules: `11`.
+Boundaries: `6`; evidence paths: `14`; phrase checks: `27`; rules: `11`.
 
 ## Boundaries
 
@@ -33,9 +33,9 @@ Boundaries: `6`; evidence paths: `13`; phrase checks: `24`; rules: `11`.
 ### runtime-artifact-cd
 
 - owner: `riido-control-plane`
-- scope: Manual or tag-triggered image-only ECS service promotion using stable environment configuration.
+- scope: Manual or tag-triggered image-only ECS service promotion using stable environment configuration. Permit a second native stability wait only while the primary rollout remains IN_PROGRESS or has just reached COMPLETED, bounded to two ten-minute windows; failed rollouts still trigger rollback. The 45-minute workflow budget retains time for rollback after an extended wait.
 - does not own: AWS topology; secret values; Terraform drift policy
-- evidence: `.github/workflows/deploy-ai-agent-testnet.yml`, `docs/30-architecture/runtime-cd-ownership.riido.json`
+- evidence: `.github/workflows/deploy-ai-agent-testnet.yml`, `tools/deploypolicy/ecs_stability_wait_test.go`, `docs/30-architecture/runtime-cd-ownership.riido.json`
 
 ### codedeploy-handoff
 

@@ -20,6 +20,35 @@
   ],
   "chains": [
     {
+      "id": "bounded_ecs_rollout_stability_wait_5818",
+      "observation": "The native ECS stability waiter expired while a scheduler replacement was recovering from an initial readiness-check rejection, causing a healthy successor to be rolled back before the full service had settled.",
+      "hypothesis": "One additional bounded stability wait for an active or just-completed primary rollout can confirm recovery without changing service configuration; failed or unknown rollout states must continue to fail closed.",
+      "claims": [
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": ".github/workflows/deploy-ai-agent-testnet.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/deploypolicy/ecs_stability_wait_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "runtime-deployment-boundary-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Permit at most two native stability waits and retain a workflow budget for rollback. Verify initial success, active recovery, completion races, terminal failure, unknown state and second-wait failure through the actual shell block and a fake AWS command. Initial readiness rejection cause remains unconfirmed; this change does not alter health checks or claim provider recovery.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "assigned_task_context_delivery_5818",
       "observation": "Assignments delivered only the current task body and parent titles; follow-ups supplied one response, so existing related documents and same-conversation messages were absent from the prompt.",
       "hypothesis": "The existing authorized component routes and persisted thread-history projection can supply bounded reference context under the original deadline without additional task permissions or arbitrary content downloads.",
