@@ -19,8 +19,19 @@ func (f *membershipSharedDynamoFixture) handle(t *testing.T, w http.ResponseWrit
 			Get            *membershipDynamoAction `json:"Get"`
 		} `json:"TransactItems"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
+	var payload json.RawMessage
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		t.Errorf("decode Dynamo payload: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if r.Header.Get("X-Amz-Target") == dynamoDBTransactWriteTarget && membershipDynamoHasEmptyCondition(payload) {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]string{"__type": "ValidationException", "message": "ConditionExpression must not be empty"})
+		return
+	}
+	if err := json.Unmarshal(payload, &p); err != nil {
+		t.Errorf("decode Dynamo actions: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
