@@ -56,6 +56,9 @@ func (s *PersistentAIAgentClientStore) mutateTaskAgentMembership(ctx context.Con
 			s.mu.Unlock()
 		}
 		mutation := taskAgentMembershipSnapshotMutation{scope: taskAgentGenerationScope{taskID: taskID, agentID: agentID, generation: generation}, baseline: baseline}
+		if publication && publicationGeneration != "" {
+			mutation.publicationAssignmentID = response.AssignmentID
+		}
 		err = s.saveSnapshot(withTaskAgentSnapshotMutation(ctx, mutation))
 		if err == nil {
 			return response, nil

@@ -18,6 +18,11 @@ func (f *membershipSharedDynamoFixture) condition(t *testing.T, p *membershipDyn
 		return true
 	case "attribute_not_exists(pk) AND attribute_not_exists(sk)", "attribute_not_exists(pk)":
 		return previous == nil
+	case "attribute_exists(pk) AND attribute_exists(sk)":
+		return previous != nil
+	case "attribute_not_exists(publication_committed)":
+		_, exists := previous["publication_committed"]
+		return !exists
 	case "attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq":
 		old, _ := strconv.ParseInt(previous["last_event_seq"]["N"], 10, 64)
 		next, _ := strconv.ParseInt(p.ExpressionAttributeValues[":last_event_seq"]["N"], 10, 64)

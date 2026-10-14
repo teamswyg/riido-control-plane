@@ -9,8 +9,9 @@ type taskAgentGenerationScope struct {
 }
 
 type taskAgentMembershipSnapshotMutation struct {
-	scope    taskAgentGenerationScope
-	baseline AIAgentTaskMembership
+	scope                   taskAgentGenerationScope
+	baseline                AIAgentTaskMembership
+	publicationAssignmentID string
 }
 
 type taskAgentSnapshotContextKey struct{}

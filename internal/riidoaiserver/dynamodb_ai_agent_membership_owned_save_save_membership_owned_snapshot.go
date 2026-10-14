@@ -102,6 +102,15 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 			}
 			actions = append(actions, dynamoDBTransactWriteItem{Put: put})
 		}
+		if scoped {
+			receipt, err := s.publicationReceiptAction(ctx, mutation, credentials)
+			if err != nil {
+				return stats, encoded, err
+			}
+			if receipt != nil {
+				actions = append(actions, *receipt)
+			}
+		}
 		payload, err := json.Marshal(struct{ TransactItems []dynamoDBTransactWriteItem }{actions})
 		if err != nil {
 			return stats, encoded, err

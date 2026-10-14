@@ -37,7 +37,11 @@ func (f *membershipSharedDynamoFixture) handle(t *testing.T, w http.ResponseWrit
 	}
 	f.mu.Lock()
 	receiptHook, ownedReadHook, recoveryHook := f.beforeReceiptQuery, f.beforeOwnedSnapshotRead, f.beforePublicationRecovery
+	generationHook := f.beforeGenerationRead
 	f.mu.Unlock()
+	if r.Header.Get("X-Amz-Target") == dynamoDBGetItemTarget && p.Key["sk"]["S"] == taskAgentGenerationSK && generationHook != nil {
+		generationHook()
+	}
 	if r.Header.Get("X-Amz-Target") == dynamoDBQueryTarget && p.ExpressionAttributeValues[":exec"]["S"] != "" && receiptHook != nil {
 		receiptHook()
 	}

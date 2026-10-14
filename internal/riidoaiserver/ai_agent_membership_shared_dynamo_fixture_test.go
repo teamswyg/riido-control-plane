@@ -15,6 +15,7 @@ type membershipSharedDynamoFixture struct {
 	server                    *httptest.Server
 	beforeScopedCommit        func(AIAgentClientSnapshot)
 	beforeReceiptQuery        func()
+	beforeGenerationRead      func()
 	beforeOwnedSnapshotRead   func()
 	rejectScopedPublication   bool
 	ambiguousScopedCommit     bool

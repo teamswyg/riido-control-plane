@@ -7,11 +7,16 @@ import (
 )
 
 func (s *DynamoDBAssignmentOperationStore) recoverFailedTaskAgentPublicationAttempt(ctx context.Context, assignment Assignment, minimumEventSeq int64, credentials AWSCredentials) (*taskAgentPublicationRecoveryResult, error) {
-	marker, found, err := s.getTaskAgentItem(ctx, taskAgentDynamoKey(assignment.TaskID, assignment.AgentID, taskAgentGenerationSK), credentials)
-	if err != nil || !found {
+	marker, _, err := s.getTaskAgentItem(ctx, taskAgentDynamoKey(assignment.TaskID, assignment.AgentID, taskAgentGenerationSK), credentials)
+	if err != nil {
 		return nil, err
 	}
-	if dynamoDBStringValue(marker, "generation") != taskAgentAssignmentGeneration(assignment) {
+	observedGeneration := dynamoDBStringValue(marker, "generation")
+	receipt, _, err := s.getTaskAgentItem(ctx, taskAgentDynamoKey(assignment.TaskID, assignment.AgentID, taskAgentExecutionReceiptSK(assignment)), credentials)
+	if err != nil {
+		return nil, err
+	}
+	if dynamoDBStringValue(receipt, "publication_committed") == "true" {
 		return nil, nil
 	}
 	member, memberHash, err := s.readPublicationMembershipBaseline(ctx, assignment, credentials)
@@ -31,7 +36,7 @@ func (s *DynamoDBAssignmentOperationStore) recoverFailedTaskAgentPublicationAtte
 		return result, nil
 	}
 	operation := failedPublicationCancellation(projection, minimumEventSeq, s.now())
-	actions, err := s.publicationRecoveryActions(assignment, member, memberHash, projection, operation)
+	actions, err := s.publicationRecoveryActions(assignment, member, memberHash, observedGeneration, projection, operation)
 	if err != nil {
 		return nil, err
 	}

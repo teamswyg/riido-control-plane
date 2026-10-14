@@ -74,6 +74,14 @@ func checkMembershipFailedOlderPublication(t *testing.T, state string) {
 	if latest == older.ID || latest == "" {
 		t.Fatalf("failed older publication replaced latest identity: latest=%q older=%q", latest, older.ID)
 	}
+	failed, found, loadErr := storeA.operationStore.(AssignmentProjectionReader).LoadAssignmentProjection(ctx, older.ID)
+	wantFailed := AssignmentCancelled
+	if state == "running" {
+		wantFailed = AssignmentCancelling
+	}
+	if loadErr != nil || !found || failed.Assignment.State != wantFailed {
+		t.Fatalf("failed older publication remained runnable before explicit removal: %+v err=%v", failed, loadErr)
+	}
 	removed := serveUnassignTaskBoundary(remover, base+"/tasks/"+taskID+"/agent-assignments/"+agentID, token, `{"assignment_id":"`+latest+`"}`)
 	if removed.Code != http.StatusAccepted {
 		t.Fatalf("remove=%d %s", removed.Code, removed.Body.String())
