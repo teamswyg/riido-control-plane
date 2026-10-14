@@ -1,0 +1,74 @@
+{
+  "schema_version": "riido-agent-task-context.v1",
+  "id": "agent-task-context",
+  "riido_task": "RIID-5818",
+  "reader_doc": "docs/30-architecture/agent-task-context.md",
+  "owning_code": [
+    "internal/riidoaiserver/ai_agent_task_context_types.go",
+    "internal/riidoaiserver/ai_agent_assignment_prompt.go",
+    "internal/riidoaiserver/ai_agent_task_context_client.go",
+    "internal/riidoaiserver/server_thread_message_assignment.go",
+    "internal/riidoaiserver/server_thread_message_prompt.go",
+    "internal/riidoaiserver/task_context_enrichment.go",
+    "internal/riidoaiserver/task_context_html.go",
+    "internal/riidoaiserver/task_context_html_format.go",
+    "internal/riidoaiserver/task_context_message_text.go",
+    "internal/riidoaiserver/task_context_parent_hierarchy.go",
+    "internal/riidoaiserver/task_context_parent_prompt.go",
+    "internal/riidoaiserver/task_context_parent_read.go",
+    "internal/riidoaiserver/task_context_resource_prompt.go",
+    "internal/riidoaiserver/task_context_resource_read.go",
+    "internal/riidoaiserver/task_context_resources.go",
+    "internal/riidoaiserver/task_context_text.go",
+    "internal/riidoaiserver/task_conversation_context.go",
+    "internal/riidoaiserver/task_conversation_messages.go",
+    "internal/riidoaiserver/task_conversation_selection.go",
+    "internal/riidoaiserver/task_context_document_source.go"
+  ],
+  "policy": {
+    "identity": "same task/agent/conversation; latest directive authoritative",
+    "parent_scope": "only authorized hierarchy references, same bearer/team, shared request deadline; no recursive project sweep",
+    "source_budget": {
+      "parents": 3,
+      "task_document_runes": 12000,
+      "parent_document_runes": 2500,
+      "recent_messages": 8,
+      "conversation_runes": 6000,
+      "resource_items_per_kind": 8
+    },
+    "resource_semantics": "metadata only, contents not downloaded; unsafe URL credentials omitted; unavailable/incomplete marked",
+    "format": "readable HTML-to-text; valid Unicode; head/tail truncation marked",
+    "followup_reads": "one canonical history read, no additional legacy thread-list read",
+    "permissions": "no caller permission widening or anonymous fallback",
+    "freshness": "fresh provider document when available; component fallback explicitly unconfirmed; no atomic cross-document claim"
+  },
+  "verification": {
+    "synthetic_only": true,
+    "tests": [
+      "TestTaskContextRichTextRetainsEvidenceWithoutExecutableMarkup",
+      "TestTaskContextBudgetPreservesRequirementAtEndAndValidUnicode",
+      "TestParentContextDoesNotChangeTaskIntentOrMetadata",
+      "TestTaskContextEnrichmentUsesAuthorizedParentsAndResourceMetadataOnly",
+      "TestParentContextRejectsMismatchedIdentityAndHonorsDeadline",
+      "TestFollowupUsesOnlySelectedConversationAndLatestDirective",
+      "TestFollowupBudgetKeepsRecentHistoryAndRejectsCrossTaskSelection",
+      "TestTaskContextManifestBudgetsMatchRuntime",
+      "TestTaskContextResourceIdentityAndIncompleteURLsStayExplicit",
+      "TestTaskContextFallbackDocumentDoesNotClaimFreshness"
+    ]
+  },
+  "limits": [
+    "does not guarantee model comprehension or semantic completion",
+    "no automatic provider recovery",
+    "no frontend changes or deployment",
+    "attachment and linked document bodies are not fetched by the server"
+  ],
+  "evidence_tool": "tools/knowledgecoverage",
+  "loop": {
+    "observation": "Assignments carried parent titles and one previous message but not bounded parent documents or conversation evidence.",
+    "hypothesis": "Readable, scoped, bounded context can preserve the task goal while keeping the latest user directive authoritative.",
+    "execute": "Run synthetic task-context, permission/deadline, conversation-isolation and provider-placement regressions; verify this direct SSOT through knowledgecoverage in CI.",
+    "evaluate": "Test success, context budgets, resource metadata-only semantics, authorization identity and generated knowledge coverage must pass; live model comprehension is not inferred.",
+    "retrospective": "Keep inaccessible/truncated inputs explicit and preserve native session/workspace authority; expand context only from authorized references."
+  }
+}

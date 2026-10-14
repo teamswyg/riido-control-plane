@@ -18,49 +18,6 @@ const (
 		"and ask for missing repository or product context before making code changes."
 )
 
-type AIAgentTaskContext struct {
-	SchemaVersion string                         `json:"schema_version,omitempty"`
-	Component     AIAgentTaskContextComponent    `json:"component"`
-	Document      AIAgentTaskContextDocument     `json:"document"`
-	Hierarchy     AIAgentTaskContextHierarchy    `json:"hierarchy"`
-	Repositories  []AIAgentTaskContextRepository `json:"repositories"`
-}
-
-type AIAgentTaskContextComponent struct {
-	ID            string `json:"id"`
-	ComponentType string `json:"componentType,omitempty"`
-	Title         string `json:"title"`
-	KeyNumber     string `json:"keyNumber,omitempty"`
-	BranchName    string `json:"branchName,omitempty"`
-}
-
-type AIAgentTaskContextDocument struct {
-	ID               string `json:"id,omitempty"`
-	TiptapDocumentID string `json:"tiptapDocumentId,omitempty"`
-	Content          string `json:"content"`
-	ContentFormat    string `json:"contentFormat,omitempty"`
-}
-
-type AIAgentTaskContextHierarchy struct {
-	Project    AIAgentTaskContextReference `json:"project,omitempty"`
-	Milestone  AIAgentTaskContextReference `json:"milestone,omitempty"`
-	ParentTask AIAgentTaskContextReference `json:"parentTask,omitempty"`
-}
-
-type AIAgentTaskContextReference struct {
-	ID        string `json:"id,omitempty"`
-	Title     string `json:"title,omitempty"`
-	KeyNumber string `json:"keyNumber,omitempty"`
-}
-
-type AIAgentTaskContextRepository struct {
-	ID            string `json:"id,omitempty"`
-	FullName      string `json:"fullName,omitempty"`
-	IsPrivate     bool   `json:"isPrivate,omitempty"`
-	RepositoryURL string `json:"repositoryUrl,omitempty"`
-	Source        string `json:"source,omitempty"`
-}
-
 type AIAgentAssignmentPromptInput struct {
 	TaskID  string
 	Context AIAgentTaskContext
@@ -99,17 +56,14 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	builder.WriteString("Use this immutable assignment snapshot as the runtime task context.\n")
 	builder.WriteString("Provider-specific instruction placement is owned by riido-daemon.\n\n")
 
-	writePromptInteractionPolicy(&builder)
-	writePromptTaskInterpretation(&builder, component, document, intentClass)
-
 	builder.WriteString("## Task\n")
+	writePromptLine(&builder, "title", component.Title)
 	writePromptLine(&builder, "task_id", taskID)
 	writePromptLine(&builder, "component_id", component.ID)
 	writePromptLine(&builder, "component_type", component.ComponentType)
 	if component.KeyNumber != "" {
 		writePromptLine(&builder, "key_number", component.KeyNumber)
 	}
-	writePromptLine(&builder, "title", component.Title)
 	writePromptLine(&builder, "branch_name", component.BranchName)
 	builder.WriteString("\n")
 
@@ -130,6 +84,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	builder.WriteString("\n")
 
 	builder.WriteString("## Document\n")
+	writeTaskContextDocumentSource(&builder, document)
 	if document.ContentFormat != "" {
 		writePromptLine(&builder, "content_format", document.ContentFormat)
 		builder.WriteString("\n")
@@ -142,6 +97,10 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	if !strings.HasSuffix(builder.String(), "\n") {
 		builder.WriteString("\n")
 	}
+	writeParentTaskContextDocuments(&builder, hierarchy)
+	writeTaskContextResources(&builder, input.Context.Resources, input.Context.ResourceStatus, 2500)
+	writePromptTaskInterpretation(&builder, component, document, intentClass)
+	writePromptInteractionPolicy(&builder)
 
 	return AIAgentAssignmentPrompt{
 		Prompt:             builder.String(),
@@ -233,8 +192,11 @@ func normalizeAIAgentTaskContextComponent(component AIAgentTaskContextComponent)
 func normalizeAIAgentTaskContextDocument(document AIAgentTaskContextDocument) AIAgentTaskContextDocument {
 	document.ID = strings.TrimSpace(document.ID)
 	document.TiptapDocumentID = strings.TrimSpace(document.TiptapDocumentID)
-	document.Content = strings.TrimSpace(document.Content)
+	document.Content = taskContextText(document.Content, document.ContentFormat, taskDocumentContextLimit)
 	document.ContentFormat = strings.TrimSpace(document.ContentFormat)
+	if strings.EqualFold(document.ContentFormat, "html") {
+		document.ContentFormat = "markdown"
+	}
 	return document
 }
 
@@ -249,11 +211,17 @@ func normalizeAIAgentTaskContextReference(reference AIAgentTaskContextReference)
 	reference.ID = strings.TrimSpace(reference.ID)
 	reference.Title = strings.TrimSpace(reference.Title)
 	reference.KeyNumber = strings.TrimSpace(reference.KeyNumber)
+	if reference.Document != nil {
+		document := *reference.Document
+		document.Content = taskContextText(document.Content, document.ContentFormat, parentDocumentContextLimit)
+		document.ContentFormat = "markdown"
+		reference.Document = &document
+	}
 	return reference
 }
 
 func writePromptLine(builder *strings.Builder, key, value string) {
-	value = strings.TrimSpace(value)
+	value = strings.Join(strings.Fields(value), " ")
 	if value == "" {
 		value = taskContextPromptFallbackNotProvided
 	}
