@@ -15,23 +15,84 @@ func (s Server) prepareAIAgentMembershipRemoval(ctx context.Context, principal A
 		return nil, nil
 	}
 	taskID, agentID, assignmentID = strings.TrimSpace(taskID), strings.TrimSpace(agentID), strings.TrimSpace(assignmentID)
-	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
+	var threads AIAgentTaskThreadCollectionResponse
+	var observation *taskAgentMembershipRemovalFence
+	var err error
+	if reader, ok := s.aiAgent.(taskAgentMembershipObservationReader); ok {
+		threads, observation, err = reader.observeTaskAgentMembershipRemoval(ctx, principal, taskID, agentID)
+	} else {
+		threads, err = s.aiAgent.ListAIAgentTaskThreads(ctx, principal, taskID)
+	}
 	if err != nil {
 		return nil, err
 	}
-	targets, found, err := assignmentActionTargetsFromThreads(taskID, agentID, assignmentID, threads.Threads)
+	selector := assignmentID
+	if observation != nil && observation.durableGeneration != "" && isIntentGateAssignmentID(assignmentID) && observation.intentGateAssignmentID != assignmentID {
+		return nil, ErrAIAgentMembershipChanged
+	}
+	if observation != nil && observation.durableGeneration != "" && !isIntentGateAssignmentID(assignmentID) {
+		if assignmentID != "" && strings.SplitN(observation.durableGeneration, "@", 2)[0] != assignmentID {
+			return nil, ErrAIAgentMembershipChanged
+		}
+		selector = ""
+	}
+	targets, found, err := assignmentActionTargetsFromThreads(taskID, agentID, selector, threads.Threads)
 	if err != nil {
 		return nil, err
 	}
 	if agentID == "" && found {
 		agentID = targets[0].AgentID
 	}
-	if err := validateMembershipRemovalAssignment(agentID, assignmentID, threads.Threads); err != nil {
+	if err := validateMembershipRemovalAssignment(agentID, selector, threads.Threads); err != nil {
 		return nil, err
 	}
-	observation := observeTaskAgentMembershipRemoval(taskID, agentID, threads.Threads)
+	if observation == nil {
+		observation = observeTaskAgentMembershipRemoval(taskID, agentID, threads.Threads)
+	} else if observation.agentID != agentID {
+		reader := s.aiAgent.(taskAgentMembershipObservationReader)
+		threads, observation, err = reader.observeTaskAgentMembershipRemoval(ctx, principal, taskID, agentID)
+		if err != nil {
+			return nil, err
+		}
+	}
 	// The observed ID guards membership removal; cancellation covers this member.
 	targets = membershipRemovalActiveTargets(taskID, agentID, threads.Threads)
+	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() {
+		reader := s.assignment.(taskAgentDurableExecutionReader)
+		generation, active, err := reader.loadTaskAgentDurableExecutions(ctx, taskID, agentID)
+		if err != nil {
+			return nil, err
+		}
+		if generation != observation.durableGeneration || (assignmentID != "" && !isIntentGateAssignmentID(assignmentID) && generation != "" && strings.SplitN(generation, "@", 2)[0] != assignmentID) {
+			return nil, ErrAIAgentMembershipChanged
+		}
+		legacy, err := s.assignment.(interface {
+			loadLegacyTaskAgentDurableExecutions(context.Context, string, string) ([]AssignmentProjection, error)
+		}).loadLegacyTaskAgentDurableExecutions(ctx, taskID, agentID)
+		if err != nil {
+			return nil, err
+		}
+		active = append(active, legacy...)
+		readerProjection := s.assignment.(AssignmentProjectionReader)
+		for _, target := range targets {
+			projection, found, err := readerProjection.LoadAssignmentProjection(ctx, target.AssignmentID)
+			if err != nil {
+				return nil, err
+			}
+			if found && projection.Assignment.TaskID == taskID && projection.Assignment.AgentID == agentID && !isTerminal(projection.Assignment.State) {
+				active = append(active, projection)
+			}
+		}
+		targets = nil
+		seen := map[string]bool{}
+		for _, projection := range active {
+			if seen[projection.Assignment.ID] {
+				continue
+			}
+			seen[projection.Assignment.ID] = true
+			targets = append(targets, aiAgentAssignmentActionTarget{TaskID: taskID, AgentID: agentID, AssignmentID: projection.Assignment.ID, State: projection.Assignment.State, durableProjection: &projection})
+		}
+	}
 	if len(targets) > 0 {
 		if _, _, err := s.cancelAIAgentAssignmentTargets(ctx, targets, reason); err != nil {
 			return nil, err

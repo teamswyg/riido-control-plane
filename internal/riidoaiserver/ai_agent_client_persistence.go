@@ -169,6 +169,7 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	}
 	snapshot.ExpectedVersion = s.version
 	snapshot.Version = s.version + 1
+	ctx = context.WithValue(ctx, taskAgentPreserveMembershipContextKey{}, true)
 	if err := s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot); err != nil {
 		return err
 	}

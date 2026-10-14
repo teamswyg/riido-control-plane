@@ -3,9 +3,11 @@ package riidoaiserver
 // This private observation fences membership removal, not execution capacity.
 // An empty latestThreadID explicitly observes the absence of retained history.
 type taskAgentMembershipRemovalFence struct {
-	taskID         string
-	agentID        string
-	latestThreadID string
+	taskID                 string
+	agentID                string
+	latestThreadID         string
+	durableGeneration      string
+	intentGateAssignmentID string
 }
 
 func observeTaskAgentMembershipRemoval(taskID, agentID string, threads []AIAgentTaskThreadRecord) *taskAgentMembershipRemovalFence {
@@ -24,6 +26,8 @@ func validateTaskAgentMembershipRemovalObservation(taskID, agentID string, expec
 		return nil
 	}
 	current := observeTaskAgentMembershipRemoval(taskID, agentID, threads)
+	current.durableGeneration = expected.durableGeneration
+	current.intentGateAssignmentID = expected.intentGateAssignmentID
 	if *current != *expected {
 		return ErrAIAgentMembershipChanged
 	}

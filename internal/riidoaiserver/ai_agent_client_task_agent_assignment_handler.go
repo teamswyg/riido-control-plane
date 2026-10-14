@@ -49,14 +49,19 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		return
 	}
 	assignmentReq := composedReq.Request
-	assignment, err := s.assignment.AssignTaskAdditive(r.Context(), taskID, assignmentReq)
+	creationContext, creationReceipt := withTaskAgentCreationReceipt(r.Context())
+	assignment, err := s.assignment.AssignTaskAdditive(creationContext, taskID, assignmentReq)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
 	req.AssignmentID, req.durableState = assignment.ID, assignmentClientResponseDurableState(assignment)
+	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() && assignmentSequence(assignment.ID) == 0 {
+		req.membershipPublicationGeneration = taskAgentAssignmentGeneration(assignment)
+	}
 	response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
 	if err != nil {
+		s.recoverTaskAgentPublication(r.Context(), assignment, creationReceipt)
 		writeAIAgentClientError(w, err)
 		return
 	}

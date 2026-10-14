@@ -13,25 +13,26 @@ func (s *Store) saveSnapshot(state *storeState) error {
 	return s.snapshotStore.SaveStoreSnapshot(context.Background(), snapshotFromState(state, s.now()))
 }
 
-func (s *Store) saveOperation(state *storeState, operationType AssignmentOperationType, assignment Assignment, events []TaskEvent) error {
+func (s *Store) saveOperation(state *storeState, operationType AssignmentOperationType, assignment Assignment, events []TaskEvent, createsExecution ...bool) error {
 	if s.operationStore == nil || len(events) == 0 {
 		return nil
 	}
 	recordedAt := s.now()
 	return s.operationStore.SaveAssignmentOperation(context.Background(), AssignmentOperationRecord{
-		SchemaVersion: AssignmentOperationSchemaVersion,
-		OperationID:   assignmentOperationID(operationType, assignment, events),
-		OperationType: operationType,
-		TaskID:        assignment.TaskID,
-		AssignmentID:  assignment.ID,
-		AgentID:       assignment.AgentID,
-		Assignment:    assignment,
-		Events:        append([]TaskEvent(nil), events...),
-		RecordedAt:    recordedAt,
+		createsExecution: len(createsExecution) > 0 && createsExecution[0],
+		SchemaVersion:    AssignmentOperationSchemaVersion,
+		OperationID:      assignmentOperationID(operationType, assignment, events),
+		OperationType:    operationType,
+		TaskID:           assignment.TaskID,
+		AssignmentID:     assignment.ID,
+		AgentID:          assignment.AgentID,
+		Assignment:       assignment,
+		Events:           append([]TaskEvent(nil), events...),
+		RecordedAt:       recordedAt,
 	})
 }
 
-func (s *Store) saveAssignmentMutationOperations(state *storeState, primaryType AssignmentOperationType, primary Assignment, events []TaskEvent) error {
+func (s *Store) saveAssignmentMutationOperations(state *storeState, primaryType AssignmentOperationType, primary Assignment, events []TaskEvent, createsExecution ...bool) error {
 	if len(events) == 0 {
 		return nil
 	}
@@ -57,7 +58,8 @@ func (s *Store) saveAssignmentMutationOperations(state *storeState, primaryType 
 			operationType = primaryType
 			assignment = primary
 		}
-		if err := s.saveOperation(state, operationType, assignment, eventsByAssignment[assignmentID]); err != nil {
+		created := assignmentID == primary.ID && len(createsExecution) > 0 && createsExecution[0]
+		if err := s.saveOperation(state, operationType, assignment, eventsByAssignment[assignmentID], created); err != nil {
 			return err
 		}
 	}
