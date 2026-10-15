@@ -6,7 +6,7 @@ import (
 )
 
 func sameTaskAgentCreation(a, b Assignment) bool {
-	return a.ID == b.ID && a.TaskID == b.TaskID && a.AgentID == b.AgentID && a.CreatedAt.Equal(b.CreatedAt)
+	return a.ID == b.ID && a.TaskID == b.TaskID && a.AgentID == b.AgentID && a.CreatedAt.Equal(b.CreatedAt) && sameRecoveryPolicy(a.RecoveryPolicy, b.RecoveryPolicy)
 }
 
 func (s *DynamoDBAssignmentOperationStore) getTaskAgentItem(ctx context.Context, key map[string]map[string]string, credentials AWSCredentials) (map[string]map[string]string, bool, error) {

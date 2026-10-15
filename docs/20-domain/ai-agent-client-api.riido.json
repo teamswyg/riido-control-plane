@@ -86,7 +86,12 @@
       "RIID-5829 desktop task notifications: 최초 연결 및 재연결은 live-only다. SSE 연결이 끊긴 구간은 과거 알림으로 재생하지 않으며 현재 실행 상태는 작업 상세 재조회로 확인한다. 프로세스 완전 종료 원격 푸시는 범위 밖이다.",
       "RIID-5829 desktop task notifications: 같은 상태/사유의 재전송과 종료 뒤 늦은 이벤트는 추가 알림을 만들지 않는다. Assignment 저장 이후 알림 투영이 실패해 재시도하더라도 이미 저장한 event ID를 재사용한다. 클라이언트는 사용자·워크스페이스별 event ID를 최대 512개 보존하고 Electron은 창 사이 중복을 막는다.",
       "RIID-5829 desktop task notifications: 클릭은 발신 webview의 같은 origin에서 /workspace/teams/team/tasks/task로 이동하고 소유 창을 복원한다. 이전 생산자가 team_id를 제공하지 않으면 현재 작업 메타데이터에서 같은 workspace/task임을 확인한 후 경로를 구성한다. 이동 시 기존 인증·권한 가드가 다시 적용된다.",
-      "RIID-5829 notification multiplex: GET /v1/client/ai-agent/events?notifications=1&workspace_id=<id>&workspace_id=<id> accepts 1–100 workspace entries, deduplicates IDs, authorizes every workspace to the same principal before subscribing, and emits only live agent_task_notification events over one HTTP connection. Current task access is rechecked per delivery; replay and unrelated client events are excluded. Cancelling the request or closing an underlying subscription releases all subscriptions. Existing workspace event routes remain compatible. This avoids HTTP/1 per-origin connection starvation for accounts with many workspaces."
+      "RIID-5829 notification multiplex: GET /v1/client/ai-agent/events?notifications=1&workspace_id=<id>&workspace_id=<id> accepts 1–100 workspace entries, deduplicates IDs, authorizes every workspace to the same principal before subscribing, and emits only live agent_task_notification events over one HTTP connection. Current task access is rechecked per delivery; replay and unrelated client events are excluded. Cancelling the request or closing an underlying subscription releases all subscriptions. Existing workspace event routes remain compatible. This avoids HTTP/1 per-origin connection starvation for accounts with many workspaces.",
+      "RIID-5823 recovery_policy is optional and finite; explicit fallback candidates require same requester/Agent/device owner, same daemon, exact model inventory, healthy confirmed diagnostics and existing experimental permission",
+      "Recovery policy is immutable for a RequestID and copied independently through assignment, durable projection, snapshot and poll responses; generic component-task assignment cannot authorize fallback providers",
+      "Recovery observations use existing riido_log events with bounded RecoveryContext metadata, active assignment/device/runtime/lease and assignment_event_key fences; cancelled or terminal runs cannot grant a new checking attempt",
+      "Lease tokens authenticate a recovery event before deduplication; recovery journals retain only bounded context and event key, without tokens, raw messages or unrelated metadata, and never overwrite assignment state",
+      "Provider recovery logs and OTel spans are emitted once after conditional durable commit; replay and failed/conflicting speculative writes do not emit a committed recovery transition; a private CAS-preserved watermark holds at most sixteen hashed receipts across replicas, preserves exact replay ACK identity, and only rechecks the selected candidate for new checking/switching dispatch approval; committed execution failures add a fixed-message ERROR child span for tail retention, excluding cancellation and needs_input, and its riido.assignment.provider is the original lease provider rather than an inferred fallback provider"
     ]
   },
   "thread_history_v3_frontend": {
@@ -368,7 +373,9 @@
       "Live progress may be dropped under subscriber backpressure, but a terminal agent_thread_progress event must be prioritized over buffered progress and replay-compensated from a recent durable terminal thread when absent.",
       "SSE open, close reason, fan-out overflow, and terminal replay compensation must be emitted as structured control-plane logs without credentials or message bodies.",
       "Do not revive a terminal assignment when a late runtime progress event arrives.",
-      "If v3 thread history has no active_stream, the client must not keep a local running spinner for that task."
+      "If v3 thread history has no active_stream, the client must not keep a local running spinner for that task.",
+      "SSE lifecycle logs contain only a route template, bounded close/error categories and valid OTel trace_id/span_id. Raw URL paths, arbitrary errors, credentials, host paths and customer content must never be emitted.",
+      "Terminal SSE delivery logs use bounded phase/state, opaque SHA256 references and valid current OTel correlation when a request context exists; asynchronous fanout must not fabricate trace context."
     ],
     "terminal_states": [
       "completed",
@@ -743,6 +750,70 @@
         "Verify React Query generation drift",
         "Verify generated client handoff",
         "Verify React Query generator command"
+      ]
+    },
+    {
+      "name": "provider-recovery-policy",
+      "file": "internal/riidoaiserver/provider_recovery_policy.go",
+      "contains": [
+        "authorizeRecoveryPolicy",
+        "sameRecoveryPolicy",
+        "fallback provider model is not authorized"
+      ]
+    },
+    {
+      "name": "provider-recovery-policy-test",
+      "file": "internal/riidoaiserver/provider_recovery_policy_test.go",
+      "contains": [
+        "TestRecoveryPolicyRequiresOwnedSameDeviceHealthyModelInventory"
+      ]
+    },
+    {
+      "name": "provider-recovery-event",
+      "file": "internal/riidoaiserver/provider_recovery_event.go",
+      "contains": [
+        "validateRecoveryEvent",
+        "SanitizeRecoveryMetadata",
+        "req.Metadata = metadata"
+      ]
+    },
+    {
+      "name": "provider-recovery-event-test",
+      "file": "internal/riidoaiserver/provider_recovery_event_test.go",
+      "contains": [
+        "TestRecoveryEventFencedSanitizedPersistedAndObservedOnce"
+      ]
+    },
+    {
+      "name": "provider-recovery-observation",
+      "file": "internal/riidoaiserver/provider_recovery_observation.go",
+      "contains": [
+        "provider_recovery_transition",
+        "traceCorrelationFromContext",
+        "provider recovery transition"
+      ]
+    },
+    {
+      "name": "sse-latency-category-test",
+      "file": "internal/riidoaiserver/http_transaction_metrics_stream_test.go",
+      "contains": [
+        "TestHTTPStreamLifetimeDoesNotInflateRequestLatency",
+        "TestHTTPMiddlewareClassifiesSSEFromResponseContentType"
+      ]
+    },
+    {
+      "name": "provider-recovery-policy-storage-test",
+      "file": "internal/riidoaiserver/provider_recovery_policy_storage_test.go",
+      "contains": [
+        "TestRecoveryPolicyPersistedCopiedAndRequestCannotChangeAuthority"
+      ]
+    },
+    {
+      "name": "provider-recovery-event-fence-test",
+      "file": "internal/riidoaiserver/provider_recovery_event_fence_test.go",
+      "contains": [
+        "TestRecoveryEventRejectsMissingLeaseUnauthorizedSwitchAndInvalidState",
+        "TestRecoveryPhaseDoesNotProjectIntoAnotherTaskRun"
       ]
     }
   ],

@@ -36,7 +36,7 @@ Executable SSOT: [`assignment-operation-journal.riido.json`](assignment-operatio
 | Name | Role |
 | --- | --- |
 | `AssignmentOperationRecord` | append-only mutation plus emitted task events |
-| `AssignmentProjection` | durable assignment read projection |
+| `AssignmentProjection` | durable assignment read projection with private bounded recovery receipts; receipts are CAS-preserved and never appear in public Assignment JSON |
 | `AssignmentActiveLease` | active assignment lease snapshot |
 | `AssignmentClaimResult` | claim outcome plus operation evidence |
 

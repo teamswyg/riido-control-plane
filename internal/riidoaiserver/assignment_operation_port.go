@@ -53,6 +53,7 @@ type AssignmentProjectionReader interface {
 type AssignmentProjection struct {
 	Assignment   Assignment
 	LastEventSeq int64
+	Recovery     *recoveryWatermark `json:"-"`
 }
 
 type AssignmentActiveLease struct {

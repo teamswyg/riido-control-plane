@@ -18,7 +18,7 @@ func (s *Store) AssignTask(ctx context.Context, taskID string, req AssignRequest
 	}
 	select {
 	case res := <-reply:
-		return res.assignment, res.err
+		return *copyAssignment(res.assignment), res.err
 	case <-ctx.Done():
 		return Assignment{}, ctx.Err()
 	}
@@ -38,7 +38,7 @@ func (s *Store) AssignTaskReplacement(ctx context.Context, taskID string, req As
 	}
 	select {
 	case res := <-reply:
-		return res.assignment, res.err
+		return *copyAssignment(res.assignment), res.err
 	case <-ctx.Done():
 		return Assignment{}, ctx.Err()
 	}
@@ -58,7 +58,7 @@ func (s *Store) AssignTaskAdditive(ctx context.Context, taskID string, req Assig
 	}
 	select {
 	case res := <-reply:
-		return res.assignment, res.err
+		return *copyAssignment(res.assignment), res.err
 	case <-ctx.Done():
 		return Assignment{}, ctx.Err()
 	}

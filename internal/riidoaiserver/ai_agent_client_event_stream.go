@@ -17,7 +17,7 @@ func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, event
 			logAIAgentClientStreamClose(r, "replay_write_error", err)
 			return
 		}
-		logAIAgentClientTerminalDelivery("replay_written", event, aiAgentWorkspaceIDFromRequest(r))
+		logAIAgentClientTerminalDelivery("replay_written", event, aiAgentWorkspaceIDFromRequest(r), r.Context())
 	}
 	flushAIAgentClientStream(w)
 	if r.URL.Query().Get("replay") == "1" {
@@ -50,7 +50,7 @@ func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live 
 				logAIAgentClientStreamClose(r, "event_write_error", err)
 				return
 			}
-			logAIAgentClientTerminalDelivery("live_written", event, aiAgentWorkspaceIDFromRequest(r))
+			logAIAgentClientTerminalDelivery("live_written", event, aiAgentWorkspaceIDFromRequest(r), r.Context())
 			flushAIAgentClientStream(w)
 		case <-keepalive.C:
 			if _, err := io.WriteString(w, ": keepalive\n\n"); err != nil {

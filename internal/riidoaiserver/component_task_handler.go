@@ -35,6 +35,14 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if req.RecoveryPolicy != nil {
+		normalized, err := normalizedRecoveryPolicy(req.RecoveryPolicy)
+		if err != nil || len(normalized.Fallbacks) != 0 {
+			writeError(w, http.StatusBadRequest, "cross-provider recovery requires a scoped task assignment")
+			return
+		}
+		req.RecoveryPolicy = normalized
+	}
 	req.CreatedBy = principal.PrincipalID
 	req.WorkspaceID = principal.WorkspaceID
 	if strings.TrimSpace(req.Prompt) == "" && s.taskContext != nil {

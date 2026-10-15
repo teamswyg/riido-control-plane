@@ -6,6 +6,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/teamswyg/riido-contracts/assignment"
 	"github.com/teamswyg/riido-contracts/provider/capability"
 )
 
@@ -18,6 +19,14 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	req.AgentInstruction = strings.TrimSpace(req.AgentInstruction)
 	req.ResumeSessionID = strings.TrimSpace(req.ResumeSessionID)
 	req.Worktree = normalizeAssignmentWorktree(req.Worktree)
+	policy, policyErr := normalizedRecoveryPolicy(req.RecoveryPolicy)
+	if policyErr != nil {
+		return Assignment{}, policyErr
+	}
+	req.RecoveryPolicy = policy
+	if req.ResumeSessionID != "" && policy != nil && len(policy.Fallbacks) != 0 {
+		return Assignment{}, errors.New("provider recovery switch is forbidden for a pinned session")
+	}
 	if taskID == "" {
 		return Assignment{}, errors.New("task_id is required")
 	}
@@ -51,6 +60,9 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 
 	if allowConcurrentTaskAgents && req.RequestID != "" {
 		if existing, ok := state.assignments[identifiedAssignmentID(taskID, req)]; ok {
+			if !sameRecoveryPolicy(existing.RecoveryPolicy, req.RecoveryPolicy) {
+				return Assignment{}, errRecoveryPolicyChanged
+			}
 			return existing, nil
 		}
 	}
@@ -71,6 +83,9 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		for _, assignmentID := range state.agentAssignments[req.AgentID] {
 			current := state.assignments[assignmentID]
 			if current.TaskID == taskID && !isTerminal(current.State) {
+				if !sameRecoveryPolicy(current.RecoveryPolicy, req.RecoveryPolicy) {
+					return Assignment{}, errRecoveryPolicyChanged
+				}
 				s.cancelQueuedBlockerForAssignment(state, &current, now)
 				return current, nil
 			}
@@ -83,6 +98,9 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		current := state.assignments[task.currentAssignmentID]
 		if !isTerminal(current.State) {
 			if current.AgentID == req.AgentID && !forceNewAssignment {
+				if !sameRecoveryPolicy(current.RecoveryPolicy, req.RecoveryPolicy) {
+					return Assignment{}, errRecoveryPolicyChanged
+				}
 				s.cancelQueuedBlockerForAssignment(state, &current, now)
 				return current, nil
 			}
@@ -120,6 +138,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		AllowExperimentalRuntime: req.AllowExperimentalRuntime,
 		ResumeSessionID:          req.ResumeSessionID,
 		Worktree:                 cloneAssignmentWorktree(req.Worktree),
+		RecoveryPolicy:           assignment.CloneProviderRecoveryPolicy(req.RecoveryPolicy),
 		State:                    AssignmentQueued,
 		ReplacesAssignmentID:     replacesID,
 		BlockedByAssignmentID:    blockedByID,

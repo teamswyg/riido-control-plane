@@ -21279,10 +21279,13 @@
     },
     {
       "id": "sse_last_event_id_reconnect_loop",
-      "observation": "Production opened 513 AI Agent SSE streams over seven days and replayed 51,422 retained events, averaging 100.2378 events per open with p95 and max both at 175. Terminal lifecycle evidence recorded 1,956 replay deliveries against 69 live terminal deliveries. The server emitted numeric SSE ids and allowed Last-Event-ID through CORS, but did not apply that cursor before replay.",
-      "hypothesis": "Filtering the bounded replay tail to events whose sequence is greater than a valid Last-Event-ID will prevent reconnects from repeatedly delivering already observed progress and terminal state while preserving initial replay, invalid-cursor compatibility, live fanout, v3 refresh truth, and every public endpoint and payload.",
+      "observation": "Production opened 513 AI Agent SSE streams over seven days and replayed 51,422 retained events, averaging 100.2378 events per open with p95 and max both at 175. Terminal lifecycle evidence recorded 1,956 replay deliveries against 69 live terminal deliveries. The server emitted numeric SSE ids and allowed Last-Event-ID through CORS, but did not apply that cursor before replay. RIID-5822/5823 read-only log analysis also found raw SSE URL paths and write-error text, terminal delivery identifiers without request trace correlation, unchanged provider snapshots producing repeated spans, and long-lived SSE connections mixed into ordinary request latency. HTTP 502/503 and provider failure observations lacked enough bounded stage/cause evidence to establish a shared cause. A two-replica fixture reproduced recovery journal retries committing two events because the event-key deduplication cache was local; a rejected durable failure write still emitted a failure log. A committed provider_result_failed terminal response returns HTTP 200; without an ERROR child span, error-tail sampling could discard that failure with ordinary successful requests.",
+      "hypothesis": "Filtering the bounded replay tail to events whose sequence is greater than a valid Last-Event-ID will prevent reconnects from repeatedly delivering already observed progress and terminal state while preserving initial replay, invalid-cursor compatibility, live fanout, v3 refresh truth, and every public endpoint and payload. Route templates, hashed opaque references, bounded close/error categories and actual trace/span IDs can make delivery and failure paths diagnosable without retaining credentials, customer paths or bodies. Separating stream lifetime from aggregate request latency prevents a healthy long connection from appearing as a slow ordinary request. Recovery phases can use the existing journal without changing task state if accepted policy/owner/device/runtime/lease fences run before dispatch approval and a bounded CAS-preserved receipt watermark deduplicates retries across replicas; logs and spans must follow durable commit. A fixed-message ERROR child span emitted by the committed-event observer can retain real domain failures despite HTTP 200, provided speculative writes, duplicate ACKs, cancellation and needs_input emit none.",
       "claims": [
-        "sse_reconnect_must_resume_after_last_event_id"
+        "sse_reconnect_must_resume_after_last_event_id",
+        "assignment_operation_journal_must_preserve_replay_and_claim_ports",
+        "metrics_http_adapter_must_preserve_public_metrics_contract",
+        "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
         {
@@ -21320,6 +21323,110 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_terminal_progress_compensation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/request_failure_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/tracing_correlation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_health_tracing.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/http_transaction_metrics_middleware.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/http_transaction_metrics_observe.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_candidate_fence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_watermark.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_watermark_check.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_projection_recovery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/durable_assignment_mutation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/committed_event_observation.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/request_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_snapshot_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_health_transition_trace_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_transaction_metrics_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_replica_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_candidate_liveness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_terminal_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_watermark_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_recovery_preserve_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/durable_assignment_failure_observation_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/committed_assignment_failure_trace.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/committed_assignment_failure_trace_test.go"
         }
       ],
       "verifiers": [
@@ -21338,6 +21445,50 @@
         {
           "kind": "tool",
           "path": "tools/loopregistry"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/request_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_snapshot_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_health_transition_trace_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_transaction_metrics_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_replica_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_candidate_liveness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_terminal_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_watermark_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_recovery_preserve_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/durable_assignment_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/committed_assignment_failure_trace_test.go"
         }
       ],
       "evidence": [
@@ -21353,9 +21504,53 @@
           "kind": "artifact",
           "path": "production-sse-replay-cursor-2026-07-18",
           "redacted": true
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/request_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_snapshot_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_health_transition_trace_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/http_transaction_metrics_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_replica_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_candidate_liveness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_terminal_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_watermark_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_recovery_preserve_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/durable_assignment_failure_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/committed_assignment_failure_trace_test.go"
         }
       ],
-      "decision": "Honor valid numeric Last-Event-ID values at the control-plane replay boundary and retain the existing bounded full replay for missing, malformed, or negative cursors. Log only cursor presence and the filtered replay count so production can prove reduction without recording cursor values, credentials, or message bodies. Keep endpoint paths, SSE event ids, payloads, terminal priority delivery, and v3 refresh behavior unchanged.",
+      "decision": "Honor valid numeric Last-Event-ID values at the control-plane replay boundary and retain the existing bounded full replay for missing, malformed, or negative cursors. Log only cursor presence and the filtered replay count so production can prove reduction without recording cursor values, credentials, or message bodies. Keep endpoint paths, SSE event ids, payloads, terminal priority delivery, and v3 refresh behavior unchanged. RIID-5822/5823 keeps those replay semantics and adds bounded lifecycle/terminal diagnostics, request-stage failure categories, and actual OTel correlation; the fixtures verify redaction and cancellation/timeout classification, not a production root-cause claim. SSE request/status counts and per-route stream_lifetime remain visible while aggregate ordinary-request latency excludes stream duration. Recovery inventory rechecks are limited to the selected approved candidate before checking/switching; final diagnostics remain recordable when an auth probe becomes uncertain. Internal hashed receipts are capped at sixteen, preserved by conditional projection writes and legacy repairs, and return the original event identity/sequence/time/context/key on replay; they are absent from public Assignment payloads. Tests prove post-commit-only observations, cross-replica and delayed-key deduplication, stopped-run fences, and normal completed/failed terminal delivery. No actual provider model execution, automatic replay after an ambiguous spawn, production fix for the previously observed 502/503 cause, or web/desktop deployment is claimed by these fixture results. The assignment failure child span records only bounded result/failure category and riido.assignment.provider for the original lease provider; the compatible failure log provider field has that same scope. Any actual fallback provider remains in its separate recovery journal. CAS rejection and duplicate fixtures require zero new error spans, a successful durable failure requires exactly one, and the HTTP terminal fixture distinguishes failed from completed while both return 200.",
       "next_loop": "closed_loop_candidate"
     },
     {

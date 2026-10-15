@@ -2102,10 +2102,65 @@
       }
     },
     {
+      "name": "ProviderRecoveryCandidate",
+      "schema": {
+        "name": "ProviderRecoveryCandidate",
+        "type": "object",
+        "required": [
+          "provider",
+          "model_id"
+        ],
+        "properties": [
+          {
+            "name": "provider",
+            "type": "string",
+            "description": "claude/codex/cursor/openclaw; validated against same owner and device inventory."
+          },
+          {
+            "name": "model_id",
+            "type": "string",
+            "description": "Explicit model present in target runtime inventory; max 128 bytes; no whitespace/control."
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProviderRecoveryPolicy",
+      "schema": {
+        "name": "ProviderRecoveryPolicy",
+        "type": "object",
+        "properties": [
+          {
+            "name": "max_attempts",
+            "type": "integer",
+            "description": "Including initial attempt; default3, bounds1..3."
+          },
+          {
+            "name": "max_elapsed_seconds",
+            "type": "integer",
+            "description": "Pre-dispatch recovery only; default30, bounds1..60."
+          },
+          {
+            "name": "max_switches",
+            "type": "integer",
+            "description": "0 by default; max1; explicit nonempty fallbacks required for1."
+          },
+          {
+            "name": "fallbacks",
+            "type": "array",
+            "description": "At most3 distinct providers, ordered; requires max_switches1.",
+            "items": {
+              "ref": "ProviderRecoveryCandidate"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AssignAIAgentTaskRequest",
       "schema": {
         "name": "AssignAIAgentTaskRequest",
-        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
+        "description": "작업 배정 요청. recovery_policy는 실행 전 검증에 한정된 유한 복구 예산이며 명시적 fallback은 서버가 같은 소유자의 같은 device/model inventory 및 권한을 검증한 경우에만 허용한다.",
         "type": "object",
         "required": [
           "agent_id"
@@ -2122,6 +2177,10 @@
           {
             "name": "instruction",
             "type": "string"
+          },
+          {
+            "name": "recovery_policy",
+            "ref": "ProviderRecoveryPolicy"
           }
         ]
       }

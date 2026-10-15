@@ -52,3 +52,22 @@ func TestOtelTraceRecorderRecordsSpanAttributesAndErrors(t *testing.T) {
 		t.Fatalf("span attrs = %#v", attrs)
 	}
 }
+
+func TestOtelTraceRecorderProvidesValidCurrentCorrelation(t *testing.T) {
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.AlwaysSample()))
+	t.Cleanup(func() {
+		if err := provider.Shutdown(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+	})
+	recorder := otelTraceRecorder{tracer: provider.Tracer("correlation-test")}
+	ctx, span := recorder.StartTraceSpan(context.Background(), riidoaiserver.TraceSpanStart{Name: "test correlation"})
+	defer span.End()
+	traceID, spanID := recorder.TraceCorrelation(ctx)
+	if traceID != trace.SpanContextFromContext(ctx).TraceID().String() || spanID != trace.SpanContextFromContext(ctx).SpanID().String() {
+		t.Fatal("correlation did not identify current OTel span")
+	}
+	if traceID, spanID := recorder.TraceCorrelation(context.Background()); traceID != "" || spanID != "" {
+		t.Fatal("invented trace context")
+	}
+}

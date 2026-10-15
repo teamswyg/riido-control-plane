@@ -1,13 +1,14 @@
 package riidoaiserver
 
 import (
+	"context"
 	"log"
 	"strings"
 
 	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
-func logAssignmentFailure(state *storeState, event TaskEvent) {
+func logAssignmentFailure(state *storeState, event TaskEvent, contexts ...context.Context) {
 	if event.Type != EventAssignmentFailed {
 		return
 	}
@@ -15,11 +16,17 @@ func logAssignmentFailure(state *storeState, event TaskEvent) {
 	if assignment, ok := state.assignments[event.AssignmentID]; ok {
 		provider = boundedProvider(assignment.RuntimeProvider)
 	}
+	ctx := context.Background()
+	if len(contexts) > 0 {
+		ctx = contexts[0]
+	}
+	traceID, spanID := traceCorrelationFromContext(ctx)
 	log.Printf(
-		"event=assignment_failed provider=%q result_status=%q failure_category=%q",
+		"event=assignment_failed provider=%q result_status=%q failure_category=%q assignment_ref=%q trace_id=%q span_id=%q",
 		provider,
 		boundedResultStatus(event.Metadata[metadatakeys.AssignmentResultStatus.String()]),
 		boundedFailureCategory(event.Metadata[metadatakeys.AssignmentFailureCategory.String()]),
+		providerHealthDeviceRef(event.AssignmentID), traceID, spanID,
 	)
 }
 

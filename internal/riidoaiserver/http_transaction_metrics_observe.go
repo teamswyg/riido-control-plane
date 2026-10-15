@@ -30,12 +30,17 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	bucket := m.bucketLocked(bucketStart)
 	bucket.requestsTotal++
 	bucket.responsesByStatus[statusCode]++
-	bucket.latency.observe(elapsedMS)
-	if observedAt.After(bucket.lastObservedAt) {
-		bucket.lastObservedAt = observedAt
+	if !obs.Stream {
+		bucket.latency.observe(elapsedMS)
+		if observedAt.After(bucket.lastObservedAt) {
+			bucket.lastObservedAt = observedAt
+		}
 	}
 	state := bucket.byKey[key]
 	metric := state.metric
+	if obs.Stream {
+		metric.DurationKind = "stream_lifetime"
+	}
 	metric.Method = method
 	metric.Route = route
 	metric.ClientSurface = clientSurface

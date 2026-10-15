@@ -69,6 +69,11 @@ func (s *Store) loop(state storeState) {
 					err = s.saveSnapshot(&state)
 				}
 			}
+			if err == nil {
+				for _, event := range eventsAfterSeq(&state, beforeEventSeq) {
+					logAssignmentFailure(&state, event)
+				}
+			}
 			msg.reply <- pollResult{response: response, operationAlreadySaved: operationAlreadySaved, mutatedAssignment: mutatedAssignment, mutationOperationType: mutationOperationType, err: err}
 		case eventCmd:
 			if _, durable := s.operationStore.(AssignmentProjectionReader); durable {
@@ -80,7 +85,7 @@ func (s *Store) loop(state storeState) {
 						return Assignment{}, err
 					}
 					return *response.Assignment, err
-				})
+				}, func(event TaskEvent) { observeCommittedAssignmentEvent(msg.ctx, &state, event) })
 				msg.reply <- eventResult{response: response, err: err}
 				continue
 			}
@@ -91,6 +96,9 @@ func (s *Store) loop(state storeState) {
 				if err == nil {
 					err = s.saveSnapshot(&state)
 				}
+			}
+			if err == nil && state.nextEventSeq != beforeEventSeq {
+				observeCommittedAssignmentEvent(msg.ctx, &state, response.Event)
 			}
 			msg.reply <- eventResult{response: response, err: err}
 		case heartbeatCmd:

@@ -32,6 +32,23 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	if err := validateDaemonBinding(s.agentRegistry, agentID, PollRequest{DaemonID: req.DaemonID, DeviceID: req.DeviceID, RuntimeID: req.RuntimeID}); err != nil {
 		return AgentEventResponse{}, err
 	}
+	var recoveryErr error
+	req, recoveryErr = s.validateRecoveryEvent(state, assignment, req)
+	if recoveryErr != nil {
+		return AgentEventResponse{}, recoveryErr
+	}
+	if existing, duplicate, err := s.checkRecoveryWatermark(assignment, req); err != nil || duplicate {
+		return AgentEventResponse{SchemaVersion: SchemaVersion, Assignment: copyAssignment(assignment), Event: existing}, err
+	}
+	if existing, ok := duplicateAssignmentEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, strings.TrimSpace(req.EventType), req.Metadata); ok {
+		if incoming := assignmentcontract.RecoveryContextFromMetadata(req.Metadata); incoming != nil {
+			previous := assignmentcontract.RecoveryContextFromMetadata(existing.Metadata)
+			if previous == nil || *incoming != *previous {
+				return AgentEventResponse{}, errors.New("recovery event key was reused with another transition")
+			}
+		}
+		return AgentEventResponse{SchemaVersion: SchemaVersion, Assignment: copyAssignment(assignment), Event: existing}, nil
+	}
 	if req.EventType == assignmentcontract.EventAssignmentWaitingForUser && (!req.ConfirmationReason.Valid() || isTerminal(assignment.State) || assignment.State == AssignmentCancelling) {
 		return AgentEventResponse{}, errors.New("waiting event requires an active execution and confirmation_reason")
 	}

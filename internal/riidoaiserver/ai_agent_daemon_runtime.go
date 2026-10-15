@@ -202,6 +202,7 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 	deviceChanged := deviceRuntimeSnapshotChangedForEvent(previousDevice, previousDeviceOK, device)
 	if deviceChanged {
 		logProviderHealthChanges(previousDevice, previousDeviceOK, device)
+		traceProviderHealthChanges(ctx, previousDevice, previousDeviceOK, device)
 		s.appendClientEventLocked(AgentClientEventDeviceRuntimeSnapshot, DeviceRuntimeSnapshotEvent{
 			EventType:     AgentClientEventDeviceRuntimeSnapshot,
 			SchemaVersion: SchemaVersion,

@@ -582,11 +582,12 @@ export interface AgentWorkStatusChangedEvent {
 }
 
 /**
- * task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.
+ * 작업 배정 요청. recovery_policy는 실행 전 검증에 한정된 유한 복구 예산이며 명시적 fallback은 서버가 같은 소유자의 같은 device/model inventory 및 권한을 검증한 경우에만 허용한다.
  */
 export interface AssignAIAgentTaskRequest {
   agent_id: string;
   instruction?: string;
+  recovery_policy?: ProviderRecoveryPolicy;
   request_id?: string;
 }
 
@@ -867,6 +868,42 @@ export type ProviderDiagnosticCode = "none" | "executable-missing" | "login-requ
  * provider probe의 저카디널리티 상태입니다.
  */
 export type ProviderHealthStatus = "healthy" | "degraded" | "unavailable" | "unknown";
+
+/**
+ * ProviderRecoveryCandidate 타입입니다.
+ */
+export interface ProviderRecoveryCandidate {
+  /**
+   * Explicit model present in target runtime inventory; max 128 bytes; no whitespace/control.
+   */
+  model_id: string;
+  /**
+   * claude/codex/cursor/openclaw; validated against same owner and device inventory.
+   */
+  provider: string;
+}
+
+/**
+ * ProviderRecoveryPolicy 타입입니다.
+ */
+export interface ProviderRecoveryPolicy {
+  /**
+   * At most3 distinct providers, ordered; requires max_switches1.
+   */
+  fallbacks?: ProviderRecoveryCandidate[];
+  /**
+   * Including initial attempt; default3, bounds1..3.
+   */
+  max_attempts?: number;
+  /**
+   * Pre-dispatch recovery only; default30, bounds1..60.
+   */
+  max_elapsed_seconds?: number;
+  /**
+   * 0 by default; max1; explicit nonempty fallbacks required for1.
+   */
+  max_switches?: number;
+}
 
 /**
  * client에 노출되는 runtime online/offline 상태입니다.

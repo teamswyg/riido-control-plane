@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -25,7 +26,7 @@ func (s *Store) applyClaimedAssignment(state *storeState, claim AssignmentClaimR
 	if claim.Operation.AssignmentID != claim.Assignment.ID {
 		return fmt.Errorf("claimed assignment operation assignment_id mismatch %q", claim.Operation.AssignmentID)
 	}
-	if claim.Operation.Assignment != claim.Assignment {
+	if !reflect.DeepEqual(claim.Operation.Assignment, claim.Assignment) {
 		return errors.New("claimed assignment operation assignment mismatch")
 	}
 	return s.applyClaimedAssignmentOperations(state, claim)
@@ -46,5 +47,5 @@ func handleLoadAssignmentProjection(state *storeState, assignmentID string) (Ass
 			lastEventSeq = event.Seq
 		}
 	}
-	return AssignmentProjection{Assignment: assignment, LastEventSeq: lastEventSeq}, true, nil
+	return AssignmentProjection{Assignment: *copyAssignment(assignment), LastEventSeq: lastEventSeq}, true, nil
 }
