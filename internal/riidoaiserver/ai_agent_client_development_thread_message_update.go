@@ -27,6 +27,7 @@ func (s *DevelopmentAIAgentClientStore) updateTaskThreadMessageFromActionLocked(
 	thread.WorkStatus = response.WorkStatus
 	thread.AssignmentState = response.AssignmentState
 	thread.FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
+	thread.ExecutionContext = copyExecutionContext(response.ExecutionContext)
 	thread.CommentKind = response.CommentKind
 	thread.Message = response.Message
 	thread.ResultMessage = response.ResultMessage

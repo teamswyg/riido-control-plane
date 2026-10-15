@@ -4,6 +4,16 @@
 import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/react-query';
 
 /**
+ * RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.
+ */
+export interface AIAgentExecutionContext {
+  diagnostic_code: "none" | "user_cancelled" | "run_cancelled" | "run_timeout" | "workspace_preparation_failed" | "session_scope_conflict" | "host_verification_failed" | "provider_blocked" | "provider_failed" | "process_aborted" | "unknown";
+  next_action: "none" | "check_workspace" | "review_session" | "review_result" | "check_provider" | "review_permissions";
+  verification_status: "not_configured" | "not_run" | "pending" | "passed" | "failed" | "cancelled" | "unknown";
+  workspace_kind: "unknown" | "isolated" | "repository_clone" | "assignment_worktree" | "native_resume";
+}
+
+/**
  * task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.
  */
 export interface AIAgentTaskActionResponse {
@@ -13,6 +23,7 @@ export interface AIAgentTaskActionResponse {
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   confirmation_reason?: "answer_required" | "approval_required";
+  execution_context?: AIAgentExecutionContext;
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   message: string;
   /**
@@ -129,6 +140,8 @@ export interface AIAgentTaskThreadHistoryRecord {
    * 같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다.
    */
   conversation_id: string;
+  execution_context?: AIAgentExecutionContext;
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   messages: AIAgentTaskThreadHistoryMessage[];
   /**
    * 후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다.
@@ -157,6 +170,7 @@ export interface AIAgentTaskThreadRecord {
   comment_kind: AgentTaskCommentKind;
   completed_at?: string;
   confirmation_reason?: "answer_required" | "approval_required";
+  execution_context?: AIAgentExecutionContext;
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   lines: AgentThreadProgressLine[];
   message: string;
@@ -554,6 +568,7 @@ export interface AgentWorkStatusChangedEvent {
   comment_kind?: AgentTaskCommentKind;
   confirmation_reason?: "answer_required" | "approval_required";
   event_type: "agent_work_status_changed";
+  execution_context?: AIAgentExecutionContext;
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   /**
    * terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.

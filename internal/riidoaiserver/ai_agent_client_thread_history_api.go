@@ -1,6 +1,10 @@
 package riidoaiserver
 
-import "time"
+import (
+	"time"
+
+	"github.com/teamswyg/riido-contracts/assignment"
+)
 
 type AIAgentTaskThreadMessageRole string
 
@@ -25,20 +29,22 @@ type AIAgentTaskThreadHistoryMessage struct {
 }
 
 type AIAgentTaskThreadHistoryRecord struct {
-	ThreadID        string                            `json:"thread_id"`
-	ConversationID  string                            `json:"conversation_id"`
-	ParentThreadID  string                            `json:"parent_thread_id,omitempty"`
-	TaskID          string                            `json:"task_id"`
-	AssignmentID    string                            `json:"assignment_id,omitempty"`
-	AgentID         string                            `json:"agent_id"`
-	AgentSnapshotID string                            `json:"agent_snapshot_id,omitempty"`
-	RunID           string                            `json:"run_id"`
-	WorkStatus      AgentWorkStatus                   `json:"work_status"`
-	AssignmentState AgentAssignmentState              `json:"assignment_state"`
-	StartedAt       time.Time                         `json:"started_at,omitempty"`
-	CompletedAt     time.Time                         `json:"completed_at,omitempty"`
-	Messages        []AIAgentTaskThreadHistoryMessage `json:"messages"`
-	ActiveStream    *AIAgentTaskThreadStreamLink      `json:"active_stream,omitempty"`
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
+	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ThreadID           string                               `json:"thread_id"`
+	ConversationID     string                               `json:"conversation_id"`
+	ParentThreadID     string                               `json:"parent_thread_id,omitempty"`
+	TaskID             string                               `json:"task_id"`
+	AssignmentID       string                               `json:"assignment_id,omitempty"`
+	AgentID            string                               `json:"agent_id"`
+	AgentSnapshotID    string                               `json:"agent_snapshot_id,omitempty"`
+	RunID              string                               `json:"run_id"`
+	WorkStatus         AgentWorkStatus                      `json:"work_status"`
+	AssignmentState    AgentAssignmentState                 `json:"assignment_state"`
+	StartedAt          time.Time                            `json:"started_at,omitempty"`
+	CompletedAt        time.Time                            `json:"completed_at,omitempty"`
+	Messages           []AIAgentTaskThreadHistoryMessage    `json:"messages"`
+	ActiveStream       *AIAgentTaskThreadStreamLink         `json:"active_stream,omitempty"`
 }
 
 type AIAgentTaskThreadHistoryCollectionResponse struct {

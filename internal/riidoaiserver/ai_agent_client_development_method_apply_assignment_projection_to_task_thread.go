@@ -38,6 +38,7 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = copyQueueDiagnostics(diagnostics)
 		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
+		threads[i].ExecutionContext = copyExecutionContext(response.ExecutionContext)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage

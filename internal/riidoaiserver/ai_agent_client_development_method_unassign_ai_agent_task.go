@@ -63,6 +63,7 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 			response.Message = thread.Message
 			response.ResultMessage = thread.ResultMessage
 			response.FailureDiagnostics = copyFailureDiagnostics(thread.FailureDiagnostics)
+			response.ExecutionContext = copyExecutionContext(thread.ExecutionContext)
 		}
 	} else if req.AssignmentID != "" {
 		return AIAgentTaskActionResponse{}, errors.New("assignment_id does not belong to task agent")
