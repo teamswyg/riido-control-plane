@@ -104,8 +104,11 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 
 	state.nextAssignmentSeq++
 	assignment := Assignment{
+		CreatedBy:   req.CreatedBy,
+		TeamID:      req.TeamID,
 		WorkspaceID: req.WorkspaceID,
-		RequestID:   req.RequestID, CreatedBy: req.CreatedBy,
+		RequestID:   req.RequestID,
+
 		ID:                       identity,
 		TaskID:                   taskID,
 		ComponentID:              req.ComponentID,

@@ -6,10 +6,13 @@ import (
 	"time"
 )
 
-func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, events []ClientStreamEvent, live <-chan ClientStreamEvent) {
+func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, events []ClientStreamEvent, live <-chan ClientStreamEvent, authorize ...func(ClientStreamEvent) bool) {
 	writeAIAgentClientStreamHeaders(w)
 	logAIAgentClientStreamOpen(r, len(events))
 	for _, event := range events {
+		if event.EventType == AgentClientEventTaskNotification {
+			continue
+		}
 		if err := writeAIAgentClientSSE(w, event); err != nil {
 			logAIAgentClientStreamClose(r, "replay_write_error", err)
 			return
@@ -21,7 +24,7 @@ func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, event
 		logAIAgentClientStreamClose(r, "replay_complete", nil)
 		return
 	}
-	streamLiveAIAgentClientEvents(w, r, live)
+	streamLiveAIAgentClientEvents(w, r, live, authorize...)
 }
 
 func writeAIAgentClientStreamHeaders(w http.ResponseWriter) {
@@ -30,7 +33,7 @@ func writeAIAgentClientStreamHeaders(w http.ResponseWriter) {
 	w.Header().Set("Connection", "keep-alive")
 }
 
-func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live <-chan ClientStreamEvent) {
+func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live <-chan ClientStreamEvent, authorize ...func(ClientStreamEvent) bool) {
 	keepalive := time.NewTicker(sseKeepaliveInterval)
 	defer keepalive.Stop()
 	for {
@@ -39,6 +42,9 @@ func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live 
 			if !ok {
 				logAIAgentClientStreamClose(r, "subscriber_closed", nil)
 				return
+			}
+			if event.EventType == AgentClientEventTaskNotification && (len(authorize) == 0 || !authorize[0](event)) {
+				continue
 			}
 			if err := writeAIAgentClientSSE(w, event); err != nil {
 				logAIAgentClientStreamClose(r, "event_write_error", err)

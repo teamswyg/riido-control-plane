@@ -241,6 +241,7 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 		return AIAgentTaskContext{}, errors.New("riidoaiserver: task context component identity mismatch")
 	}
 	contextSnapshot := detail.toAIAgentTaskContext()
+	contextSnapshot.TeamID = location.Team.ID
 	c.enrichTaskContext(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot)
 	return contextSnapshot, nil
 }

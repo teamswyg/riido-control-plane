@@ -19,12 +19,14 @@ func TestIdentifiedAssignmentTransactionCannotOverwriteWinner(t *testing.T) {
 		mu.Lock()
 		defer mu.Unlock()
 		if r.Header.Get("X-Amz-Target") == dynamoDBGetItemTarget {
-			json.NewEncoder(w).Encode(map[string]any{"Item": projection})
+			if err := json.NewEncoder(w).Encode(map[string]any{"Item": projection}); err != nil {
+				t.Fatal(err)
+			}
 			return
 		}
 		if r.Header.Get("X-Amz-Target") != dynamoDBTransactWriteTarget {
 			t.Error("creation must be atomic")
-			http.Error(w, "bad target", 400)
+			http.Error(w, "bad target", http.StatusBadRequest)
 			return
 		}
 		var payload struct {
@@ -43,20 +45,22 @@ func TestIdentifiedAssignmentTransactionCannotOverwriteWinner(t *testing.T) {
 			}
 		}
 		if writes > 0 {
-			w.WriteHeader(400)
-			w.Write([]byte(`{"__type":"TransactionCanceledException"}`))
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"__type":"TransactionCanceledException"}`))
 			return
 		}
 		writes++
 		projection = payload.TransactItems[1].Put.Item
 		// Simulate a daemon completing the winner before the second replica retries.
 		var assignment Assignment
-		json.Unmarshal([]byte(projection["assignment_json"]["S"]), &assignment)
+		if err := json.Unmarshal([]byte(projection["assignment_json"]["S"]), &assignment); err != nil {
+			t.Fatal(err)
+		}
 		assignment.State = AssignmentCompleted
 		value, _ := json.Marshal(assignment)
 		projection["assignment_json"] = map[string]string{"S": string(value)}
 		projection["assignment_state"] = map[string]string{"S": string(AssignmentCompleted)}
-		w.Write([]byte(`{}`))
+		_, _ = w.Write([]byte(`{}`))
 	}))
 	defer endpoint.Close()
 	credentials, _ := NewStaticAWSCredentialsProvider("test", "test", "")
@@ -71,7 +75,7 @@ func TestIdentifiedAssignmentTransactionCannotOverwriteWinner(t *testing.T) {
 	record.Assignment.RequestID = "request"
 	record.Assignment.State = AssignmentQueued
 	for range 2 {
-		if err := store.SaveAssignmentOperation(context.Background(), record); err != nil {
+		if err := store.SaveAssignmentOperation(context.Background(), record); err != nil && !errors.Is(err, errIdentifiedExecutionExists) {
 			t.Fatal(err)
 		}
 	}
@@ -85,7 +89,9 @@ func TestClientSnapshotCompareAndSwapRejectsStaleWriter(t *testing.T) {
 	var version int64
 	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var payload struct{ TransactItems []dynamoDBTransactWritePut }
-		json.NewDecoder(r.Body).Decode(&payload)
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatal(err)
+		}
 		if len(payload.TransactItems) == 0 {
 			t.Error("missing transaction")
 			return
@@ -98,12 +104,12 @@ func TestClientSnapshotCompareAndSwapRejectsStaleWriter(t *testing.T) {
 			t.Error("unexpected previous version")
 		}
 		if version > 0 {
-			w.WriteHeader(400)
-			w.Write([]byte(`{"__type":"ConditionalCheckFailedException"}`))
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"__type":"ConditionalCheckFailedException"}`))
 			return
 		}
 		version++
-		w.Write([]byte(`{}`))
+		_, _ = w.Write([]byte(`{}`))
 	}))
 	defer endpoint.Close()
 	credentials, _ := NewStaticAWSCredentialsProvider("test", "test", "")
@@ -140,11 +146,11 @@ func TestDurableCancellationTransactionUsesExpectedStateSequenceAndLease(t *test
 			t.Errorf("incomplete guard: %+v", guard)
 		}
 		if calls == 2 {
-			w.WriteHeader(400)
-			w.Write([]byte(`{"__type":"TransactionCanceledException"}`))
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"__type":"TransactionCanceledException"}`))
 			return
 		}
-		w.Write([]byte(`{}`))
+		_, _ = w.Write([]byte(`{}`))
 	}))
 	defer endpoint.Close()
 	credentials, _ := NewStaticAWSCredentialsProvider("test", "test", "")

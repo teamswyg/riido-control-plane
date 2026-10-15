@@ -13,7 +13,7 @@ func deliverAIAgentClientEvent(
 	default:
 	}
 	subscriber.droppedEvents++
-	if !clientStreamEventIsTerminalProgress(event) {
+	if !clientStreamEventIsTerminalProgress(event) && event.EventType != AgentClientEventTaskNotification {
 		return subscriber
 	}
 	select {

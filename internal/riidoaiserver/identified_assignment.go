@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var errIdentifiedExecutionExists = errors.New("identified execution already committed")
+
 // Stable IDs let retrying publishers and restarted API instances converge on one request.
 func identifiedAssignmentID(taskID string, req AssignRequest) string {
 	return fmt.Sprintf("asn-request-%x", sha256.Sum256([]byte(req.WorkspaceID+"\x00"+taskID+"\x00"+req.AgentID+"\x00"+req.CreatedBy+"\x00"+req.RequestID)))
@@ -48,7 +50,13 @@ func (s *Store) assignIdentifiedRequest(state *storeState, taskID string, req As
 	}
 	events := eventsAfterSeq(&trial, beforeSeq)
 	if err = s.saveAssignmentMutationOperations(&trial, AssignmentOperationAssignTask, assignment, events, true); err != nil {
-		return Assignment{}, err
+		if !errors.Is(err, errIdentifiedExecutionExists) {
+			return Assignment{}, err
+		}
+		trial.nextAssignmentSeq = state.nextAssignmentSeq
+		trial.nextEventSeq = state.nextEventSeq
+		trial.events = state.events
+		events = nil
 	}
 	if reader, ok := s.operationStore.(AssignmentProjectionReader); ok {
 		projection, found, readErr := reader.LoadAssignmentProjection(context.Background(), assignmentID)

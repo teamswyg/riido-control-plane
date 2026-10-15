@@ -19,6 +19,17 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	}
 	thread, hadThread := s.assignmentEventThreadLocked(input)
 	previousThread := thread
+	if hadThread && !agentAssignmentStateAcceptsRuntimeProgress(previousThread.AssignmentState) {
+		// Snapshot repair can observe the durable terminal event before its fanout.
+		// Deliver that event without reviving or mutating the terminal projection.
+		if thread.AssignmentID == input.AssignmentID && isTerminal(input.State) && input.Type != EventRiidoLog && input.Type != EventProviderLog && input.Type != EventProviderError {
+			response := assignmentEventActionResponse(thread, input.State, input.Message, input.Metadata)
+			if response.WorkStatus == thread.WorkStatus {
+				s.appendTaskNotificationLocked(input.Event, response)
+			}
+		}
+		return nil
+	}
 
 	if input.IsProgressLog() {
 		return s.recordAssignmentProgressEventLocked(input, agent, hadThread, previousThread, thread)

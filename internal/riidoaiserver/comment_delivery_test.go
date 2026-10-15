@@ -18,7 +18,9 @@ func TestCommentDeliveryVerifiedEvidenceAndRetry(t *testing.T) {
 		if r.Header.Get(CommentDeliveryKeyHeader) != key || r.URL.Path != "/internal/agent-comment-deliveries/event" {
 			t.Error("evidence request missing binding")
 		}
-		json.NewEncoder(w).Encode(evidence)
+		if err := json.NewEncoder(w).Encode(evidence); err != nil {
+			t.Fatal(err)
+		}
 	}))
 	defer evidenceServer.Close()
 	clientStore := NewDevelopmentAIAgentClientStore()
@@ -27,7 +29,7 @@ func TestCommentDeliveryVerifiedEvidenceAndRetry(t *testing.T) {
 	flakyClient := &retryableProjectionClient{DevelopmentAIAgentClientStore: clientStore, fail: true}
 	handler := NewServer(ServerConfig{AIAgentClient: flakyClient, Assignment: assignments, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: evidenceServer.URL, Key: key}}).Handler()
 	submit := func(secret string) *httptest.ResponseRecorder {
-		r := httptest.NewRequest("POST", "/internal/agent-comment-deliveries", bytes.NewBufferString(`{"event_id":"event"}`))
+		r := httptest.NewRequest(http.MethodPost, "/internal/agent-comment-deliveries", bytes.NewBufferString(`{"event_id":"event"}`))
 		r.Header.Set(CommentDeliveryKeyHeader, secret)
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, r)
@@ -49,8 +51,12 @@ func TestCommentDeliveryVerifiedEvidenceAndRetry(t *testing.T) {
 		t.Fatalf("retry=%d %s", retry.Code, retry.Body.String())
 	}
 	var a, b AIAgentTaskActionResponse
-	json.Unmarshal(first.Body.Bytes(), &a)
-	json.Unmarshal(retry.Body.Bytes(), &b)
+	if err := json.Unmarshal(first.Body.Bytes(), &a); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(retry.Body.Bytes(), &b); err != nil {
+		t.Fatal(err)
+	}
 	if a.AssignmentID == "" || a.AssignmentID != b.AssignmentID || a.ThreadID != b.ThreadID || a.AssignmentState != AgentAssignmentStateQueued {
 		t.Fatalf("request duplicated: %+v %+v", a, b)
 	}

@@ -17,6 +17,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		RunID:              response.RunID,
 		SourceCommentID:    strings.TrimSpace(sourceCommentID),
 		WorkStatus:         response.WorkStatus,
+		ConfirmationReason: response.ConfirmationReason,
 		AssignmentState:    response.AssignmentState,
 		CommentKind:        response.CommentKind,
 		Message:            response.Message,
@@ -38,6 +39,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 			threads[i].ConversationID = taskThreadConversationID(threads[i])
 		}
 		threads[i].WorkStatus = response.WorkStatus
+		threads[i].ConfirmationReason = response.ConfirmationReason
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
 		}

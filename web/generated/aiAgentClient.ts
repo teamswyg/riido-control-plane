@@ -155,6 +155,7 @@ export interface AIAgentTaskThreadRecord {
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   completed_at?: string;
+  confirmation_reason?: "answer_required" | "approval_required";
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   lines: AgentThreadProgressLine[];
   message: string;
@@ -426,6 +427,28 @@ export interface AgentProfileThumbnailUploadResponse {
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
 /**
+ * 배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.
+ */
+export interface AgentTaskNotificationEvent {
+  agent_id: string;
+  assignment_id: string;
+  assignment_state: AgentAssignmentState;
+  confirmation_reason?: "answer_required" | "approval_required";
+  created_by: string;
+  event_id: string;
+  event_type: "agent_task_notification";
+  notification_type: "result_ready" | "answer_required" | "approval_required" | "failed";
+  occurred_at: string;
+  recipient_principal_id: string;
+  run_id: string;
+  schema_version: string;
+  task_id: string;
+  team_id?: string;
+  work_status: AgentWorkStatus;
+  workspace_id: string;
+}
+
+/**
  * 활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.
  */
 export interface AgentThreadProgressEvent {
@@ -472,6 +495,7 @@ export interface AgentWorkStatusChangedEvent {
   assignment_id?: string;
   assignment_state?: AgentAssignmentState;
   comment_kind?: AgentTaskCommentKind;
+  confirmation_reason?: "answer_required" | "approval_required";
   event_type: "agent_work_status_changed";
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   /**
@@ -560,7 +584,7 @@ export type ClientKind = "web" | "desktop_webview";
 /**
  * web과 desktop webview client가 소비하는 SSE event union입니다.
  */
-export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
+export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent;
 
 /**
  * agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.

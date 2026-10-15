@@ -438,6 +438,7 @@ type StopAIAgentTaskRequest struct {
 }
 
 type AIAgentTaskActionResponse struct {
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	SchemaVersion      string                               `json:"schema_version"`
 	TaskID             string                               `json:"task_id"`
 	AssignmentID       string                               `json:"assignment_id,omitempty"`
@@ -491,6 +492,7 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 }
 
 type AIAgentTaskThreadRecord struct {
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	ThreadID           string                               `json:"thread_id"`
 	ConversationID     string                               `json:"conversation_id,omitempty"`
 	ParentThreadID     string                               `json:"parent_thread_id,omitempty"`
@@ -550,6 +552,7 @@ type AgentEditabilityChangedEvent struct {
 }
 
 type AgentWorkStatusChangedEvent struct {
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	EventType          string                               `json:"event_type"`
 	SchemaVersion      string                               `json:"schema_version"`
 	AgentID            string                               `json:"agent_id"`

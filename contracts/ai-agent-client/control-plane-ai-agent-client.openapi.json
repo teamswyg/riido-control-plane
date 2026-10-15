@@ -4833,6 +4833,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
+          },
           "failure_diagnostics": {
             "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
           },
@@ -5433,6 +5440,89 @@
         ],
         "type": "string"
       },
+      "AgentTaskNotificationEvent": {
+        "description": "배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "agent_task_notification"
+            ],
+            "type": "string"
+          },
+          "notification_type": {
+            "enum": [
+              "result_ready",
+              "answer_required",
+              "approval_required",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "occurred_at": {
+            "type": "string"
+          },
+          "recipient_principal_id": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_type",
+          "schema_version",
+          "event_id",
+          "occurred_at",
+          "workspace_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "created_by",
+          "recipient_principal_id",
+          "notification_type",
+          "work_status",
+          "assignment_state"
+        ],
+        "type": "object"
+      },
       "AgentThreadProgressEvent": {
         "description": "활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.",
         "properties": {
@@ -5556,6 +5646,13 @@
           },
           "comment_kind": {
             "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
           },
           "event_type": {
             "enum": [
@@ -5741,6 +5838,7 @@
         "discriminator": {
           "mapping": {
             "agent_editability_changed": "#/components/schemas/AgentEditabilityChangedEvent",
+            "agent_task_notification": "#/components/schemas/AgentTaskNotificationEvent",
             "agent_thread_progress": "#/components/schemas/AgentThreadProgressEvent",
             "agent_work_status_changed": "#/components/schemas/AgentWorkStatusChangedEvent",
             "device_daemon_status_changed": "#/components/schemas/DeviceDaemonStatusEvent",
@@ -5763,6 +5861,9 @@
           },
           {
             "$ref": "#/components/schemas/AgentThreadProgressEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AgentTaskNotificationEvent"
           }
         ]
       },

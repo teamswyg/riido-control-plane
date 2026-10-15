@@ -11,6 +11,10 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 		writeMethodNotAllowed(w)
 		return
 	}
+	if r.URL.Query().Get("notifications") == "1" {
+		s.handleTaskNotificationStream(w, r)
+		return
+	}
 	principal, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionStream})
 	if !ok {
 		return
@@ -34,5 +38,5 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 		return
 	}
 	events = aiAgentClientReplayEventsAfterLastEventID(events, r.Header.Get("Last-Event-ID"))
-	serveAIAgentClientEventStream(w, r, events, live)
+	serveAIAgentClientEventStream(w, r, events, live, func(event ClientStreamEvent) bool { return s.clientNotificationAuthorized(r, principal, event) })
 }

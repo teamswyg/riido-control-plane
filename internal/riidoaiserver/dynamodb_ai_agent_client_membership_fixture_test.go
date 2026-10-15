@@ -32,7 +32,7 @@ func (f *snapshotDynamoDBFixture) membershipCommit(t *testing.T, body []byte, w 
 			expected := put.ExpressionAttributeValues[":expected"]["N"]
 			current := f.items[dynamoDBAIAgentClientSnapshotSK]["version"]["N"]
 			if (current == "" && expected != "0") || (current != "" && current != expected) {
-				http.Error(w, `{"__type":"TransactionCanceledException"}`, 400)
+				http.Error(w, `{"__type":"TransactionCanceledException"}`, http.StatusBadRequest)
 				return
 			}
 		}

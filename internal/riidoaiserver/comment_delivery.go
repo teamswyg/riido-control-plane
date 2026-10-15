@@ -36,7 +36,11 @@ func (config CommentDeliveryConfig) Validate() error {
 		return nil
 	}
 	endpoint, err := url.Parse(config.EvidenceBaseURL)
-	if err != nil || endpoint.Host == "" || endpoint.User != nil || endpoint.RawQuery != "" || endpoint.Fragment != "" || (endpoint.Scheme != "https" && !(endpoint.Scheme == "http" && (endpoint.Hostname() == "127.0.0.1" || endpoint.Hostname() == "localhost"))) {
+	if err != nil {
+		return errors.New("invalid comment delivery evidence URL")
+	}
+	invalidScheme := endpoint.Scheme != "https" && (endpoint.Scheme != "http" || (endpoint.Hostname() != "127.0.0.1" && endpoint.Hostname() != "localhost"))
+	if endpoint.Host == "" || endpoint.User != nil || endpoint.RawQuery != "" || endpoint.Fragment != "" || invalidScheme {
 		return errors.New("comment delivery evidence URL must use HTTPS (or loopback HTTP)")
 	}
 	if len(config.Key) < 32 {
@@ -80,9 +84,9 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer result.Body.Close()
-	if result.StatusCode != 200 {
+	if result.StatusCode != http.StatusOK {
 		status := http.StatusBadGateway
-		if result.StatusCode == 403 || result.StatusCode == 404 || result.StatusCode == 410 {
+		if result.StatusCode == http.StatusForbidden || result.StatusCode == http.StatusNotFound || result.StatusCode == http.StatusGone {
 			status = http.StatusForbidden
 		}
 		writeError(w, status, "comment delivery evidence rejected")
@@ -119,14 +123,19 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
-	assignment, err := s.assignment.AssignTaskAdditive(ctx, evidence.TaskID, composed.Request)
+	creationContext, creationReceipt := withTaskAgentCreationReceipt(ctx)
+	assignment, err := s.assignment.AssignTaskAdditive(creationContext, evidence.TaskID, composed.Request)
 	if err != nil {
 		writeCommentDeliveryError(w, err)
 		return
 	}
 	request.AssignmentID, request.durableState = assignment.ID, assignmentClientResponseDurableState(assignment)
+	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() && assignmentSequence(assignment.ID) == 0 {
+		request.membershipPublicationGeneration = taskAgentAssignmentGeneration(assignment)
+	}
 	response, err = s.aiAgent.CreateAIAgentTaskAgentAssignment(ctx, principal, evidence.TaskID, request)
 	if err != nil {
+		s.recoverTaskAgentPublication(ctx, assignment, creationReceipt)
 		writeCommentDeliveryError(w, err)
 		return
 	}

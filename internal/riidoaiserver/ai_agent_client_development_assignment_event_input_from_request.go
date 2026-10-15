@@ -7,6 +7,7 @@ import (
 
 func newAssignmentEventInput(agentID string, req AgentEventRequest, event TaskEvent) (assignmentEventInput, error) {
 	input := assignmentEventInput{
+		Event:        event,
 		AgentID:      strings.TrimSpace(agentID),
 		TaskID:       firstNonEmpty(event.TaskID, req.TaskID),
 		AssignmentID: firstNonEmpty(event.AssignmentID, req.AssignmentID),

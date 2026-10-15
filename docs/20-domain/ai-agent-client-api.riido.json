@@ -12,11 +12,59 @@
   "ir": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json",
   "generated_core": "web/generated/aiAgentClient.ts",
   "generated_react": "web/generated/aiAgentClient.react.ts",
-  "operation_counts": {"total":57,"v1":26,"v2":31,"smoke_matrix":57},
-  "required_generated_paths": ["aiAgent.bootstrap","aiAgent.profileThumbnails.uploads.create","aiAgent.devices.daemons.list","aiAgent.tasks.assign","aiAgent.tasks.threadMessages.create","v2.aiAgent.bootstrap","v2.aiAgent.agents.create","v2.aiAgent.devices.daemons.list","v2.aiAgent.profileThumbnails.uploads.create","v2.aiAgent.tasks.assignedAgentProfiles","v2.aiAgent.tasks.agentAssignments.create","v2.aiAgent.tasks.threadStreamSubscription"],
-  "runtime_config_keys": ["RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"],
-  "public_fields": ["workspace_id","profile_thumbnail_url","provider_version","health_status","diagnostic_code","diagnostic_summary","assigned-agent-profiles","agent-assignments","thread-stream-subscription","conversation_id","parent_thread_id","agent_snapshot_id","agent_snapshots","messages","author_principal_id","is_owned_by_viewer","desktop_app_version","client_status","minimum_daemon_version","latest_daemon_version","agent_capability","agent_supported","update_required","download_url"],
-  "deployment_evidence": ["not from a manual","The workflow masks both values"],
+  "operation_counts": {
+    "total": 57,
+    "v1": 26,
+    "v2": 31,
+    "smoke_matrix": 57
+  },
+  "required_generated_paths": [
+    "aiAgent.bootstrap",
+    "aiAgent.profileThumbnails.uploads.create",
+    "aiAgent.devices.daemons.list",
+    "aiAgent.tasks.assign",
+    "aiAgent.tasks.threadMessages.create",
+    "v2.aiAgent.bootstrap",
+    "v2.aiAgent.agents.create",
+    "v2.aiAgent.devices.daemons.list",
+    "v2.aiAgent.profileThumbnails.uploads.create",
+    "v2.aiAgent.tasks.assignedAgentProfiles",
+    "v2.aiAgent.tasks.agentAssignments.create",
+    "v2.aiAgent.tasks.threadStreamSubscription"
+  ],
+  "runtime_config_keys": [
+    "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
+  ],
+  "public_fields": [
+    "workspace_id",
+    "profile_thumbnail_url",
+    "provider_version",
+    "health_status",
+    "diagnostic_code",
+    "diagnostic_summary",
+    "assigned-agent-profiles",
+    "agent-assignments",
+    "thread-stream-subscription",
+    "conversation_id",
+    "parent_thread_id",
+    "agent_snapshot_id",
+    "agent_snapshots",
+    "messages",
+    "author_principal_id",
+    "is_owned_by_viewer",
+    "desktop_app_version",
+    "client_status",
+    "minimum_daemon_version",
+    "latest_daemon_version",
+    "agent_capability",
+    "agent_supported",
+    "update_required",
+    "download_url"
+  ],
+  "deployment_evidence": [
+    "not from a manual",
+    "The workflow masks both values"
+  ],
   "device_client_guidance": {
     "read_endpoint": "GET /v2/client/workspaces/{workspace_id}/ai-agent/devices",
     "purpose": "Distinguish a registered Desktop device, an offline daemon, an unsupported daemon version, and an Agent-ready daemon without guessing from an empty runtime list.",
@@ -29,7 +77,17 @@
       "agent_capability=version_unknown means an online daemon did not report a parseable release version; show diagnostics or update guidance rather than an installation claim.",
       "agent_capability=ready and agent_supported=true mean the daemon meets the configured minimum version.",
       "download_url is server-owned update guidance; clients must not hard-code a different release URL.",
-      "RIID-5827: authenticated loopback local-state mode preserves assignment workspace identity, serializes client snapshots, and rejects stale file versions. Provider errors remain visible before terminal state; coalesced assistant snapshots keep monotonic sequence numbers."
+      "RIID-5827: authenticated loopback local-state mode preserves assignment workspace identity, serializes client snapshots, and rejects stale file versions. Provider errors remain visible before terminal state; coalesced assistant snapshots keep monotonic sequence numbers.",
+      "RIID-5829 desktop task notifications: Assignment의 created_by·workspace_id·team_id는 배정 시 인증 주체와 검증된 작업 맥락에서 저장한다. 과거 created_by가 비어 있으면 소유자로 추정하지 않는다.",
+      "RIID-5829 desktop task notifications: Assignment.state는 기존 실행 FSM을 유지한다. running과 confirmation_reason(answer_required/approval_required)이 함께 있으면 WorkStatus는 waiting_for_user다. 로그는 대기를 해제하지 않고 명시적 running 재개와 terminal 결과만 해제한다.",
+      "RIID-5829 desktop task notifications: TaskEvent의 event_id는 assignment ID와 영속 event sequence로 구성하고 at이 발생 시각이다. 별도 agent_task_notification에 workspace/task/agent/assignment/run ID, created_by, recipient_principal_id, notification_type, confirmation_reason, work_status, assignment_state, team_id를 제공한다.",
+      "RIID-5829 desktop task notifications: 알림 종류는 result_ready, answer_required, approval_required, failed다. completed는 실행 결과 준비이며 업무 완료 상태를 변경하지 않는다. 일반 로그·경고·복구 중 provider_error·사용자 취소는 알림을 만들지 않는다.",
+      "RIID-5829 desktop task notifications: 수신자는 배정자 한 명이다. 공유 에이전트 소유권·관리자 역할로 수신 권한을 확대하지 않는다. SSE 발송 직전 현재 bearer로 해당 workspace/task의 읽기 권한을 재확인하고 실패하면 전달하지 않는다.",
+      "RIID-5829 desktop task notifications: 최초 연결 및 재연결은 live-only다. SSE 연결이 끊긴 구간은 과거 알림으로 재생하지 않으며 현재 실행 상태는 작업 상세 재조회로 확인한다. 프로세스 완전 종료 원격 푸시는 범위 밖이다.",
+      "RIID-5829 desktop task notifications: 같은 상태/사유의 재전송과 종료 뒤 늦은 이벤트는 추가 알림을 만들지 않는다. Assignment 저장 이후 알림 투영이 실패해 재시도하더라도 이미 저장한 event ID를 재사용한다. 클라이언트는 사용자·워크스페이스별 event ID를 최대 512개 보존하고 Electron은 창 사이 중복을 막는다.",
+      "RIID-5829 desktop task notifications: 클릭은 발신 webview의 같은 origin에서 /workspace/teams/team/tasks/task로 이동하고 소유 창을 복원한다. 이전 생산자가 team_id를 제공하지 않으면 현재 작업 메타데이터에서 같은 workspace/task임을 확인한 후 경로를 구성한다. 이동 시 기존 인증·권한 가드가 다시 적용된다.",
+      "RIID-5829 notification multiplex: GET /v1/client/ai-agent/events?notifications=1&workspace_id=<id>&workspace_id=<id> accepts 1–100 workspace entries, deduplicates IDs, authorizes every workspace to the same principal before subscribing, and emits only live agent_task_notification events over one HTTP connection. Current task access is rechecked per delivery; replay and unrelated client events are excluded. Cancelling the request or closing an underlying subscription releases all subscriptions. Existing workspace event routes remain compatible. This avoids HTTP/1 per-origin connection starvation for accounts with many workspaces.",
+      "RIID-5829 review: actionable notifications displace buffered progress like terminal results. A committed assignment event whose client projection fails returns retryable 503 and reuses the original stable event ID on retry. Legacy needs_input keeps waiting_for_user work_status while notification assignment_state uses the declared underlying assignment FSM value."
     ]
   },
   "thread_history_v3_frontend": {
@@ -48,27 +106,74 @@
       "truth_role": "live update input"
     },
     "implementation_steps": [
-      {"name":"initial-load-v3","detail":"When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model."},
-      {"name":"group-by-conversation-id","detail":"Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key."},
-      {"name":"optimistic-v2-mutation","detail":"For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response."},
-      {"name":"refetch-v3-after-mutation","detail":"After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots."},
-      {"name":"select-runtime-bound-agent","detail":"Populate the participant picker from task-scoped assignable-agents. Bootstrap remains the management catalog, while assignable-agents includes only visible agents whose runtime and daemon are currently online and resolvable by the assignment POST path."}
+      {
+        "name": "initial-load-v3",
+        "detail": "When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model."
+      },
+      {
+        "name": "group-by-conversation-id",
+        "detail": "Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key."
+      },
+      {
+        "name": "optimistic-v2-mutation",
+        "detail": "For assign, message, stop, and delete, use the existing v2 mutation endpoint and apply an optimistic UI update immediately from the mutation response."
+      },
+      {
+        "name": "refetch-v3-after-mutation",
+        "detail": "After each v2 mutation settles, refetch v3 thread history to recover persisted user messages, agent replies, progress rows, and historical snapshots."
+      },
+      {
+        "name": "select-runtime-bound-agent",
+        "detail": "Populate the participant picker from task-scoped assignable-agents. Bootstrap remains the management catalog, while assignable-agents includes only visible agents whose runtime and daemon are currently online and resolvable by the assignment POST path."
+      }
     ],
     "response_shapes": [
       {
-        "name":"AIAgentTaskThreadHistoryCollectionResponse",
-        "purpose":"Top-level response for one task screen. The frontend should treat threads as timeline records and resolve display metadata through agent_snapshots.",
-        "fields":["schema_version","task_id","threads[]","agent_snapshots?","active_stream?"]
+        "name": "AIAgentTaskThreadHistoryCollectionResponse",
+        "purpose": "Top-level response for one task screen. The frontend should treat threads as timeline records and resolve display metadata through agent_snapshots.",
+        "fields": [
+          "schema_version",
+          "task_id",
+          "threads[]",
+          "agent_snapshots?",
+          "active_stream?"
+        ]
       },
       {
-        "name":"AIAgentTaskThreadHistoryRecord",
-        "purpose":"One persisted AI thread/run record in the task timeline. Multiple records may share conversation_id when they belong to the same visible Agent comment card.",
-        "fields":["thread_id","conversation_id","parent_thread_id","task_id","assignment_id","agent_id","agent_snapshot_id","run_id","work_status","assignment_state","started_at","completed_at","messages[]"]
+        "name": "AIAgentTaskThreadHistoryRecord",
+        "purpose": "One persisted AI thread/run record in the task timeline. Multiple records may share conversation_id when they belong to the same visible Agent comment card.",
+        "fields": [
+          "thread_id",
+          "conversation_id",
+          "parent_thread_id",
+          "task_id",
+          "assignment_id",
+          "agent_id",
+          "agent_snapshot_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "started_at",
+          "completed_at",
+          "messages[]"
+        ]
       },
       {
-        "name":"AIAgentTaskThreadHistoryMessage",
-        "purpose":"One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply; author_principal_id identifies the user who wrote role=user messages.",
-        "fields":["message_id","role","comment_kind","assignment_id","run_id","source_message_id","author_principal_id","seq","body","result_message","observed_at"]
+        "name": "AIAgentTaskThreadHistoryMessage",
+        "purpose": "One stable timeline row inside a thread history record. message_id is the React row key; body can contain sanitized HTML from a user reply; author_principal_id identifies the user who wrote role=user messages.",
+        "fields": [
+          "message_id",
+          "role",
+          "comment_kind",
+          "assignment_id",
+          "run_id",
+          "source_message_id",
+          "author_principal_id",
+          "seq",
+          "body",
+          "result_message",
+          "observed_at"
+        ]
       }
     ],
     "action_endpoints": [
@@ -109,14 +214,46 @@
       }
     ],
     "identity_rules": [
-      {"name":"task_id","meaning":"Task screen parent scope","use":"Group all AI thread history for one task screen"},
-      {"name":"conversation_id","meaning":"Stable AI comment card key","use":"Render one Agent conversation card; same value means reply chain, different value means separate card even for same agent_id"},
-      {"name":"thread_id","meaning":"Concrete thread/run identity","use":"Route v2 user messages and render sub-run blocks inside a conversation card"},
-      {"name":"parent_thread_id","meaning":"Source thread for a follow-up run","use":"Nest a follow-up run under the original Agent comment when present"},
-      {"name":"assignment_id","meaning":"Durable work assignment","use":"Manage execution status and stop/delete targeting"},
-      {"name":"run_id","meaning":"Runtime execution flow","use":"Deduplicate live progress together with assignment_id and seq"},
-      {"name":"message_id","meaning":"Stable v3 timeline row key","use":"Render messages without collapsing repeated user bodies or repeated progress text"},
-      {"name":"author_principal_id","meaning":"User reply author identity","use":"Render role=user messages with the actual author instead of falling back to the current viewer"}
+      {
+        "name": "task_id",
+        "meaning": "Task screen parent scope",
+        "use": "Group all AI thread history for one task screen"
+      },
+      {
+        "name": "conversation_id",
+        "meaning": "Stable AI comment card key",
+        "use": "Render one Agent conversation card; same value means reply chain, different value means separate card even for same agent_id"
+      },
+      {
+        "name": "thread_id",
+        "meaning": "Concrete thread/run identity",
+        "use": "Route v2 user messages and render sub-run blocks inside a conversation card"
+      },
+      {
+        "name": "parent_thread_id",
+        "meaning": "Source thread for a follow-up run",
+        "use": "Nest a follow-up run under the original Agent comment when present"
+      },
+      {
+        "name": "assignment_id",
+        "meaning": "Durable work assignment",
+        "use": "Manage execution status and stop/delete targeting"
+      },
+      {
+        "name": "run_id",
+        "meaning": "Runtime execution flow",
+        "use": "Deduplicate live progress together with assignment_id and seq"
+      },
+      {
+        "name": "message_id",
+        "meaning": "Stable v3 timeline row key",
+        "use": "Render messages without collapsing repeated user bodies or repeated progress text"
+      },
+      {
+        "name": "author_principal_id",
+        "meaning": "User reply author identity",
+        "use": "Render role=user messages with the actual author instead of falling back to the current viewer"
+      }
     ],
     "grouping_rules": [
       "Task screen scope is task_id.",
@@ -132,33 +269,96 @@
       "Historical cards must keep the captured snapshot even if the current agent settings change."
     ],
     "message_roles": [
-      {"role":"user","meaning":"User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present."},
-      {"role":"progress","meaning":"Runtime progress log, ordered by seq inside assignment_id and run_id"},
-      {"role":"agent","meaning":"Agent status or final result message. queued_by_busy_agent must not be exposed as a durable reply or live progress copy; the server removes queued status rows from v3 messages[] and hides queued status from v2 client-visible action/list/SSE projections."}
+      {
+        "role": "user",
+        "meaning": "User follow-up instruction inside the AI thread. Use author_principal_id for the writer when present."
+      },
+      {
+        "role": "progress",
+        "meaning": "Runtime progress log, ordered by seq inside assignment_id and run_id"
+      },
+      {
+        "role": "agent",
+        "meaning": "Agent status or final result message. queued_by_busy_agent must not be exposed as a durable reply or live progress copy; the server removes queued status rows from v3 messages[] and hides queued status from v2 client-visible action/list/SSE projections."
+      }
     ],
     "interaction_scenarios": [
-      {"name":"intent-clarification-before-deliverable","detail":"When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables."},
-      {"name":"non-command-component-document-asks-first","detail":"When a project, milestone, task, or subtask has document content but no explicit action signal, classify it as intent-oriented and ask what to do first before the daemon receives runnable work."},
-      {"name":"intent-clarification-waits-for-user","detail":"When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user, assignment_state=waiting_for_user, comment_kind=needs_input, and no active_stream; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape."},
-      {"name":"concrete-followup-authoritative","detail":"When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document."},
-      {"name":"draft-then-research-limit-in-same-conversation","detail":"A marketing-copy task can first ask what to do, then complete a copywriting draft from the user's concrete follow-up, then accept another follow-up for research in the same conversation_id. If provider quota is exhausted during that research run, only the latest run fails with the normalized cloud-credit message; the prior draft result remains visible."},
-      {"name":"provider-limit-result","detail":"When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다."},
-      {"name":"handoff-after-provider-limit","detail":"When the user assigns another agent after a provider-limit result, the new agent must create a separate conversation_id while the limited research conversation and prior draft remain visible in v3 history."}
+      {
+        "name": "intent-clarification-before-deliverable",
+        "detail": "When the task title/document is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the agent's first visible answer should ask a concise clarification question in the existing thread before producing deliverables."
+      },
+      {
+        "name": "non-command-component-document-asks-first",
+        "detail": "When a project, milestone, task, or subtask has document content but no explicit action signal, classify it as intent-oriented and ask what to do first before the daemon receives runnable work."
+      },
+      {
+        "name": "intent-clarification-waits-for-user",
+        "detail": "When the runtime reports assignment_result_status=needs_input, v3 history keeps the agent question in the same conversation with work_status=waiting_for_user, assignment_state=waiting_for_user, comment_kind=needs_input, and no active_stream; a user reply to that thread creates a follow-up run under the same conversation_id without changing endpoint shape."
+      },
+      {
+        "name": "concrete-followup-authoritative",
+        "detail": "When the user replies in that thread with a concrete instruction, render the user message in the same conversation_id and let the follow-up run treat that latest message as the current directive while re-reading the latest task document."
+      },
+      {
+        "name": "draft-then-research-limit-in-same-conversation",
+        "detail": "A marketing-copy task can first ask what to do, then complete a copywriting draft from the user's concrete follow-up, then accept another follow-up for research in the same conversation_id. If provider quota is exhausted during that research run, only the latest run fails with the normalized cloud-credit message; the prior draft result remains visible."
+      },
+      {
+        "name": "provider-limit-result",
+        "detail": "When provider token, quota, or cloud-credit exhaustion stops the run, keep the same conversation and render the normalized result message: 보유하신 크레딧이 부족합니다. 더 깊은 리서치를 진행하려면 추가 Cloud AI 자원이 필요합니다."
+      },
+      {
+        "name": "handoff-after-provider-limit",
+        "detail": "When the user assigns another agent after a provider-limit result, the new agent must create a separate conversation_id while the limited research conversation and prior draft remain visible in v3 history."
+      }
     ],
     "ordering_rules": [
-      {"name":"conversation-card-ordering","detail":"First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root."},
-      {"name":"message-row-ordering","detail":"Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text."},
-      {"name":"queued-status-current-only","detail":"comment_kind=queued_by_busy_agent means the durable assignment is waiting behind busy work. Client-visible v2 projections must not render it as an Agent reply or thinking/progress row: hide queued work_status, assignment_state, comment_kind, message, result_message, queue diagnostics, and queued work-status SSE events. Preserve the existing identity fields and active stream so clients retain participant identity; v3 history and the durable scheduler continue to expose assignment_state=queued."},
-      {"name":"queued-stream-current-only","detail":"If the same conversation_id has an active running thread, a superseded queued thread must not expose per-thread active_stream and must not win the collection active_stream. This prevents a stale queued hint from keeping the UI in a thinking/progress state while the conversation is already running."},
-      {"name":"progress-dedupe-ordering","detail":"For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility."},
-      {"name":"late-terminal-guard","detail":"If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."},
-      {"name":"terminal-active-stream-closure","detail":"When every v3 thread for a task is terminal, omit both the top-level active_stream and each per-thread active_stream. A client refresh or v3 refetch must be able to clear stale optimistic running UI from this server truth."}
+      {
+        "name": "conversation-card-ordering",
+        "detail": "First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root."
+      },
+      {
+        "name": "message-row-ordering",
+        "detail": "Within one thread record, render messages by observed_at, then role order user -> progress -> agent, then seq, then message_id. Use message_id as the stable row key, not body text."
+      },
+      {
+        "name": "queued-status-current-only",
+        "detail": "comment_kind=queued_by_busy_agent means the durable assignment is waiting behind busy work. Client-visible v2 projections must not render it as an Agent reply or thinking/progress row: hide queued work_status, assignment_state, comment_kind, message, result_message, queue diagnostics, and queued work-status SSE events. Preserve the existing identity fields and active stream so clients retain participant identity; v3 history and the durable scheduler continue to expose assignment_state=queued."
+      },
+      {
+        "name": "queued-stream-current-only",
+        "detail": "If the same conversation_id has an active running thread, a superseded queued thread must not expose per-thread active_stream and must not win the collection active_stream. This prevents a stale queued hint from keeping the UI in a thinking/progress state while the conversation is already running."
+      },
+      {
+        "name": "progress-dedupe-ordering",
+        "detail": "For SSE progress, use assignment_id + run_id + seq when assignment_id exists, and fall back to thread_id + run_id + seq for compatibility."
+      },
+      {
+        "name": "late-terminal-guard",
+        "detail": "If an assignment is already completed, failed, stopped, cancelled, or timeout, ignore late runtime progress that tries to revive it as running."
+      },
+      {
+        "name": "terminal-active-stream-closure",
+        "detail": "When every v3 thread for a task is terminal, omit both the top-level active_stream and each per-thread active_stream. A client refresh or v3 refetch must be able to clear stale optimistic running UI from this server truth."
+      }
     ],
     "mutation_rules": [
-      {"name":"assign-agent","detail":"POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment."},
-      {"name":"send-thread-message","detail":"POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run."},
-      {"name":"stop-agent","detail":"POST the task-scoped v2 stop endpoint, preferably including assignment_id. The UI should close the work immediately from control-plane truth; daemon acknowledgement is eventual."},
-      {"name":"delete-agent","detail":"DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed. The server observes the latest retained thread from the same snapshot used to cancel this task/Agent's executions. Task-scoped client assignment and follow-up publication hold a shared gate from durable creation through client projection publication; membership removal waits for that publication before checking its private thread observation under the client-store lock. A concurrent new execution, including one created after an empty-history observation, returns 409 without removing membership or stopping the unobserved execution. Persistent participants may expose latest_assignment_id from their latest retained thread regardless of execution state; this optional removal observation does not occupy runtime capacity."}
+      {
+        "name": "assign-agent",
+        "detail": "POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment."
+      },
+      {
+        "name": "send-thread-message",
+        "detail": "POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run."
+      },
+      {
+        "name": "stop-agent",
+        "detail": "POST the task-scoped v2 stop endpoint, preferably including assignment_id. The UI should close the work immediately from control-plane truth; daemon acknowledgement is eventual."
+      },
+      {
+        "name": "delete-agent",
+        "detail": "DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed. The server observes the latest retained thread from the same snapshot used to cancel this task/Agent's executions. Task-scoped client assignment and follow-up publication hold a shared gate from durable creation through client projection publication; membership removal waits for that publication before checking its private thread observation under the client-store lock. A concurrent new execution, including one created after an empty-history observation, returns 409 without removing membership or stopping the unobserved execution. Persistent participants may expose latest_assignment_id from their latest retained thread regardless of execution state; this optional removal observation does not occupy runtime capacity."
+      }
     ],
     "sse_handling_rules": [
       "Open one task-level SSE stream from the v2 thread-stream-subscription response.",
@@ -171,7 +371,13 @@
       "Do not revive a terminal assignment when a late runtime progress event arrives.",
       "If v3 thread history has no active_stream, the client must not keep a local running spinner for that task."
     ],
-    "terminal_states": ["completed","failed","stopped","cancelled","timeout"],
+    "terminal_states": [
+      "completed",
+      "failed",
+      "stopped",
+      "cancelled",
+      "timeout"
+    ],
     "checklist": [
       "v3-read-model",
       "conversation-id-card-key",
@@ -195,45 +401,351 @@
     ]
   },
   "source_checks": [
-    {"name":"react-query-generator-drift","file":"tools/reactquerygen/drift_test.go","contains":["TestGenerateReactQueryClientDoesNotDrift","generateReact"]},
-    {"name":"react-query-generator-metadata","file":"tools/reactquerygen/client_metadata_projection_test.go","contains":["TestAIAgentClientMetadataFlowsThroughContractProjections","assertRequiredClientMetadataFields"]},
-    {"name":"react-query-generator-required-fields","file":"tools/reactquerygen/client_metadata_required_test.go","contains":["assignAIAgentTask","invalidates"]},
-    {"name":"generated-client-handoff-files","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody","assertGeneratedClientHandoffFiles"]},
-    {"name":"generated-client-handoff-branch","file":"tools/generatedclienthandoff/generated_files_test.go","contains":["TestGeneratedClientHandoffRejectsNonRiidoWorkBranch","Riido work branchName"]},
-    {"name":"black-box-smoke","file":"internal/riidoaiserver/ai_agent_client_generated_smoke_test.go","contains":["TestHTTPAIAgentClientGeneratedEndpointSmokeV1","TestHTTPAIAgentClientGeneratedEndpointSmokeV2","TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"]},
-    {"name":"thread-history-v3-api","file":"internal/riidoaiserver/ai_agent_client_thread_history_api.go","contains":["ConversationID","ParentThreadID","AgentSnapshotID","AuthorPrincipalID","Messages","AgentSnapshots"]},
-    {"name":"thread-history-v3-projection","file":"internal/riidoaiserver/ai_agent_client_thread_history_projection.go","contains":["taskThreadConversationID","taskThreadParentThreadID","taskThreadHistoryMessagesLocked","AgentSnapshots"]},
-    {"name":"thread-history-v3-queued-status-filter","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go","contains":["suppressSupersededQueuedHistoryMessages","AgentTaskCommentQueuedByBusyAgent","historyMessageIsQueuedStatus"]},
-    {"name":"thread-history-v3-queued-status-state","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state.go","contains":["threadIsActivelyRunning","AgentWorkStatusRunning","AgentAssignmentStateRunning"]},
-    {"name":"thread-history-v3-queued-stream-filter","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_stream.go","contains":["queuedThreadIsSupersededByRunningConversation","AgentAssignmentStateQueued","taskThreadHistoryConversationIsRunning"]},
-    {"name":"thread-history-v3-queued-status-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go","contains":["TestAIAgentTaskThreadHistoryHidesSupersededBusyQueuedMessage","TestAIAgentTaskThreadHistoryHidesCurrentBusyQueuedMessage"]},
-    {"name":"thread-history-v3-queued-status-state-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state_test.go","contains":["TestAIAgentTaskThreadHistoryHidesQueuedMessageWhenConversationIsRunning"]},
-    {"name":"thread-history-v3-queued-stream-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go","contains":["TestAIAgentTaskThreadHistoryClearsQueuedStreamWhenConversationRuns","TestAIAgentTaskThreadHistoryActiveStreamPrefersRunning"]},
-    {"name":"assignment-participant-stability-test","file":"internal/riidoaiserver/ai_agent_client_http_assignment_participant_stability_test.go","contains":["TestHTTPAssignmentKeepsParticipantWhileDurablyQueued","AssignmentStateQueued","ActiveStream"]},
-    {"name":"assignable-runtime-binding-filter","file":"internal/riidoaiserver/ai_agent_client_assignable_runtime_filter.go","contains":["runtimeBoundAssignableAgents","resolveAgentRuntimeFact"]},
-    {"name":"assignable-runtime-binding-test","file":"internal/riidoaiserver/ai_agent_client_http_assignable_runtime_binding_test.go","contains":["TestHTTPAIAgentClientAssignableAgentsMatchAssignmentRuntimeValidation","agent-owned-claude","agent-owned-codex"]},
-    {"name":"thread-history-v3-conversation-test","file":"internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go","contains":["assertConversationFollowup","ConversationID","ParentThreadID","assertConversationReassignment"]},
-    {"name":"thread-history-v3-intent-chain-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_full_chain_assert_test.go","contains":["assertNestedConversationFollowup","assertDraftCopywritingComplete"]},
-    {"name":"thread-history-v3-intent-handoff-test","file":"internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go","contains":["TestAIAgentIntentDialogueCanHandoffAfterProviderLimit","assertConversationReassignment","assertFollowupResearchLimit"]},
-    {"name":"thread-history-v3-http-intent-dialogue","file":"internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go","contains":["TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline","postIntentDialogueThreadMessage","recordIntentDialogueCompleted","assertFollowupResearchLimit"]},
-    {"name":"thread-history-v3-terminal-active-stream-test","file":"internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go","contains":["TestHTTPAIAgentClientV3TerminalHistoryOmitsActiveStream","terminal-only v3 history must not expose active_stream","terminal thread must not carry per-thread active_stream"]},
-    {"name":"terminal-sse-priority-test","file":"internal/riidoaiserver/ai_agent_client_terminal_sse_priority_test.go","contains":["TestAIAgentClientTerminalProgressDisplacesBufferedProgress","terminalCompensations","buffered terminal progress was not prioritized"]},
-    {"name":"terminal-sse-replay-test","file":"internal/riidoaiserver/ai_agent_client_terminal_sse_replay_test.go","contains":["TestAIAgentClientSubscribeCompensatesMissingRecentTerminalProgressOnce","countTerminalProgressForThread"]},
-    {"name":"sse-replay-cursor","file":"internal/riidoaiserver/ai_agent_client_event_replay_cursor.go","contains":["aiAgentClientReplayEventsAfterLastEventID","strconv.ParseInt","event.Seq > cursor"]},
-    {"name":"sse-replay-cursor-handler","file":"internal/riidoaiserver/ai_agent_client_events_handler.go","contains":["Last-Event-ID","aiAgentClientReplayEventsAfterLastEventID"]},
-    {"name":"sse-replay-cursor-test","file":"internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go","contains":["TestAIAgentClientReplayEventsAfterLastEventID","TestAIAgentClientReplayEventsIgnoreInvalidLastEventID","TestHTTPAIAgentClientEventsHonorsLastEventID"]},
-    {"name":"sse-lifecycle-logging","file":"internal/riidoaiserver/ai_agent_client_sse_logging.go","contains":["event=stream_open","replay_cursor_present=","event=stream_closed","event=fanout_overflow_summary","terminal_compensations="]},
-    {"name":"sse-lifecycle-logging-test","file":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go","contains":["TestAIAgentClientSSELifecycleLogsReasonWithoutQuery","replay_cursor_present=true","SSE lifecycle log exposed query"]},
-    {"name":"non-command-component-intent-gate-test","file":"internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go","contains":["TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument","TestAssignmentPromptKeepsExplicitTitleWithPreferenceDocumentExecutable"]},
-    {"name":"thread-history-v3-http","file":"internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go","contains":["/v3/client/workspaces/","conversation_id missing"]},
-    {"name":"thread-history-v3-handoff-types","file":"tools/aiagentclientapi/types_thread_history_v3.go","contains":["ImplementationSteps","ResponseShapes","OrderingRules","MutationRules"]},
-    {"name":"thread-history-v3-handoff-renderer","file":"tools/aiagentclientapi/render_thread_history_v3.go","contains":["Thread History v3 Frontend Flow","Thread History v3 Response Model","Thread History v3 Message Ordering"]},
-    {"name":"thread-history-v3-handoff-verifier-rules","file":"tools/aiagentclientapi/verify_thread_history_v3_rules.go","contains":["requireNamedRules","requireShape","hasString"]},
-    {"name":"thread-history-v2-actions","file":"internal/riidoaiserver/ai_agent_client_task_router_handler.go","contains":["agent-assignments","thread-stream-subscription","threads/","/messages"]},
-    {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envAIAgentClientDev","RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"]},
-    {"name":"device-client-status-projection","file":"internal/riidoaiserver/device_client_status_projection.go","contains":["projectDeviceClientStatusLocked","classifyDeviceAgentCapability","DeviceAgentCapabilityUpdateRequired"]},
-    {"name":"device-client-status-http-test","file":"internal/riidoaiserver/ai_agent_client_http_device_client_status_test.go","contains":["TestHTTPAIAgentClientDevicesIncludesVersionGuidance","MinimumDaemonVersion","DownloadURL"]},
-    {"name":"workflow","file":".github/workflows/ai-agent-client-api.yml","contains":["Verify React Query generation drift","Verify generated client handoff","Verify React Query generator command"]}
+    {
+      "name": "react-query-generator-drift",
+      "file": "tools/reactquerygen/drift_test.go",
+      "contains": [
+        "TestGenerateReactQueryClientDoesNotDrift",
+        "generateReact"
+      ]
+    },
+    {
+      "name": "react-query-generator-metadata",
+      "file": "tools/reactquerygen/client_metadata_projection_test.go",
+      "contains": [
+        "TestAIAgentClientMetadataFlowsThroughContractProjections",
+        "assertRequiredClientMetadataFields"
+      ]
+    },
+    {
+      "name": "react-query-generator-required-fields",
+      "file": "tools/reactquerygen/client_metadata_required_test.go",
+      "contains": [
+        "assignAIAgentTask",
+        "invalidates"
+      ]
+    },
+    {
+      "name": "generated-client-handoff-files",
+      "file": "tools/generatedclienthandoff/generated_files_test.go",
+      "contains": [
+        "TestGeneratedClientHandoffWritesManifestHistoryReadmeAndPRBody",
+        "assertGeneratedClientHandoffFiles"
+      ]
+    },
+    {
+      "name": "generated-client-handoff-branch",
+      "file": "tools/generatedclienthandoff/generated_files_test.go",
+      "contains": [
+        "TestGeneratedClientHandoffRejectsNonRiidoWorkBranch",
+        "Riido work branchName"
+      ]
+    },
+    {
+      "name": "black-box-smoke",
+      "file": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go",
+      "contains": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1",
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2",
+        "TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI"
+      ]
+    },
+    {
+      "name": "thread-history-v3-api",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_api.go",
+      "contains": [
+        "ConversationID",
+        "ParentThreadID",
+        "AgentSnapshotID",
+        "AuthorPrincipalID",
+        "Messages",
+        "AgentSnapshots"
+      ]
+    },
+    {
+      "name": "thread-history-v3-projection",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go",
+      "contains": [
+        "taskThreadConversationID",
+        "taskThreadParentThreadID",
+        "taskThreadHistoryMessagesLocked",
+        "AgentSnapshots"
+      ]
+    },
+    {
+      "name": "thread-history-v3-queued-status-filter",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status.go",
+      "contains": [
+        "suppressSupersededQueuedHistoryMessages",
+        "AgentTaskCommentQueuedByBusyAgent",
+        "historyMessageIsQueuedStatus"
+      ]
+    },
+    {
+      "name": "thread-history-v3-queued-status-state",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state.go",
+      "contains": [
+        "threadIsActivelyRunning",
+        "AgentWorkStatusRunning",
+        "AgentAssignmentStateRunning"
+      ]
+    },
+    {
+      "name": "thread-history-v3-queued-stream-filter",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream.go",
+      "contains": [
+        "queuedThreadIsSupersededByRunningConversation",
+        "AgentAssignmentStateQueued",
+        "taskThreadHistoryConversationIsRunning"
+      ]
+    },
+    {
+      "name": "thread-history-v3-queued-status-test",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_test.go",
+      "contains": [
+        "TestAIAgentTaskThreadHistoryHidesSupersededBusyQueuedMessage",
+        "TestAIAgentTaskThreadHistoryHidesCurrentBusyQueuedMessage"
+      ]
+    },
+    {
+      "name": "thread-history-v3-queued-status-state-test",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_queued_status_state_test.go",
+      "contains": [
+        "TestAIAgentTaskThreadHistoryHidesQueuedMessageWhenConversationIsRunning"
+      ]
+    },
+    {
+      "name": "thread-history-v3-queued-stream-test",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_queued_stream_test.go",
+      "contains": [
+        "TestAIAgentTaskThreadHistoryClearsQueuedStreamWhenConversationRuns",
+        "TestAIAgentTaskThreadHistoryActiveStreamPrefersRunning"
+      ]
+    },
+    {
+      "name": "assignment-participant-stability-test",
+      "file": "internal/riidoaiserver/ai_agent_client_http_assignment_participant_stability_test.go",
+      "contains": [
+        "TestHTTPAssignmentKeepsParticipantWhileDurablyQueued",
+        "AssignmentStateQueued",
+        "ActiveStream"
+      ]
+    },
+    {
+      "name": "assignable-runtime-binding-filter",
+      "file": "internal/riidoaiserver/ai_agent_client_assignable_runtime_filter.go",
+      "contains": [
+        "runtimeBoundAssignableAgents",
+        "resolveAgentRuntimeFact"
+      ]
+    },
+    {
+      "name": "assignable-runtime-binding-test",
+      "file": "internal/riidoaiserver/ai_agent_client_http_assignable_runtime_binding_test.go",
+      "contains": [
+        "TestHTTPAIAgentClientAssignableAgentsMatchAssignmentRuntimeValidation",
+        "agent-owned-claude",
+        "agent-owned-codex"
+      ]
+    },
+    {
+      "name": "thread-history-v3-conversation-test",
+      "file": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go",
+      "contains": [
+        "assertConversationFollowup",
+        "ConversationID",
+        "ParentThreadID",
+        "assertConversationReassignment"
+      ]
+    },
+    {
+      "name": "thread-history-v3-intent-chain-test",
+      "file": "internal/riidoaiserver/ai_agent_intent_dialogue_full_chain_assert_test.go",
+      "contains": [
+        "assertNestedConversationFollowup",
+        "assertDraftCopywritingComplete"
+      ]
+    },
+    {
+      "name": "thread-history-v3-intent-handoff-test",
+      "file": "internal/riidoaiserver/ai_agent_intent_dialogue_handoff_scenario_test.go",
+      "contains": [
+        "TestAIAgentIntentDialogueCanHandoffAfterProviderLimit",
+        "assertConversationReassignment",
+        "assertFollowupResearchLimit"
+      ]
+    },
+    {
+      "name": "thread-history-v3-http-intent-dialogue",
+      "file": "internal/riidoaiserver/ai_agent_client_http_intent_dialogue_v3_test.go",
+      "contains": [
+        "TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline",
+        "postIntentDialogueThreadMessage",
+        "recordIntentDialogueCompleted",
+        "assertFollowupResearchLimit"
+      ]
+    },
+    {
+      "name": "thread-history-v3-terminal-active-stream-test",
+      "file": "internal/riidoaiserver/ai_agent_client_http_v3_terminal_stream_test.go",
+      "contains": [
+        "TestHTTPAIAgentClientV3TerminalHistoryOmitsActiveStream",
+        "terminal-only v3 history must not expose active_stream",
+        "terminal thread must not carry per-thread active_stream"
+      ]
+    },
+    {
+      "name": "terminal-sse-priority-test",
+      "file": "internal/riidoaiserver/ai_agent_client_terminal_sse_priority_test.go",
+      "contains": [
+        "TestAIAgentClientTerminalProgressDisplacesBufferedProgress",
+        "terminalCompensations",
+        "buffered terminal progress was not prioritized"
+      ]
+    },
+    {
+      "name": "terminal-sse-replay-test",
+      "file": "internal/riidoaiserver/ai_agent_client_terminal_sse_replay_test.go",
+      "contains": [
+        "TestAIAgentClientSubscribeCompensatesMissingRecentTerminalProgressOnce",
+        "countTerminalProgressForThread"
+      ]
+    },
+    {
+      "name": "sse-replay-cursor",
+      "file": "internal/riidoaiserver/ai_agent_client_event_replay_cursor.go",
+      "contains": [
+        "aiAgentClientReplayEventsAfterLastEventID",
+        "strconv.ParseInt",
+        "event.Seq > cursor"
+      ]
+    },
+    {
+      "name": "sse-replay-cursor-handler",
+      "file": "internal/riidoaiserver/ai_agent_client_events_handler.go",
+      "contains": [
+        "Last-Event-ID",
+        "aiAgentClientReplayEventsAfterLastEventID"
+      ]
+    },
+    {
+      "name": "sse-replay-cursor-test",
+      "file": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go",
+      "contains": [
+        "TestAIAgentClientReplayEventsAfterLastEventID",
+        "TestAIAgentClientReplayEventsIgnoreInvalidLastEventID",
+        "TestHTTPAIAgentClientEventsHonorsLastEventID"
+      ]
+    },
+    {
+      "name": "sse-lifecycle-logging",
+      "file": "internal/riidoaiserver/ai_agent_client_sse_logging.go",
+      "contains": [
+        "event=stream_open",
+        "replay_cursor_present=",
+        "event=stream_closed",
+        "event=fanout_overflow_summary",
+        "terminal_compensations="
+      ]
+    },
+    {
+      "name": "sse-lifecycle-logging-test",
+      "file": "internal/riidoaiserver/ai_agent_client_sse_logging_test.go",
+      "contains": [
+        "TestAIAgentClientSSELifecycleLogsReasonWithoutQuery",
+        "replay_cursor_present=true",
+        "SSE lifecycle log exposed query"
+      ]
+    },
+    {
+      "name": "non-command-component-intent-gate-test",
+      "file": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go",
+      "contains": [
+        "TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument",
+        "TestAssignmentPromptKeepsExplicitTitleWithPreferenceDocumentExecutable"
+      ]
+    },
+    {
+      "name": "thread-history-v3-http",
+      "file": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go",
+      "contains": [
+        "/v3/client/workspaces/",
+        "conversation_id missing"
+      ]
+    },
+    {
+      "name": "thread-history-v3-handoff-types",
+      "file": "tools/aiagentclientapi/types_thread_history_v3.go",
+      "contains": [
+        "ImplementationSteps",
+        "ResponseShapes",
+        "OrderingRules",
+        "MutationRules"
+      ]
+    },
+    {
+      "name": "thread-history-v3-handoff-renderer",
+      "file": "tools/aiagentclientapi/render_thread_history_v3.go",
+      "contains": [
+        "Thread History v3 Frontend Flow",
+        "Thread History v3 Response Model",
+        "Thread History v3 Message Ordering"
+      ]
+    },
+    {
+      "name": "thread-history-v3-handoff-verifier-rules",
+      "file": "tools/aiagentclientapi/verify_thread_history_v3_rules.go",
+      "contains": [
+        "requireNamedRules",
+        "requireShape",
+        "hasString"
+      ]
+    },
+    {
+      "name": "thread-history-v2-actions",
+      "file": "internal/riidoaiserver/ai_agent_client_task_router_handler.go",
+      "contains": [
+        "agent-assignments",
+        "thread-stream-subscription",
+        "threads/",
+        "/messages"
+      ]
+    },
+    {
+      "name": "runtime-env",
+      "file": "cmd/riido_ai_server/env_names.go",
+      "contains": [
+        "envAIAgentClientDev",
+        "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
+      ]
+    },
+    {
+      "name": "device-client-status-projection",
+      "file": "internal/riidoaiserver/device_client_status_projection.go",
+      "contains": [
+        "projectDeviceClientStatusLocked",
+        "classifyDeviceAgentCapability",
+        "DeviceAgentCapabilityUpdateRequired"
+      ]
+    },
+    {
+      "name": "device-client-status-http-test",
+      "file": "internal/riidoaiserver/ai_agent_client_http_device_client_status_test.go",
+      "contains": [
+        "TestHTTPAIAgentClientDevicesIncludesVersionGuidance",
+        "MinimumDaemonVersion",
+        "DownloadURL"
+      ]
+    },
+    {
+      "name": "workflow",
+      "file": ".github/workflows/ai-agent-client-api.yml",
+      "contains": [
+        "Verify React Query generation drift",
+        "Verify generated client handoff",
+        "Verify React Query generator command"
+      ]
+    }
   ],
   "loop": {
     "observation": "The AI Agent client API doc repeated contract, generated-client, smoke, deployment, and runtime rules as prose while the machine-readable mirrors already existed.",
@@ -242,5 +754,11 @@
     "evaluate": "The verifier checks contract file presence, OpenAPI operation counts, v1/v2 split, generated path coverage, smoke matrix parity, source anchors, generated doc freshness, and CLI evidence output.",
     "retrospective": "This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts."
   },
-  "non_goals": ["canonical riido-contracts changes","frontend hook policy","Figma interpretation","live AWS deployment","production persistence topology"]
+  "non_goals": [
+    "canonical riido-contracts changes",
+    "frontend hook policy",
+    "Figma interpretation",
+    "live AWS deployment",
+    "production persistence topology"
+  ]
 }
