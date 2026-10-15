@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 	"time"
 )
@@ -13,7 +14,8 @@ import (
 func TestRecoveryJournalThenTerminalHTTPPreservesTaskCompletion(t *testing.T) {
 	for _, terminal := range []AssignmentState{AssignmentCompleted, AssignmentFailed} {
 		t.Run(string(terminal), func(t *testing.T) {
-			ctx := context.Background()
+			recorder := &recordingTraceRecorder{}
+			ctx := WithTraceRecorder(context.Background(), recorder)
 			client := NewDevelopmentAIAgentClientStore()
 			binding, ok := client.LookupDaemonBinding("agent-owned-codex")
 			if !ok {
@@ -35,6 +37,7 @@ func TestRecoveryJournalThenTerminalHTTPPreservesTaskCompletion(t *testing.T) {
 			terminalEvent := AgentEventRequest{AssignmentID: current.ID, TaskID: current.TaskID, DaemonID: binding.DaemonID, DeviceID: binding.DeviceID, RuntimeID: binding.RuntimeID, State: terminal, EventType: EventAssignmentCompleted, Message: "result"}
 			if terminal == AssignmentFailed {
 				terminalEvent.EventType = EventAssignmentFailed
+				terminalEvent.Metadata = map[string]string{"assignment_result_status": "failed", "assignment_failure_category": "provider_result_failed"}
 			}
 			for _, event := range []AgentEventRequest{recovery, terminalEvent} {
 				body, err := json.Marshal(event)
@@ -44,7 +47,7 @@ func TestRecoveryJournalThenTerminalHTTPPreservesTaskCompletion(t *testing.T) {
 				req := httptest.NewRequest(http.MethodPost, "/v1/agents/"+current.AgentID+"/events", bytes.NewReader(body))
 				req.Header.Set("Authorization", "Bearer assignment-token")
 				response := httptest.NewRecorder()
-				server.handleAgentEvent(response, req, current.AgentID)
+				server.handleAgentEvent(response, req.WithContext(ctx), current.AgentID)
 				if response.Code != http.StatusOK {
 					t.Fatalf("event %s rejected: status=%d body=%s", event.EventType, response.Code, response.Body.String())
 				}
@@ -58,6 +61,9 @@ func TestRecoveryJournalThenTerminalHTTPPreservesTaskCompletion(t *testing.T) {
 			}
 			if ops.projection.Assignment.State != terminal || len(ops.records) != 2 {
 				t.Fatal("terminal execution did not commit after recovery journal")
+			}
+			if got := slices.Contains(traceSpanNames(recorder.snapshot()), "assignment failure committed"); got != (terminal == AssignmentFailed) {
+				t.Fatal("HTTP 200 terminal acknowledgment lost committed failure trace evidence")
 			}
 		})
 	}

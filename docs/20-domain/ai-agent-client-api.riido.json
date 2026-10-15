@@ -91,7 +91,7 @@
       "Recovery policy is immutable for a RequestID and copied independently through assignment, durable projection, snapshot and poll responses; generic component-task assignment cannot authorize fallback providers",
       "Recovery observations use existing riido_log events with bounded RecoveryContext metadata, active assignment/device/runtime/lease and assignment_event_key fences; cancelled or terminal runs cannot grant a new checking attempt",
       "Lease tokens authenticate a recovery event before deduplication; recovery journals retain only bounded context and event key, without tokens, raw messages or unrelated metadata, and never overwrite assignment state",
-      "Provider recovery logs and OTel spans are emitted once after conditional durable commit; replay and failed/conflicting speculative writes do not emit a committed recovery transition; a private CAS-preserved watermark holds at most sixteen hashed receipts across replicas, preserves exact replay ACK identity, and only rechecks the selected candidate for new checking/switching dispatch approval"
+      "Provider recovery logs and OTel spans are emitted once after conditional durable commit; replay and failed/conflicting speculative writes do not emit a committed recovery transition; a private CAS-preserved watermark holds at most sixteen hashed receipts across replicas, preserves exact replay ACK identity, and only rechecks the selected candidate for new checking/switching dispatch approval; committed execution failures add a fixed-message ERROR child span for tail retention, excluding cancellation and needs_input, and its riido.assignment.provider is the original lease provider rather than an inferred fallback provider"
     ]
   },
   "thread_history_v3_frontend": {

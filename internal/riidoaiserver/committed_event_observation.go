@@ -6,5 +6,6 @@ import "context"
 // a speculative trial or retrying a failed conditional write.
 func observeCommittedAssignmentEvent(ctx context.Context, state *storeState, event TaskEvent) {
 	logAssignmentFailure(state, event, ctx)
+	traceCommittedAssignmentFailure(ctx, state, event)
 	observeProviderRecoveryEvent(ctx, event)
 }
