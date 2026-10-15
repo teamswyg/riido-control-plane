@@ -114,16 +114,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `4af6fc6f5e9f` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `store_snapshot_file_outbox_guard` | `tools/storesnapshotoutbox` | 100% | `069f1635d5a6` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `0e8ff6bfaa30` | `react_query_generator_must_preserve_generated_client_surface` |
+| `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `b31f8ce1e2cf` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `48085b0032cf` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `c11c819ee098` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `3584`
-- tracked files: `3584`
+- Go files: `3600`
+- tracked files: `3600`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -169,16 +169,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3584`
-- unique syntax hashes: `3381`
+- tracked files: `3600`
+- unique syntax hashes: `3397`
 - compression gain: `203`
-- analysis reduction: `5.66%`
+- analysis reduction: `5.63%`
 - collision count: `0`
-- relocation mappings: `3584`
+- relocation mappings: `3600`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `111`
 - missing golden commands: `0`
-- efficiency score: `566`
+- efficiency score: `563`
 - compression score: `203`
-- weighted score: `769`
+- weighted score: `766`

@@ -15,9 +15,11 @@ func (*scopedDashboardStore) Close() error { return nil }
 func (*scopedDashboardStore) LoadAssignmentOperations(context.Context) ([]AssignmentOperationRecord, error) {
 	panic("dashboard must not replay global journal")
 }
+
 func (s *scopedDashboardStore) LoadAgentAssignmentOperations(_ context.Context, id string) ([]AssignmentOperationRecord, error) {
 	return s.records, nil
 }
+
 func TestAgentDashboardUsesScopedHistoryAndRetainsStartupHistory(t *testing.T) {
 	now := time.Now().UTC()
 	state := newStoreState()

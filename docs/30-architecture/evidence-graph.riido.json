@@ -20,6 +20,52 @@
   ],
   "chains": [
     {
+      "id": "agent_dashboard_scoped_read_and_pagination_5830",
+      "observation": "Each dashboard refresh replayed the global assignment journal through the mutation actor, and the generated client omitted the page query argument.",
+      "hypothesis": "An Agent-scoped durable history partition read outside the mutation actor, merged with the already-loaded legacy history, prevents unrelated journal work from blocking claims and preserves prior history without a live backfill.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "react_query_generator_must_preserve_generated_client_surface"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_agent_history_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_dashboard_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/reactquerygen/operation_writer.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_agent_history_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_dashboard_scoped_history_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/query_parameter_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Retain startup-loaded legacy history, read new Agent journal rows with consistent partition queries and request deadlines, and keep task permission filtering before counts/pagination. Mutation acknowledgment retries a failed history mirror; sparse queue indexes and offline notification delivery are unchanged. Typed optional page reaches both the URL and query key. No frontend deployment or newly executed model task is claimed.",
+      "next_loop": "ai_agent_load_harness"
+    },
+    {
       "id": "agent_notification_retry_delivery_5829",
       "observation": "Live-only task notifications could be dropped behind a full progress buffer, and a committed assignment event could receive HTTP success before its client projection persisted. Legacy needs-input events also used an undeclared assignment state.",
       "hypothesis": "Priority displacement and retryable projection failures preserve notifications without changing existing SSE replay cursors or exposing task content to other recipients.",

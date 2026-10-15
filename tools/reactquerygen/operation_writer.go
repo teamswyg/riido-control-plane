@@ -69,9 +69,10 @@ func writePathParams(b *strings.Builder, op routeOperation, info operationInfo) 
 				if !p.Required {
 					optional = "?"
 				}
-				if p.Schema.Type == "integer" || p.Schema.Type == "number" {
+				switch p.Schema.Type {
+				case "integer", "number":
 					typ = "number"
-				} else if p.Schema.Type == "boolean" {
+				case "boolean":
 					typ = "boolean"
 				}
 			}
