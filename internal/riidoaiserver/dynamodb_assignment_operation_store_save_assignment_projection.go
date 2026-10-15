@@ -40,6 +40,9 @@ func (s *DynamoDBAssignmentOperationStore) saveAssignmentProjection(ctx context.
 	}
 	_ = json.Unmarshal(apiErr.body, &dynamoErr)
 	if strings.Contains(dynamoErr.Type, "ConditionalCheckFailedException") {
+		if err := s.preserveRecoveryProjection(ctx, record, credentials); err != nil {
+			return err
+		}
 		if err := s.releaseAgentActiveAssignmentIfTerminal(ctx, record, credentials); err != nil {
 			return err
 		}

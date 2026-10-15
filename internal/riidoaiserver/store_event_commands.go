@@ -1,6 +1,9 @@
 package riidoaiserver
 
+import "context"
+
 type eventCmd struct {
+	ctx     context.Context
 	agentID string
 	req     AgentEventRequest
 	reply   chan eventResult

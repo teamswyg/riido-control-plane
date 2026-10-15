@@ -1,6 +1,10 @@
 package riidoaiserver
 
-import "context"
+import (
+	"context"
+
+	"github.com/teamswyg/riido-contracts/assignment"
+)
 
 func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context.Context, agentID string, req AgentEventRequest, event TaskEvent) error {
 	if err := ctx.Err(); err != nil {
@@ -11,6 +15,9 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 		return err
 	}
 
+	if assignment.RecoveryContextFromMetadata(input.Metadata) != nil {
+		return nil
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	agent, ok := s.agents[input.AgentID]

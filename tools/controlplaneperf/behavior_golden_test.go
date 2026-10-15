@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const controlPlanePerformanceGoldenSHA256 = "9e45c92c8bea6fec85c75111a78bbf90443f3179a4261ec55027c24fa4fb8492"
+const controlPlanePerformanceGoldenSHA256 = "14cb9aa0d8b9c1dbac9812e4d7f905e391840d2be7063882317195097c09ac12"
 
 func TestControlPlanePerformanceBehaviorGolden(t *testing.T) {
 	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-24T00:00:00Z")

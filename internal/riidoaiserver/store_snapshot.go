@@ -154,7 +154,7 @@ func snapshotFromState(state *storeState, savedAt time.Time) StoreSnapshot {
 
 	assignments := make([]Assignment, 0, len(state.assignments))
 	for _, assignment := range state.assignments {
-		assignments = append(assignments, assignment)
+		assignments = append(assignments, *copyAssignment(assignment))
 	}
 	sort.Slice(assignments, func(i, j int) bool { return assignments[i].ID < assignments[j].ID })
 
@@ -225,7 +225,7 @@ func stateFromSnapshot(snapshot StoreSnapshot) (storeState, error) {
 		if assignment.ID == "" {
 			return storeState{}, errors.New("store snapshot assignment id is required")
 		}
-		state.assignments[assignment.ID] = assignment
+		state.assignments[assignment.ID] = *copyAssignment(assignment)
 	}
 	for agentID, ids := range snapshot.AgentAssignments {
 		state.agentAssignments[agentID] = append([]string(nil), ids...)

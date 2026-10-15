@@ -8,10 +8,12 @@ import (
 )
 
 type conditionalTestOperations struct {
-	mu          sync.Mutex
-	projection  AssignmentProjection
-	records     []AssignmentOperationRecord
-	claimOnSave bool
+	mu                 sync.Mutex
+	projection         AssignmentProjection
+	records            []AssignmentOperationRecord
+	claimOnSave        bool
+	saveErr            error
+	conflictsRemaining int
 }
 
 func (s *conditionalTestOperations) Close() error { return nil }
@@ -24,6 +26,13 @@ func (s *conditionalTestOperations) LoadAssignmentProjection(context.Context, st
 func (s *conditionalTestOperations) SaveAssignmentOperation(_ context.Context, record AssignmentOperationRecord) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.saveErr != nil {
+		return s.saveErr
+	}
+	if s.conflictsRemaining > 0 {
+		s.conflictsRemaining--
+		return errAssignmentProjectionConflict
+	}
 	if s.claimOnSave {
 		s.claimOnSave = false
 		s.projection.Assignment.State = AssignmentLeased
@@ -35,7 +44,11 @@ func (s *conditionalTestOperations) SaveAssignmentOperation(_ context.Context, r
 		return errAssignmentProjectionConflict
 	}
 	s.records = append(s.records, record)
-	s.projection = AssignmentProjection{Assignment: record.Assignment, LastEventSeq: assignmentOperationLastEventSeq(record)}
+	watermark, err := recoveryWatermarkForRecord(record)
+	if err != nil {
+		return err
+	}
+	s.projection = AssignmentProjection{Assignment: record.Assignment, LastEventSeq: assignmentOperationLastEventSeq(record), Recovery: watermark}
 	return nil
 }
 

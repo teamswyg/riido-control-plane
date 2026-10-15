@@ -6,7 +6,10 @@ import (
 	"strings"
 )
 
-type aiAgentWorkspaceIDContextKey struct{}
+type (
+	aiAgentWorkspaceIDContextKey struct{}
+	requestLogRouteContextKey    struct{}
+)
 
 func aiAgentWorkspaceIDFromRequest(r *http.Request) string {
 	if r == nil {
@@ -21,7 +24,8 @@ func aiAgentWorkspaceIDFromRequest(r *http.Request) string {
 func requestWithAIAgentWorkspaceIDAndPath(r *http.Request, workspaceID, path string) *http.Request {
 	urlCopy := *r.URL
 	urlCopy.Path = path
-	next := r.Clone(context.WithValue(r.Context(), aiAgentWorkspaceIDContextKey{}, strings.TrimSpace(workspaceID)))
+	ctx := context.WithValue(r.Context(), requestLogRouteContextKey{}, traceHTTPRoute(r.Method, r.URL.Path))
+	next := r.Clone(context.WithValue(ctx, aiAgentWorkspaceIDContextKey{}, strings.TrimSpace(workspaceID)))
 	next.URL = &urlCopy
 	return next
 }

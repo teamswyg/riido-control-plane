@@ -55,6 +55,7 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 	}
 	result, err := s.config.Authorizer.Authorize(r.Context(), token, req)
 	if err != nil {
+		logRequestFailure(r, "authorization", err)
 		switch {
 		case errors.Is(err, ErrAuthorizationForbidden):
 			writeError(w, http.StatusForbidden, "forbidden")

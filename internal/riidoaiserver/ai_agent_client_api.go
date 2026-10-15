@@ -390,6 +390,8 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
+	RecoveryPolicy *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
+
 	RequestID                       string              `json:"request_id,omitempty"`
 	Instruction                     string              `json:"instruction,omitempty"`
 	SourceCommentID                 string              `json:"-"`

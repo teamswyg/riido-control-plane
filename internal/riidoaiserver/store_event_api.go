@@ -13,7 +13,7 @@ func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentE
 		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan eventResult, 1)
-	if err := s.send(ctx, eventCmd{agentID: agentID, req: req, reply: reply}); err != nil {
+	if err := s.send(ctx, eventCmd{ctx: ctx, agentID: agentID, req: req, reply: reply}); err != nil {
 		return AgentEventResponse{}, err
 	}
 	select {

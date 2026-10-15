@@ -22,5 +22,9 @@ func assignmentProjectionFromDynamoDBItem(item map[string]map[string]string) (as
 	if err != nil {
 		return assignmentProjectionRecord{}, fmt.Errorf("decode assignment projection last_event_seq: %w", err)
 	}
-	return assignmentProjectionRecord{Assignment: assignment, LastEventSeq: lastEventSeq}, nil
+	watermark, err := recoveryWatermarkFromJSON(dynamoDBStringValue(item, "recovery_watermark_json"), lastEventSeq)
+	if err != nil {
+		return assignmentProjectionRecord{}, err
+	}
+	return assignmentProjectionRecord{Assignment: assignment, LastEventSeq: lastEventSeq, Recovery: watermark}, nil
 }

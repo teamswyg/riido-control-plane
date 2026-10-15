@@ -17,7 +17,7 @@
   ],
   "records": [
     {"name": "AssignmentOperationRecord", "role": "append-only mutation plus emitted task events"},
-    {"name": "AssignmentProjection", "role": "durable assignment read projection"},
+    {"name": "AssignmentProjection", "role": "durable assignment read projection with private bounded recovery receipts; receipts are CAS-preserved and never appear in public Assignment JSON"},
     {"name": "AssignmentActiveLease", "role": "active assignment lease snapshot"},
     {"name": "AssignmentClaimResult", "role": "claim outcome plus operation evidence"}
   ],

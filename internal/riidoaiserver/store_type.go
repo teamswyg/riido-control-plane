@@ -13,6 +13,7 @@ type Store struct {
 	agentRegistry       AgentRegistry
 	operationMetrics    *StoreOperationMetrics
 	traceRecorder       TraceRecorder
+	recoveryFence       *recoveryWatermark
 
 	taskAgentExecutionGate taskAgentExecutionGate
 }

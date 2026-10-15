@@ -10,7 +10,7 @@ var errAssignmentProjectionConflict = errors.New("assignment changed concurrentl
 
 // Cancellation and daemon events share a conditional operation+projection commit.
 // Nothing is broadcast before the durable write has won the race.
-func (s *Store) mutateDurableAssignment(state *storeState, id string, kind AssignmentOperationType, mutate func(*Store, *storeState) (Assignment, error)) (Assignment, error) {
+func (s *Store) mutateDurableAssignment(state *storeState, id string, kind AssignmentOperationType, mutate func(*Store, *storeState) (Assignment, error), observe ...func(TaskEvent)) (Assignment, error) {
 	reader := s.operationStore.(AssignmentProjectionReader)
 	for range 3 {
 		expected, found, err := reader.LoadAssignmentProjection(context.Background(), id)
@@ -28,6 +28,7 @@ func (s *Store) mutateDurableAssignment(state *storeState, id string, kind Assig
 		before := trial.nextEventSeq
 		quiet := *s
 		quiet.outbox = nil
+		quiet.recoveryFence = expected.Recovery
 		assignment, err := mutate(&quiet, &trial)
 		if err != nil {
 			return Assignment{}, err
@@ -58,6 +59,9 @@ func (s *Store) mutateDurableAssignment(state *storeState, id string, kind Assig
 		state.agentEventsTotal = trial.agentEventsTotal
 		for _, event := range events {
 			s.appendRecordedEvent(state, event)
+			for _, observer := range observe {
+				observer(event)
+			}
 		}
 		s.signalAgentWaiters(state, assignment.AgentID)
 		return assignment, nil

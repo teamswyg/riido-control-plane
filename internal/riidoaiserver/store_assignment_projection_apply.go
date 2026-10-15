@@ -29,7 +29,7 @@ func (s *Store) applyClaimedAssignmentOperations(state *storeState, claim Assign
 }
 
 func applyAssignmentToState(state *storeState, assignment Assignment) {
-	state.assignments[assignment.ID] = assignment
+	state.assignments[assignment.ID] = *copyAssignment(assignment)
 	if seq := assignmentSequence(assignment.ID); seq > state.nextAssignmentSeq {
 		state.nextAssignmentSeq = seq
 	}

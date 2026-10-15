@@ -70,6 +70,9 @@ func (s *DynamoDBAssignmentOperationStore) saveTaskAgentCreation(ctx context.Con
 			return readErr
 		}
 		if found && existing.Assignment.RequestID == record.Assignment.RequestID && existing.Assignment.WorkspaceID == record.Assignment.WorkspaceID && existing.Assignment.CreatedBy == record.Assignment.CreatedBy && existing.Assignment.TaskID == record.TaskID && existing.Assignment.AgentID == record.AgentID {
+			if !sameRecoveryPolicy(existing.Assignment.RecoveryPolicy, record.Assignment.RecoveryPolicy) {
+				return errRecoveryPolicyChanged
+			}
 			return errIdentifiedExecutionExists
 		}
 	}

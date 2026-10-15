@@ -13,7 +13,7 @@ func TestDynamoDBAssignmentOperationStoreTreatsProjectionConflictAsIdempotent(t 
 	putCalls := 0
 	store, requests := newDynamoDBAssignmentOperationStoreHarness(t, dynamoDBAssignmentOperationStoreHarnessConfig{
 		Now:           fixedNow,
-		RequestBuffer: 3,
+		RequestBuffer: 4,
 		Handler: func(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("X-Amz-Target") != dynamoDBPutItemTarget {
 				_, _ = w.Write([]byte(`{}`))
@@ -35,6 +35,7 @@ func TestDynamoDBAssignmentOperationStoreTreatsProjectionConflictAsIdempotent(t 
 	}
 	assertDynamoDBTarget(t, <-requests, dynamoDBPutItemTarget)
 	assertDynamoDBTarget(t, <-requests, dynamoDBPutItemTarget)
+	assertDynamoDBTarget(t, <-requests, dynamoDBGetItemTarget)
 	assertDynamoDBTarget(t, <-requests, dynamoDBDeleteItemTarget)
 }
 

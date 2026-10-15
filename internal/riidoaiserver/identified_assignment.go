@@ -29,11 +29,17 @@ func (s *Store) assignIdentifiedRequest(state *storeState, taskID string, req As
 			return Assignment{}, err
 		}
 		if found {
+			if !sameRecoveryPolicy(projection.Assignment.RecoveryPolicy, req.RecoveryPolicy) {
+				return Assignment{}, errRecoveryPolicyChanged
+			}
 			applyAssignmentToState(state, projection.Assignment)
 			return projection.Assignment, nil
 		}
 	}
 	if existing, ok := state.assignments[assignmentID]; ok {
+		if !sameRecoveryPolicy(existing.RecoveryPolicy, req.RecoveryPolicy) {
+			return Assignment{}, errRecoveryPolicyChanged
+		}
 		return existing, nil
 	}
 	// Do not publish an accepted event or allow polling until persistence succeeds.
@@ -64,6 +70,9 @@ func (s *Store) assignIdentifiedRequest(state *storeState, taskID string, req As
 			return Assignment{}, readErr
 		}
 		if found {
+			if !sameRecoveryPolicy(projection.Assignment.RecoveryPolicy, req.RecoveryPolicy) {
+				return Assignment{}, errRecoveryPolicyChanged
+			}
 			assignment = projection.Assignment
 			applyAssignmentToState(&trial, assignment)
 		}

@@ -40,7 +40,13 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 	if err != nil {
 		return composedAssignRequest{}, err
 	}
+	policy, err := s.authorizeRecoveryPolicy(ctx, principal, selected, binding, runtime.RequiresExperimentalOptIn, req.RecoveryPolicy)
+	if err != nil {
+		return composedAssignRequest{}, err
+	}
 	assignmentReq := AssignRequest{
+		RecoveryPolicy: policy,
+
 		RequestID: req.RequestID, WorkspaceID: principal.WorkspaceID, Prompt: strings.TrimSpace(req.Instruction),
 
 		ComponentID:              taskID,

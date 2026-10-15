@@ -30,6 +30,7 @@ func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Reque
 	}
 	var req DeviceRuntimeSnapshotSyncRequest
 	if err := decodeJSON(r, &req); err != nil {
+		logRequestFailure(r, "runtime_snapshot_decode", err)
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -43,6 +44,7 @@ func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Reque
 	}
 	response, err := s.daemonRuntime.SyncAIAgentDaemonRuntimeSnapshot(r.Context(), principal, req)
 	if err != nil {
+		logRequestFailure(r, "runtime_snapshot_sync", err)
 		if errors.Is(err, ErrAuthorizationForbidden) {
 			writeError(w, http.StatusForbidden, "forbidden")
 			return
@@ -50,6 +52,5 @@ func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Reque
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	traceProviderHealth(r.Context(), response.Device.DeviceID, response.Device.Runtimes)
 	writeJSON(w, http.StatusAccepted, response)
 }

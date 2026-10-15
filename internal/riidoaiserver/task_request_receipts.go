@@ -53,18 +53,6 @@ func (s *PersistentAIAgentClientStore) FindTaskRequestReceipt(ctx context.Contex
 	return s.DevelopmentAIAgentClientStore.FindTaskRequestReceipt(ctx, principal, taskID, req)
 }
 
-func (s Server) findTaskRequestReceipt(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, bool, error) {
-	if req.RequestID == "" {
-		return AIAgentTaskActionResponse{}, false, nil
-	}
-	if reader, ok := s.aiAgent.(interface {
-		FindTaskRequestReceipt(context.Context, AuthorizationResult, string, AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, bool, error)
-	}); ok {
-		return reader.FindTaskRequestReceipt(ctx, principal, taskID, req)
-	}
-	return AIAgentTaskActionResponse{}, false, nil
-}
-
 func (s *DevelopmentAIAgentClientStore) rememberTaskRequestReceiptLocked(key string, response AIAgentTaskActionResponse) AIAgentTaskActionResponse {
 	if key != "" {
 		if s.taskRequestReceipts == nil {
