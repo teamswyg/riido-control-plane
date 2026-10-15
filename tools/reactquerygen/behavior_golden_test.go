@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	reactQueryGenCoreHash  = "fdbbfbd37e9bf3069d8d0d0301cbb190f06e29b9dff5a77282f660b1e1a0c6e2"
+	reactQueryGenCoreHash  = "96b395cddf4ff957dcfcee412c55ea90d3243d1f1394abbbec0ef30d1e25e90b"
 	reactQueryGenReactHash = "d44cc9a9fd0ec67479b53c9fb65e79332bf467577b8053de1ab832984c607484"
 )
 
@@ -31,8 +31,8 @@ func TestReactQueryGenBehaviorGolden(t *testing.T) {
 	}
 	want := reactQueryGenGolden{
 		Operations: 57,
-		Schemas:    68,
-		CoreBytes:  380071,
+		Schemas:    72,
+		CoreBytes:  382436,
 		ReactBytes: 102106,
 		CoreHash:   reactQueryGenCoreHash,
 		ReactHash:  reactQueryGenReactHash,

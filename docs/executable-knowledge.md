@@ -14,9 +14,9 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Generated reader docs with declared workflow evidence | 42 |
 | Generated reader docs with manifest evidence_tool | 12 |
 | Generated reader docs with uploaded evidence artifact | 42 |
-| Direct SSOT docs | 1 |
-| Direct SSOT docs with evidence loop | 1 |
-| Direct SSOT docs with CI evidence | 1 |
+| Direct SSOT docs | 2 |
+| Direct SSOT docs with evidence loop | 2 |
+| Direct SSOT docs with CI evidence | 2 |
 | Standalone executable manifests | 3 |
 | Standalone executable manifests with strict CI evidence | 3 |
 | Source SSOT manifests | 3 |
@@ -28,16 +28,16 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Imported manifests with projection evidence | 1 |
 | Owned manifests | 9 |
 | Owned manifests with owner evidence | 9 |
-| Executable manifest inventory | 61 |
-| Tracked executable manifests | 61 |
+| Executable manifest inventory | 62 |
+| Tracked executable manifests | 62 |
 | Registered manual docs | 0 |
-| Scanned docs | 43 |
+| Scanned docs | 44 |
 
 ## Manifest Inventory
 
 | Group | Count | Sample paths |
 | --- | ---: | --- |
-| `docs` | 51 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
+| `docs` | 52 | `docs/20-domain/agent-catalog-rbac.riido.json`<br>`docs/20-domain/agent-runtime-binding.riido.json`<br>`docs/20-domain/ai-agent-client-api.riido.json` |
 | `contracts` | 4 | `contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json`<br>`contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json` |
 | `.` | 2 | `README.riido.json`<br>`dependency_allowlist.riido.json` |
 | `config` | 1 | `config/ci/baseline-go-workflow-parity.riido.json` |
@@ -47,8 +47,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 ## Manifest Loop Inventory
 
-- Complete manifest loops: `61`
-- Direct manifest loops: `48`
+- Complete manifest loops: `62`
+- Direct manifest loops: `49`
 - Delegated manifest loops: `13`
 - Missing manifest loops: `0`
 - Missing loop budget: `0`

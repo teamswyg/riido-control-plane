@@ -20,6 +20,43 @@
   ],
   "chains": [
     {
+      "id": "request_identity_membership_integration_5828",
+      "observation": "Retry identities and explicit new submissions need different execution behavior while existing participant removal generations must remain authoritative.",
+      "hypothesis": "Scoped deterministic request IDs and independent receipts can integrate into existing four-item creation transactions and atomic snapshot commits.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/identified_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/durable_assignment_mutation.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_agent_request_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_request_receipts_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Preserve current participant tombstone/generation ownership, make new identified requests distinct, and fail closed on raced durable mutations. Comment delivery remains disabled without the separately provisioned monolith evidence endpoint and server key.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "agent_notification_retry_delivery_5829",
       "observation": "Live-only task notifications could be dropped behind a full progress buffer, and a committed assignment event could receive HTTP success before its client projection persisted. Legacy needs-input events also used an undeclared assignment state.",
       "hypothesis": "Priority displacement and retryable projection failures preserve notifications without changing existing SSE replay cursors or exposing task content to other recipients.",
@@ -22419,7 +22456,7 @@
         },
         {
           "kind": "code",
-          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_transaction.go"
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_transaction.go"
         },
         {
           "kind": "code",

@@ -16,12 +16,14 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	ids := s.visibleTaskMemberIDsLocked(principal, taskID)
 	threads, snapshots := s.visibleTaskThreadHistoryRecordsLocked(principal, taskID)
 	response := AIAgentTaskThreadHistoryCollectionResponse{
-		SchemaVersion:  SchemaVersion,
-		TaskID:         taskID,
-		Threads:        threads,
-		AgentSnapshots: snapshots,
+		SchemaVersion:    SchemaVersion,
+		AssignedAgentIDs: ids,
+		TaskID:           taskID,
+		Threads:          threads,
+		AgentSnapshots:   snapshots,
 	}
 	suppressSupersededQueuedHistoryMessages(response.Threads)
 	response.ActiveStream = taskThreadHistoryActiveStream(response.Threads)

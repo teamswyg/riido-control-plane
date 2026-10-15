@@ -14,7 +14,7 @@ func TestDynamoDBAIAgentClientSnapshotWritesManifestAfterParts(t *testing.T) {
 		t.Fatalf("SaveAIAgentClientSnapshot: %v", err)
 	}
 	requests := drainDynamoDBAIAgentClientSnapshotRequests(fixture.requests)
-	if len(requests) != len(dynamoDBAIAgentClientSnapshotPartNames) {
+	if len(requests) != 1 {
 		t.Fatalf("write requests = %d, want %d", len(requests), len(dynamoDBAIAgentClientSnapshotPartNames))
 	}
 	last := requests[len(requests)-1]
@@ -27,11 +27,11 @@ func TestDynamoDBAIAgentClientSnapshotWritesManifestAfterParts(t *testing.T) {
 	if err := json.Unmarshal(last.body, &payload); err != nil {
 		t.Fatal(err)
 	}
-	if len(payload.TransactItems) != 2 {
+	if len(payload.TransactItems) != len(dynamoDBAIAgentClientSnapshotPartNames)+1 {
 		t.Fatalf("commit actions = %d", len(payload.TransactItems))
 	}
-	assertDynamoDBString(t, payload.TransactItems[0].Put.Item, "part_name", dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships)
-	assertDynamoDBString(t, payload.TransactItems[1].Put.Item, "sk", dynamoDBAIAgentClientSnapshotSK)
+
+	assertDynamoDBString(t, payload.TransactItems[len(payload.TransactItems)-1].Put.Item, "sk", dynamoDBAIAgentClientSnapshotSK)
 }
 
 func TestDynamoDBAIAgentClientSnapshotWritePressure(t *testing.T) {

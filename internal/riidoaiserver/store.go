@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"strings"
 	"time"
 )
 
@@ -11,6 +12,13 @@ func (s *Store) loop(state storeState) {
 		case recoverTaskAgentPublicationCmd:
 			msg.reply <- s.applyTaskAgentPublicationRecovery(&state, msg.ctx, msg.assignment)
 		case assignCmd:
+			if msg.allowConcurrentTaskAgents && strings.TrimSpace(msg.req.RequestID) != "" {
+				before := state.nextAssignmentSeq
+				assignment, err := s.assignIdentifiedRequest(&state, msg.taskID, msg.req)
+				msg.creationReceipt.record(assignment, err == nil && state.nextAssignmentSeq != before)
+				msg.reply <- assignResult{assignment: assignment, err: err}
+				continue
+			}
 			startedAt := time.Now()
 			_, taskExisted := state.tasks[msg.taskID]
 			beforeEventSeq := state.nextEventSeq
@@ -28,6 +36,13 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- assignResult{assignment: assignment, err: err}
 		case cancelAssignmentCmd:
+			if _, durable := s.operationStore.(AssignmentProjectionReader); durable && msg.req.AssignmentID != "" {
+				assignment, err := s.mutateDurableAssignment(&state, msg.req.AssignmentID, AssignmentOperationClientStop, func(quiet *Store, trial *storeState) (Assignment, error) {
+					return quiet.handleCancelAssignment(trial, msg.taskID, msg.req)
+				})
+				msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
+				continue
+			}
 			beforeEventSeq := state.nextEventSeq
 			assignment, err := s.handleCancelAssignment(&state, msg.taskID, msg.req)
 			if err == nil {
@@ -56,6 +71,19 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- pollResult{response: response, operationAlreadySaved: operationAlreadySaved, mutatedAssignment: mutatedAssignment, mutationOperationType: mutationOperationType, err: err}
 		case eventCmd:
+			if _, durable := s.operationStore.(AssignmentProjectionReader); durable {
+				var response AgentEventResponse
+				_, err := s.mutateDurableAssignment(&state, msg.req.AssignmentID, AssignmentOperationAgentEvent, func(quiet *Store, trial *storeState) (Assignment, error) {
+					var err error
+					response, err = quiet.handleEvent(trial, msg.agentID, msg.req)
+					if response.Assignment == nil {
+						return Assignment{}, err
+					}
+					return *response.Assignment, err
+				})
+				msg.reply <- eventResult{response: response, err: err}
+				continue
+			}
 			beforeEventSeq := state.nextEventSeq
 			response, err := s.handleEvent(&state, msg.agentID, msg.req)
 			if err == nil && state.nextEventSeq != beforeEventSeq {

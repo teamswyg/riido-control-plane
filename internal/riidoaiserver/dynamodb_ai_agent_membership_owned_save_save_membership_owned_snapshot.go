@@ -51,27 +51,19 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 				}
 			}
 		}
-		items, hashes, encoded, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, s.partHashes)
+		var committedHashes map[string]string
+		if current != nil {
+			if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
+				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
+			}
+		}
+		items, hashes, encoded, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, committedHashes)
 		if err != nil {
 			return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 		}
 		stats := dynamoDBAIAgentClientSnapshotWritePressure(items)
 		writes := items
-		if !scoped {
-			plan := dynamoDBAIAgentClientSnapshotPlanWrites(items)
-			var parts []map[string]map[string]string
-			writes = []map[string]map[string]string{plan.manifest}
-			for _, item := range plan.parts {
-				if dynamoDBAIAgentClientSnapshotPartName(item) == dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships {
-					writes = append(writes, item)
-				} else {
-					parts = append(parts, item)
-				}
-			}
-			if err := s.putSnapshotPartItems(ctx, parts, credentials); err != nil {
-				return stats, encoded, err
-			}
-		}
+
 		actions := []dynamoDBTransactWriteItem{}
 		if scoped {
 			condition := "attribute_not_exists(pk) AND attribute_not_exists(sk)"
@@ -84,7 +76,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		}
 		for _, item := range writes {
 			put := &dynamoDBTransactWritePutAction{TableName: s.tableName, Item: item}
-			if scoped && dynamoDBStringValue(item, "sk") == dynamoDBAIAgentClientSnapshotSK {
+			if dynamoDBStringValue(item, "sk") == dynamoDBAIAgentClientSnapshotSK {
 				if current == nil {
 					put.ConditionExpression = "attribute_not_exists(pk) AND attribute_not_exists(sk)"
 				} else {

@@ -30,6 +30,9 @@ func (f *membershipSharedDynamoFixture) condition(t *testing.T, p *membershipDyn
 	case "part_hash = :member_hash":
 		value, exists := previous["part_hash"]["S"]
 		return exists && value == p.ExpressionAttributeValues[":member_hash"]["S"]
+	case "version = :expected", "attribute_not_exists(version) OR version = :expected":
+		current, exists := previous["version"]["N"]
+		return (!exists && p.ExpressionAttributeValues[":expected"]["N"] == "0") || current == p.ExpressionAttributeValues[":expected"]["N"]
 	case "part_hashes_json = :snapshot_hashes":
 		return previous["part_hashes_json"]["S"] == p.ExpressionAttributeValues[":snapshot_hashes"]["S"]
 	case "generation = :generation":
@@ -38,6 +41,8 @@ func (f *membershipSharedDynamoFixture) condition(t *testing.T, p *membershipDyn
 		return previous["active_assignment_id"]["S"] == p.ExpressionAttributeValues[":assignment_id"]["S"]
 	case "assignment_state = :terminal AND last_event_seq = :terminal_seq":
 		return previous["assignment_state"]["S"] == p.ExpressionAttributeValues[":terminal"]["S"] && previous["last_event_seq"]["N"] == p.ExpressionAttributeValues[":terminal_seq"]["N"]
+	case "assignment_state = :expected_state AND last_event_seq = :expected_seq", "assignment_state = :expected_state AND last_event_seq = :expected_seq AND lease_token = :expected_lease":
+		return previous["assignment_state"]["S"] == p.ExpressionAttributeValues[":expected_state"]["S"] && previous["last_event_seq"]["N"] == p.ExpressionAttributeValues[":expected_seq"]["N"] && (p.ExpressionAttributeValues[":expected_lease"]["S"] == "" || previous["lease_token"]["S"] == p.ExpressionAttributeValues[":expected_lease"]["S"])
 	case "assignment_state = :observed_state AND last_event_seq = :observed_seq":
 		return previous["assignment_state"]["S"] == p.ExpressionAttributeValues[":observed_state"]["S"] && previous["last_event_seq"]["N"] == p.ExpressionAttributeValues[":observed_seq"]["N"]
 	case "assignment_state = :queued AND agent_id = :agent_id AND last_event_seq = :expected_last_event_seq":

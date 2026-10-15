@@ -719,6 +719,25 @@
           "value": "desktop_webview"
         }
       ]
+    },
+    {
+      "name": "AIAgentTaskThreadMessageRole",
+      "type": "string",
+      "description": "v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.",
+      "values": [
+        {
+          "value": "user",
+          "description": "사용자가 thread에 남긴 다음 작업 지시입니다."
+        },
+        {
+          "value": "agent",
+          "description": "AI Agent가 생성한 상태/최종 결과 메시지입니다."
+        },
+        {
+          "value": "progress",
+          "description": "runtime output에서 파생된 진행 로그 메시지입니다."
+        }
+      ]
     }
   ],
   "sum_types": [
@@ -2026,6 +2045,14 @@
           {
             "name": "agent_id",
             "type": "string"
+          },
+          {
+            "name": "request_id",
+            "type": "string"
+          },
+          {
+            "name": "instruction",
+            "type": "string"
           }
         ]
       }
@@ -2726,7 +2753,8 @@
         "required": [
           "schema_version",
           "task_id",
-          "threads"
+          "threads",
+          "assigned_agent_ids"
         ],
         "properties": [
           {
@@ -2747,6 +2775,13 @@
           {
             "name": "active_stream",
             "ref": "AIAgentTaskThreadStreamLink"
+          },
+          {
+            "name": "assigned_agent_ids",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -2986,6 +3021,193 @@
           {
             "name": "reason",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryMessage",
+      "schema": {
+        "name": "AIAgentTaskThreadHistoryMessage",
+        "description": "v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.",
+        "type": "object",
+        "required": [
+          "message_id",
+          "role"
+        ],
+        "properties": [
+          {
+            "name": "message_id",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "ref": "AIAgentTaskThreadMessageRole"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "source_message_id",
+            "type": "string"
+          },
+          {
+            "name": "seq",
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "result_message",
+            "type": "string"
+          },
+          {
+            "name": "observed_at",
+            "type": "string",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryRecord",
+      "schema": {
+        "name": "AIAgentTaskThreadHistoryRecord",
+        "description": "v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.",
+        "type": "object",
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "conversation_id",
+          "messages"
+        ],
+        "properties": [
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "conversation_id",
+            "type": "string",
+            "description": "같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다."
+          },
+          {
+            "name": "parent_thread_id",
+            "type": "string",
+            "description": "후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다."
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_snapshot_id",
+            "type": "string",
+            "description": "agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다."
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "completed_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "messages",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadHistoryMessage"
+            }
+          },
+          {
+            "name": "active_stream",
+            "ref": "AIAgentTaskThreadStreamLink"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryCollectionResponse",
+      "schema": {
+        "name": "AIAgentTaskThreadHistoryCollectionResponse",
+        "description": "v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads",
+          "assigned_agent_ids"
+        ],
+        "properties": [
+          {
+            "name": "assigned_agent_ids",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "threads",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadHistoryRecord"
+            }
+          },
+          {
+            "name": "agent_snapshots",
+            "type": "object",
+            "description": "agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.",
+            "additional_properties_ref": "AIAgentTaskThreadAgentSnapshot"
+          },
+          {
+            "name": "active_stream",
+            "ref": "AIAgentTaskThreadStreamLink"
           }
         ]
       }

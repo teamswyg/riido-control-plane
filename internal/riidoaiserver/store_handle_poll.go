@@ -95,6 +95,8 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			recordPollAction(state, response.Action, count)
 			return response, true, nil, "", nil
 		}
+		recordPollAction(state, response.Action, count)
+		return response, false, nil, "", nil
 	}
 	for _, id := range assignIDs {
 		assignment := state.assignments[id]

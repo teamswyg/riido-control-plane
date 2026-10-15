@@ -57,6 +57,15 @@ func (s *DynamoDBAssignmentOperationStore) saveTaskAgentCreation(ctx context.Con
 	if err == nil {
 		return nil
 	}
+	if record.Assignment.RequestID != "" {
+		existing, found, readErr := s.loadAssignmentProjection(ctx, record.AssignmentID, credentials)
+		if readErr != nil {
+			return readErr
+		}
+		if found && existing.Assignment.RequestID == record.Assignment.RequestID && existing.Assignment.WorkspaceID == record.Assignment.WorkspaceID && existing.Assignment.CreatedBy == record.Assignment.CreatedBy && existing.Assignment.TaskID == record.TaskID && existing.Assignment.AgentID == record.AgentID {
+			return errIdentifiedExecutionExists
+		}
+	}
 	// Any failed response may follow a committed transaction. Confirm the exact
 	// creation before reporting failure; a missing or different record is not success.
 	journal, found, readErr := s.getTaskAgentItem(ctx, map[string]map[string]string{"pk": {"S": dynamoDBAssignmentOperationPK}, "sk": {"S": assignmentOperationSortKey(record)}}, credentials)

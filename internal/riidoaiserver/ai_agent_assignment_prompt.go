@@ -19,8 +19,9 @@ const (
 )
 
 type AIAgentAssignmentPromptInput struct {
-	TaskID  string
-	Context AIAgentTaskContext
+	UserInstruction string
+	TaskID          string
+	Context         AIAgentTaskContext
 }
 
 type AIAgentAssignmentPrompt struct {
@@ -49,7 +50,11 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	if component.Title == "" && document.Content == "" {
 		return AIAgentAssignmentPrompt{}, errors.New("task context title or document content is required")
 	}
-	intentClass := classifyTaskContextIntent(component, document)
+	intentDocument := document
+	if instruction := strings.TrimSpace(input.UserInstruction); instruction != "" {
+		intentDocument.Content += "\n" + instruction
+	}
+	intentClass := classifyTaskContextIntent(component, intentDocument)
 
 	var builder strings.Builder
 	builder.WriteString("# Riido AI Agent Assignment\n\n")
@@ -101,6 +106,10 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	writeTaskContextResources(&builder, input.Context.Resources, input.Context.ResourceStatus, 2500)
 	writePromptTaskInterpretation(&builder, component, document, intentClass)
 	writePromptInteractionPolicy(&builder)
+
+	if instruction := strings.TrimSpace(input.UserInstruction); instruction != "" {
+		builder.WriteString("\n\n[사용자 추가 요청]\n" + instruction)
+	}
 
 	return AIAgentAssignmentPrompt{
 		Prompt:             builder.String(),

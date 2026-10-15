@@ -49,9 +49,17 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		}
 	}
 
+	if allowConcurrentTaskAgents && req.RequestID != "" {
+		if existing, ok := state.assignments[identifiedAssignmentID(taskID, req)]; ok {
+			return existing, nil
+		}
+	}
 	identity, err := s.newAssignmentID(state.nextAssignmentSeq + 1)
 	if err != nil {
 		return Assignment{}, err
+	}
+	if allowConcurrentTaskAgents && req.RequestID != "" {
+		identity = identifiedAssignmentID(taskID, req)
 	}
 	now := s.now()
 	task := state.tasks[taskID]
@@ -59,7 +67,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		task = taskRecord{id: taskID, componentID: req.ComponentID}
 	}
 
-	if allowConcurrentTaskAgents {
+	if allowConcurrentTaskAgents && req.RequestID == "" {
 		for _, assignmentID := range state.agentAssignments[req.AgentID] {
 			current := state.assignments[assignmentID]
 			if current.TaskID == taskID && !isTerminal(current.State) {
@@ -96,9 +104,11 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 
 	state.nextAssignmentSeq++
 	assignment := Assignment{
-		CreatedBy:                req.CreatedBy,
-		TeamID:                   req.TeamID,
-		WorkspaceID:              req.WorkspaceID,
+		CreatedBy:   req.CreatedBy,
+		TeamID:      req.TeamID,
+		WorkspaceID: req.WorkspaceID,
+		RequestID:   req.RequestID,
+
 		ID:                       identity,
 		TaskID:                   taskID,
 		ComponentID:              req.ComponentID,

@@ -36,6 +36,8 @@ func checkMembershipIndependentStorePublication(t *testing.T, mode, state, histo
 			t.Fatal(err)
 		}
 		delete(snapshot.TaskThreads, taskID)
+		snapshot.ExpectedVersion = snapshot.Version
+		snapshot.Version++
 		if err := clientA.snapshotStore.SaveAIAgentClientSnapshot(context.Background(), snapshot); err != nil {
 			t.Fatal(err)
 		}

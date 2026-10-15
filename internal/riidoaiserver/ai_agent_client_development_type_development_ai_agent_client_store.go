@@ -5,6 +5,7 @@ import (
 )
 
 type DevelopmentAIAgentClientStore struct {
+	taskRequestReceipts     map[string]AIAgentTaskActionResponse
 	mu                      sync.Mutex
 	workspaceID             string
 	expectedDaemonProfile   string
