@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `111`; runtime: `1`; internal: `6`; tools: `103`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `135`; max file lines: `710`.
+File line budget target: `75`; files over target: `144`; max file lines: `710`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 135 | 99 | -36 |
+| Files over target | 144 | 99 | -45 |
 | Max file lines | 710 | 2481 | 1771 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -27,9 +27,9 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 126 | 85 | 710 | 838 | 13329 | 13604 |
+| `internal/riidoaiserver` | 134 | 85 | 710 | 838 | 13519 | 13604 |
 | `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
-| `tools/reactquerygen` | 0 | 3 | 0 | 1395 | 0 | 2766 |
+| `tools/reactquerygen` | 1 | 3 | 83 | 1395 | 8 | 2766 |
 | `cmd/riido_ai_server` | 3 | 3 | 144 | 791 | 101 | 1474 |
 | `tools/containercontract` | 0 | 0 | 0 | 75 | 0 | 0 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
@@ -53,7 +53,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 638 |
 | `internal/riidoaiserver/ai_agent_client_persistence.go` | 527 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
-| `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 482 |
+| `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 484 |
 | `internal/riidoaiserver/ai_agent_task_context_client.go` | 460 |
 | `internal/riidoaiserver/ai_agent_client_multi_agent_test.go` | 431 |
 
@@ -61,23 +61,24 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 126 | 710 | 13329 |
+| `internal/riidoaiserver` | 134 | 710 | 13519 |
 | `internal/authpep` | 6 | 291 | 687 |
 | `cmd/riido_ai_server` | 3 | 144 | 101 |
+| `tools/reactquerygen` | 1 | 83 | 8 |
 
 ## Packages
 
 - `public-adapter`: `awsadapters`
-- `adapter`: `internal/agentstatefile`, `tools/agentcatalogrbac/pathutil`, `tools/agentcatalogrbac/requirements`, `tools/agentcatalogrbac/setutil`, `tools/agentruntimebinding/pathutil`, `tools/agentruntimebinding/requirements`, `tools/aigeneratedsmokematrix/doccheck`, `tools/aigeneratedsmokematrix/pathutil`, `tools/aigeneratedsmokematrix/rendertext`, `tools/aigeneratedsmokematrix/requirements`, `tools/aigeneratedsmokematrix/setutil`, `tools/apiclientdelivery/doccheck`, `tools/apiclientdelivery/pathutil`, `tools/apiclientdelivery/rendertext`, `tools/apiclientdelivery/requirements`, `tools/apiclientdelivery/runconfig`, `tools/assignmentjournal/pathutil`, `tools/assignmentjournal/requirements`, `tools/cloudwatchemf/pathutil`, `tools/cloudwatchemf/requirements`, `tools/containercontract/dockerfile`, `tools/dependencyallowlist/layers`, `tools/integrationmatrix/pathutil`, `tools/metricshttpadapter/pathutil`, `tools/metricshttpadapter/requirements`, `tools/metricshttpadapter/runconfig`, `tools/metricshttpadapter/sourcechecks`, `tools/metricshttpadapter/statuscheck`, `tools/openquestions/pathutil`, `tools/providerstatus/pathutil`, `tools/providerstatus/renderutil`, `tools/providerstatus/requirements`, `tools/repositoryreadme/pathutil`, `tools/reviewaccountseed/httpclient`, `tools/reviewaccountseed/pathutil`, `tools/reviewaccountseed/requirements`, `tools/reviewaccountseed/runconfig`, `tools/reviewaccountseed/seedruntime`, `tools/saascontrolplane/pathutil`, `tools/saascontrolplane/requirements`, `tools/saascontrolplane/setutil`, `tools/snapshotcqrsgate/pathutil`, `tools/snapshotcqrsgate/requirements`, `tools/aiagentclientapi/doccheck`, `tools/aiagentclientapi/pathutil`, `tools/aiagentclientapi/rendertext`, `tools/aiagentclientapi/requirements`, `tools/aiagentclientapi/setutil`, `tools/aiagentclientapi/smokematrix`
 - `runtime-shell`: `cmd/riido_ai_server`
+- `adapter`: `internal/agentstatefile`, `tools/agentcatalogrbac/pathutil`, `tools/agentcatalogrbac/requirements`, `tools/agentcatalogrbac/setutil`, `tools/agentruntimebinding/pathutil`, `tools/agentruntimebinding/requirements`, `tools/aiagentclientapi/doccheck`, `tools/aiagentclientapi/pathutil`, `tools/aiagentclientapi/rendertext`, `tools/aiagentclientapi/requirements`, `tools/aiagentclientapi/setutil`, `tools/aiagentclientapi/smokematrix`, `tools/aigeneratedsmokematrix/doccheck`, `tools/aigeneratedsmokematrix/pathutil`, `tools/aigeneratedsmokematrix/rendertext`, `tools/aigeneratedsmokematrix/requirements`, `tools/aigeneratedsmokematrix/setutil`, `tools/apiclientdelivery/doccheck`, `tools/apiclientdelivery/pathutil`, `tools/apiclientdelivery/rendertext`, `tools/apiclientdelivery/requirements`, `tools/apiclientdelivery/runconfig`, `tools/assignmentjournal/pathutil`, `tools/assignmentjournal/requirements`, `tools/cloudwatchemf/pathutil`, `tools/cloudwatchemf/requirements`, `tools/containercontract/dockerfile`, `tools/dependencyallowlist/layers`, `tools/integrationmatrix/pathutil`, `tools/metricshttpadapter/pathutil`, `tools/metricshttpadapter/requirements`, `tools/metricshttpadapter/runconfig`, `tools/metricshttpadapter/sourcechecks`, `tools/metricshttpadapter/statuscheck`, `tools/openquestions/pathutil`, `tools/providerstatus/pathutil`, `tools/providerstatus/renderutil`, `tools/providerstatus/requirements`, `tools/repositoryreadme/pathutil`, `tools/reviewaccountseed/httpclient`, `tools/reviewaccountseed/pathutil`, `tools/reviewaccountseed/requirements`, `tools/reviewaccountseed/runconfig`, `tools/reviewaccountseed/seedruntime`, `tools/saascontrolplane/pathutil`, `tools/saascontrolplane/requirements`, `tools/saascontrolplane/setutil`, `tools/snapshotcqrsgate/pathutil`, `tools/snapshotcqrsgate/requirements`
 - `identity-adapter`: `internal/authpep`
 - `compatibility-test`: `internal/contractscompat`
 - `source-ready-adapter`: `internal/ownergraphql/controlplane`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
 - `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aiagentload`, `tools/aiagentrisk`, `tools/aiagentthreadsnapshot`, `tools/aigeneratedsmokematrix`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/controlplanepressure`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/metricshttpadapter`, `tools/migrationledger`, `tools/openquestions`, `tools/operationalreadiness`, `tools/providerstatus`, `tools/publicpageslive`, `tools/requestauth`, `tools/reviewaccountseed`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
-- `meta-evidence-tool`: `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/gocibaseline`, `tools/harnesspromotion`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopclosureaudit`, `tools/looprefreshdispatch`, `tools/loopregistry`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/syntaxhash`, `tools/workflowevidence`
 - `policy-evidence-tool`: `tools/ciworkflowparity`
+- `meta-evidence-tool`: `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/gocibaseline`, `tools/harnesspromotion`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopclosureaudit`, `tools/looprefreshdispatch`, `tools/loopregistry`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/syntaxhash`, `tools/workflowevidence`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`
 - `generator`: `tools/generatedclienthandoff`, `tools/reactquerygen`
 - `meta-evidence-adapter`: `tools/syntaxhash/duplicates`

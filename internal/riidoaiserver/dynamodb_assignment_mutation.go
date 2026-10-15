@@ -16,7 +16,11 @@ func (s *DynamoDBAssignmentOperationStore) saveConditionalAssignment(ctx context
 		return err
 	}
 	expected := record.ExpectedProjection
-	items := make([]dynamoDBTransactWritePut, 2)
+	count := 2
+	if s.enableAgentHistory {
+		count++
+	}
+	items := make([]dynamoDBTransactWritePut, count)
 	for i, item := range []map[string]map[string]string{projection, operation} {
 		items[i].Put.TableName = s.tableName
 		items[i].Put.Item = item
@@ -31,6 +35,17 @@ func (s *DynamoDBAssignmentOperationStore) saveConditionalAssignment(ctx context
 		items[0].Put.ExpressionAttributeValues[":expected_lease"] = map[string]string{"S": expected.Assignment.LeaseToken}
 	}
 	items[1].Put.ConditionExpression = "attribute_not_exists(pk) AND attribute_not_exists(sk)"
+	if s.enableAgentHistory {
+		history, err := agentHistoryOperationItem(record)
+		if err != nil {
+			return err
+		}
+		var write dynamoDBTransactWritePut
+		write.Put.TableName = s.tableName
+		write.Put.Item = history
+		write.Put.ConditionExpression = "attribute_not_exists(pk) AND attribute_not_exists(sk)"
+		items[2] = write
+	}
 	payload, err := json.Marshal(struct {
 		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
 	}{items})

@@ -94,12 +94,17 @@
       "role": "Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.",
       "must_not_own": "new adapter behavior, duplicated DTOs, credential storage"
     },
-    {"path": "internal/agentstatefile", "kind": "adapter", "role": "Authenticated local single-process AI Agent snapshot file IO with a version fence.", "must_not_own": "assignment lifecycle, authorization decisions, production multi-replica persistence"},
     {
       "path": "cmd/riido_ai_server",
       "kind": "runtime-shell",
       "role": "Binary entrypoint, Factor 12 env parsing, HTTP lifecycle, optional metrics and tracing startup.",
       "must_not_own": "domain decisions, Terraform, production secret values, provider process execution"
+    },
+    {
+      "path": "internal/agentstatefile",
+      "kind": "adapter",
+      "role": "Authenticated local single-process AI Agent snapshot file IO with a version fence.",
+      "must_not_own": "assignment lifecycle, authorization decisions, production multi-replica persistence"
     },
     {
       "path": "internal/authpep",
@@ -178,6 +183,42 @@
       "kind": "evidence-tool",
       "role": "AI Agent client API SSOT verifier.",
       "must_not_own": "HTTP handler implementation"
+    },
+    {
+      "path": "tools/aiagentclientapi/doccheck",
+      "kind": "adapter",
+      "role": "Generated document freshness adapter for the AI Agent client API verifier.",
+      "must_not_own": "AI Agent client API rendering policy or manifest loading"
+    },
+    {
+      "path": "tools/aiagentclientapi/pathutil",
+      "kind": "adapter",
+      "role": "Repository path resolution adapter for the AI Agent client API verifier.",
+      "must_not_own": "AI Agent client API contract policy"
+    },
+    {
+      "path": "tools/aiagentclientapi/rendertext",
+      "kind": "adapter",
+      "role": "Markdown list/code rendering adapter for the AI Agent client API generated reader.",
+      "must_not_own": "Thread history v3 frontend semantics"
+    },
+    {
+      "path": "tools/aiagentclientapi/requirements",
+      "kind": "adapter",
+      "role": "AI Agent client API required schema, identity, endpoint, field, and deployment vocabulary.",
+      "must_not_own": "manifest loading, source verification, or doc rendering"
+    },
+    {
+      "path": "tools/aiagentclientapi/setutil",
+      "kind": "adapter",
+      "role": "String membership set adapter for the AI Agent client API verifier.",
+      "must_not_own": "AI Agent client API semantic rules"
+    },
+    {
+      "path": "tools/aiagentclientapi/smokematrix",
+      "kind": "adapter",
+      "role": "Smoke matrix generated-path reader for the AI Agent client API verifier.",
+      "must_not_own": "OpenAPI operation counting or generated client handoff policy"
     },
     {
       "path": "tools/aiagentload",
@@ -288,6 +329,12 @@
       "must_not_own": "manifest loading or doc rendering"
     },
     {
+      "path": "tools/ciworkflowparity",
+      "kind": "policy-evidence-tool",
+      "role": "Exact baseline GitHub Actions to native riido-ci parity verifier with credential-free runner pin and zero retirement authority.",
+      "must_not_own": "legacy workflow retirement, controller scheduling, deployment, runtime behavior, authentication, or fixed-cost resources"
+    },
+    {
       "path": "tools/closedloopcandidatedecision",
       "kind": "meta-evidence-tool",
       "role": "Closed-loop candidate decision verifier that binds candidate artifacts to owner, priority, disposition, and next artifacts.",
@@ -358,12 +405,6 @@
       "kind": "evidence-tool",
       "role": "Local open-loop control-plane pressure harness for throughput, latency, allocation, goroutine evidence, and finding-level closed-loop candidate adoption paths.",
       "must_not_own": "endpoint contract changes, live production load execution, or infra scaling policy"
-    },
-    {
-      "path": "tools/ciworkflowparity",
-      "kind": "policy-evidence-tool",
-      "role": "Exact baseline GitHub Actions to native riido-ci parity verifier with credential-free runner pin and zero retirement authority.",
-      "must_not_own": "legacy workflow retirement, controller scheduling, deployment, runtime behavior, authentication, or fixed-cost resources"
     },
     {
       "path": "tools/dependencyallowlist",
@@ -712,42 +753,6 @@
       "kind": "meta-evidence-tool",
       "role": "GitHub Actions and declared attested private riido-ci evidence-route coverage verifier.",
       "must_not_own": "domain-specific test semantics or private operator evidence"
-    },
-    {
-      "path": "tools/aiagentclientapi/doccheck",
-      "kind": "adapter",
-      "role": "Generated document freshness adapter for the AI Agent client API verifier.",
-      "must_not_own": "AI Agent client API rendering policy or manifest loading"
-    },
-    {
-      "path": "tools/aiagentclientapi/pathutil",
-      "kind": "adapter",
-      "role": "Repository path resolution adapter for the AI Agent client API verifier.",
-      "must_not_own": "AI Agent client API contract policy"
-    },
-    {
-      "path": "tools/aiagentclientapi/rendertext",
-      "kind": "adapter",
-      "role": "Markdown list/code rendering adapter for the AI Agent client API generated reader.",
-      "must_not_own": "Thread history v3 frontend semantics"
-    },
-    {
-      "path": "tools/aiagentclientapi/requirements",
-      "kind": "adapter",
-      "role": "AI Agent client API required schema, identity, endpoint, field, and deployment vocabulary.",
-      "must_not_own": "manifest loading, source verification, or doc rendering"
-    },
-    {
-      "path": "tools/aiagentclientapi/setutil",
-      "kind": "adapter",
-      "role": "String membership set adapter for the AI Agent client API verifier.",
-      "must_not_own": "AI Agent client API semantic rules"
-    },
-    {
-      "path": "tools/aiagentclientapi/smokematrix",
-      "kind": "adapter",
-      "role": "Smoke matrix generated-path reader for the AI Agent client API verifier.",
-      "must_not_own": "OpenAPI operation counting or generated client handoff policy"
     }
   ],
   "rules": [

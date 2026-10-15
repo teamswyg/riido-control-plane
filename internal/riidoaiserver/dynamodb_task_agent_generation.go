@@ -49,6 +49,13 @@ func (s *DynamoDBAssignmentOperationStore) saveTaskAgentCreation(ctx context.Con
 		}
 		items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, Item: item, ConditionExpression: condition}})
 	}
+	if s.enableAgentHistory {
+		history, err := agentHistoryOperationItem(record)
+		if err != nil {
+			return err
+		}
+		items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, Item: history, ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)"}})
+	}
 	payload, err := json.Marshal(struct{ TransactItems []dynamoDBTransactWriteItem }{items})
 	if err != nil {
 		return err

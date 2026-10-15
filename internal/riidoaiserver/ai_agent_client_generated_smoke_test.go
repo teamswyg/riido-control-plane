@@ -20,6 +20,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV1(t *testing.T) {
 	}})
 
 	token := "user-token"
+	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/agents/agent-owned-codex/dashboard", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/devices", token, "", http.StatusOK)
@@ -140,6 +141,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 
 	token := "user-token"
 	base := "/v2/client/workspaces/workspace-dev-riid/ai-agent"
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/agents/agent-owned-codex/dashboard", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/devices", token, "", http.StatusOK)

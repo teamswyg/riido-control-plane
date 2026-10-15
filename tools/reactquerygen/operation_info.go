@@ -12,6 +12,11 @@ func newOperationInfo(op routeOperation) (operationInfo, error) {
 		return operationInfo{}, fmt.Errorf("%s %s missing operationId", op.Method, op.Path)
 	}
 	params := pathParams(op.Path)
+	for _, p := range op.Op.Parameters {
+		if p.In == "query" {
+			params = append(params, p.Name)
+		}
+	}
 	responseType := responseType(op.Op)
 	eventStream := isEventStream(op.Op)
 	if eventStream {

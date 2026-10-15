@@ -8,7 +8,12 @@ import (
 	"strings"
 )
 
-func (s *DynamoDBAssignmentOperationStore) save(ctx context.Context, record AssignmentOperationRecord, credentials AWSCredentials) error {
+func (s *DynamoDBAssignmentOperationStore) save(ctx context.Context, record AssignmentOperationRecord, credentials AWSCredentials) (err error) {
+	defer func() {
+		if err == nil && s.enableAgentHistory && record.ExpectedProjection == nil && !record.createsExecution && (record.OperationType != AssignmentOperationAssignTask || record.Assignment.RequestID == "") {
+			err = s.saveAgentHistoryOperation(ctx, record, credentials)
+		}
+	}()
 	if record.SchemaVersion == "" {
 		record.SchemaVersion = AssignmentOperationSchemaVersion
 	}

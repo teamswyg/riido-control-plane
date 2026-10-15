@@ -10,16 +10,16 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `252`
-- claim refs: `341`
-- change refs: `2397`
-- verifier refs: `1414`
-- evidence refs: `773`
+- chains: `253`
+- claim refs: `343`
+- change refs: `2401`
+- verifier refs: `1419`
+- evidence refs: `774`
 
 ## Compiled Chain Summary
 
-- complete chains: `252` / `252`
-- claim-bound chains: `252`
+- complete chains: `253` / `253`
+- claim-bound chains: `253`
 - unclaimed chains: `0`
 - next-loop targets: `10`
 
@@ -32,8 +32,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate_decision` | `10` | `35` | `186` | `95` | `46` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
+| `ai_agent_load_harness` | `2` | `4` | `8` | `9` | `2` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
-| `ai_agent_load_harness` | `1` | `2` | `4` | `4` | `1` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
 
 ## Evidence Chains
@@ -290,8 +290,9 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `loop_closure_audit_native_ci_parity_loop` | `2` | `6` | `3` | `4` | `closed_loop_candidate` |
 | `evidence_graph_native_ci_parity_loop` | `2` | `6` | `3` | `3` | `closed_loop_candidate` |
 | `control_plane_owner_graphql_source_ready_boundary` | `2` | `7` | `6` | `5` | `closed_loop_candidate` |
-| `agent_execution_delivery_modular_integration_20261013` | `2` | `4` | `4` | `1` | `ai_agent_load_harness` |
+| `agent_execution_delivery_modular_integration_20261013` | `2` | `5` | `5` | `1` | `ai_agent_load_harness` |
 | `persistent_agent_participant_review_5841` | `2` | `74` | `42` | `43` | `ai_thread_history` |
+| `agent_dashboard_scoped_read_and_pagination_5830` | `2` | `3` | `4` | `1` | `ai_agent_load_harness` |
 
 ## Loop
 
