@@ -1,6 +1,7 @@
 package riidoaiserver
 
 type assignCmd struct {
+	creationReceipt           *taskAgentCreationReceipt
 	taskID                    string
 	req                       AssignRequest
 	allowConcurrentTaskAgents bool
@@ -14,9 +15,10 @@ type assignResult struct {
 }
 
 type CancelAssignmentRequest struct {
-	AgentID      string
-	AssignmentID string
-	Reason       string
+	durableProjection *AssignmentProjection
+	AgentID           string
+	AssignmentID      string
+	Reason            string
 }
 
 type cancelAssignmentCmd struct {

@@ -6,6 +6,7 @@ import (
 )
 
 type DynamoDBAssignmentOperationStoreConfig struct {
+	EnableAgentHistory  bool
 	Region              string
 	TableName           string
 	Endpoint            string
@@ -16,6 +17,7 @@ type DynamoDBAssignmentOperationStoreConfig struct {
 }
 
 type DynamoDBAssignmentOperationStore struct {
+	enableAgentHistory  bool
 	commands            chan dynamoDBAssignmentOperationCommand
 	done                chan struct{}
 	region              string

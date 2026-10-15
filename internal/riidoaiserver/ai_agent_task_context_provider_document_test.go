@@ -3,14 +3,19 @@ package riidoaiserver
 import (
 	"net/http"
 	"net/http/httptest"
+	"sort"
 	"strings"
+	"sync"
 	"testing"
 )
 
 func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T) {
 	gotPaths := []string{}
+	var mu sync.Mutex
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
 		gotPaths = append(gotPaths, r.URL.RequestURI())
+		mu.Unlock()
 		if got := r.Header.Get("Authorization"); got != "Bearer user-jwt" {
 			t.Fatalf("authorization header = %q", got)
 		}
@@ -28,7 +33,11 @@ func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T
 		"/public/components/component-a/workspace",
 		"/teams/team-a/components/component-a?getDocument=true",
 		"/documents/providers/team-a/component-a?format=html",
+		"/teams/team-a/components/component-a/files",
+		"/teams/team-a/components/component-a/web-links",
 	}
+	sort.Strings(gotPaths)
+	sort.Strings(wantPaths)
 	if strings.Join(gotPaths, "\n") != strings.Join(wantPaths, "\n") {
 		t.Fatalf("paths = %#v", gotPaths)
 	}

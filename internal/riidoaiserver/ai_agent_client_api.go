@@ -311,9 +311,10 @@ type AssignedAgentProfile struct {
 }
 
 type AssignedAgentProfileMapResponse struct {
-	SchemaVersion         string                          `json:"schema_version"`
-	WorkspaceID           string                          `json:"workspace_id"`
-	AssignedAgentProfiles map[string]AssignedAgentProfile `json:"assigned_agent_profiles"`
+	SchemaVersion         string                                    `json:"schema_version"`
+	WorkspaceID           string                                    `json:"workspace_id"`
+	AssignedAgentProfiles map[string]AssignedAgentProfile           `json:"assigned_agent_profiles"`
+	TaskAgentParticipants map[string]TaskAgentParticipantCollection `json:"task_agent_participants"`
 }
 
 type ClientBootstrapResponse struct {
@@ -387,22 +388,26 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	AgentID            string `json:"agent_id"`
-	AssignmentID       string `json:"-"`
-	durableState       AssignmentState
-	intentGateRequired bool
+	membershipPublicationGeneration string
+	AgentID                         string `json:"agent_id"`
+	AssignmentID                    string `json:"-"`
+	durableState                    AssignmentState
+	intentGateRequired              bool
 }
 
 type UnassignAIAgentTaskRequest struct {
 	AgentID      string `json:"agent_id"`
 	AssignmentID string `json:"assignment_id,omitempty"`
 	Reason       string `json:"reason,omitempty"`
+
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type AgentAssignmentActionRequest struct {
-	AssignmentID string `json:"assignment_id,omitempty"`
-	Reason       string `json:"reason,omitempty"`
-	durableState AssignmentState
+	AssignmentID           string `json:"assignment_id,omitempty"`
+	Reason                 string `json:"reason,omitempty"`
+	durableState           AssignmentState
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type SubmitAIAgentTaskCommentRequest struct {
@@ -412,12 +417,13 @@ type SubmitAIAgentTaskCommentRequest struct {
 }
 
 type CreateAIAgentTaskThreadMessageRequest struct {
-	Body                       string `json:"body"`
-	SourceMessageID            string `json:"source_message_id,omitempty"`
-	AssignmentID               string `json:"-"`
-	toolApproval               bool
-	toolApprovalWithoutPending bool
-	durableState               AssignmentState
+	membershipPublicationGeneration string
+	Body                            string `json:"body"`
+	SourceMessageID                 string `json:"source_message_id,omitempty"`
+	AssignmentID                    string `json:"-"`
+	toolApproval                    bool
+	toolApprovalWithoutPending      bool
+	durableState                    AssignmentState
 }
 
 type StopAIAgentTaskRequest struct {

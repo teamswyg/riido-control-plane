@@ -29,31 +29,30 @@ type AgentDashboardRun struct {
 	QueuePosition int
 }
 
-type agentDashboardSnapshotCmd struct{ reply chan StoreSnapshot }
+type agentDashboardSnapshotCmd struct {
+	agentID string
+	reply   chan StoreSnapshot
+}
 
 func (s *Store) LoadAgentDashboardHistory(ctx context.Context, agentID string) (AgentDashboardHistory, error) {
-	var snapshot StoreSnapshot
-	if loader, ok := s.operationStore.(AssignmentOperationLoader); ok {
-		operations, err := loader.LoadAssignmentOperations(ctx)
-		if err != nil {
-			return AgentDashboardHistory{}, err
-		}
-		state, err := stateFromAssignmentOperations(operations)
-		if err != nil {
-			return AgentDashboardHistory{}, err
-		}
-		snapshot = snapshotFromState(&state, s.now())
-	} else {
-		reply := make(chan StoreSnapshot, 1)
-		if err := s.send(ctx, agentDashboardSnapshotCmd{reply: reply}); err != nil {
-			return AgentDashboardHistory{}, err
-		}
-		select {
-		case snapshot = <-reply:
-		case <-ctx.Done():
-			return AgentDashboardHistory{}, ctx.Err()
-		}
+	reply := make(chan StoreSnapshot, 1)
+	if err := s.send(ctx, agentDashboardSnapshotCmd{agentID: agentID, reply: reply}); err != nil {
+		return AgentDashboardHistory{}, err
 	}
+	var snapshot StoreSnapshot
+	select {
+	case snapshot = <-reply:
+	case <-ctx.Done():
+		return AgentDashboardHistory{}, ctx.Err()
+	}
+	if reader, ok := s.operationStore.(agentAssignmentHistoryReader); ok {
+		operations, err := reader.LoadAgentAssignmentOperations(ctx, agentID)
+		if err != nil {
+			return AgentDashboardHistory{}, err
+		}
+		snapshot = mergeAgentDashboardOperations(snapshot, operations, agentID)
+	}
+
 	result := dashboardHistoryFromSnapshot(snapshot, agentID)
 	result.Durable = s.operationStore != nil || s.snapshotStore != nil
 	// The queue reader owns execution order, including cross-instance assignments.

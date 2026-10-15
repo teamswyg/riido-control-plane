@@ -729,6 +729,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -1710,7 +1720,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "unassignAIAgentTask.participant-removal-stops-agent-work"
+          "unassignAIAgentTask.participant-removal-stops-agent-work",
+          "unassignAIAgentTask.interleaved-execution-prevents-participant-removal"
         ]
       },
       "post": {
@@ -2688,6 +2699,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -3606,7 +3627,7 @@
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles": {
       "get": {
         "operationId": "listWorkspaceAssignedAgentProfilesV2",
-        "summary": "workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)",
+        "summary": "workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)",
         "tags": [
           "ai_agent_client"
         ],
@@ -3664,7 +3685,9 @@
         },
         "x-riido-scenarios": [
           "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
-          "listWorkspaceAssignedAgentProfilesV2.historical-threads-are-omitted"
+          "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
+          "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+          "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state"
         ]
       }
     },
@@ -3750,6 +3773,7 @@
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
             "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles",
             "v2.aiAgent.tasks.threadStreamSubscription"
           ]
         },
@@ -3761,7 +3785,7 @@
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}": {
       "delete": {
         "operationId": "deleteAIAgentTaskAgentAssignmentV2",
-        "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+        "summary": "task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)",
         "tags": [
           "ai_agent_client"
         ],
@@ -3791,6 +3815,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAIAgentTaskAgentAssignmentRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Accepted",
@@ -3838,11 +3871,13 @@
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
             "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles",
             "v2.aiAgent.tasks.threadStreamSubscription"
           ]
         },
         "x-riido-scenarios": [
-          "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
+          "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
+          "deleteAIAgentTaskAgentAssignmentV2.interleaved-execution-prevents-participant-removal"
         ]
       }
     },
@@ -3926,6 +3961,7 @@
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
             "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles",
             "v2.aiAgent.tasks.threadStreamSubscription"
           ]
         },
@@ -4087,7 +4123,10 @@
             "v2.aiAgent.tasks.threads",
             "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
-        }
+        },
+        "x-riido-scenarios": [
+          "unassignAIAgentTaskV2.interleaved-execution-prevents-participant-removal"
+        ]
       },
       "post": {
         "operationId": "assignAIAgentTaskV2",
@@ -4341,7 +4380,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       }
@@ -4578,7 +4618,8 @@
           "invalidates": [
             "v2.aiAgent.bootstrap",
             "v2.aiAgent.tasks.assignableAgents",
-            "v2.aiAgent.tasks.threads"
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
       }
@@ -5863,6 +5904,13 @@
           "schema_version": {
             "type": "string"
           },
+          "task_agent_participants": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TaskAgentParticipantCollection"
+            },
+            "description": "Task ID keyed persistent Agent membership collections. Includes completed and stopped Agents until explicit participant removal. The legacy assigned_agent_profiles field remains active-only.",
+            "type": "object"
+          },
           "workspace_id": {
             "type": "string"
           }
@@ -6101,6 +6149,19 @@
           "failed"
         ],
         "type": "string"
+      },
+      "DeleteAIAgentTaskAgentAssignmentRequest": {
+        "description": "Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.",
+        "properties": {
+          "assignment_id": {
+            "description": "Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained.",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "DeleteAgentResponse": {
         "description": "agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.",
@@ -6546,10 +6607,61 @@
         ],
         "type": "object"
       },
+      "TaskAgentParticipantCollection": {
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/TaskAgentParticipantRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "agents"
+        ],
+        "type": "object"
+      },
+      "TaskAgentParticipantRecord": {
+        "description": "A persistent Agent participant, independent of execution state.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "is_owned_by_viewer": {
+            "type": "boolean"
+          },
+          "is_stop_required": {
+            "description": "At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID.",
+            "type": "boolean"
+          },
+          "latest_assignment_id": {
+            "description": "Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "name",
+          "is_owned_by_viewer",
+          "is_stop_required"
+        ],
+        "type": "object"
+      },
       "UnassignAIAgentTaskRequest": {
         "description": "task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.",
         "properties": {
           "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "description": "Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership.",
             "type": "string"
           },
           "reason": {

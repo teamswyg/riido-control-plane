@@ -26,6 +26,10 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	if dynamoDBAIAgentClientSnapshotItemIsLegacy(current) {
 		return s.loadLegacySnapshot(ctx, current, credentials)
 	}
+	items, err = s.readMembershipCommit(ctx, items, credentials)
+	if err != nil {
+		return AIAgentClientSnapshot{}, false, err
+	}
 	snapshot, snapshotBytes, err = decodeSplitDynamoDBAIAgentClientSnapshot(items)
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, err

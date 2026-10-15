@@ -43,7 +43,7 @@ func TestAgentDashboardHTTPPermissionsAndUnavailable(t *testing.T) {
 		t.Run(map[bool]string{false: "filter", true: "fail-closed"}[fail], func(t *testing.T) {
 			state := newStoreState()
 			for _, id := range []string{"visible", "secret"} {
-				state.assignments[id] = Assignment{ID: id, TaskID: id, AgentID: "agent-owned-codex", WorkspaceID: defaultAIAgentClientWorkspaceID, State: AssignmentCompleted, CreatedAt: now, UpdatedAt: now}
+				applyAssignmentToState(&state, Assignment{ID: id, TaskID: id, AgentID: "agent-owned-codex", WorkspaceID: defaultAIAgentClientWorkspaceID, State: AssignmentCompleted, CreatedAt: now, UpdatedAt: now})
 			}
 			store := newStoreWithConfig(StoreConfig{}, state)
 			defer store.Close()

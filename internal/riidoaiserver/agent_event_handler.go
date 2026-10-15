@@ -24,7 +24,10 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		return
 	}
 	if recorder, ok := s.aiAgent.(AIAgentAssignmentEventRecorder); ok {
-		_ = recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, req, response.Event)
+		if err := recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, req, response.Event); err != nil {
+			writeError(w, http.StatusServiceUnavailable, "assignment event committed but client projection is pending; retry the same event")
+			return
+		}
 	}
 	writeJSON(w, http.StatusOK, response)
 }

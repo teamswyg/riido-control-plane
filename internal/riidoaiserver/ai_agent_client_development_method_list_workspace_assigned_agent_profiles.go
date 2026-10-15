@@ -53,5 +53,6 @@ func (s *DevelopmentAIAgentClientStore) ListWorkspaceAssignedAgentProfiles(ctx c
 		SchemaVersion:         SchemaVersion,
 		WorkspaceID:           s.workspaceScope(principal),
 		AssignedAgentProfiles: profiles,
+		TaskAgentParticipants: s.taskAgentParticipantsLocked(principal),
 	}, nil
 }

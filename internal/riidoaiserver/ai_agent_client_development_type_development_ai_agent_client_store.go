@@ -17,6 +17,7 @@ type DevelopmentAIAgentClientStore struct {
 	nextDaemonCommand       int
 	agents                  map[string]AgentClientRecord
 	fixtures                []AgentOnboardingFixture
+	taskAgentMemberships    map[string]map[string]AIAgentTaskMembership
 	taskThreads             map[string][]AIAgentTaskThreadRecord
 	taskThreadMessages      map[string][]AIAgentTaskThreadHistoryMessage
 	taskThreadProgressCache map[string]taskThreadProgressMessageCache

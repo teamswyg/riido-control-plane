@@ -530,6 +530,10 @@ export interface AssignedAgentProfileMapResponse {
    */
   assigned_agent_profiles: Record<string, AssignedAgentProfile>;
   schema_version: string;
+  /**
+   * Task ID keyed persistent Agent membership collections. Includes completed and stopped Agents until explicit participant removal. The legacy assigned_agent_profiles field remains active-only.
+   */
+  task_agent_participants?: Record<string, TaskAgentParticipantCollection>;
   workspace_id: string;
 }
 
@@ -652,6 +656,17 @@ export type DaemonControlAction = "start" | "restart" | "stop";
  * daemon command가 접수된 뒤 client가 버튼/상태를 표시할 때 사용하는 제어 상태입니다.
  */
 export type DaemonControlState = "idle" | "starting" | "restarting" | "stopping" | "failed";
+
+/**
+ * Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.
+ */
+export interface DeleteAIAgentTaskAgentAssignmentRequest {
+  /**
+   * Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained.
+   */
+  assignment_id?: string;
+  reason?: string;
+}
 
 /**
  * agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.
@@ -838,10 +853,39 @@ export interface SubmitAIAgentTaskCommentRequest {
 }
 
 /**
+ * TaskAgentParticipantCollection 타입입니다.
+ */
+export interface TaskAgentParticipantCollection {
+  agents: TaskAgentParticipantRecord[];
+}
+
+/**
+ * A persistent Agent participant, independent of execution state.
+ */
+export interface TaskAgentParticipantRecord {
+  agent_id: string;
+  is_owned_by_viewer: boolean;
+  /**
+   * At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID.
+   */
+  is_stop_required: boolean;
+  /**
+   * Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained.
+   */
+  latest_assignment_id?: string;
+  name: string;
+  profile_thumbnail_url?: string;
+}
+
+/**
  * task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.
  */
 export interface UnassignAIAgentTaskRequest {
   agent_id: string;
+  /**
+   * Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership.
+   */
+  assignment_id?: string;
   reason?: string;
 }
 
@@ -1258,6 +1302,7 @@ export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, opti
  */
 export interface GetAgentDashboardPathParams {
   agent_id: string;
+  page?: number;
 }
 
 /**
@@ -1265,7 +1310,10 @@ export interface GetAgentDashboardPathParams {
  */
 export async function getAgentDashboard(config: RiidoClientConfig, params: GetAgentDashboardPathParams, options: RiidoRequestOptions = {}): Promise<AgentDashboardResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/dashboard`;
-  return riidoRequest<AgentDashboardResponse>(config, path, { method: 'GET', signal: options.signal });
+  const query = new URLSearchParams();
+  if (params.page !== undefined) query.set("page", String(params.page));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal });
 }
 
 /**
@@ -2450,6 +2498,7 @@ export function stopAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, op
 export interface GetAgentDashboardV2PathParams {
   workspace_id: string;
   agent_id: string;
+  page?: number;
 }
 
 /**
@@ -2457,7 +2506,10 @@ export interface GetAgentDashboardV2PathParams {
  */
 export async function getAgentDashboardV2(config: RiidoClientConfig, params: GetAgentDashboardV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentDashboardResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/dashboard`;
-  return riidoRequest<AgentDashboardResponse>(config, path, { method: 'GET', signal: options.signal });
+  const query = new URLSearchParams();
+  if (params.page !== undefined) query.set("page", String(params.page));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal });
 }
 
 /**
@@ -3045,7 +3097,7 @@ export function createAIAgentProfileThumbnailUploadV2MutationOptions(config: Rii
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
 export interface ListWorkspaceAssignedAgentProfilesV2PathParams {
@@ -3053,7 +3105,7 @@ export interface ListWorkspaceAssignedAgentProfilesV2PathParams {
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  */
 export async function listWorkspaceAssignedAgentProfilesV2(config: RiidoClientConfig, params: ListWorkspaceAssignedAgentProfilesV2PathParams, options: RiidoRequestOptions = {}): Promise<AssignedAgentProfileMapResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/assigned-agent-profiles`;
@@ -3061,7 +3113,7 @@ export async function listWorkspaceAssignedAgentProfilesV2(config: RiidoClientCo
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * cache tag: `v2.aiAgent.tasks.assignedAgentProfiles`
  * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
  */
@@ -3070,7 +3122,7 @@ export function listWorkspaceAssignedAgentProfilesV2QueryKeyRoot(): readonly unk
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * 이 호출에 사용하는 React Query 키입니다.
  */
 export function listWorkspaceAssignedAgentProfilesV2QueryKey(params: ListWorkspaceAssignedAgentProfilesV2PathParams): readonly unknown[] {
@@ -3078,7 +3130,7 @@ export function listWorkspaceAssignedAgentProfilesV2QueryKey(params: ListWorkspa
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
  */
 export function listWorkspaceAssignedAgentProfilesV2QueryOptions(config: RiidoClientConfig, params: ListWorkspaceAssignedAgentProfilesV2PathParams, options: RiidoQueryOptions<AssignedAgentProfileMapResponse> = {}) {
@@ -3137,7 +3189,7 @@ export function createAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoC
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
 export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
@@ -3147,23 +3199,24 @@ export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  */
-export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments/${params.agent_id}`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * mutation 함수에 전달하는 변수입니다.
  */
 export interface DeleteAIAgentTaskAgentAssignmentV2MutationVariables {
   params: DeleteAIAgentTaskAgentAssignmentV2PathParams;
+  body: DeleteAIAgentTaskAgentAssignmentRequest;
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 이 mutation을 구분하는 React Query mutation key입니다.
  */
 export function deleteAIAgentTaskAgentAssignmentV2MutationKey(): readonly unknown[] {
@@ -3171,14 +3224,14 @@ export function deleteAIAgentTaskAgentAssignmentV2MutationKey(): readonly unknow
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * useMutation에 전달할 수 있는 옵션입니다.
  */
 export function deleteAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) {
   return {
     ...options,
     mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, {}),
   };
 }
 
@@ -5650,7 +5703,7 @@ export interface CreateAIAgentProfileThumbnailUploadV2Endpoint {
 }
 
 /**
- * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+ * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
  * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
  * 접근 예시: `riido.v2.aiAgent.tasks.assignedAgentProfiles`
@@ -5732,6 +5785,10 @@ export interface CreateAIAgentTaskAgentAssignmentV2Endpoint {
      */
     readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
     /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
+    /**
      * `v2.aiAgent.tasks.threadStreamSubscription` cache tag를 무효화합니다.
      */
     readonly aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => Promise<void>;
@@ -5743,7 +5800,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2Endpoint {
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
  * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
  * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -5753,7 +5810,7 @@ export interface DeleteAIAgentTaskAgentAssignmentV2Endpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  readonly request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -5782,6 +5839,10 @@ export interface DeleteAIAgentTaskAgentAssignmentV2Endpoint {
      * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
      */
     readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
     /**
      * `v2.aiAgent.tasks.threadStreamSubscription` cache tag를 무효화합니다.
      */
@@ -5833,6 +5894,10 @@ export interface StopAIAgentTaskAgentAssignmentV2Endpoint {
      * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
      */
     readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
     /**
      * `v2.aiAgent.tasks.threadStreamSubscription` cache tag를 무효화합니다.
      */
@@ -6080,6 +6145,10 @@ export interface StopAIAgentTaskV2Endpoint {
      */
     readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
     /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
+    /**
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
@@ -6210,6 +6279,10 @@ export interface CreateAIAgentTaskThreadMessageV2Endpoint {
      * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
      */
     readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
     /**
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
@@ -6782,15 +6855,15 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.create`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.create`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.create`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly create: CreateAIAgentTaskAgentAssignmentV2Endpoint;
   /**
-   * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+   * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly delete: DeleteAIAgentTaskAgentAssignmentV2Endpoint;
   /**
@@ -6798,7 +6871,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.stop`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.stop`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.stop`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly stop: StopAIAgentTaskAgentAssignmentV2Endpoint;
 }
@@ -6812,7 +6885,7 @@ export interface RiidoV2AIAgentTasksThreadMessagesNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.threadMessages.create`
    * 검색용 generated 경로: `aiAgent.tasks.threadMessages.create`
    * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.create`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly create: CreateAIAgentTaskThreadMessageV2Endpoint;
 }
@@ -6842,7 +6915,7 @@ export interface RiidoV2AIAgentTasksNamespace {
    */
   readonly assignableAgents: ListAIAgentTaskAssignableAgentsV2Endpoint;
   /**
-   * workspace task/card 목록에서 현재 배정된 AI Agent profile 표시값을 component_id key 해시맵으로 조회합니다 (v2 workspace-scoped)
+   * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
    * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
    * 접근 예시: `riido.v2.aiAgent.tasks.assignedAgentProfiles`
@@ -6854,7 +6927,7 @@ export interface RiidoV2AIAgentTasksNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.stop`
    * 검색용 generated 경로: `aiAgent.tasks.stop`
    * 접근 예시: `riido.v2.aiAgent.tasks.stop`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly stop: StopAIAgentTaskV2Endpoint;
   /**
@@ -7527,12 +7600,13 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
                 aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
                 aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+                aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
                 aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }),
-                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
               },
             },
             delete: {
-              request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentTaskAgentAssignmentV2(config, params, options),
+              request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options?: RiidoRequestOptions) => deleteAIAgentTaskAgentAssignmentV2(config, params, body, options),
               mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey,
               mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => deleteAIAgentTaskAgentAssignmentV2MutationOptions(config, options),
               mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => deleteAIAgentTaskAgentAssignmentV2MutationOptions(config, options),
@@ -7540,8 +7614,9 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
                 aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
                 aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+                aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
                 aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }),
-                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
               },
             },
             stop: {
@@ -7553,8 +7628,9 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
                 aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
                 aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+                aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
                 aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }),
-                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
               },
             },
           },
@@ -7600,7 +7676,8 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
               aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
               aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
-              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+              aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
+              all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() })]),
             },
           },
           submitComment: {
@@ -7626,7 +7703,8 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
                 aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
                 aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
-                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() })]),
+                aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() })]),
               },
             },
           },

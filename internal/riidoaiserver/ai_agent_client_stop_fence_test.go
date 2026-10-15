@@ -117,7 +117,7 @@ func TestC2RunningThreadStillAcceptsRuntimeProgress(t *testing.T) {
 	}
 }
 
-func TestUnassignTerminalFailedThreadUpdatesOriginalThread(t *testing.T) {
+func TestUnassignTerminalFailedThreadPreservesOriginalThread(t *testing.T) {
 	ctx := context.Background()
 	store := NewDevelopmentAIAgentClientStore()
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
@@ -173,9 +173,11 @@ func TestUnassignTerminalFailedThreadUpdatesOriginalThread(t *testing.T) {
 	thread := threads.Threads[0]
 	if thread.ThreadID != assigned.ThreadID ||
 		thread.AssignmentID != assigned.AssignmentID ||
-		thread.AssignmentState != AgentAssignmentStateStopped ||
-		thread.WorkStatus != AgentWorkStatusIdle {
-		t.Fatalf("terminal unassign did not stop original thread: %+v", thread)
+		thread.AssignmentState != failed.AssignmentState ||
+		thread.WorkStatus != failed.WorkStatus ||
+		thread.Message != failed.Message ||
+		!thread.CompletedAt.Equal(failed.CompletedAt) {
+		t.Fatalf("terminal unassign changed original thread: %+v", thread)
 	}
 }
 
