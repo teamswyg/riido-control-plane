@@ -11,7 +11,9 @@ import (
 // using only snapshot content so that two instances loading the same snapshot
 // compute the same colors. Agents with a tmp_color are fixture-created onboarding
 // agents and get blue. The remaining agents take a least-used color within their
-// workspace scope, processed in created_at and agent_id order.
+// workspace scope, processed in created_at and agent_id order. A tie among the
+// least-used colors is broken by the fixed order blue, orange, green, purple, so
+// the result never depends on randomness or map iteration.
 func backfillAgentProfileColors(agents map[string]AgentClientRecord, scopeOf func(AgentClientRecord) string) {
 	counts := map[string]map[AgentProfileColor]int{}
 	var pending []AgentClientRecord
@@ -37,7 +39,7 @@ func backfillAgentProfileColors(agents map[string]AgentClientRecord, scopeOf fun
 	for _, agent := range pending {
 		scope := scopeOf(agent)
 		candidates := leastUsedAgentProfileColors(counts[scope])
-		agent.ProfileColor = candidates[agentIDHashIndex(agent.AgentID, len(candidates))]
+		agent.ProfileColor = candidates[0]
 		agents[agent.AgentID] = agent
 		addAgentProfileColorCount(counts, scope, agent.ProfileColor)
 	}

@@ -29,6 +29,10 @@ func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapsho
 		return json.Unmarshal(raw, &snapshot.TaskThreadMessages)
 	case dynamoDBAIAgentClientSnapshotPartEvents:
 		return json.Unmarshal(raw, &snapshot.Events)
+	case dynamoDBAIAgentClientSnapshotPartOnboardingCreated:
+		return json.Unmarshal(raw, &snapshot.OnboardingCreatedIDs)
+	case dynamoDBAIAgentClientSnapshotPartOnboardingDone:
+		return json.Unmarshal(raw, &snapshot.OnboardingCompletions)
 	default:
 		return fmt.Errorf("unknown AI Agent client snapshot part %s", name)
 	}

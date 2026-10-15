@@ -164,6 +164,13 @@ func TestAIAgentProfileColorBackfillUsesLeastUsedPerWorkspace(t *testing.T) {
 	if b == AgentProfileColorBlue || c == AgentProfileColorBlue || b == c {
 		t.Fatalf("workspace ws-1 should spread new agents over unused colors, got b=%q c=%q", b, c)
 	}
+	// Ties among least-used colors follow the fixed order blue, orange, green, purple.
+	if first["agent-b"].ProfileColor != AgentProfileColorOrange || first["agent-c"].ProfileColor != AgentProfileColorGreen {
+		t.Fatalf("ws-1 ties must break by fixed order: b=%q c=%q, want orange and green", first["agent-b"].ProfileColor, first["agent-c"].ProfileColor)
+	}
+	if got := first["agent-d"].ProfileColor; got != AgentProfileColorBlue {
+		t.Fatalf("first agent of an empty workspace = %q, want blue", got)
+	}
 	for id := range first {
 		if first[id].ProfileColor != second[id].ProfileColor {
 			t.Fatalf("backfill is not deterministic for %s: %q vs %q", id, first[id].ProfileColor, second[id].ProfileColor)

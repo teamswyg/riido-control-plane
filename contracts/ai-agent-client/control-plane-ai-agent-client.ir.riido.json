@@ -422,7 +422,7 @@
         "profile_color: one of blue, orange, green, purple; set once at creation and never changed by create, update, or PATCH-style requests",
         "profile_color_onboarding: Agents created through the onboarding fixture create path use blue",
         "profile_color_other: other Agents created in a workspace take a color chosen at random among the least-used profile_color values in that workspace",
-        "profile_color_backfill: Agents loaded from a snapshot without profile_color receive one deterministically from the snapshot (fixture-created agents with tmp_color get blue; the rest use the least-used rule in created_at and agent_id order) and keep it",
+        "profile_color_backfill: Agents loaded from a snapshot without profile_color receive one deterministically from the snapshot (fixture-created agents with tmp_color get blue; the rest take the least-used color in created_at and agent_id order, and any tie among least-used colors is broken by the fixed order blue, orange, green, purple, taking the first) and keep it",
         "profile_color_projection: profile_color is projected to agent records, task_agent_participants, assigned_agent_profiles, and thread agent snapshots; clients must not derive it from tmp_color",
         "profile_color_update: update requests accept profile_color for compatibility and ignore it; the stored color never changes"
       ]
