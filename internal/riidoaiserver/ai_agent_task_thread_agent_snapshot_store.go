@@ -18,12 +18,13 @@ func (s *DevelopmentAIAgentClientStore) deletedAgentSnapshot(agentID string, cap
 		capturedAt = time.Now().UTC()
 	}
 	return &AIAgentTaskThreadAgentSnapshot{
-		AgentID:     agentID,
-		WorkspaceID: s.workspaceScope(AuthorizationResult{}),
-		Name:        "삭제된 에이전트",
-		TmpColor:    "#94A3B8",
-		Visibility:  AgentVisibilityPublic,
-		CapturedAt:  capturedAt.UTC(),
+		AgentID:      agentID,
+		WorkspaceID:  s.workspaceScope(AuthorizationResult{}),
+		Name:         "삭제된 에이전트",
+		TmpColor:     "#94A3B8",
+		ProfileColor: fallbackAgentProfileColor(agentID),
+		Visibility:   AgentVisibilityPublic,
+		CapturedAt:   capturedAt.UTC(),
 	}
 }
 

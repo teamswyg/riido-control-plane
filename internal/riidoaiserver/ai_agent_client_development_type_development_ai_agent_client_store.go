@@ -27,4 +27,5 @@ type DevelopmentAIAgentClientStore struct {
 	events                  []ClientStreamEvent
 	subscribers             map[int]aiAgentClientSubscriber
 	nextSubscriberID        int
+	profileColorIndex       func(n int) int
 }

@@ -13,10 +13,10 @@
   "generated_core": "web/generated/aiAgentClient.ts",
   "generated_react": "web/generated/aiAgentClient.react.ts",
   "operation_counts": {
-    "total": 59,
+    "total": 60,
     "v1": 27,
-    "v2": 32,
-    "smoke_matrix": 59
+    "v2": 33,
+    "smoke_matrix": 60
   },
   "required_generated_paths": [
     "aiAgent.bootstrap",

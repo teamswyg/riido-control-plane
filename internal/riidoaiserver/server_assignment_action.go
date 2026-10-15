@@ -57,7 +57,7 @@ func (s Server) cancelAIAgentAssignmentTargets(ctx context.Context, targets []ai
 	}
 	primary := targets[0]
 	for _, target := range targets {
-		if isIntentGateAssignmentID(target.AssignmentID) {
+		if isNonDurableAssignmentID(target.AssignmentID) {
 			continue
 		}
 		cancelled, err := canceller.CancelAssignment(ctx, target.TaskID, CancelAssignmentRequest{

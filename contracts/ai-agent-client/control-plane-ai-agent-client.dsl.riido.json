@@ -417,7 +417,13 @@
         "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
         "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image upload uses createAIAgentProfileThumbnailUpload before saving profile_thumbnail_url",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
-        "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
+        "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1",
+        "profile_color: one of blue, orange, green, purple; set once at creation and never changed by create, update, or PATCH-style requests",
+        "profile_color_onboarding: Agents created through the onboarding fixture create path use blue",
+        "profile_color_other: other Agents created in a workspace take a color chosen at random among the least-used profile_color values in that workspace",
+        "profile_color_backfill: Agents loaded from a snapshot without profile_color receive one deterministically from the snapshot (fixture-created agents with tmp_color get blue; the rest use the least-used rule in created_at and agent_id order) and keep it",
+        "profile_color_projection: profile_color is projected to agent records, task_agent_participants, assigned_agent_profiles, and thread agent snapshots; clients must not derive it from tmp_color",
+        "profile_color_update: update requests accept profile_color for compatibility and ignore it; the stored color never changes"
       ]
     },
     {
@@ -440,6 +446,26 @@
         "no_runtime: when no selectable runtime is detected, clients skip the fixture-selection step and show the no-installed-AI start state",
         "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
         "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
+      ]
+    },
+    {
+      "policy_id": "ai_agent_onboarding_completion.v1",
+      "kind": "onboarding",
+      "description": "앱 온보딩 첫 작업의 완료 결과는 실행과 독립된 completed task thread와 agent 댓글 한 건으로 기록됩니다.",
+      "rules": [
+        "server: the completion adds the agent as a persistent task participant and records a completed thread with assignment_id prefix onboarding-seed-",
+        "server: the completion never calls the assignment queue, never creates a queued, leasable, or running assignment, and performs no AI execution",
+        "server: the completion comment is an agent-authored message with comment_kind task_completed; agents cannot edit task bodies",
+        "idempotency: the same task and agent, or the same request_id, returns the existing completion response without duplicating participants or messages",
+        "non_durable: onboarding-seed- assignment IDs are non-durable; stop, cancel, participant removal, and reconcile paths must not treat them as queued executions",
+        "access: the workspace, task, and agent must be visible to the authorized principal, using the same checks as agent assignment",
+        "locale: template copy is selected by locale ko or en; omitted locale means ko",
+        "copy_schedule_ko: 단계 4개를 이 작업의 하위 작업으로 추가하고 마감일을 넣어 뒀어요. 참여자는 비워 뒀으니 팀원을 초대하면 바로 넣을 수 있어요.",
+        "copy_schedule_en: Added the 4 phases as subtasks of this task with due dates. Assignees are empty, so you can add them as soon as you invite teammates.",
+        "copy_interview_ko: 질문지를 이 작업의 문서로 남겼어요. \"~라면 쓰시겠어요?\"처럼 답을 유도하는 질문은 뺐어요.",
+        "copy_interview_en: Saved the questions as this task's document. Leading questions like \"Would you use it if…?\" were left out.",
+        "copy_launch_ko: 항목 9개를 이 작업의 하위 작업으로 추가하고 D-3, 당일, D+7 마감일을 넣어 뒀어요.",
+        "copy_launch_en: Added the 9 items as subtasks of this task with D-3, launch-day, and D+7 due dates."
       ]
     }
   ],
@@ -735,6 +761,63 @@
         {
           "value": "progress",
           "description": "runtime output에서 파생된 진행 로그 메시지입니다."
+        }
+      ]
+    },
+    {
+      "name": "AgentProfileColor",
+      "type": "string",
+      "description": "AI Agent profile 색상 4종입니다.",
+      "values": [
+        {
+          "value": "blue",
+          "description": "파란색입니다. 온보딩으로 만든 Agent의 고정 색입니다."
+        },
+        {
+          "value": "orange",
+          "description": "주황색입니다."
+        },
+        {
+          "value": "green",
+          "description": "초록색입니다."
+        },
+        {
+          "value": "purple",
+          "description": "보라색입니다."
+        }
+      ]
+    },
+    {
+      "name": "AIAgentOnboardingTaskTemplateKey",
+      "type": "string",
+      "description": "앱 온보딩 첫 작업 결과 템플릿 3종입니다. 결과 본문은 서버가 가진 승인된 문구를 사용합니다.",
+      "values": [
+        {
+          "value": "schedule",
+          "description": "일정 계획 템플릿입니다. 4개 단계를 하위 작업으로 추가합니다."
+        },
+        {
+          "value": "interview",
+          "description": "고객 인터뷰 질문지 템플릿입니다. 질문지를 작업 문서로 남깁니다."
+        },
+        {
+          "value": "launch",
+          "description": "출시 준비 템플릿입니다. 9개 항목을 하위 작업으로 추가합니다."
+        }
+      ]
+    },
+    {
+      "name": "AIAgentOnboardingLocale",
+      "type": "string",
+      "description": "온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.",
+      "values": [
+        {
+          "value": "ko",
+          "description": "한국어 문구입니다."
+        },
+        {
+          "value": "en",
+          "description": "영어 문구입니다."
         }
       ]
     }
@@ -1211,6 +1294,11 @@
           "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."
         },
         {
+          "name": "profile_color",
+          "ref": "AgentProfileColor",
+          "description": "agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다."
+        },
+        {
           "name": "description",
           "type": "string",
           "max_length": 160
@@ -1279,7 +1367,8 @@
         "editability",
         "assigned_task_count",
         "created_at",
-        "updated_at"
+        "updated_at",
+        "profile_color"
       ],
       "properties": [
         {
@@ -1313,6 +1402,11 @@
           "name": "tmp_color",
           "type": "string",
           "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."
+        },
+        {
+          "name": "profile_color",
+          "ref": "AgentProfileColor",
+          "description": "agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다."
         },
         {
           "name": "description",
@@ -1429,6 +1523,11 @@
           "name": "tmp_color",
           "type": "string",
           "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452."
+        },
+        {
+          "name": "profile_color",
+          "ref": "AgentProfileColor",
+          "description": "배정된 Agent의 고정 profile 색상입니다. tmp_color와 독립적으로 항상 내려갑니다."
         }
       ]
     },
@@ -1440,7 +1539,8 @@
         "agent_id",
         "name",
         "is_owned_by_viewer",
-        "is_stop_required"
+        "is_stop_required",
+        "profile_color"
       ],
       "properties": [
         {
@@ -1455,6 +1555,11 @@
           "name": "profile_thumbnail_url",
           "type": "string",
           "format": "uri"
+        },
+        {
+          "name": "profile_color",
+          "ref": "AgentProfileColor",
+          "description": "참여자 Agent의 고정 profile 색상입니다."
         },
         {
           "name": "is_owned_by_viewer",
@@ -1975,6 +2080,11 @@
           "name": "model_id",
           "type": "string",
           "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+        },
+        {
+          "name": "profile_color",
+          "ref": "AgentProfileColor",
+          "description": "호환을 위해 받을 수 있는 무시되는 입력입니다. 생성 시 정해진 profile 색상은 이 요청으로 바뀌지 않습니다."
         }
       ]
     },
@@ -2214,6 +2324,11 @@
         {
           "name": "tmp_color",
           "type": "string"
+        },
+        {
+          "name": "profile_color",
+          "ref": "AgentProfileColor",
+          "description": "thread snapshot 시점의 profile 색상입니다."
         },
         {
           "name": "visibility",
@@ -3408,6 +3523,37 @@
         {
           "name": "scope",
           "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "CompleteAIAgentOnboardingTaskRequest",
+      "description": "앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.",
+      "type": "object",
+      "required": [
+        "agent_id",
+        "template_key"
+      ],
+      "properties": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "description": "온보딩으로 깨운 agent의 안정 식별자입니다."
+        },
+        {
+          "name": "template_key",
+          "ref": "AIAgentOnboardingTaskTemplateKey",
+          "description": "완료 결과 템플릿입니다."
+        },
+        {
+          "name": "request_id",
+          "type": "string",
+          "description": "같은 완료 요청을 다시 보낼 때 쓰는 idempotency key입니다. 같은 값이면 기존 결과를 돌려줍니다."
+        },
+        {
+          "name": "locale",
+          "ref": "AIAgentOnboardingLocale",
+          "description": "완료 문구 언어입니다. 생략하면 ko입니다."
         }
       ]
     }
@@ -5845,6 +5991,63 @@
           "given": "a task already has an active AI Agent assignment and another visible agent is selected",
           "when": "client calls riido.v2.aiAgent.tasks.agentAssignments.create",
           "then": "control-plane keeps existing active task threads and creates or returns the selected agent's task thread"
+        }
+      ]
+    },
+    {
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "kind": "command",
+      "summary": "온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/onboarding-completion",
+      "resource": "agent",
+      "action": "assign",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "onboardingCompletion",
+          "create"
+        ],
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles",
+          "v2.aiAgent.tasks.threadStreamSubscription"
+        ]
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "CompleteAIAgentOnboardingTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenarios": [
+        {
+          "name": "onboarding completion records a participant and a completed agent comment without execution",
+          "given": "an onboarding-created agent is visible in the workspace and the task has no active execution for it",
+          "when": "client calls riido.v2.aiAgent.tasks.onboardingCompletion.create with a template_key",
+          "then": "control-plane adds the agent as a task participant and records one completed task_completed agent message; no queued or leasable assignment is created"
+        },
+        {
+          "name": "onboarding completion is idempotent",
+          "given": "the same task and agent, or the same request_id, already has an onboarding completion",
+          "when": "client repeats the completion request",
+          "then": "control-plane returns the existing completion response without adding participants or messages"
         }
       ]
     },

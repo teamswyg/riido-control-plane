@@ -14,7 +14,7 @@ type developmentAIAgentClientSeed struct {
 
 func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 	seed := newDevelopmentAIAgentClientSeed()
-	return &DevelopmentAIAgentClientStore{
+	store := &DevelopmentAIAgentClientStore{
 		workspaceID:             defaultAIAgentClientWorkspaceID,
 		daemonClientPolicy:      DefaultDaemonClientCompatibilityPolicy(),
 		devices:                 seed.devices,
@@ -33,6 +33,8 @@ func NewDevelopmentAIAgentClientStore() *DevelopmentAIAgentClientStore {
 		nextSubscriberID:        0,
 		nextDeviceCredentialSeq: 0,
 	}
+	store.ensureAgentProfileColorsLocked()
+	return store
 }
 
 func newDevelopmentAIAgentClientSeed() developmentAIAgentClientSeed {

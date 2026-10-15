@@ -14,6 +14,16 @@ export interface AIAgentExecutionContext {
 }
 
 /**
+ * 온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.
+ */
+export type AIAgentOnboardingLocale = "ko" | "en";
+
+/**
+ * 앱 온보딩 첫 작업 결과 템플릿 3종입니다. 결과 본문은 서버가 가진 승인된 문구를 사용합니다.
+ */
+export type AIAgentOnboardingTaskTemplateKey = "schedule" | "interview" | "launch";
+
+/**
  * task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.
  */
 export interface AIAgentTaskActionResponse {
@@ -56,6 +66,10 @@ export interface AIAgentTaskThreadAgentSnapshot {
   model_label?: string;
   name?: string;
   owner_principal_id?: string;
+  /**
+   * thread snapshot 시점의 profile 색상입니다.
+   */
+  profile_color?: AgentProfileColor;
   profile_thumbnail_url?: string;
   runtime_kind?: RuntimeKind;
   tmp_color?: string;
@@ -263,6 +277,10 @@ export interface AgentClientRecord {
   model_label?: string;
   name: string;
   owner_principal_id: string;
+  /**
+   * agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다.
+   */
+  profile_color?: AgentProfileColor;
   profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
@@ -309,6 +327,10 @@ export interface AgentClientRecordV2 {
   model_label?: string;
   name: string;
   owner_principal_id: string;
+  /**
+   * agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다.
+   */
+  profile_color: AgentProfileColor;
   profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
@@ -459,6 +481,11 @@ export interface AgentOnboardingFixtureListResponse {
 }
 
 /**
+ * AI Agent profile 색상 4종입니다.
+ */
+export type AgentProfileColor = "blue" | "orange" | "green" | "purple";
+
+/**
  * 브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.
  */
 export interface AgentProfileThumbnailUploadFormField {
@@ -600,6 +627,10 @@ export interface AssignedAgentProfile {
    */
   avatar_url?: string;
   /**
+   * 배정된 Agent의 고정 profile 색상입니다. tmp_color와 독립적으로 항상 내려갑니다.
+   */
+  profile_color?: AgentProfileColor;
+  /**
    * fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452.
    */
   tmp_color?: string;
@@ -658,6 +689,28 @@ export type ClientKind = "web" | "desktop_webview";
  * web과 desktop webview client가 소비하는 SSE event union입니다.
  */
 export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent;
+
+/**
+ * 앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.
+ */
+export interface CompleteAIAgentOnboardingTaskRequest {
+  /**
+   * 온보딩으로 깨운 agent의 안정 식별자입니다.
+   */
+  agent_id: string;
+  /**
+   * 완료 문구 언어입니다. 생략하면 ko입니다.
+   */
+  locale?: AIAgentOnboardingLocale;
+  /**
+   * 같은 완료 요청을 다시 보낼 때 쓰는 idempotency key입니다. 같은 값이면 기존 결과를 돌려줍니다.
+   */
+  request_id?: string;
+  /**
+   * 완료 결과 템플릿입니다.
+   */
+  template_key: AIAgentOnboardingTaskTemplateKey;
+}
 
 /**
  * agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.
@@ -994,6 +1047,10 @@ export interface TaskAgentParticipantRecord {
    */
   latest_assignment_id?: string;
   name: string;
+  /**
+   * 참여자 Agent의 고정 profile 색상입니다.
+   */
+  profile_color: AgentProfileColor;
   profile_thumbnail_url?: string;
 }
 
@@ -1029,6 +1086,10 @@ export interface UpdateAgentConfigurationRequest {
    * agent 설정 화면의 이름 입력값입니다.
    */
   name?: string;
+  /**
+   * 호환을 위해 받을 수 있는 무시되는 입력입니다. 생성 시 정해진 profile 색상은 이 요청으로 바뀌지 않습니다.
+   */
+  profile_color?: AgentProfileColor;
   /**
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
@@ -3583,6 +3644,52 @@ export function submitAIAgentTaskCommentV2MutationOptions(config: RiidoClientCon
     ...options,
     mutationKey: submitAIAgentTaskCommentV2MutationKey(),
     mutationFn: (variables: SubmitAIAgentTaskCommentV2MutationVariables) => submitAIAgentTaskCommentV2(config, variables.params, variables.body, {}),
+  };
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ */
+export async function completeAIAgentOnboardingTaskV2(config: RiidoClientConfig, params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/onboarding-completion`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2MutationVariables {
+  params: CompleteAIAgentOnboardingTaskV2PathParams;
+  body: CompleteAIAgentOnboardingTaskRequest;
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function completeAIAgentOnboardingTaskV2MutationKey(): readonly unknown[] {
+  return ["completeAIAgentOnboardingTaskV2"] as const;
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function completeAIAgentOnboardingTaskV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: completeAIAgentOnboardingTaskV2MutationKey(),
+    mutationFn: (variables: CompleteAIAgentOnboardingTaskV2MutationVariables) => completeAIAgentOnboardingTaskV2(config, variables.params, variables.body, {}),
   };
 }
 
@@ -6225,6 +6332,61 @@ export interface SubmitAIAgentTaskCommentV2Endpoint {
 }
 
 /**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+ * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+ * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables>) => ReturnType<typeof completeAIAgentOnboardingTaskV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables>) => ReturnType<typeof completeAIAgentOnboardingTaskV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threadStreamSubscription` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.stop`
  * 검색용 generated 경로: `aiAgent.tasks.stop`
@@ -6997,6 +7159,20 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
 }
 
 /**
+ * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksOnboardingCompletionNamespace {
+  /**
+   * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+   * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+   * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
+   */
+  readonly create: CompleteAIAgentOnboardingTaskV2Endpoint;
+}
+
+/**
  * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
  */
 export interface RiidoV2AIAgentTasksThreadMessagesNamespace {
@@ -7042,6 +7218,10 @@ export interface RiidoV2AIAgentTasksNamespace {
    * cache tag: `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly assignedAgentProfiles: ListWorkspaceAssignedAgentProfilesV2Endpoint;
+  /**
+   * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+   */
+  readonly onboardingCompletion: RiidoV2AIAgentTasksOnboardingCompletionNamespace;
   /**
    * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.stop`
@@ -7786,6 +7966,22 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             invalidate: (queryClient: QueryClient, params: ListWorkspaceAssignedAgentProfilesV2PathParams) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKey(params) }),
             invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
             prefetch: (queryClient: QueryClient, params: ListWorkspaceAssignedAgentProfilesV2PathParams, options?: RiidoQueryOptions<AssignedAgentProfileMapResponse>) => queryClient.prefetchQuery(listWorkspaceAssignedAgentProfilesV2QueryOptions(config, params, options)),
+          },
+          onboardingCompletion: {
+            create: {
+              request: (params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options?: RiidoRequestOptions) => completeAIAgentOnboardingTaskV2(config, params, body, options),
+              mutationKey: completeAIAgentOnboardingTaskV2MutationKey,
+              mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) => completeAIAgentOnboardingTaskV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) => completeAIAgentOnboardingTaskV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+                aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+                aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+                aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
+                aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
+              },
+            },
           },
           stop: {
             request: (params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options?: RiidoRequestOptions) => stopAIAgentTaskV2(config, params, body, options),

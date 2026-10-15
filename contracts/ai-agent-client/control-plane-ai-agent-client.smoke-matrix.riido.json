@@ -429,6 +429,14 @@
       ]
     },
     {
+      "generated_path": "v2.aiAgent.tasks.onboardingCompletion.create",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/onboarding-completion",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
       "generated_path": "v2.aiAgent.tasks.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/stop",

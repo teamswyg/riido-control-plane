@@ -284,6 +284,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/task-smoke-onboarding/onboarding-completion", token, `{"agent_id":"agent-owned-codex","template_key":"schedule"}`, http.StatusAccepted)
 }
 
 func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {

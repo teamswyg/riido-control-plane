@@ -780,6 +780,20 @@ export interface SubmitAIAgentTaskCommentV2ReactEndpoint extends core.SubmitAIAg
 }
 
 /**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+ * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+ * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2ReactEndpoint extends core.CompleteAIAgentOnboardingTaskV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CompleteAIAgentOnboardingTaskV2MutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.CompleteAIAgentOnboardingTaskV2MutationVariables>;
+}
+
+/**
  * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.stop`
  * 검색용 generated 경로: `aiAgent.tasks.stop`
@@ -1422,6 +1436,20 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
 }
 
 /**
+ * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksOnboardingCompletionReactNamespace {
+  /**
+   * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+   * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+   * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
+   */
+  readonly create: CompleteAIAgentOnboardingTaskV2ReactEndpoint;
+}
+
+/**
  * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
  */
 export interface RiidoV2AIAgentTasksThreadMessagesReactNamespace {
@@ -1467,6 +1495,10 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * cache tag: `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly assignedAgentProfiles: ListWorkspaceAssignedAgentProfilesV2ReactEndpoint;
+  /**
+   * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+   */
+  readonly onboardingCompletion: RiidoV2AIAgentTasksOnboardingCompletionReactNamespace;
   /**
    * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.stop`
@@ -1842,6 +1874,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             assignedAgentProfiles: {
               ...coreClient.v2.aiAgent.tasks.assignedAgentProfiles,
               useQuery: (params: core.ListWorkspaceAssignedAgentProfilesV2PathParams, options?: core.RiidoQueryOptions<core.AssignedAgentProfileMapResponse>) => useQuery<core.AssignedAgentProfileMapResponse, Error>(coreClient.v2.aiAgent.tasks.assignedAgentProfiles.query(params, options)),
+            },
+            onboardingCompletion: {
+              create: {
+                ...coreClient.v2.aiAgent.tasks.onboardingCompletion.create,
+                useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.CompleteAIAgentOnboardingTaskV2MutationVariables>(coreClient.v2.aiAgent.tasks.onboardingCompletion.create.mutation(options)),
+              },
             },
             stop: {
               ...coreClient.v2.aiAgent.tasks.stop,
