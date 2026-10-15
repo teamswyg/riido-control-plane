@@ -3,7 +3,6 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -16,34 +15,27 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	defer func() {
 		s.observeAIAgentClientSnapshot(AIAgentClientSnapshotLoad, startedAt, snapshotBytes, err)
 	}()
-	return s.loadConsistentSnapshot(ctx, credentials, &snapshotBytes)
-}
-
-func (s *DynamoDBAIAgentClientSnapshot) loadConsistentSnapshot(ctx context.Context, credentials AWSCredentials, snapshotBytes *int64) (AIAgentClientSnapshot, bool, error) {
-	for range 3 {
-		items, err := s.querySnapshotItems(ctx, credentials)
-		if err != nil {
-			return AIAgentClientSnapshot{}, false, err
-		}
-		current := dynamoDBAIAgentClientSnapshotCurrentItem(items)
-		if len(current) == 0 {
-			return AIAgentClientSnapshot{}, false, nil
-		}
-		if dynamoDBAIAgentClientSnapshotItemIsLegacy(current) {
-			return s.loadLegacySnapshot(ctx, current, credentials)
-		}
-		snapshot, size, err := decodeSplitDynamoDBAIAgentClientSnapshot(items)
-		*snapshotBytes = size
-		if errors.Is(err, errAIAgentSnapshotConflict) {
-			continue
-		}
-		if err != nil {
-			return AIAgentClientSnapshot{}, false, err
-		}
-		s.partHashes = dynamoDBAIAgentClientSnapshotPartHashes(items)
-		return snapshot, true, nil
+	items, err := s.querySnapshotItems(ctx, credentials)
+	if err != nil {
+		return AIAgentClientSnapshot{}, false, err
 	}
-	return AIAgentClientSnapshot{}, false, errAIAgentSnapshotConflict
+	current := dynamoDBAIAgentClientSnapshotCurrentItem(items)
+	if len(current) == 0 {
+		return AIAgentClientSnapshot{}, false, nil
+	}
+	if dynamoDBAIAgentClientSnapshotItemIsLegacy(current) {
+		return s.loadLegacySnapshot(ctx, current, credentials)
+	}
+	items, err = s.readMembershipCommit(ctx, items, credentials)
+	if err != nil {
+		return AIAgentClientSnapshot{}, false, err
+	}
+	snapshot, snapshotBytes, err = decodeSplitDynamoDBAIAgentClientSnapshot(items)
+	if err != nil {
+		return AIAgentClientSnapshot{}, false, err
+	}
+	s.partHashes = dynamoDBAIAgentClientSnapshotPartHashes(items)
+	return snapshot, true, nil
 }
 
 func (s *DynamoDBAIAgentClientSnapshot) loadLegacySnapshot(ctx context.Context, current map[string]map[string]string, credentials AWSCredentials) (AIAgentClientSnapshot, bool, error) {
@@ -51,7 +43,7 @@ func (s *DynamoDBAIAgentClientSnapshot) loadLegacySnapshot(ctx context.Context, 
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, err
 	}
-	s.partHashes = nil
+	_ = s.save(ctx, snapshot, credentials)
 	return snapshot, true, nil
 }
 

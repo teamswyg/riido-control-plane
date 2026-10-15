@@ -20,6 +20,78 @@
   ],
   "chains": [
     {
+      "id": "bounded_ecs_rollout_stability_wait_5818",
+      "observation": "The native ECS stability waiter expired while a scheduler replacement was recovering from an initial readiness-check rejection, causing a healthy successor to be rolled back before the full service had settled.",
+      "hypothesis": "One additional bounded stability wait for an active or just-completed primary rollout can confirm recovery without changing service configuration; failed or unknown rollout states must continue to fail closed.",
+      "claims": [
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": ".github/workflows/deploy-ai-agent-testnet.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "tools/deploypolicy/ecs_stability_wait_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "runtime-deployment-boundary-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Permit at most two native stability waits and retain a workflow budget for rollback. Verify initial success, active recovery, completion races, terminal failure, unknown state and second-wait failure through the actual shell block and a fake AWS command. Initial readiness rejection cause remains unconfirmed; this change does not alter health checks or claim provider recovery.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "assigned_task_context_delivery_5818",
+      "observation": "Assignments delivered only the current task body and parent titles; follow-ups supplied one response, so existing related documents and same-conversation messages were absent from the prompt.",
+      "hypothesis": "The existing authorized component routes and persisted thread-history projection can supply bounded reference context under the original deadline without additional task permissions or arbitrary content downloads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "ambiguous_task_context_must_ask_before_work"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_enrichment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_thread_message_assignment.go"
+
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_enrichment_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_conversation_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_text_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Reuse a single existing history projection for follow-up selection and context; limit prompt history to eight relevant messages and 6000 runes, deduplicate at most three parent document reads and retain the original request deadline. Synthetic identity/permission/deadline/isolation tests pass; no measured production latency or provider comprehension improvement is claimed.",
+      "next_loop": "control_plane_performance_harness"
+    },
+    {
       "id": "production_provider_failure_observability_loop",
       "observation": "Production logs showed repeated external-authorizer timeouts, short HTTP 503 bursts, and initial non-operational provider observations without a useful diagnostic code or device correlation. One-percent head sampling also produced no retained error traces for the same incident window.",
       "hypothesis": "Bounded failure-stage fields, hashed device correlation, normalized provider diagnostics, and error-marked spans can make provider and request failures diagnosable without changing endpoints, logging raw provider output, or adding high-cardinality metric dimensions.",
@@ -21309,7 +21381,661 @@
       ],
       "decision": "Admit only a source-ready, public, exact two-operation owner receiver registered at /owner/graphql. healthCheck is exactly 200; fireError always returns null plus the pinned error; aliases, repeated selections, fragments, unknown operations, malformed JSON, and missing handler configuration fail closed. The changed route and syntax-hash surfaces are now bound to executable evidence, while runtime_wired, deployment, effect, performance improvement, and public schema credit remain zero.",
       "next_loop": "closed_loop_candidate"
+    },
+    {"id": "agent_execution_delivery_modular_integration_20261013", "observation": "The reviewed 5827 source predates main module decomposition. Partial message keys disappeared from the public wire and replacement lines reused sequence numbers; shared state updates also needed serialization for local file snapshots.", "hypothesis": "An additive public discriminator, monotonic progress sequence and serialized snapshot boundary can improve live execution visibility while preserving current main replay cursors, v3 conversations, authentication and performance controls.", "claims": ["sse_reconnect_must_resume_after_last_event_id", "thread_history_v3_must_expose_stable_conversation_grouping"], "changes": [{"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_api.go"}, {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_next_thread_progress_seq_locked.go"}, {"kind": "code", "path": "internal/riidoaiserver/server_assignment_request.go"}, {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"}], "verifiers": [{"kind": "test", "path": "internal/riidoaiserver/execution_delivery_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"}, {"kind": "tool", "path": "tools/loopregistry"}], "evidence": [{"kind": "artifact", "path": "agent-execution-modular-integration-local-tests-20261013", "redacted": true}], "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence.", "next_loop": "ai_agent_load_harness"},
+    {
+  "id": "persistent_agent_participant_review_5841",
+  "observation": "Terminal participant removal unconditionally overwrote execution data; optional Dynamo membership parts could be restored without CURRENT committing them; additive assignment mutations omitted the participant query invalidation tag. Additional review reproduced failed membership commit making CURRENT unreadable, stale execution removal hiding a newer execution, and followup execution failing to restore membership or invalidate the participant cache. Subsequent RIID-5841 review reproduced historical waiting A hiding the latest removal ID B, ID-less removal cancelling A but erasing membership while interleaved B remained runnable, and durable B being created before its client thread was published. Native independent Persistent client stores and assignment actors sharing one Dynamo fixture reproduced unpublished durable generation removal across Server instances, legacy receipt absence, creation during receipt reads, stale scoped peer-history writes, and standalone failed publication leaving removal permanently conflicted. Independent native review reproduced recovery cancellation sequence 4 colliding with same-task actor runtime sequence 4, causing local replay and live subscriber emission to be skipped despite durable cancellation. Native creation transactions committed before a 503 response or connection loss were reported as failures and skipped membership publication. Strict Dynamo wire validation reproduced empty optional ConditionExpression on unconditional transaction puts. A superseding generation left the failed older unpublished execution runnable; cancelling solely from the newer marker would also cancel an actually published execution whose response was lost.",
+  "hypothesis": "Atomic membership/CURRENT write and read, a latest-assignment removal fence before durable cancellation and under the store lock, followup membership activation, and participant query invalidation close the reproduced failure paths. State-independent latest_assignment_id and an optional DELETE guard separate membership from execution ownership. A same-snapshot private thread observation, cancellation of every retained active execution for this task Agent, and a task publication gate from durable creation through client publication make explicit removal reject a newly observed generation without retaining workers or rewriting terminal history. Atomic durable generation and active receipts, a stable strong observation before cancellation, legacy and retained projection union, private scoped membership and history commit conditions, and exact self-created failed-publication recovery close these supported boundaries without extending the public API or retaining runtime leases. Passing the private actor next-event floor to the recovery event factory preserves existing actor cursor ordering without adding a distributed sequencer. A publication proof in the existing active execution receipt, committed with membership and checked during cancellation, distinguishes those cases without another retained row.",
+  "claims": [
+    "stop_reassign_must_not_revive_or_mutate_inactive_threads",
+    "sse_reconnect_must_resume_after_last_event_id"
+  ],
+  "changes": [
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_development_method_unassign_ai_agent_task.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_decode.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_fence.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_transaction.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
+    },
+    {
+      "kind": "manifest",
+      "path": "docs/30-architecture/loop-registry.riido.json"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_task_membership.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/server_ai_agent_membership_removal.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_observation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_task_execution_gate.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_task_unassign_handler.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_api.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_assign_ai_agent_task.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_task_agent_assignment.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_task_thread_message.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_delete_ai_agent_task_agent_assignment.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_list_workspace_assigned_agent_profiles.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_unassign_ai_agent_task.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_handler.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_task_assign_handler.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_membership_persistent_mutation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_membership_persistent_mutation_observe_task_agent_membership_removal.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_visibility.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/assignment_operation_port.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_save.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_read_task_agent_generation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_next.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_repair_transaction_payload.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_transaction_payload.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_dynamo_dbassignment_claim_repair.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_dynamo_dbcancel_queued_blocker_operation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_interfaces.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_agent_active_assignment.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_agent_queue_records.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_assignment_projection.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_refresh_agent_active_assignment.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_release_agent_active_assignment_if_terminal.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_save.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_save_assignment_projection.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_stale_blocker_lease_condition.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_assignment_transaction_types.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_generation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_generation_delete_task_agent_terminal_receipt.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_generation_load_task_agent_durable_executions.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_generation_same_task_agent_creation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_publication_recovery_actions.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_read_publication_membership_baseline.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_retry.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/server_assignment_action.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/server_constructor.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_assignment_api.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_assignment_commands.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_cancel_queued_blocker_for_assignment.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_constructor.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_handle_assign.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_handle_cancel_assignment.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_handle_event.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_handle_poll.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_persistence_handlers.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/store_type.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/task_agent_creation_receipt.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/task_agent_durable_generation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/task_agent_durable_generation_load_legacy_task_agent_durable_executions.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/task_agent_publication_cancellation.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/task_agent_publication_recovery.go"
     }
+  ],
+  "verifiers": [
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/reactquerygen/participant_invalidation_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_followup_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_stale_removal_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_atomic_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_latest_assignment_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_all_active_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_http_fence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_durable_publish_gap_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_task_execution_gate_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_publication_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test_httpmembership_removal_does_not_cancel_execution_created_during_receipt_read_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_cross_server_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_failed_older_publication_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_independent_store_publication_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test_httpmembership_removal_survives_stale_ordinary_writer_and_fresh_bulk_read_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_intent_gate_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_legacy_coexistence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_legacy_durable_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_native_scenario_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_peer_commit_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_private_removal_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_advance_failed_publication_execution_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_check_failed_membership_publication_recovery_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_peer_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_projection_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_stale_intent_gate_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_event_sequence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_legacy_absent_part_recovery_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_creation_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_rejected_creation_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_dynamo_wire_condition_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_accepted_publication_generation_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_terminal_receipt_race_test.go"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "tools/reactquerygen/participant_invalidation_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_followup_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_stale_removal_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_atomic_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_latest_assignment_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_all_active_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_removal_http_fence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_durable_publish_gap_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_task_execution_gate_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_publication_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test_httpmembership_removal_does_not_cancel_execution_created_during_receipt_read_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_cross_server_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_failed_older_publication_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_independent_store_publication_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test_httpmembership_removal_survives_stale_ordinary_writer_and_fresh_bulk_read_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_intent_gate_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_legacy_coexistence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_legacy_durable_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_native_scenario_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_peer_commit_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_private_removal_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_advance_failed_publication_execution_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_check_failed_membership_publication_recovery_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_peer_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_projection_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_stale_intent_gate_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_recovery_event_sequence_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_legacy_absent_part_recovery_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_creation_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_rejected_creation_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_dynamo_wire_condition_test.go"
+    },
+    {
+      "kind": "code",
+      "path": "internal/riidoaiserver/dynamodb_ai_agent_publication_receipt.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_accepted_publication_generation_race_test.go"
+    },
+    {
+      "kind": "test",
+      "path": "internal/riidoaiserver/ai_agent_membership_publication_terminal_receipt_race_test.go"
+    }
+  ],
+  "decision": "Keep terminal history and peer activity unchanged on removal. Explicit removal uses one DELETE and cancels the task Agent's observed active executions; an optional latest retained assignment ID is a generation guard, not membership or runtime capacity. Reject stale observations with HTTP 409 and preserve newer executions. Accepted followup instructions restore membership and invalidate participant queries. The existing per-Store gate is supplemented by shared DynamoDB generation and active receipts: initial creation commits journal, projection, generation and receipt together; terminal cleanup deletes the active receipt while preserving generation. Ordinary snapshot writers preserve authoritative membership. Scoped publication/removal applies only its target relation delta with atomic baseline history, membership and generation conditions, fresh reload and local restoration on conflict. Cancellation combines strong receipt and legacy/retained projections and rechecks generation before cancelling. Only a request's exact newly created execution may undergo failed-publication recovery. Membership publication records publication_committed on its existing active receipt in the same transaction; a missing receipt is accepted only with an exact terminal projection, and a terminal cleanup race retries without recreating the receipt. Recovery preserves published executions, including lost publication responses followed by a newer generation. It cancels an unpublished older execution with projection and unpublished-receipt conditions, checking but never rewinding a newer marker. The receipt has no additional retention after execution ends. Recovery events exceed the actor consumed sequence and reach replay and live subscribers. Legacy snapshots lacking the optional membership part use an absence condition. Creation response errors reconcile exact durable journal and projection before reporting failure; absent or mismatching records remain errors. Optional Put conditions are omitted when empty; required ConditionCheck guards remain. Strict HTTP Dynamo fixtures, focused regression, package race and generated checks are source-level evidence. Actual AWS, daemon termination, mixed old/new binary rollout and general ordinary thread/event snapshot atomicity remain separate validation boundaries; the existing tag/manual deployment workflow is not invoked by this merge. Individual STOP, permissions, task/subtask scope and public API policy are unchanged.",
+  "next_loop": "ai_thread_history"
+}
   ],
   "loop": {
     "observation": "Evidence artifacts existed, but the reasoning chain from observation to next loop was still scattered across generated readers and PR memory.",

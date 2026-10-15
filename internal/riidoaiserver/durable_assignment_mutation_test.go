@@ -20,6 +20,7 @@ func (s *conditionalTestOperations) LoadAssignmentProjection(context.Context, st
 	defer s.mu.Unlock()
 	return s.projection, true, nil
 }
+
 func (s *conditionalTestOperations) SaveAssignmentOperation(_ context.Context, record AssignmentOperationRecord) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -37,6 +38,7 @@ func (s *conditionalTestOperations) SaveAssignmentOperation(_ context.Context, r
 	s.projection = AssignmentProjection{Assignment: record.Assignment, LastEventSeq: assignmentOperationLastEventSeq(record)}
 	return nil
 }
+
 func TestDurableCancelRetriesClaimRaceAndFencesLateDaemonEvent(t *testing.T) {
 	for _, claim := range []bool{false, true} {
 		t.Run(map[bool]string{false: "queued", true: "claim-wins"}[claim], func(t *testing.T) {
@@ -73,6 +75,7 @@ type noClaimTestOperations struct{ *conditionalTestOperations }
 func (*noClaimTestOperations) ClaimNextAssignment(context.Context, string, time.Time) (AssignmentClaimResult, error) {
 	return AssignmentClaimResult{}, nil
 }
+
 func TestDurableQueueNeverFallsBackToStaleLocalAssignment(t *testing.T) {
 	store := NewStoreWithConfig(StoreConfig{OperationStore: &noClaimTestOperations{&conditionalTestOperations{}}})
 	defer store.Close()

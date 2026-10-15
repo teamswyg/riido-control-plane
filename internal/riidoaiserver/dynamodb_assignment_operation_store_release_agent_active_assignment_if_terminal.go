@@ -1,0 +1,52 @@
+package riidoaiserver
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
+)
+
+func (s *DynamoDBAssignmentOperationStore) releaseAgentActiveAssignmentIfTerminal(ctx context.Context, record AssignmentOperationRecord, credentials AWSCredentials) error {
+	if !isTerminal(record.Assignment.State) {
+		return nil
+	}
+	payload, err := s.deleteAgentActiveAssignmentPayload(record)
+	if err != nil {
+		return err
+	}
+	_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+		endpoint:     s.endpoint,
+		endpointHost: s.endpointHost,
+		region:       s.region,
+		target:       dynamoDBDeleteItemTarget,
+		payload:      payload,
+		credentials:  credentials,
+		httpClient:   s.httpClient,
+		now:          s.now,
+	})
+	if err == nil {
+		return nil
+	}
+	var apiErr dynamoDBAPIError
+	if !errors.As(err, &apiErr) {
+		return fmt.Errorf("dynamodb delete agent active assignment: %w", err)
+	}
+	var dynamoErr struct {
+		Type       string `json:"__type"`
+		Message    string `json:"message"`
+		MessageAlt string `json:"Message"`
+	}
+	_ = json.Unmarshal(apiErr.body, &dynamoErr)
+	if strings.Contains(dynamoErr.Type, "ConditionalCheckFailedException") {
+		return nil
+	}
+	if dynamoErr.Message == "" {
+		dynamoErr.Message = dynamoErr.MessageAlt
+	}
+	if dynamoErr.Message == "" {
+		dynamoErr.Message = strings.TrimSpace(string(apiErr.body))
+	}
+	return fmt.Errorf("dynamodb delete agent active assignment: status=%d type=%q message=%q", apiErr.statusCode, dynamoErr.Type, dynamoErr.Message)
+}

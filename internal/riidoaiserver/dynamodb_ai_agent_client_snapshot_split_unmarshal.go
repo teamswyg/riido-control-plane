@@ -9,8 +9,6 @@ func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapsho
 	switch name {
 	case dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts:
 		return json.Unmarshal(raw, &snapshot.TaskRequestReceipts)
-	case dynamoDBAIAgentClientSnapshotPartTaskAssignedAgents:
-		return json.Unmarshal(raw, &snapshot.TaskAssignedAgents)
 	case dynamoDBAIAgentClientSnapshotPartDevices:
 		return json.Unmarshal(raw, &snapshot.Devices)
 	case dynamoDBAIAgentClientSnapshotPartDeviceCredentials:
@@ -23,6 +21,8 @@ func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapsho
 		return json.Unmarshal(raw, &snapshot.Agents)
 	case dynamoDBAIAgentClientSnapshotPartFixtures:
 		return json.Unmarshal(raw, &snapshot.Fixtures)
+	case dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships:
+		return json.Unmarshal(raw, &snapshot.TaskAgentMemberships)
 	case dynamoDBAIAgentClientSnapshotPartTaskThreads:
 		return json.Unmarshal(raw, &snapshot.TaskThreads)
 	case dynamoDBAIAgentClientSnapshotPartTaskThreadMessages:

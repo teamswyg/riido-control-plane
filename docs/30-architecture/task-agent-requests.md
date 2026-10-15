@@ -12,7 +12,7 @@ is independent of execution state. Human member mutations remain in monolith.
 Verification: request retry/replay, persistence failure, busy Agent follow-up,
 multiple Agents, prompt composition, HTTP authorization and generated API drift.
 Keep v1 and callers without request_id compatible. Server contract precedes client
-rollout; production deployment is outside this implementation.
+rollout; deployment evidence is recorded separately from these executable contracts.
 
 ## Delivery and rollout
 
@@ -47,8 +47,8 @@ in this repository. Configuration ownership is recorded in
 
 Apply the monolith's `0013-agent-comment-delivery.sql` migration before enabling
 its worker. Deploy compatible contracts/control-plane/daemon before the client.
-Both Go consumers pin the published contracts commit `00e3d3e0bbec` through
-`v0.3.7-0.20261012084624-00e3d3e0bbec`; builds do not depend on a local workspace.
+Both Go consumers pin the published contracts commit `16034fc69f42` through
+`v0.3.7-0.20261015041017-16034fc69f42`; builds do not depend on a local workspace.
 Request receipts are persisted separately from display history. Intent-gated
 retries reuse their first outcome even after task text changes or unassignment.
 Active threads remain available for cancellation beyond the display history limit.
@@ -57,3 +57,5 @@ Rollback disables new comment submissions and the worker, preserving pending
 rows and identified assignments for a later compatible restart. Do not drop the
 outbox as part of rollback. The old request-less routes remain compatible; only
 identified requests opt into durable new execution per submission.
+
+현재 참여자 generation 및 제거 tombstone을 유지한다. 식별 요청 생성도 journal/projection/generation/receipt의 같은 transaction을 사용하며, 일반 writer는 최신 참여자 relation을 보존하고 변경 part와 CURRENT를 한 번에 저장한다.

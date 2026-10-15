@@ -1,0 +1,38 @@
+{
+  "schema_version": "riido-task-agent-request-identity.v1",
+  "id": "task-agent-requests",
+  "riido_task": "RIID-5828",
+  "reader_doc": "docs/30-architecture/task-agent-requests.md",
+  "owning_code": [
+    "internal/riidoaiserver/identified_assignment.go",
+    "internal/riidoaiserver/task_request_receipts.go",
+    "internal/riidoaiserver/durable_assignment_mutation.go",
+    "internal/riidoaiserver/comment_delivery.go"
+  ],
+  "policy": {
+    "identity": "workspace/task/agent/author/request; immutable request retries return original outcome",
+    "membership": "current generation/tombstone owner remains authoritative; replay never restores explicit removal",
+    "persistence": "atomic snapshot part/CURRENT writes and conditional assignment mutation; preserve receipt independently of retained UI history",
+    "activation": "monolith migration0013, dedicated key and receiver configuration are required before worker enablement; compatible API deploy alone does not activate comments"
+  },
+  "verification": {
+    "synthetic_only": true,
+    "tests": [
+      "TestRequestReceiptsSurviveDisplayRetentionAndUnassignment",
+      "TestIdentifiedAssignmentTransactionCannotOverwriteWinner",
+      "TestDurableCancelRetriesClaimRaceAndFencesLateDaemonEvent"
+    ]
+  },
+  "limits": [
+    "no frontend rollout",
+    "no claim of enabled monolith worker before migration and credential verification"
+  ],
+  "evidence_tool": "tools/knowledgecoverage",
+  "loop": {
+    "observation": "Busy agents lose distinct requests when retries and new submissions share one identity.",
+    "hypothesis": "Immutable scoped request identities and persisted receipts distinguish retries without restoring removed participants.",
+    "execute": "Integrate requests into the current atomic membership generation owner and verify concurrent mutations and replay.",
+    "evaluate": "Request, restart, stale writer, removal, queue and source-contract tests must pass.",
+    "retrospective": "Keep source-comment authorization server-owned and client activation separate from compatible deployment."
+  }
+}

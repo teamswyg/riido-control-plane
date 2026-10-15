@@ -11,20 +11,23 @@ func TestSnapshotConflictPreservesWinnerParts(t *testing.T) {
 	defer f.close()
 	winner := snapshotTestRecord(fixedSnapshotTestNow())
 	winner.Version = 1
-	winner.TaskAssignedAgents = map[string][]string{"task": {"winner"}}
+	winner.TaskRequestReceipts = map[string]AIAgentTaskActionResponse{"task": {AssignmentID: "winner"}}
 	if err := f.store.SaveAIAgentClientSnapshot(context.Background(), winner); err != nil {
 		t.Fatal(err)
 	}
 	loser := winner
-	loser.TaskAssignedAgents = map[string][]string{"task": {"loser"}}
+	loser.ExpectedVersion = 0
+	loser.Version = 2
+	loser.TaskRequestReceipts = map[string]AIAgentTaskActionResponse{"task": {AssignmentID: "loser"}}
 	if err := f.store.SaveAIAgentClientSnapshot(context.Background(), loser); !errors.Is(err, errAIAgentSnapshotConflict) {
 		t.Fatalf("stale writer accepted: %v", err)
 	}
 	loaded, ok, err := f.store.LoadAIAgentClientSnapshot(context.Background())
-	if err != nil || !ok || loaded.TaskAssignedAgents["task"][0] != "winner" {
+	if err != nil || !ok || loaded.TaskRequestReceipts["task"].AssignmentID != "winner" {
 		t.Fatalf("winner corrupted: %+v %v", loaded, err)
 	}
 }
+
 func TestMixedSnapshotPartsAreRejected(t *testing.T) {
 	record := snapshotTestRecord(fixedSnapshotTestNow())
 	items, _, _, err := encodeSplitDynamoDBAIAgentClientSnapshot(record, nil)

@@ -33,11 +33,11 @@ func TestIdentifiedAssignmentTransactionCannotOverwriteWinner(t *testing.T) {
 		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			t.Error(err)
 		}
-		if len(payload.TransactItems) != 2 {
+		if len(payload.TransactItems) != 4 {
 			t.Error("operation and projection must share transaction")
 			return
 		}
-		for _, item := range payload.TransactItems {
+		for _, item := range payload.TransactItems[:2] {
 			if item.Put.ConditionExpression != "attribute_not_exists(pk) AND attribute_not_exists(sk)" {
 				t.Error("missing create-only guard")
 			}
@@ -48,7 +48,7 @@ func TestIdentifiedAssignmentTransactionCannotOverwriteWinner(t *testing.T) {
 			return
 		}
 		writes++
-		projection = payload.TransactItems[0].Put.Item
+		projection = payload.TransactItems[1].Put.Item
 		// Simulate a daemon completing the winner before the second replica retries.
 		var assignment Assignment
 		json.Unmarshal([]byte(projection["assignment_json"]["S"]), &assignment)

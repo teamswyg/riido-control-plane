@@ -45,5 +45,8 @@ func (s *DynamoDBAssignmentOperationStore) saveConditionalAssignment(ctx context
 		return err
 	}
 	// Keep the lease while cancelling so another request cannot start before ACK.
-	return s.releaseAgentActiveAssignmentIfTerminal(ctx, record, credentials)
+	if err := s.releaseAgentActiveAssignmentIfTerminal(ctx, record, credentials); err != nil {
+		return err
+	}
+	return s.deleteTaskAgentTerminalReceipt(ctx, record, credentials)
 }

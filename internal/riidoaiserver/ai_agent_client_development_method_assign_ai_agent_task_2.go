@@ -43,7 +43,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 			}
 		}
 	}
-	s.addTaskMemberLocked(taskID, agent.AgentID)
+	s.assignTaskAgentMemberLocked(taskID, agent)
 	if thread, ok := s.activeTaskThreadForAgentLocked(taskID, agent.AgentID); ok && canReuseActiveTaskThreadForAssignment(thread, req.AssignmentID) {
 		return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(thread, principal.WorkspaceID)), nil
 	}
@@ -81,6 +81,8 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 	s.agents[agent.AgentID] = agent
+	s.assignTaskAgentMemberLocked(taskID, agent)
+
 	s.appendAgentTaskActionEvent(response)
 	s.rememberTaskRequestReceiptLocked(receiptKey, response)
 	return clientVisibleQueuedActionResponse(response), nil

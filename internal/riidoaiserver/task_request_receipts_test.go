@@ -45,18 +45,20 @@ func TestRequestReceiptsSurviveDisplayRetentionAndUnassignment(t *testing.T) {
 		t.Fatalf("replay restored membership: %+v %v", threads, err)
 	}
 }
+
 func TestSnapshotBackfillsLegacyMembershipBeforeFirstRead(t *testing.T) {
 	s := NewDevelopmentAIAgentClientStore()
-	s.taskAssignedAgents = nil
+	s.taskAgentMemberships = nil
 	s.taskThreads["legacy"] = []AIAgentTaskThreadRecord{{TaskID: "legacy", AgentID: "agent-public-openclaw", AssignmentState: AgentAssignmentStateRunning}}
 	snap, err := s.snapshot(time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(snap.TaskAssignedAgents["legacy"]) != 1 {
-		t.Fatalf("lost membership: %+v", snap.TaskAssignedAgents)
+	if len(snap.TaskAgentMemberships["legacy"]) != 1 {
+		t.Fatalf("lost membership: %+v", snap.TaskAgentMemberships)
 	}
 }
+
 func TestSnapshotKeepsEveryActiveRequest(t *testing.T) {
 	s := NewDevelopmentAIAgentClientStore()
 	for i := 0; i < 60; i++ {

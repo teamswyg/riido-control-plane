@@ -34,6 +34,7 @@ func openAssignmentStore(ctx context.Context, config runtimeConfig, client riido
 		ActiveLeaseDuration: config.AssignmentActiveLease,
 		Outbox:              config.AssignmentOutbox,
 		OperationStore:      config.AssignmentOperationStore,
+		SnapshotStore:       config.AssignmentSnapshotStore,
 		TraceRecorder:       traceRecorder,
 	})
 	if err != nil {

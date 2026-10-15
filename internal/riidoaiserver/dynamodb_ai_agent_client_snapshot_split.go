@@ -3,17 +3,17 @@ package riidoaiserver
 const dynamoDBAIAgentClientSnapshotSplitStorageVersion = "riido-ai-agent-client-snapshot-split.v1"
 
 const (
-	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts = "TASK_REQUEST_RECEIPTS"
-	dynamoDBAIAgentClientSnapshotPartTaskAssignedAgents  = "TASK_ASSIGNED_AGENTS"
-	dynamoDBAIAgentClientSnapshotPartDevices             = "DEVICES"
-	dynamoDBAIAgentClientSnapshotPartDeviceCredentials   = "DEVICE_CREDENTIALS"
-	dynamoDBAIAgentClientSnapshotPartDeviceConnections   = "DEVICE_CONNECTION_GRANTS"
-	dynamoDBAIAgentClientSnapshotPartDaemons             = "DAEMONS"
-	dynamoDBAIAgentClientSnapshotPartAgents              = "AGENTS"
-	dynamoDBAIAgentClientSnapshotPartFixtures            = "FIXTURES"
-	dynamoDBAIAgentClientSnapshotPartTaskThreads         = "TASK_THREADS"
-	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages  = "TASK_THREAD_MESSAGES"
-	dynamoDBAIAgentClientSnapshotPartEvents              = "EVENTS"
+	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts  = "TASK_REQUEST_RECEIPTS"
+	dynamoDBAIAgentClientSnapshotPartDevices              = "DEVICES"
+	dynamoDBAIAgentClientSnapshotPartDeviceCredentials    = "DEVICE_CREDENTIALS"
+	dynamoDBAIAgentClientSnapshotPartDeviceConnections    = "DEVICE_CONNECTION_GRANTS"
+	dynamoDBAIAgentClientSnapshotPartDaemons              = "DAEMONS"
+	dynamoDBAIAgentClientSnapshotPartAgents               = "AGENTS"
+	dynamoDBAIAgentClientSnapshotPartFixtures             = "FIXTURES"
+	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships = "TASK_AGENT_MEMBERSHIPS"
+	dynamoDBAIAgentClientSnapshotPartTaskThreads          = "TASK_THREADS"
+	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages   = "TASK_THREAD_MESSAGES"
+	dynamoDBAIAgentClientSnapshotPartEvents               = "EVENTS"
 )
 
 var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
@@ -28,7 +28,7 @@ var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
 
 var dynamoDBAIAgentClientSnapshotOptionalPartNames = []string{
 	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts,
-	dynamoDBAIAgentClientSnapshotPartTaskAssignedAgents,
+	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships,
 	dynamoDBAIAgentClientSnapshotPartDeviceConnections,
 	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages,
 }

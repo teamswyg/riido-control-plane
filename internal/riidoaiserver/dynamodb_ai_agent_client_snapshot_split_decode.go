@@ -42,6 +42,15 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 		}
 	}
 	for _, name := range dynamoDBAIAgentClientSnapshotOptionalPartNames {
+		if name == dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships {
+			if err := decodeCommittedTaskAgentMemberships(current, byPart[name], &snapshot); err != nil {
+				return AIAgentClientSnapshot{}, 0, err
+			}
+			if snapshot.TaskAgentMemberships != nil {
+				encodedBytes += int64(len(dynamoDBStringValue(byPart[name], "part_gzip")))
+			}
+			continue
+		}
 		item := byPart[name]
 		if item == nil {
 			continue

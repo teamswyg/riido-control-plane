@@ -42,6 +42,7 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 	}
 	assignmentReq := AssignRequest{
 		RequestID: req.RequestID, WorkspaceID: principal.WorkspaceID, Prompt: strings.TrimSpace(req.Instruction),
+
 		ComponentID:              taskID,
 		AgentID:                  selected.AgentID,
 		RuntimeProvider:          binding.RuntimeProvider,

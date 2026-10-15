@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const runtimeBoundaryGoldenSHA256 = "ebd3fcd45c06e6815c5829ad2c2fd501be45dad1c915df7aebbdcae932bedd16"
+const runtimeBoundaryGoldenSHA256 = "4f429586e9184fa485441ae78d09df9be48a9d1f598e602377c5b17817a87fa4"
 
 func TestRuntimeBoundaryManifest(t *testing.T) {
 	repo := filepath.Join("..", "..")

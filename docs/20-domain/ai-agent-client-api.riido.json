@@ -28,7 +28,8 @@
       "agent_capability=offline means the device remains registered but the daemon heartbeat is stale or absent; do not describe this as not installed.",
       "agent_capability=version_unknown means an online daemon did not report a parseable release version; show diagnostics or update guidance rather than an installation claim.",
       "agent_capability=ready and agent_supported=true mean the daemon meets the configured minimum version.",
-      "download_url is server-owned update guidance; clients must not hard-code a different release URL."
+      "download_url is server-owned update guidance; clients must not hard-code a different release URL.",
+      "RIID-5827: authenticated loopback local-state mode preserves assignment workspace identity, serializes client snapshots, and rejects stale file versions. Provider errors remain visible before terminal state; coalesced assistant snapshots keep monotonic sequence numbers."
     ]
   },
   "thread_history_v3_frontend": {
@@ -157,7 +158,7 @@
       {"name":"assign-agent","detail":"POST the v2 agent-assignments endpoint with agent_id. Same provider or same agent_id can still produce a distinct conversation when the user performs a new participant-dropdown assignment."},
       {"name":"send-thread-message","detail":"POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run."},
       {"name":"stop-agent","detail":"POST the task-scoped v2 stop endpoint, preferably including assignment_id. The UI should close the work immediately from control-plane truth; daemon acknowledgement is eventual."},
-      {"name":"delete-agent","detail":"DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed."}
+      {"name":"delete-agent","detail":"DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed. The server observes the latest retained thread from the same snapshot used to cancel this task/Agent's executions. Task-scoped client assignment and follow-up publication hold a shared gate from durable creation through client projection publication; membership removal waits for that publication before checking its private thread observation under the client-store lock. A concurrent new execution, including one created after an empty-history observation, returns 409 without removing membership or stopping the unobserved execution. Persistent participants may expose latest_assignment_id from their latest retained thread regardless of execution state; this optional removal observation does not occupy runtime capacity."}
     ],
     "sse_handling_rules": [
       "Open one task-level SSE stream from the v2 thread-stream-subscription response.",

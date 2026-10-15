@@ -94,6 +94,7 @@
       "role": "Public facade for private infra and evidence tooling that needs selected AWS adapter behavior.",
       "must_not_own": "new adapter behavior, duplicated DTOs, credential storage"
     },
+    {"path": "internal/agentstatefile", "kind": "adapter", "role": "Authenticated local single-process AI Agent snapshot file IO with a version fence.", "must_not_own": "assignment lifecycle, authorization decisions, production multi-replica persistence"},
     {
       "path": "cmd/riido_ai_server",
       "kind": "runtime-shell",

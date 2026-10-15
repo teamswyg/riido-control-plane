@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `53`; manifest entries: `53`; secret/credential entries: `8`; operator-only entries: `12`.
+Runtime env reads: `54`; manifest entries: `54`; secret/credential entries: `8`; operator-only entries: `13`.
 
 ## Runtime Env
 
@@ -69,6 +69,7 @@ Runtime env reads: `53`; manifest entries: `53`; secret/credential entries: `8`;
 | `AWS_CONTAINER_AUTHORIZATION_TOKEN` | `empty` | `credential` | Authorization token forwarded to the ECS credential endpoint. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `empty` | `operator` | Standard OTLP endpoint fallback when the Riido-specific endpoint is empty. |
 | `OTEL_SERVICE_NAME` | `empty` | `public` | Standard service.name fallback when the Riido-specific service name is empty. |
+| `RIIDO_AI_SERVER_LOCAL_STATE_DIR` | `disabled` | `operator` | authenticated loopback-only file state and scoped task contexts for local agent verification |
 
 ## Runtime Rules
 

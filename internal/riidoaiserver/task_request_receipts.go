@@ -12,6 +12,7 @@ func taskRequestReceiptKey(principal AuthorizationResult, taskID string, req Ass
 	}
 	return identifiedAssignmentID(strings.TrimSpace(taskID), AssignRequest{WorkspaceID: principal.WorkspaceID, AgentID: strings.TrimSpace(req.AgentID), CreatedBy: principal.PrincipalID, RequestID: strings.TrimSpace(req.RequestID)})
 }
+
 func cloneTaskRequestReceipts(input map[string]AIAgentTaskActionResponse) map[string]AIAgentTaskActionResponse {
 	result := make(map[string]AIAgentTaskActionResponse, len(input))
 	for key, value := range input {
@@ -19,6 +20,7 @@ func cloneTaskRequestReceipts(input map[string]AIAgentTaskActionResponse) map[st
 	}
 	return result
 }
+
 func (s *DevelopmentAIAgentClientStore) FindTaskRequestReceipt(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, bool, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, false, err
@@ -38,6 +40,7 @@ func (s *DevelopmentAIAgentClientStore) FindTaskRequestReceipt(ctx context.Conte
 	}
 	return response, found, nil
 }
+
 func (s *PersistentAIAgentClientStore) FindTaskRequestReceipt(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, bool, error) {
 	s.operationMu.Lock()
 	defer s.operationMu.Unlock()
@@ -49,6 +52,7 @@ func (s *PersistentAIAgentClientStore) FindTaskRequestReceipt(ctx context.Contex
 	}
 	return s.DevelopmentAIAgentClientStore.FindTaskRequestReceipt(ctx, principal, taskID, req)
 }
+
 func (s Server) findTaskRequestReceipt(ctx context.Context, principal AuthorizationResult, taskID string, req AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, bool, error) {
 	if req.RequestID == "" {
 		return AIAgentTaskActionResponse{}, false, nil

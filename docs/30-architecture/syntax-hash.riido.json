@@ -790,7 +790,8 @@
       "golden_command": "go test ./internal/ownergraphql/controlplane -run TestControlPlaneOwnerGraphQLBehaviorGolden -count=1",
       "semantic_claim_id": "runtime_deployment_boundary_must_preserve_public_private_ownership",
       "mode": "golden_locked_unregistered_owner_graphql_source_ready_boundary"
-    }
+    },
+    {"id": "local_agent_snapshot_file_adapter", "package_path": "internal/agentstatefile", "golden_command": "go test ./internal/agentstatefile -run TestFileAgentSnapshotReopenAndVersionFence -count=1", "semantic_claim_id": "store_snapshot_file_outbox_must_preserve_durable_replay_evidence", "mode": "golden_locked_local_persistence"}
   ],
   "constraints": {
     "max_file_lines": 75,

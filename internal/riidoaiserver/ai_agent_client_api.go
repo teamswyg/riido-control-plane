@@ -311,9 +311,10 @@ type AssignedAgentProfile struct {
 }
 
 type AssignedAgentProfileMapResponse struct {
-	SchemaVersion         string                          `json:"schema_version"`
-	WorkspaceID           string                          `json:"workspace_id"`
-	AssignedAgentProfiles map[string]AssignedAgentProfile `json:"assigned_agent_profiles"`
+	SchemaVersion         string                                    `json:"schema_version"`
+	WorkspaceID           string                                    `json:"workspace_id"`
+	AssignedAgentProfiles map[string]AssignedAgentProfile           `json:"assigned_agent_profiles"`
+	TaskAgentParticipants map[string]TaskAgentParticipantCollection `json:"task_agent_participants"`
 }
 
 type ClientBootstrapResponse struct {
@@ -387,26 +388,30 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	RequestID           string              `json:"request_id,omitempty"`
-	Instruction         string              `json:"instruction,omitempty"`
-	SourceCommentID     string              `json:"-"`
-	VerifiedTaskContext *AIAgentTaskContext `json:"-"`
-	AgentID             string              `json:"agent_id"`
-	AssignmentID        string              `json:"-"`
-	durableState        AssignmentState
-	intentGateRequired  bool
+	RequestID                       string              `json:"request_id,omitempty"`
+	Instruction                     string              `json:"instruction,omitempty"`
+	SourceCommentID                 string              `json:"-"`
+	VerifiedTaskContext             *AIAgentTaskContext `json:"-"`
+	membershipPublicationGeneration string
+	AgentID                         string `json:"agent_id"`
+	AssignmentID                    string `json:"-"`
+	durableState                    AssignmentState
+	intentGateRequired              bool
 }
 
 type UnassignAIAgentTaskRequest struct {
 	AgentID      string `json:"agent_id"`
 	AssignmentID string `json:"assignment_id,omitempty"`
 	Reason       string `json:"reason,omitempty"`
+
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type AgentAssignmentActionRequest struct {
-	AssignmentID string `json:"assignment_id,omitempty"`
-	Reason       string `json:"reason,omitempty"`
-	durableState AssignmentState
+	AssignmentID           string `json:"assignment_id,omitempty"`
+	Reason                 string `json:"reason,omitempty"`
+	durableState           AssignmentState
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type SubmitAIAgentTaskCommentRequest struct {
@@ -416,12 +421,13 @@ type SubmitAIAgentTaskCommentRequest struct {
 }
 
 type CreateAIAgentTaskThreadMessageRequest struct {
-	Body                       string `json:"body"`
-	SourceMessageID            string `json:"source_message_id,omitempty"`
-	AssignmentID               string `json:"-"`
-	toolApproval               bool
-	toolApprovalWithoutPending bool
-	durableState               AssignmentState
+	membershipPublicationGeneration string
+	Body                            string `json:"body"`
+	SourceMessageID                 string `json:"source_message_id,omitempty"`
+	AssignmentID                    string `json:"-"`
+	toolApproval                    bool
+	toolApprovalWithoutPending      bool
+	durableState                    AssignmentState
 }
 
 type StopAIAgentTaskRequest struct {
@@ -590,6 +596,7 @@ func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
 
 func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
 	wire := struct {
+		MessageKey string    `json:"message_key,omitempty"`
 		Seq        int       `json:"seq"`
 		Message    string    `json:"message"`
 		ObservedAt time.Time `json:"observed_at,omitempty"`
@@ -597,6 +604,9 @@ func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
 		Seq:        line.Seq,
 		Message:    line.Message,
 		ObservedAt: line.ObservedAt,
+	}
+	if line.MessageKey == "assistant.partial" || line.MessageKey == "runtime.activity" {
+		wire.MessageKey = line.MessageKey
 	}
 	return json.Marshal(wire)
 }

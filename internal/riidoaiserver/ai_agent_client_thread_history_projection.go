@@ -16,13 +16,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.ensureTaskMembershipLocked()
-	ids := []string{}
-	for _, id := range s.taskAssignedAgents[taskID] {
-		if _, ok := s.visibleAgent(principal, id); ok {
-			ids = append(ids, id)
-		}
-	}
+	ids := s.visibleTaskMemberIDsLocked(principal, taskID)
 	threads, snapshots := s.visibleTaskThreadHistoryRecordsLocked(principal, taskID)
 	response := AIAgentTaskThreadHistoryCollectionResponse{
 		SchemaVersion:    SchemaVersion,

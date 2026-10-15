@@ -82,7 +82,8 @@ type AssignmentClaimResult struct {
 }
 
 type AssignmentOperationRecord struct {
-	ExpectedProjection *AssignmentProjection   `json:"-"`
+	ExpectedProjection *AssignmentProjection `json:"-"`
+	createsExecution   bool
 	SchemaVersion      string                  `json:"schema_version"`
 	OperationID        string                  `json:"operation_id"`
 	OperationType      AssignmentOperationType `json:"operation_type"`
@@ -146,9 +147,6 @@ func assignmentOperationID(operationType AssignmentOperationType, assignment Ass
 	}
 	switch operationType {
 	case AssignmentOperationAssignTask:
-		if assignment.RequestID != "" {
-			return "assign:" + assignment.ID
-		}
 		return fmt.Sprintf("assign:%s:%d", assignment.ID, lastSeq)
 	case AssignmentOperationPollStart:
 		return fmt.Sprintf("poll-start:%s:%s:%d", assignment.ID, assignment.LeaseToken, lastSeq)

@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/teamswyg/riido-contracts/metadatakeys"
 	"strconv"
+
+	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
 var errAIAgentSnapshotConflict = errors.New("agent state changed concurrently; retry request")

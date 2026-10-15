@@ -7,8 +7,6 @@ import (
 type DevelopmentAIAgentClientStore struct {
 	taskRequestReceipts     map[string]AIAgentTaskActionResponse
 	mu                      sync.Mutex
-	taskAssignedAgents      map[string][]string
-	snapshotVersion         int64
 	workspaceID             string
 	expectedDaemonProfile   string
 	daemonClientPolicy      DaemonClientCompatibilityPolicy
@@ -20,6 +18,7 @@ type DevelopmentAIAgentClientStore struct {
 	nextDaemonCommand       int
 	agents                  map[string]AgentClientRecord
 	fixtures                []AgentOnboardingFixture
+	taskAgentMemberships    map[string]map[string]AIAgentTaskMembership
 	taskThreads             map[string][]AIAgentTaskThreadRecord
 	taskThreadMessages      map[string][]AIAgentTaskThreadHistoryMessage
 	taskThreadProgressCache map[string]taskThreadProgressMessageCache

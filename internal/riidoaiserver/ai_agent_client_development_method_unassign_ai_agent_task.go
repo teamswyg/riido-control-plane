@@ -21,14 +21,24 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	agent, ok := s.visibleAgent(principal, req.AgentID)
+	if err := validateTaskAgentMembershipRemovalObservation(taskID, req.AgentID, req.membershipRemovalFence, s.taskThreads[taskID]); err != nil {
+		return AIAgentTaskActionResponse{}, err
+	}
+	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && isIntentGateAssignmentID(req.AssignmentID) && req.membershipRemovalFence.intentGateAssignmentID != req.AssignmentID {
+		return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
+	}
+	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && !isIntentGateAssignmentID(req.AssignmentID) {
+		if req.AssignmentID != "" && strings.SplitN(req.membershipRemovalFence.durableGeneration, "@", 2)[0] != req.AssignmentID {
+			return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
+		}
+		req.AssignmentID = ""
+	}
+	agent, ok := s.taskAgentForMembershipRemovalLocked(principal, taskID, req.AgentID, req.AssignmentID)
 	if !ok {
-		if thread, found := s.taskThreadForUnassignTargetLocked(taskID, req.AgentID, req.AssignmentID); found {
-			agent, ok = s.agentFromTaskThreadLocked(principal, thread)
-		}
-		if !ok {
-			return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
-		}
+		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
+	}
+	if err := validateMembershipRemovalAssignment(req.AgentID, req.AssignmentID, s.taskThreads[taskID]); err != nil {
+		return AIAgentTaskActionResponse{}, err
 	}
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
@@ -40,26 +50,41 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 		CommentKind:     AgentTaskCommentStoppedByUserRequest,
 		Message:         clientMessageTaskStopped,
 	}
+	active := false
 	if thread, ok := s.taskThreadForUnassignTargetLocked(taskID, agent.AgentID, req.AssignmentID); ok {
 		response.ThreadID = thread.ThreadID
 		response.AssignmentID = thread.AssignmentID
 		response.RunID = thread.RunID
+		active = taskThreadHasActiveStream(thread)
+		if !active {
+			response.WorkStatus = thread.WorkStatus
+			response.AssignmentState = thread.AssignmentState
+			response.CommentKind = thread.CommentKind
+			response.Message = thread.Message
+			response.ResultMessage = thread.ResultMessage
+			response.FailureDiagnostics = copyFailureDiagnostics(thread.FailureDiagnostics)
+		}
 	} else if req.AssignmentID != "" {
 		return AIAgentTaskActionResponse{}, errors.New("assignment_id does not belong to task agent")
 	} else {
 		response.ThreadID = threadIDForRun(response.TaskID, response.AgentID, response.RunID)
 	}
-	if req.AssignmentID != "" {
+	if req.AssignmentID != "" && req.membershipRemovalFence == nil {
 		s.markTaskAgentAssignmentThreadStoppedLocked(taskID, agent.AgentID, req.AssignmentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	} else {
 		s.markTaskAgentThreadsStoppedLocked(taskID, agent.AgentID, AgentTaskCommentStoppedByUserRequest, response.Message)
 	}
-	s.upsertTaskThreadFromActionLocked(response, "")
+	// Removing membership is not a new execution or a terminal status update.
+	if active {
+		s.upsertTaskThreadFromActionLocked(response, "")
+	}
 	if _, ok := s.agents[agent.AgentID]; ok {
 		agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 		s.agents[agent.AgentID] = agent
 	}
-	s.removeTaskMemberLocked(taskID, agent.AgentID)
-	s.appendAgentTaskActionEvent(response)
+	s.removeTaskAgentMemberLocked(taskID, agent)
+	if active {
+		s.appendAgentTaskActionEvent(response)
+	}
 	return response, nil
 }

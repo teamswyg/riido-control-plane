@@ -47,7 +47,7 @@ func (s *Store) assignIdentifiedRequest(state *storeState, taskID string, req As
 		return Assignment{}, err
 	}
 	events := eventsAfterSeq(&trial, beforeSeq)
-	if err = s.saveAssignmentMutationOperations(&trial, AssignmentOperationAssignTask, assignment, events); err != nil {
+	if err = s.saveAssignmentMutationOperations(&trial, AssignmentOperationAssignTask, assignment, events, true); err != nil {
 		return Assignment{}, err
 	}
 	if reader, ok := s.operationStore.(AssignmentProjectionReader); ok {

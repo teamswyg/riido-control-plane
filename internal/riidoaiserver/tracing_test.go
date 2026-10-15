@@ -176,17 +176,6 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
 		switch r.Header.Get("X-Amz-Target") {
-		case dynamoDBTransactWriteTarget:
-			var payload struct{ TransactItems []dynamoDBTransactWritePut }
-			if err := json.Unmarshal(body, &payload); err != nil {
-				t.Error(err)
-			}
-			itemsMu.Lock()
-			for _, entry := range payload.TransactItems {
-				items[entry.Put.Item["sk"]["S"]] = entry.Put.Item
-			}
-			itemsMu.Unlock()
-			_, _ = w.Write([]byte(`{}`))
 		case dynamoDBPutItemTarget:
 			var payload struct {
 				Item map[string]map[string]string `json:"Item"`
@@ -198,6 +187,37 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 			items[payload.Item["sk"]["S"]] = payload.Item
 			itemsMu.Unlock()
 			_, _ = w.Write([]byte(`{}`))
+		case dynamoDBTransactWriteTarget:
+			var payload struct {
+				TransactItems []struct {
+					Put struct{ Item map[string]map[string]string }
+				}
+			}
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Error(err)
+			}
+			itemsMu.Lock()
+			for _, action := range payload.TransactItems {
+				items[dynamoDBStringValue(action.Put.Item, "sk")] = action.Put.Item
+			}
+			itemsMu.Unlock()
+			_, _ = w.Write([]byte(`{}`))
+		case dynamoDBSnapshotTransactGetTarget:
+			var payload struct {
+				TransactItems []struct {
+					Get struct{ Key map[string]map[string]string }
+				}
+			}
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Error(err)
+			}
+			itemsMu.Lock()
+			responses := make([]map[string]any, 0, len(payload.TransactItems))
+			for _, action := range payload.TransactItems {
+				responses = append(responses, map[string]any{"Item": items[dynamoDBStringValue(action.Get.Key, "sk")]})
+			}
+			itemsMu.Unlock()
+			_ = json.NewEncoder(w).Encode(map[string]any{"Responses": responses})
 		case dynamoDBQueryTarget:
 			itemsMu.Lock()
 			out := make([]map[string]map[string]string, 0, len(items))
@@ -237,7 +257,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 	}
 
 	names := traceSpanNames(recorder.snapshot())
-	for _, want := range []string{aiAgentClientSnapshotSaveTraceName, "aws.dynamodb.TransactWriteItems", "aws.dynamodb.Query"} {
+	for _, want := range []string{aiAgentClientSnapshotSaveTraceName, "aws.dynamodb.Query"} {
 		if !slices.Contains(names, want) {
 			t.Fatalf("missing span %q in %v", want, names)
 		}
@@ -248,7 +268,7 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 		spanByName[span.Name] = span
 	}
 	if got := spanByName["aws.dynamodb.TransactWriteItems"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotSave.String() {
-		t.Fatalf("PutItem store operation = %q, want %q", got, AIAgentClientSnapshotSave.String())
+		t.Fatalf("TransactWriteItems store operation = %q, want %q", got, AIAgentClientSnapshotSave.String())
 	}
 	if got := spanByName["aws.dynamodb.Query"].Attributes[metadatakeys.RiidoStoreOperation.String()]; got != AIAgentClientSnapshotLoad.String() {
 		t.Fatalf("Query store operation = %q, want %q", got, AIAgentClientSnapshotLoad.String())
