@@ -35,13 +35,19 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 			return
 		}
 	}
+	assignmentState := response.AssignmentState
+	if assignmentState == AgentAssignmentState("waiting_for_user") {
+		stateResponse := AIAgentTaskActionResponse{}
+		applyAssignmentStateActionResponse(&stateResponse, event.State)
+		assignmentState = stateResponse.AssignmentState
+	}
 	s.appendClientEventLocked(AgentClientEventTaskNotification, AgentTaskNotificationEvent{
 		EventType: AgentClientEventTaskNotification, SchemaVersion: SchemaVersion,
 		EventID: event.EventID, OccurredAt: event.At, WorkspaceID: event.WorkspaceID,
 		TaskID: event.TaskID, AgentID: event.AgentID, AssignmentID: event.AssignmentID,
 		TeamID: event.TeamID, RunID: response.RunID, CreatedBy: event.CreatedBy, RecipientPrincipalID: event.CreatedBy,
 		NotificationType: kind, ConfirmationReason: response.ConfirmationReason,
-		WorkStatus: response.WorkStatus, AssignmentState: response.AssignmentState,
+		WorkStatus: response.WorkStatus, AssignmentState: assignmentState,
 	})
 }
 

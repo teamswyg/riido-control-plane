@@ -18,11 +18,19 @@ type dynamoDBTransactWritePut struct {
 type dynamoDBTransactWriteItem struct {
 	Put            *dynamoDBTransactWritePutAction            `json:"Put,omitempty"`
 	ConditionCheck *dynamoDBTransactWriteConditionCheckAction `json:"ConditionCheck,omitempty"`
+	Delete         *dynamoDBTransactWriteDeleteAction         `json:"Delete,omitempty"`
+}
+
+type dynamoDBTransactWriteDeleteAction struct {
+	TableName                 string                       `json:"TableName"`
+	Key                       map[string]map[string]string `json:"Key"`
+	ConditionExpression       string                       `json:"ConditionExpression,omitempty"`
+	ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues,omitempty"`
 }
 
 type dynamoDBTransactWritePutAction struct {
 	TableName                 string                       `json:"TableName"`
-	ConditionExpression       string                       `json:"ConditionExpression"`
+	ConditionExpression       string                       `json:"ConditionExpression,omitempty"`
 	ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues,omitempty"`
 	Item                      map[string]map[string]string `json:"Item"`
 }

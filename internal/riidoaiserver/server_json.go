@@ -61,6 +61,8 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusConflict, err.Error())
 	case errors.Is(err, ErrAIAgentTaskThreadConflict):
 		writeError(w, http.StatusConflict, err.Error())
+	case errors.Is(err, ErrAIAgentMembershipChanged):
+		writeError(w, http.StatusConflict, err.Error())
 	default:
 		writeError(w, http.StatusBadRequest, err.Error())
 	}

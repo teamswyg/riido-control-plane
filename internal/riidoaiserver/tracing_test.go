@@ -187,6 +187,37 @@ func TestDynamoDBAIAgentClientSnapshotUsesTraceContext(t *testing.T) {
 			items[payload.Item["sk"]["S"]] = payload.Item
 			itemsMu.Unlock()
 			_, _ = w.Write([]byte(`{}`))
+		case dynamoDBTransactWriteTarget:
+			var payload struct {
+				TransactItems []struct {
+					Put struct{ Item map[string]map[string]string }
+				}
+			}
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Error(err)
+			}
+			itemsMu.Lock()
+			for _, action := range payload.TransactItems {
+				items[dynamoDBStringValue(action.Put.Item, "sk")] = action.Put.Item
+			}
+			itemsMu.Unlock()
+			_, _ = w.Write([]byte(`{}`))
+		case dynamoDBSnapshotTransactGetTarget:
+			var payload struct {
+				TransactItems []struct {
+					Get struct{ Key map[string]map[string]string }
+				}
+			}
+			if err := json.Unmarshal(body, &payload); err != nil {
+				t.Error(err)
+			}
+			itemsMu.Lock()
+			responses := make([]map[string]any, 0, len(payload.TransactItems))
+			for _, action := range payload.TransactItems {
+				responses = append(responses, map[string]any{"Item": items[dynamoDBStringValue(action.Get.Key, "sk")]})
+			}
+			itemsMu.Unlock()
+			_ = json.NewEncoder(w).Encode(map[string]any{"Responses": responses})
 		case dynamoDBQueryTarget:
 			itemsMu.Lock()
 			out := make([]map[string]map[string]string, 0, len(items))

@@ -31,6 +31,10 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 	if snapshot.SavedAt.IsZero() {
 		snapshot.SavedAt = s.now()
 	}
+	if preserve, _ := ctx.Value(taskAgentPreserveMembershipContextKey{}).(bool); preserve {
+		stats, snapshotBytes, err = s.saveMembershipOwnedSnapshot(ctx, snapshot, credentials)
+		return err
+	}
 	items, hashes, encodedBytes, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, s.partHashes)
 	if err != nil {
 		return err

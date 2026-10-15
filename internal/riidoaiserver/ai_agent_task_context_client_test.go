@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -66,10 +67,13 @@ func TestAIAgentTaskContextClientRequestsOpenAPIEndpoint(t *testing.T) {
 }
 
 func TestAIAgentPrivateTaskContextClientResolvesTeamAndComponentWithBearer(t *testing.T) {
+	var mu sync.Mutex
 	var gotWorkspacePath string
 	var gotDetailPath string
 	var gotAuthorization []string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
 		gotAuthorization = append(gotAuthorization, r.Header.Get("Authorization"))
 		switch r.URL.Path {
 		case "/public/components/component-a/workspace":
@@ -131,6 +135,8 @@ func TestAIAgentPrivateTaskContextClientResolvesTeamAndComponentWithBearer(t *te
 	if err != nil {
 		t.Fatalf("GetAIAgentTaskContextForRequest: %v", err)
 	}
+	mu.Lock()
+	defer mu.Unlock()
 	if gotWorkspacePath != "/public/components/component-a/workspace" || gotDetailPath != "/teams/team-a/components/component-a" {
 		t.Fatalf("paths workspace=%q detail=%q", gotWorkspacePath, gotDetailPath)
 	}
