@@ -32,6 +32,13 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	if err := validateDaemonBinding(s.agentRegistry, agentID, PollRequest{DaemonID: req.DaemonID, DeviceID: req.DeviceID, RuntimeID: req.RuntimeID}); err != nil {
 		return AgentEventResponse{}, err
 	}
+	req = assignmentEventACKRequest(assignment, req)
+	if err := s.validateReadyEventLease(state, assignment, &req); err != nil {
+		return AgentEventResponse{}, err
+	}
+	if response, duplicate, err := s.checkStateAssignmentEventACK(state, assignment, req); err != nil || duplicate {
+		return response, err
+	}
 	var recoveryErr error
 	req, recoveryErr = s.validateRecoveryEvent(state, assignment, req)
 	if recoveryErr != nil {
@@ -55,6 +62,10 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	if event, ok := repeatedNotificationEvent(state, assignment, req); ok {
 		return AgentEventResponse{SchemaVersion: SchemaVersion, Assignment: copyAssignment(assignment), Event: event}, nil
 	}
+	payloadHash, err := assignmentEventACKPayloadHash(assignment, req)
+	if err != nil {
+		return AgentEventResponse{}, err
+	}
 	state.agentEventsTotal++
 	now := s.now()
 	req.ProviderSessionID = strings.TrimSpace(req.ProviderSessionID)
@@ -75,15 +86,7 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	if assignmentChanged {
 		state.assignments[assignment.ID] = assignment
 	}
-	eventType := strings.TrimSpace(req.EventType)
-	if eventType == "" {
-		if req.State != "" {
-			eventType = EventAssignmentStateUpdated
-		}
-		if eventType == "" {
-			eventType = EventRiidoLog
-		}
-	}
+	eventType := req.EventType
 	if eventType == assignmentcontract.EventAssignmentWaitingForUser {
 		assignment.ConfirmationReason = req.ConfirmationReason
 	} else if eventType == EventAssignmentRunning || isTerminal(assignment.State) {
@@ -100,6 +103,7 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 		}
 	}
 	event := s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, assignment.State, req.Message, req.Metadata, now)
+	s.retainStateAssignmentEventACK(state, assignment, req, event, payloadHash)
 	return AgentEventResponse{
 		SchemaVersion: SchemaVersion,
 		Assignment:    copyAssignment(assignment),

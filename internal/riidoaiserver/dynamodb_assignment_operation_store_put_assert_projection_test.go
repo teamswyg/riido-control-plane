@@ -7,7 +7,7 @@ func assertAssignmentProjectionPutPayload(t *testing.T, payload dynamoDBPutPaylo
 	if payload.TableName != "riido-ai-server-assignments" {
 		t.Fatalf("projection table = %q", payload.TableName)
 	}
-	if payload.ConditionExpression != "(attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq) AND attribute_not_exists(recovery_watermark_json)" {
+	if payload.ConditionExpression != "(attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq) AND attribute_not_exists(recovery_watermark_json) AND attribute_not_exists(event_ack_receipts_json)" {
 		t.Fatalf("projection condition = %q", payload.ConditionExpression)
 	}
 	assertDynamoDBString(t, payload.Item, "pk", "ASSIGNMENT#asn-000001")

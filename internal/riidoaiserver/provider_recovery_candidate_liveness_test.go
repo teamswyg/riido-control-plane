@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -22,7 +23,7 @@ func TestRecoveryCandidateChecksOnlySelectedProviderBeforeDispatch(t *testing.T)
 	a := Assignment{ID: "asn", AgentID: binding.AgentID, TaskID: "task", RuntimeProvider: "codex", CreatedBy: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID, RecoveryPolicy: policy, State: AssignmentLeased, LeaseToken: "lease", UpdatedAt: time.Now()}
 	store := NewStoreWithConfig(StoreConfig{AgentRegistry: client})
 	defer store.Close()
-	if err := store.recheckRecoveryCandidate(a, "cursor"); err != nil {
+	if err := store.recheckRecoveryCandidate(context.Background(), a, "cursor"); err != nil {
 		t.Fatalf("unselected candidate blocked healthy dispatch: %v", err)
 	}
 	client.devices[0].Runtimes[2].HealthStatus = hostintegration.ProviderHealthUnknown

@@ -37,7 +37,7 @@ func (s *Store) loop(state storeState) {
 			msg.reply <- assignResult{assignment: assignment, err: err}
 		case cancelAssignmentCmd:
 			if _, durable := s.operationStore.(AssignmentProjectionReader); durable && msg.req.AssignmentID != "" {
-				assignment, err := s.mutateDurableAssignment(&state, msg.req.AssignmentID, AssignmentOperationClientStop, func(quiet *Store, trial *storeState) (Assignment, error) {
+				assignment, err := s.mutateDurableAssignment(msg.ctx, &state, msg.req.AssignmentID, AssignmentOperationClientStop, func(quiet *Store, trial *storeState) (Assignment, error) {
 					return quiet.handleCancelAssignment(trial, msg.taskID, msg.req)
 				})
 				msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
@@ -76,10 +76,18 @@ func (s *Store) loop(state storeState) {
 			}
 			msg.reply <- pollResult{response: response, operationAlreadySaved: operationAlreadySaved, mutatedAssignment: mutatedAssignment, mutationOperationType: mutationOperationType, err: err}
 		case eventCmd:
+			if err := msg.ctx.Err(); err != nil {
+				msg.reply <- eventResult{err: err}
+				continue
+			}
 			if _, durable := s.operationStore.(AssignmentProjectionReader); durable {
 				var response AgentEventResponse
-				_, err := s.mutateDurableAssignment(&state, msg.req.AssignmentID, AssignmentOperationAgentEvent, func(quiet *Store, trial *storeState) (Assignment, error) {
+				_, err := s.mutateDurableAssignment(msg.ctx, &state, msg.req.AssignmentID, AssignmentOperationAgentEvent, func(quiet *Store, trial *storeState) (Assignment, error) {
 					var err error
+					quiet.recoveryApproval = msg.approval
+					if err = msg.ctx.Err(); err != nil {
+						return Assignment{}, err
+					}
 					response, err = quiet.handleEvent(trial, msg.agentID, msg.req)
 					if response.Assignment == nil {
 						return Assignment{}, err
@@ -90,7 +98,9 @@ func (s *Store) loop(state storeState) {
 				continue
 			}
 			beforeEventSeq := state.nextEventSeq
-			response, err := s.handleEvent(&state, msg.agentID, msg.req)
+			eventStore := *s
+			eventStore.recoveryApproval = msg.approval
+			response, err := eventStore.handleEvent(&state, msg.agentID, msg.req)
 			if err == nil && state.nextEventSeq != beforeEventSeq {
 				err = s.saveOperation(&state, AssignmentOperationAgentEvent, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
 				if err == nil {

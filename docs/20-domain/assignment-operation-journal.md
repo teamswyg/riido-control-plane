@@ -14,11 +14,11 @@ Executable SSOT: [`assignment-operation-journal.riido.json`](assignment-operatio
 
 | Step | Statement |
 | --- | --- |
-| Observe | The assignment journal doc described public ports and replay behavior but did not itself produce CI evidence. |
-| Hypothesis | A focused journal SSOT can catch drift in operation records, claim ports, lease semantics, and replay reducers before durable adapters regress. |
-| Execute | Generate the reader doc from this manifest and run the assignmentjournal verifier in CI. |
-| Evaluate | The verifier checks required ports, records, replay rules, version constants, source anchors, generated doc freshness, and focused journal tests. |
-| Retrospective | This slice proves public journal semantics without AWS credentials; DynamoDB adapter cost and deployment evidence stay in adapter-owned slices. |
+| Observe | Stable event keys previously deduplicated only local event history and fallback inventory reads could occupy the global assignment actor after caller cancellation. |
+| Hypothesis | Private bounded ACK receipts committed by projection CAS and cancellable candidate preflight outside the actor preserve retry identity and stop responsiveness across replicas. |
+| Execute | Generate the reader doc and exercise replica/restart/CAS replay, changed-payload refusal, legacy repair preservation and cancellation/stop races before journal verification. |
+| Evaluate | The journal verifier checks owning ports, source anchors and generated freshness; focused tests require exact original ACKs, no duplicate side effects and actor responsiveness during inventory stalls. |
+| Retrospective | Ready and terminal ACK guarantees cover newly committed stable-key receipts; legacy records without receipts retain compatibility and cannot retroactively prove a lost original acknowledgement. |
 
 ## Ports
 
@@ -36,7 +36,7 @@ Executable SSOT: [`assignment-operation-journal.riido.json`](assignment-operatio
 | Name | Role |
 | --- | --- |
 | `AssignmentOperationRecord` | append-only mutation plus emitted task events |
-| `AssignmentProjection` | durable assignment read projection with private bounded recovery receipts; receipts are CAS-preserved and never appear in public Assignment JSON |
+| `AssignmentProjection` | durable assignment read projection with private CAS-preserved bounded recovery and Ready/terminal ACK receipts; receipts never appear in public Assignment JSON |
 | `AssignmentActiveLease` | active assignment lease snapshot |
 | `AssignmentClaimResult` | claim outcome plus operation evidence |
 
@@ -52,6 +52,8 @@ Executable SSOT: [`assignment-operation-journal.riido.json`](assignment-operatio
 | `sort-replayed-events` | replay | sort task event histories by sequence |
 | `rebuild-current-assignment` | index | rebuild task current_assignment_id from newest assignment ordering |
 | `rebuild-agent-index` | index | rebuild agent assignment lists in assignment creation order |
+| `durable-daemon-event-ack` | replay | For stable-key Ready and terminal events, atomically persist at most eight private hashed payload receipts with the operation and projection. Identical retries across replicas or restart restore the original event ACK and assignment acknowledgement fields without another event, outbox, log or span; reject semantic payload reuse and fail closed at the bound without evicting a receipt. A Ready ACK can authorize dispatch only while the current execution is still leased/ready with the same unexpired lease; Running, cancelling and terminal executions refuse it. The private receipt JSON is bounded to 16 KiB and validated before any durable write; the cap never evicts an original receipt. |
+| `candidate-preflight-outside-actor` | index | Run selected fallback inventory authorization outside the assignment actor under caller cancellation and a two-second bound. The actor and each projection CAS retry recheck the observed assignment fingerprint, execution binding, active lease, state and request context; an intervening stop or lease/policy generation change invalidates approval. |
 
 ## Version Constants
 

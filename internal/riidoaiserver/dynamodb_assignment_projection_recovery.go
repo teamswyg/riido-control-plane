@@ -23,7 +23,7 @@ func assignmentProjectionRecoveryField(item map[string]map[string]string, record
 func (s *DynamoDBAssignmentOperationStore) preserveRecoveryProjection(ctx context.Context, record AssignmentOperationRecord, credentials AWSCredentials) error {
 	for range 3 {
 		current, found, err := s.loadAssignmentProjection(ctx, record.AssignmentID, credentials)
-		if err != nil || !found || current.LastEventSeq > assignmentOperationLastEventSeq(record) || current.Recovery == nil {
+		if err != nil || !found || current.LastEventSeq > assignmentOperationLastEventSeq(record) || (current.Recovery == nil && len(current.EventACKs) == 0) {
 			return err
 		}
 		expected := AssignmentProjection(current)
