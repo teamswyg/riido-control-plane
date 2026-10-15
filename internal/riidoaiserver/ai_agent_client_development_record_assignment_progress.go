@@ -16,8 +16,15 @@ func (s *DevelopmentAIAgentClientStore) recordAssignmentProgressEventLocked(
 		return nil
 	}
 	event := assignmentProgressEvent(input, thread, line)
+	if thread.ConfirmationReason != "" {
+		event.WorkStatus = AgentWorkStatusWaitingForUser
+	}
 	s.appendThreadProgressLocked(event)
 	s.appendClientEventLocked(event.EventType, event)
-	s.agents[input.AgentID] = markAgentRunningFromAssignmentProgress(agent)
+	agent = markAgentRunningFromAssignmentProgress(agent)
+	if thread.ConfirmationReason != "" {
+		agent.WorkStatus = AgentWorkStatusWaitingForUser
+	}
+	s.agents[input.AgentID] = agent
 	return nil
 }

@@ -23,7 +23,9 @@ func (s *DevelopmentAIAgentClientStore) appendThreadProgressLocked(event AgentTh
 			threads[i].AssignmentID = strings.TrimSpace(event.AssignmentID)
 		}
 		s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
-		threads[i].WorkStatus = event.WorkStatus
+		if threads[i].ConfirmationReason == "" {
+			threads[i].WorkStatus = event.WorkStatus
+		}
 		threads[i].AssignmentState = event.AssignmentState
 		threads[i].QueueDiagnostics = nil
 		threads[i].CommentKind = event.CommentKind

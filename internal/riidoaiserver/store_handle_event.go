@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
 func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventRequest) (AgentEventResponse, error) {
@@ -29,6 +31,12 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	}
 	if err := validateDaemonBinding(s.agentRegistry, agentID, PollRequest{DaemonID: req.DaemonID, DeviceID: req.DeviceID, RuntimeID: req.RuntimeID}); err != nil {
 		return AgentEventResponse{}, err
+	}
+	if req.EventType == assignmentcontract.EventAssignmentWaitingForUser && (!req.ConfirmationReason.Valid() || isTerminal(assignment.State) || assignment.State == AssignmentCancelling) {
+		return AgentEventResponse{}, errors.New("waiting event requires an active execution and confirmation_reason")
+	}
+	if event, ok := repeatedNotificationEvent(state, assignment, req); ok {
+		return AgentEventResponse{SchemaVersion: SchemaVersion, Assignment: copyAssignment(assignment), Event: event}, nil
 	}
 	state.agentEventsTotal++
 	now := s.now()
@@ -59,6 +67,12 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 			eventType = EventRiidoLog
 		}
 	}
+	if eventType == assignmentcontract.EventAssignmentWaitingForUser {
+		assignment.ConfirmationReason = req.ConfirmationReason
+	} else if eventType == EventAssignmentRunning || isTerminal(assignment.State) {
+		assignment.ConfirmationReason = ""
+	}
+	state.assignments[assignment.ID] = assignment
 	if !assignmentChanged {
 		if existing, ok := duplicateAssignmentEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, eventType, req.Metadata); ok {
 			return AgentEventResponse{

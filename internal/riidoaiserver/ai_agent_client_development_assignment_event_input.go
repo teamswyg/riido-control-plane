@@ -3,6 +3,7 @@ package riidoaiserver
 import "time"
 
 type assignmentEventInput struct {
+	Event        TaskEvent
 	AgentID      string
 	TaskID       string
 	AssignmentID string

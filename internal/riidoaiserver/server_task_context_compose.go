@@ -28,6 +28,7 @@ func composeAssignRequestWithTaskContextResult(
 		return composedAssignRequest{}, err
 	}
 	req.Prompt = composed.Prompt
+	req.TeamID = contextSnapshot.TeamID
 	if composed.HasRepository {
 		req.Worktree = assignmentWorktreeFromTaskContext(contextSnapshot, composed.SelectedRepository)
 	}

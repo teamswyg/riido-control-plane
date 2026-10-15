@@ -20,6 +20,43 @@
   ],
   "chains": [
     {
+      "id": "agent_notification_retry_delivery_5829",
+      "observation": "Live-only task notifications could be dropped behind a full progress buffer, and a committed assignment event could receive HTTP success before its client projection persisted. Legacy needs-input events also used an undeclared assignment state.",
+      "hypothesis": "Priority displacement and retryable projection failures preserve notifications without changing existing SSE replay cursors or exposing task content to other recipients.",
+      "claims": [
+        "sse_reconnect_must_resume_after_last_event_id"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_event_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_task_notification.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_notification_regression_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Displace buffered progress for notifications, return retryable HTTP 503 on projection failure, preserve stable event identity on retry, and map legacy input waits to declared states. Notifications remain live-only; this does not claim durable offline delivery.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "bounded_ecs_rollout_stability_wait_5818",
       "observation": "The native ECS stability waiter expired while a scheduler replacement was recovering from an initial readiness-check rejection, causing a healthy successor to be rolled back before the full service had settled.",
       "hypothesis": "One additional bounded stability wait for an active or just-completed primary rollout can confirm recovery without changing service configuration; failed or unknown rollout states must continue to fail closed.",
@@ -64,7 +101,6 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/server_thread_message_assignment.go"
-
         }
       ],
       "verifiers": [
@@ -20603,20 +20639,51 @@
         "device_client_status_must_distinguish_install_update_and_ready"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/device_client_status_projection.go"},
-        {"kind":"code","path":"internal/riidoaiserver/daemon_version_compare.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_client_status_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_http_device_client_status_test.go"},
-        {"kind":"manifest","path":"docs/20-domain/ai-agent-client-api.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_client_status_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/daemon_version_compare.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_client_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_device_client_status_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/aiagentclientapi"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"ai-agent-client-api-evidence","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
       ],
       "decision": "The v2 device list keeps all existing fields and adds explicit viewer ownership, enrolled Desktop version, reported daemon version, configured minimum/latest versions, update requirement, Agent support, and server-owned download guidance. Workspace-visible devices remain attributed to their real owner.",
       "next_loop": "closed_loop_candidate"
@@ -20785,24 +20852,67 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_daemon_runtime.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_daemon_binding_test.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_sse_delivery.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_event_stream.go"},
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
-        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_daemon_runtime.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_daemon_binding_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_event_stream.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/agent-runtime-binding.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/agentruntimebinding"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"internal/riidoaiserver/device_daemon_binding_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
-        {"kind":"artifact","path":"production-task-runtime-binding-terminal-sse-triage-2026-07-15","redacted":true}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_daemon_binding_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "production-task-runtime-binding-terminal-sse-triage-2026-07-15",
+          "redacted": true
+        }
       ],
       "decision": "The daemon binding response now includes every agent whose validated runtime binding targets the authenticated device, including an owner-created agent in an unconnected workspace, while device credential ownership and binding.DeviceID checks remain unchanged. Terminal SSE payloads are unchanged; structured logs now record fanout enqueue, overflow compensation, replay write, and live write with workspace and execution identifiers but without credentials or message bodies. Claude's observed delay remains attributed to an upstream rate-limit retry and is not misclassified as daemon scheduling.",
       "next_loop": "closed_loop_candidate"
@@ -20816,23 +20926,65 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/dynamodb_assignment_operation_store.go"},
-        {"kind":"code","path":"internal/riidoaiserver/dynamodb_assignment_operation_store_replay_load.go"},
-        {"kind":"code","path":"internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing.go"},
-        {"kind":"test","path":"internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_load.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/moduledecomposition"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go"},
-        {"kind":"artifact","path":"production-assignment-journal-startup-pressure-2026-07-15","redacted":true},
-        {"kind":"artifact","path":"production-deploy-run-29388058904","redacted":true},
-        {"kind":"artifact","path":"production-deploy-run-29388798091","redacted":true}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "production-assignment-journal-startup-pressure-2026-07-15",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "production-deploy-run-29388058904",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "production-deploy-run-29388798091",
+          "redacted": true
+        }
       ],
       "decision": "Keep strongly consistent replay and all API/runtime contracts unchanged. Pace each successful 50-item journal page by 100 milliseconds and retry a throttled page in place. Preserve the page size, pacing interval, cancellation, and deadline behavior as executable boundary tests. Move replay loading out of the oversized DynamoDB store source so the module decomposition ratchet improves while the behavior remains unchanged.",
       "next_loop": "closed_loop_candidate"
@@ -20846,31 +20998,96 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/device_connection_grant.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_persistence.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_daemon_runtime.go"},
-        {"kind":"code","path":"internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_cross_account_binding_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_persistence_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_migration_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_device_connections_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_benchmark_test.go"},
-        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_connection_grant.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_daemon_runtime.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_cross_account_binding_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_connection_grant_persistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_connection_grant_migration_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_device_connections_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_connection_grant_benchmark_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/agent-runtime-binding.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/agentruntimebinding"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"internal/riidoaiserver/device_cross_account_binding_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_persistence_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_connection_grant_migration_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_device_connections_test.go"},
-        {"kind":"artifact","path":"cross-account-runtime-binding-evidence","redacted":true},
-        {"kind":"artifact","path":"cross-account-device-grant-benchmark","redacted":true}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_cross_account_binding_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_connection_grant_persistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_connection_grant_migration_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_device_connections_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "cross-account-runtime-binding-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "cross-account-device-grant-benchmark",
+          "redacted": true
+        }
       ],
       "decision": "Model account switching as an additive connection grant while keeping the physical device id, owner, credential, runtime ids, and historical bindings stable. Store grants by device so the five-second daemon binding poll summarizes only that device's connected accounts. Return only connected_principal_count and a timestamp-independent semantic revision to the daemon; principal ids and device credentials stay inside the control-plane snapshot. Legacy snapshots backfill the original owner grant and DynamoDB split snapshots preserve new grants without a storage-version break.",
       "next_loop": "closed_loop_candidate"
@@ -20884,20 +21101,51 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_api.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_runtime_liveness_binding_test.go"},
-        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_runtime_liveness_binding_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/agent-runtime-binding.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/agentruntimebinding"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"internal/riidoaiserver/device_runtime_liveness_binding_test.go"},
-        {"kind":"artifact","path":"staging-runtime-liveness-heartbeat-jitter-2026-07-15","redacted":true}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_runtime_liveness_binding_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-runtime-liveness-heartbeat-jitter-2026-07-15",
+          "redacted": true
+        }
       ],
       "decision": "Set runtime and daemon snapshot staleness to 45 seconds, covering two roughly 21-second legacy heartbeat windows plus jitter. Preserve the existing greater-than stale comparison and all public contracts. Re-run staging after deployment and require the periodic binding rejection to disappear while heartbeat and binding polls remain healthy.",
       "next_loop": "closed_loop_candidate"
@@ -20911,25 +21159,71 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/agent_registry.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_daemon_binding_lookup.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"},
-        {"kind":"workflow","path":".github/workflows/agent-runtime-binding.yml"},
-        {"kind":"manifest","path":"docs/20-domain/agent-runtime-binding.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_registry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_daemon_binding_lookup.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/agent-runtime-binding.yml"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/agent-runtime-binding.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/agentruntimebinding"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/agentruntimebinding"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"},
-        {"kind":"artifact","path":"staging-daemon-poll-durable-binding-long-window-2026-07-16","redacted":true}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_daemon_poll_stale_binding_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_daemon_poll_unavailable_binding_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "staging-daemon-poll-durable-binding-long-window-2026-07-16",
+          "redacted": true
+        }
       ],
       "decision": "Keep client-visible runtime liveness and daemon agent-binding discovery time-sensitive, but authenticate poll, heartbeat, provider-status, and agent-event calls through a separate durable binding lookup. The lookup ignores only elapsed heartbeat age and still requires the current stored agent/runtime/device/daemon relationship plus explicit online/detected state. No endpoint, payload, credential, assignment, or SSE contract changes.",
       "next_loop": "closed_loop_candidate"
@@ -20942,26 +21236,75 @@
         "sse_reconnect_must_resume_after_last_event_id"
       ],
       "changes": [
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_event_replay_cursor.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_events_handler.go"},
-        {"kind":"code","path":"internal/riidoaiserver/ai_agent_client_sse_logging.go"},
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
-        {"kind":"manifest","path":"docs/20-domain/ai-agent-client-api.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence/production-sse-replay-cursor-2026-07-18.json"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_events_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence/production-sse-replay-cursor-2026-07-18.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"internal/riidoaiserver"},
-        {"kind":"test","path":"tools/aiagentclientapi"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"},
-        {"kind":"test","path":"internal/riidoaiserver/ai_agent_client_sse_logging_test.go"},
-        {"kind":"artifact","path":"production-sse-replay-cursor-2026-07-18","redacted":true}
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_sse_logging_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "production-sse-replay-cursor-2026-07-18",
+          "redacted": true
+        }
       ],
       "decision": "Honor valid numeric Last-Event-ID values at the control-plane replay boundary and retain the existing bounded full replay for missing, malformed, or negative cursors. Log only cursor presence and the filtered replay count so production can prove reduction without recording cursor values, credentials, or message bodies. Keep endpoint paths, SSE event ids, payloads, terminal priority delivery, and v3 refresh behavior unchanged.",
       "next_loop": "closed_loop_candidate"
@@ -20975,26 +21318,76 @@
         "candidate_decision_evidence_must_expose_next_command"
       ],
       "changes": [
-        {"kind":"manifest","path":"docs/30-architecture/closed-loop-candidate-decision.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/closed-loop-candidate-decision.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"test","path":"tools/closedloopcandidatedecision/behavior_golden_test.go"},
-        {"kind":"test","path":"tools/loopclosureaudit/behavior_golden_test.go"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/closed-loop-candidate-decision.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/closed-loop-candidate-decision.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"tools/closedloopcandidatedecision"},
-        {"kind":"tool","path":"tools/closedloopcandidatedecision"},
-        {"kind":"test","path":"tools/loopclosureaudit"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/closedloopcandidatedecision"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"test","path":"tools/closedloopcandidatedecision/behavior_golden_test.go"},
-        {"kind":"test","path":"tools/loopclosureaudit/behavior_golden_test.go"},
-        {"kind":"artifact","path":"closed-loop-candidate-review-audit-2026-07-22","redacted":true},
-        {"kind":"artifact","path":"github-actions-run-29882928818","redacted":true}
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit/behavior_golden_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-review-audit-2026-07-22",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "github-actions-run-29882928818",
+          "redacted": true
+        }
       ],
       "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation.",
       "next_loop": "closed_loop_candidate_decision"
@@ -21007,22 +21400,62 @@
         "go_ci_baseline_must_preserve_broad_ci_contract"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"repository-readme-evidence","redacted":true},
-        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "repository-readme-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "executable-knowledge-coverage",
+          "redacted": true
+        }
       ],
       "decision": "Admit repository-readme as the second of 56 source workflows with all source steps mapped natively, zero required adapters, exact source SHA-256 ae953f656aba408e154b10a7d4bd782169fa51fc93ddd618e2d3313a5b82e58c, redacted content-addressed evidence, and mode-0600 README and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 54 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21035,22 +21468,62 @@
         "go_ci_baseline_must_preserve_broad_ci_contract"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
-        {"kind":"artifact","path":"control-plane-context-map-evidence","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "dependency-allowlist-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "control-plane-context-map-evidence",
+          "redacted": true
+        }
       ],
       "decision": "Admit context-map as the third of 56 source workflows with all five source steps mapped natively, zero required adapters, exact source SHA-256 3abfc4a36a0e9121996116a8010b56769a75d30915c64d394761c552ccae5392, redacted content-addressed evidence, and a mode-0600 Context Map receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 53 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21063,23 +21536,67 @@
         "go_ci_baseline_must_preserve_broad_ci_contract"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"go-ci-baseline-evidence","redacted":true},
-        {"kind":"artifact","path":"go-test-cover.out","redacted":true},
-        {"kind":"artifact","path":"go-test-coverage-summary.txt","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-test-cover.out",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-test-coverage-summary.txt",
+          "redacted": true
+        }
       ],
       "decision": "Admit Go CI quality as the fourth of 56 source workflows with all eight source behaviors mapped natively, zero required adapters, exact source SHA-256 82a08f1a850273ce756c0988fddbdfbcdd5590e059b442c172a89a7d41b731c4, exact golangci-lint v2.12.2 and coverage-summary behavior, redacted content-addressed evidence, and mode-0600 baseline and coverage receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 52 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21092,23 +21609,67 @@
         "go_ci_baseline_must_preserve_broad_ci_contract"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
-        {"kind":"artifact","path":"module-decomposition-evidence","redacted":true},
-        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "dependency-allowlist-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "module-decomposition-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "executable-knowledge-coverage",
+          "redacted": true
+        }
       ],
       "decision": "Admit module-decomposition as the fifth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 16077a7807afe5b64787ab7faf0321685f8797f5833fc87c85a9e1ae0c504480, redacted content-addressed evidence, and mode-0600 module-decomposition and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 51 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21121,21 +21682,57 @@
         "go_ci_baseline_must_preserve_broad_ci_contract"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"pre-commit-baseline-evidence","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "pre-commit-baseline-evidence",
+          "redacted": true
+        }
       ],
       "decision": "Admit pre-commit-baseline as the sixth of 56 source workflows with all four source behaviors mapped natively, zero required adapters, exact source SHA-256 338db1065406d91b511c7fd8838f7b18964aabadbea8e2b4039cc9aa8e89c104, redacted content-addressed evidence, and a mode-0600 pre-commit baseline receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 50 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21148,23 +21745,67 @@
         "go_ci_baseline_must_preserve_broad_ci_contract"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
-        {"kind":"artifact","path":"migration-ledger-evidence","redacted":true},
-        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "dependency-allowlist-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "migration-ledger-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "executable-knowledge-coverage",
+          "redacted": true
+        }
       ],
       "decision": "Admit migration-ledger as the seventh of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 636e8b00f5ed7df631dc5a17d1560b281b0ab6c99be255afb9dafcec971254b1, redacted content-addressed evidence, and mode-0600 migration-ledger and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 49 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21178,21 +21819,57 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"syntax-hash-evidence","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        }
       ],
       "decision": "Admit syntax-hash as the eighth of 56 source workflows with all five source behaviors mapped natively, zero required adapters, exact loop environment and source SHA-256 470d347daa1b35680fb4c899ec234e3ead152356c8f38ab07d521fbcdf194ec7, redacted content-addressed evidence, and a mode-0600 syntax-hash receipt. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 48 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21206,22 +21883,62 @@
         "config_reference_must_preserve_env_manifest_parity"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/configreference"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/configreference"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"config-reference-evidence","redacted":true},
-        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "config-reference-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "executable-knowledge-coverage",
+          "redacted": true
+        }
       ],
       "decision": "Admit config-reference as the ninth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 5cbf30d7a80482fc5f29daface720c3418d31448aaac7d18a2b57c3744683d89, redacted content-addressed evidence, and mode-0600 config-reference and executable-knowledge receipts. Preserve the source workflow unchanged and keep retirement, runtime, credential, scheduling, deployment, and fixed-cost authority false; 47 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21235,24 +21952,71 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
-        {"kind":"artifact","path":"open-questions-evidence","redacted":true},
-        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "dependency-allowlist-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "open-questions-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "executable-knowledge-coverage",
+          "redacted": true
+        }
       ],
       "decision": "Admit open-questions as the twelfth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact open-decision loop environment and source SHA-256 a73744d4a386246d66f1c599953b8411a4740ca3616957857ed415ef6500c937, redacted content-addressed evidence, and mode-0600 open-questions and executable-knowledge receipts. Preserve the source workflow unchanged and keep scheduling, retirement, runtime, credential, deployment, and fixed-cost authority false; 44 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21266,24 +22030,71 @@
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"dependency-allowlist-evidence","redacted":true},
-        {"kind":"artifact","path":"integration-matrix-evidence","redacted":true},
-        {"kind":"artifact","path":"executable-knowledge-coverage","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "dependency-allowlist-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "integration-matrix-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "executable-knowledge-coverage",
+          "redacted": true
+        }
       ],
       "decision": "Admit integration-matrix as the fourteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact source SHA-256 0d2df869bc0836ba70ac9d109d14c03ef9b927ac960d85a699190fc5d6ed9f61, redacted content-addressed evidence, and mode-0600 integration-matrix and executable-knowledge receipts. Preserve the source workflow unchanged and keep scheduling, retirement, runtime, credential, deployment, and fixed-cost authority false; 42 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21297,23 +22108,66 @@
         "loop_closure_audit_must_prove_human_exit_requirements"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"loop-closure-audit-evidence","redacted":true},
-        {"kind":"artifact","path":"loop-closure-audit-closed-loop-candidates","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-closure-audit-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-closure-audit-closed-loop-candidates",
+          "redacted": true
+        }
       ],
       "decision": "Admit loop-closure-audit as the fifteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact loop environment and source SHA-256 a26fbcca723421a900bdddd2cba8da71079d1110c77acd561fe2e626ae601781, redacted content-addressed evidence, and two mode-0600 receipts. Preserve the source workflow unchanged and keep scheduling, dispatch, retirement, runtime, credential, deployment, and fixed-cost authority false; 41 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21327,22 +22181,61 @@
         "evidence_graph_evidence_must_expose_full_chain"
       ],
       "changes": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/loop-registry.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/loop-registry.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
       ],
       "verifiers": [
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/loopregistry"},
-        {"kind":"tool","path":"tools/evidencegraph"}
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"control-plane-local-self-check-evidence","redacted":true},
-        {"kind":"artifact","path":"baseline-ci-parity-evidence","redacted":true},
-        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "control-plane-local-self-check-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "baseline-ci-parity-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        }
       ],
       "decision": "Admit evidence-graph as the sixteenth of 56 source workflows with all six source behaviors mapped natively, zero required adapters, exact full-history, cached Go, impact-base and annotation behavior, exact source SHA-256 518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710, redacted content-addressed evidence, and a success-only mode-0600 receipt. Preserve the source workflow unchanged and keep scheduling, dispatch, pull-request admission, retirement, runtime, credential, deployment, and fixed-cost authority false; 40 workflows remain for separate bounded review.",
       "next_loop": "closed_loop_candidate"
@@ -21356,686 +22249,798 @@
         "runtime_deployment_boundary_must_preserve_public_private_ownership"
       ],
       "changes": [
-        {"kind":"manifest","path":"docs/30-architecture/health-ready-cmd.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/health-ready-cmd.md"},
-        {"kind":"manifest","path":"docs/30-architecture/module-decomposition.riido.json"},
-        {"kind":"manifest","path":"docs/30-architecture/syntax-hash.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/syntax-hash.md"},
-        {"kind":"manifest","path":"docs/30-architecture/evidence-graph.riido.json"},
-        {"kind":"generated_doc","path":"docs/30-architecture/evidence-graph.md"}
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/health-ready-cmd.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/health-ready-cmd.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/module-decomposition.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/syntax-hash.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/evidence-graph.md"
+        }
       ],
       "verifiers": [
-        {"kind":"test","path":"tools/evidencegraph/behavior_golden_test.go"},
-        {"kind":"tool","path":"tools/healthreadycmd"},
-        {"kind":"tool","path":"tools/moduledecomposition"},
-        {"kind":"tool","path":"tools/syntaxhash"},
-        {"kind":"tool","path":"tools/evidencegraph"},
-        {"kind":"tool","path":"tools/loopregistry"}
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/healthreadycmd"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/syntaxhash"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
       ],
       "evidence": [
-        {"kind":"artifact","path":"health-ready-command-evidence","redacted":true},
-        {"kind":"artifact","path":"module-decomposition-evidence","redacted":true},
-        {"kind":"artifact","path":"syntax-hash-evidence","redacted":true},
-        {"kind":"artifact","path":"evidence-graph-evidence","redacted":true},
-        {"kind":"artifact","path":"loop-registry-evidence","redacted":true}
+        {
+          "kind": "artifact",
+          "path": "health-ready-command-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "module-decomposition-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "syntax-hash-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "evidence-graph-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
       ],
       "decision": "Admit only a source-ready, public, exact two-operation owner receiver registered at /owner/graphql. healthCheck is exactly 200; fireError always returns null plus the pinned error; aliases, repeated selections, fragments, unknown operations, malformed JSON, and missing handler configuration fail closed. The changed route and syntax-hash surfaces are now bound to executable evidence, while runtime_wired, deployment, effect, performance improvement, and public schema credit remain zero.",
       "next_loop": "closed_loop_candidate"
     },
-    {"id": "agent_execution_delivery_modular_integration_20261013", "observation": "The reviewed 5827 source predates main module decomposition. Partial message keys disappeared from the public wire and replacement lines reused sequence numbers; shared state updates also needed serialization for local file snapshots.", "hypothesis": "An additive public discriminator, monotonic progress sequence and serialized snapshot boundary can improve live execution visibility while preserving current main replay cursors, v3 conversations, authentication and performance controls.", "claims": ["sse_reconnect_must_resume_after_last_event_id", "thread_history_v3_must_expose_stable_conversation_grouping"], "changes": [{"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_api.go"}, {"kind": "code", "path": "internal/riidoaiserver/ai_agent_client_development_method_next_thread_progress_seq_locked.go"}, {"kind": "code", "path": "internal/riidoaiserver/server_assignment_request.go"}, {"kind": "manifest", "path": "docs/20-domain/ai-agent-client-api.riido.json"}], "verifiers": [{"kind": "test", "path": "internal/riidoaiserver/execution_delivery_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"}, {"kind": "test", "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"}, {"kind": "tool", "path": "tools/loopregistry"}], "evidence": [{"kind": "artifact", "path": "agent-execution-modular-integration-local-tests-20261013", "redacted": true}], "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence.", "next_loop": "ai_agent_load_harness"},
     {
-  "id": "persistent_agent_participant_review_5841",
-  "observation": "Terminal participant removal unconditionally overwrote execution data; optional Dynamo membership parts could be restored without CURRENT committing them; additive assignment mutations omitted the participant query invalidation tag. Additional review reproduced failed membership commit making CURRENT unreadable, stale execution removal hiding a newer execution, and followup execution failing to restore membership or invalidate the participant cache. Subsequent RIID-5841 review reproduced historical waiting A hiding the latest removal ID B, ID-less removal cancelling A but erasing membership while interleaved B remained runnable, and durable B being created before its client thread was published. Native independent Persistent client stores and assignment actors sharing one Dynamo fixture reproduced unpublished durable generation removal across Server instances, legacy receipt absence, creation during receipt reads, stale scoped peer-history writes, and standalone failed publication leaving removal permanently conflicted. Independent native review reproduced recovery cancellation sequence 4 colliding with same-task actor runtime sequence 4, causing local replay and live subscriber emission to be skipped despite durable cancellation. Native creation transactions committed before a 503 response or connection loss were reported as failures and skipped membership publication. Strict Dynamo wire validation reproduced empty optional ConditionExpression on unconditional transaction puts. A superseding generation left the failed older unpublished execution runnable; cancelling solely from the newer marker would also cancel an actually published execution whose response was lost.",
-  "hypothesis": "Atomic membership/CURRENT write and read, a latest-assignment removal fence before durable cancellation and under the store lock, followup membership activation, and participant query invalidation close the reproduced failure paths. State-independent latest_assignment_id and an optional DELETE guard separate membership from execution ownership. A same-snapshot private thread observation, cancellation of every retained active execution for this task Agent, and a task publication gate from durable creation through client publication make explicit removal reject a newly observed generation without retaining workers or rewriting terminal history. Atomic durable generation and active receipts, a stable strong observation before cancellation, legacy and retained projection union, private scoped membership and history commit conditions, and exact self-created failed-publication recovery close these supported boundaries without extending the public API or retaining runtime leases. Passing the private actor next-event floor to the recovery event factory preserves existing actor cursor ordering without adding a distributed sequencer. A publication proof in the existing active execution receipt, committed with membership and checked during cancellation, distinguishes those cases without another retained row.",
-  "claims": [
-    "stop_reassign_must_not_revive_or_mutate_inactive_threads",
-    "sse_reconnect_must_resume_after_last_event_id"
-  ],
-  "changes": [
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_development_method_unassign_ai_agent_task.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_decode.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_fence.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_transaction.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
-    },
-    {
-      "kind": "manifest",
-      "path": "docs/30-architecture/loop-registry.riido.json"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_task_membership.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/server_ai_agent_membership_removal.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_observation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_task_execution_gate.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_task_unassign_handler.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_api.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_assign_ai_agent_task.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_task_agent_assignment.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_task_thread_message.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_delete_ai_agent_task_agent_assignment.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_list_workspace_assigned_agent_profiles.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_persistent_method_unassign_ai_agent_task.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_handler.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_task_assign_handler.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_membership_persistent_mutation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_membership_persistent_mutation_observe_task_agent_membership_removal.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_visibility.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/assignment_operation_port.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_save.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_read_task_agent_generation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_next.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_repair_transaction_payload.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_transaction_payload.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_dynamo_dbassignment_claim_repair.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_dynamo_dbcancel_queued_blocker_operation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_interfaces.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_agent_active_assignment.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_agent_queue_records.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_assignment_projection.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_refresh_agent_active_assignment.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_release_agent_active_assignment_if_terminal.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_save.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_save_assignment_projection.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_stale_blocker_lease_condition.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_assignment_transaction_types.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_generation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_generation_delete_task_agent_terminal_receipt.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_generation_load_task_agent_durable_executions.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_generation_same_task_agent_creation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_publication_recovery_actions.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_read_publication_membership_baseline.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_retry.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/server_assignment_action.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/server_constructor.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_assignment_api.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_assignment_commands.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_cancel_queued_blocker_for_assignment.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_constructor.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_handle_assign.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_handle_cancel_assignment.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_handle_event.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_handle_poll.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_persistence_handlers.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/store_type.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/task_agent_creation_receipt.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/task_agent_durable_generation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/task_agent_durable_generation_load_legacy_task_agent_durable_executions.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/task_agent_publication_cancellation.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/task_agent_publication_recovery.go"
+      "id": "agent_execution_delivery_modular_integration_20261013",
+      "observation": "The reviewed 5827 source predates main module decomposition. Partial message keys disappeared from the public wire and replacement lines reused sequence numbers; shared state updates also needed serialization for local file snapshots.",
+      "hypothesis": "An additive public discriminator, monotonic progress sequence and serialized snapshot boundary can improve live execution visibility while preserving current main replay cursors, v3 conversations, authentication and performance controls.",
+      "claims": [
+        "sse_reconnect_must_resume_after_last_event_id",
+        "thread_history_v3_must_expose_stable_conversation_grouping"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_next_thread_progress_seq_locked.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_assignment_request.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_delivery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_conversation_assert_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "agent-execution-modular-integration-local-tests-20261013",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence.",
+      "next_loop": "ai_agent_load_harness"
+    },
+    {
+      "id": "persistent_agent_participant_review_5841",
+      "observation": "Terminal participant removal unconditionally overwrote execution data; optional Dynamo membership parts could be restored without CURRENT committing them; additive assignment mutations omitted the participant query invalidation tag. Additional review reproduced failed membership commit making CURRENT unreadable, stale execution removal hiding a newer execution, and followup execution failing to restore membership or invalidate the participant cache. Subsequent RIID-5841 review reproduced historical waiting A hiding the latest removal ID B, ID-less removal cancelling A but erasing membership while interleaved B remained runnable, and durable B being created before its client thread was published. Native independent Persistent client stores and assignment actors sharing one Dynamo fixture reproduced unpublished durable generation removal across Server instances, legacy receipt absence, creation during receipt reads, stale scoped peer-history writes, and standalone failed publication leaving removal permanently conflicted. Independent native review reproduced recovery cancellation sequence 4 colliding with same-task actor runtime sequence 4, causing local replay and live subscriber emission to be skipped despite durable cancellation. Native creation transactions committed before a 503 response or connection loss were reported as failures and skipped membership publication. Strict Dynamo wire validation reproduced empty optional ConditionExpression on unconditional transaction puts. A superseding generation left the failed older unpublished execution runnable; cancelling solely from the newer marker would also cancel an actually published execution whose response was lost.",
+      "hypothesis": "Atomic membership/CURRENT write and read, a latest-assignment removal fence before durable cancellation and under the store lock, followup membership activation, and participant query invalidation close the reproduced failure paths. State-independent latest_assignment_id and an optional DELETE guard separate membership from execution ownership. A same-snapshot private thread observation, cancellation of every retained active execution for this task Agent, and a task publication gate from durable creation through client publication make explicit removal reject a newly observed generation without retaining workers or rewriting terminal history. Atomic durable generation and active receipts, a stable strong observation before cancellation, legacy and retained projection union, private scoped membership and history commit conditions, and exact self-created failed-publication recovery close these supported boundaries without extending the public API or retaining runtime leases. Passing the private actor next-event floor to the recovery event factory preserves existing actor cursor ordering without adding a distributed sequencer. A publication proof in the existing active execution receipt, committed with membership and checked during cancellation, distinguishes those cases without another retained row.",
+      "claims": [
+        "stop_reassign_must_not_revive_or_mutate_inactive_threads",
+        "sse_reconnect_must_resume_after_last_event_id"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_unassign_ai_agent_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_fence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_transaction.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_membership.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_membership_removal.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_execution_gate.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_unassign_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_assign_ai_agent_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_task_agent_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_task_thread_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_delete_ai_agent_task_agent_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_list_workspace_assigned_agent_profiles.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_unassign_ai_agent_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assign_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_membership_persistent_mutation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_membership_persistent_mutation_observe_task_agent_membership_removal.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_visibility.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_operation_port.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_save.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_read_task_agent_generation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_next.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_repair_transaction_payload.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_transaction_payload.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_dynamo_dbassignment_claim_repair.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_dynamo_dbcancel_queued_blocker_operation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_interfaces.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_agent_active_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_agent_queue_records.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_load_assignment_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_refresh_agent_active_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_release_agent_active_assignment_if_terminal.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_save.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_save_assignment_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_stale_blocker_lease_condition.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_transaction_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_generation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_generation_delete_task_agent_terminal_receipt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_generation_load_task_agent_durable_executions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_generation_same_task_agent_creation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_publication_recovery_actions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_read_publication_membership_baseline.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_task_agent_publication_recovery_retry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_assignment_action.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_constructor.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_assignment_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_assignment_commands.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cancel_queued_blocker_for_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_constructor.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_assign.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_cancel_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_poll.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_persistence_handlers.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_type.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_agent_creation_receipt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_agent_durable_generation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_agent_durable_generation_load_legacy_task_agent_durable_executions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_agent_publication_cancellation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_agent_publication_recovery.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/participant_invalidation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_followup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_stale_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_atomic_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_latest_assignment_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_all_active_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_http_fence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_durable_publish_gap_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_task_execution_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test_httpmembership_removal_does_not_cancel_execution_created_during_receipt_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_cross_server_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_failed_older_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_independent_store_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test_httpmembership_removal_survives_stale_ordinary_writer_and_fresh_bulk_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_intent_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_legacy_coexistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_legacy_durable_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_native_scenario_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_peer_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_private_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_advance_failed_publication_execution_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_check_failed_membership_publication_recovery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_peer_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_projection_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_stale_intent_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_event_sequence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_legacy_absent_part_recovery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_creation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_rejected_creation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_dynamo_wire_condition_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_accepted_publication_generation_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_terminal_receipt_race_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/participant_invalidation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_followup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_stale_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_atomic_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_latest_assignment_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_all_active_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_removal_http_fence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_durable_publish_gap_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_task_execution_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test_httpmembership_removal_does_not_cancel_execution_created_during_receipt_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_cross_server_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_failed_older_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_independent_store_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test_httpmembership_removal_survives_stale_ordinary_writer_and_fresh_bulk_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_intent_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_legacy_coexistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_legacy_durable_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_native_scenario_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_peer_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_private_removal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_advance_failed_publication_execution_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_check_failed_membership_publication_recovery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_peer_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_projection_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_stale_intent_gate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_recovery_event_sequence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_legacy_absent_part_recovery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_creation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_rejected_creation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_dynamo_wire_condition_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_publication_receipt.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_accepted_publication_generation_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_publication_terminal_receipt_race_test.go"
+        }
+      ],
+      "decision": "Keep terminal history and peer activity unchanged on removal. Explicit removal uses one DELETE and cancels the task Agent's observed active executions; an optional latest retained assignment ID is a generation guard, not membership or runtime capacity. Reject stale observations with HTTP 409 and preserve newer executions. Accepted followup instructions restore membership and invalidate participant queries. The existing per-Store gate is supplemented by shared DynamoDB generation and active receipts: initial creation commits journal, projection, generation and receipt together; terminal cleanup deletes the active receipt while preserving generation. Ordinary snapshot writers preserve authoritative membership. Scoped publication/removal applies only its target relation delta with atomic baseline history, membership and generation conditions, fresh reload and local restoration on conflict. Cancellation combines strong receipt and legacy/retained projections and rechecks generation before cancelling. Only a request's exact newly created execution may undergo failed-publication recovery. Membership publication records publication_committed on its existing active receipt in the same transaction; a missing receipt is accepted only with an exact terminal projection, and a terminal cleanup race retries without recreating the receipt. Recovery preserves published executions, including lost publication responses followed by a newer generation. It cancels an unpublished older execution with projection and unpublished-receipt conditions, checking but never rewinding a newer marker. The receipt has no additional retention after execution ends. Recovery events exceed the actor consumed sequence and reach replay and live subscribers. Legacy snapshots lacking the optional membership part use an absence condition. Creation response errors reconcile exact durable journal and projection before reporting failure; absent or mismatching records remain errors. Optional Put conditions are omitted when empty; required ConditionCheck guards remain. Strict HTTP Dynamo fixtures, focused regression, package race and generated checks are source-level evidence. Actual AWS, daemon termination, mixed old/new binary rollout and general ordinary thread/event snapshot atomicity remain separate validation boundaries; the existing tag/manual deployment workflow is not invoked by this merge. Individual STOP, permissions, task/subtask scope and public API policy are unchanged.",
+      "next_loop": "ai_thread_history"
     }
-  ],
-  "verifiers": [
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/reactquerygen/participant_invalidation_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_followup_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_stale_removal_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_atomic_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_latest_assignment_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_all_active_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_http_fence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_durable_publish_gap_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_task_execution_gate_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_publication_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test_httpmembership_removal_does_not_cancel_execution_created_during_receipt_read_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_cross_server_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_failed_older_publication_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_independent_store_publication_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test_httpmembership_removal_survives_stale_ordinary_writer_and_fresh_bulk_read_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_intent_gate_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_legacy_coexistence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_legacy_durable_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_native_scenario_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_peer_commit_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_private_removal_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_advance_failed_publication_execution_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_check_failed_membership_publication_recovery_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_peer_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_projection_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_stale_intent_gate_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_event_sequence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_legacy_absent_part_recovery_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_creation_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_rejected_creation_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_dynamo_wire_condition_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_accepted_publication_generation_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_terminal_receipt_race_test.go"
-    }
-  ],
-  "evidence": [
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_task_membership_removal_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "tools/reactquerygen/participant_invalidation_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_followup_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_stale_removal_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_atomic_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_latest_assignment_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_all_active_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_removal_http_fence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_durable_publish_gap_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_task_execution_gate_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_publication_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_commit_fence_test_httpmembership_removal_does_not_cancel_execution_created_during_receipt_read_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_cross_server_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_failed_older_publication_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_check_membership_independent_store_publication_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_independent_store_test_httpmembership_removal_survives_stale_ordinary_writer_and_fresh_bulk_read_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_intent_gate_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_legacy_coexistence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_legacy_durable_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_native_scenario_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_peer_commit_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_private_removal_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_advance_failed_publication_execution_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_check_failed_membership_publication_recovery_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_failure_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_peer_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_projection_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_stale_intent_gate_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_recovery_event_sequence_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_legacy_absent_part_recovery_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_ambiguous_creation_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_rejected_creation_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_dynamo_wire_condition_test.go"
-    },
-    {
-      "kind": "code",
-      "path": "internal/riidoaiserver/dynamodb_ai_agent_publication_receipt.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_accepted_publication_generation_race_test.go"
-    },
-    {
-      "kind": "test",
-      "path": "internal/riidoaiserver/ai_agent_membership_publication_terminal_receipt_race_test.go"
-    }
-  ],
-  "decision": "Keep terminal history and peer activity unchanged on removal. Explicit removal uses one DELETE and cancels the task Agent's observed active executions; an optional latest retained assignment ID is a generation guard, not membership or runtime capacity. Reject stale observations with HTTP 409 and preserve newer executions. Accepted followup instructions restore membership and invalidate participant queries. The existing per-Store gate is supplemented by shared DynamoDB generation and active receipts: initial creation commits journal, projection, generation and receipt together; terminal cleanup deletes the active receipt while preserving generation. Ordinary snapshot writers preserve authoritative membership. Scoped publication/removal applies only its target relation delta with atomic baseline history, membership and generation conditions, fresh reload and local restoration on conflict. Cancellation combines strong receipt and legacy/retained projections and rechecks generation before cancelling. Only a request's exact newly created execution may undergo failed-publication recovery. Membership publication records publication_committed on its existing active receipt in the same transaction; a missing receipt is accepted only with an exact terminal projection, and a terminal cleanup race retries without recreating the receipt. Recovery preserves published executions, including lost publication responses followed by a newer generation. It cancels an unpublished older execution with projection and unpublished-receipt conditions, checking but never rewinding a newer marker. The receipt has no additional retention after execution ends. Recovery events exceed the actor consumed sequence and reach replay and live subscribers. Legacy snapshots lacking the optional membership part use an absence condition. Creation response errors reconcile exact durable journal and projection before reporting failure; absent or mismatching records remain errors. Optional Put conditions are omitted when empty; required ConditionCheck guards remain. Strict HTTP Dynamo fixtures, focused regression, package race and generated checks are source-level evidence. Actual AWS, daemon termination, mixed old/new binary rollout and general ordinary thread/event snapshot atomicity remain separate validation boundaries; the existing tag/manual deployment workflow is not invoked by this merge. Individual STOP, permissions, task/subtask scope and public API policy are unchanged.",
-  "next_loop": "ai_thread_history"
-}
   ],
   "loop": {
     "observation": "Evidence artifacts existed, but the reasoning chain from observation to next loop was still scattered across generated readers and PR memory.",

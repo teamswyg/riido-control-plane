@@ -1,6 +1,13 @@
 package riidoaiserver
 
 func clientEventVisibleToLocked(s *DevelopmentAIAgentClientStore, principal AuthorizationResult, event ClientStreamEvent) bool {
+	if notification, ok := event.Payload.(AgentTaskNotificationEvent); ok {
+		return notification.RecipientPrincipalID != "" && notification.RecipientPrincipalID == principal.PrincipalID && notification.WorkspaceID != "" && notification.WorkspaceID == principal.WorkspaceID
+	}
+	if event.EventType == AgentClientEventTaskNotification {
+		return false
+	}
+
 	if daemon, ok := eventDeviceDaemon(event.Payload); ok {
 		return s.daemonVisibleToPrincipalLocked(principal, daemon)
 	}

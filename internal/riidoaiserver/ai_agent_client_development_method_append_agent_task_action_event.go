@@ -10,6 +10,7 @@ func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAg
 		ThreadID:           response.ThreadID,
 		RunID:              response.RunID,
 		WorkStatus:         response.WorkStatus,
+		ConfirmationReason: response.ConfirmationReason,
 		AssignmentState:    response.AssignmentState,
 		CommentKind:        response.CommentKind,
 		ResultMessage:      response.ResultMessage,

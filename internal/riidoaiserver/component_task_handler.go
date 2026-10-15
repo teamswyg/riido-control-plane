@@ -26,7 +26,8 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
 		return
 	}
-	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceComponentTask, Action: AuthorizationActionAssign, TaskID: taskID}); !ok {
+	principal, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceComponentTask, Action: AuthorizationActionAssign, TaskID: taskID})
+	if !ok {
 		return
 	}
 	var req AssignRequest
@@ -34,6 +35,8 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	req.CreatedBy = principal.PrincipalID
+	req.WorkspaceID = principal.WorkspaceID
 	if strings.TrimSpace(req.Prompt) == "" && s.taskContext != nil {
 		composedReq, err := s.assignRequestWithTaskContextPrompt(r.Context(), taskID, req)
 		if err != nil {

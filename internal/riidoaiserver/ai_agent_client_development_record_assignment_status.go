@@ -12,6 +12,11 @@ func (s *DevelopmentAIAgentClientStore) recordAssignmentStatusEventLocked(
 		message = input.Message
 	}
 	response := assignmentEventActionResponse(thread, input.State, message, input.Metadata)
+
+	if input.State == AssignmentRunning && input.Event.ConfirmationReason.Valid() {
+		response.WorkStatus = AgentWorkStatusWaitingForUser
+		response.ConfirmationReason = string(input.Event.ConfirmationReason)
+	}
 	response.AssignmentID = input.AssignmentID
 	s.upsertTaskThreadFromActionLocked(response, "")
 	shouldFanoutStatus := shouldFanoutAgentTaskActionEvent(hadThread, previousThread, response)
@@ -20,4 +25,5 @@ func (s *DevelopmentAIAgentClientStore) recordAssignmentStatusEventLocked(
 	if shouldFanoutStatus {
 		s.appendAgentTaskActionEvent(response)
 	}
+	s.appendTaskNotificationLocked(input.Event, response)
 }
