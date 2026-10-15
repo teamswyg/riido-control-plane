@@ -5327,8 +5327,8 @@
     },
     {
       "id": "thread_history_user_followup_retention_loop",
-      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, can lose the actual reply author when another workspace member writes inside the thread, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer.",
+      "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, can lose the actual reply author when another workspace member writes inside the thread, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide. RIID-5820: execution evidence also disappeared in v3 cold history because only message fields were projected.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -5392,6 +5392,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/tool_approval_thread_message_assert_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_context_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
         }
       ],
       "verifiers": [
@@ -5422,6 +5430,10 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/loop-registry.yml"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_execution_context_test.go"
         }
       ],
       "evidence": [
@@ -5431,7 +5443,7 @@
           "redacted": true
         }
       ],
-      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. The v3 user-message row now carries author_principal_id so another member's reply can be rendered as that member after refresh. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history.",
+      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. The v3 user-message row now carries author_principal_id so another member's reply can be rendered as that member after refresh. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history. RIID-5820 keeps paths/commands local, sanitizes shared enums, retains legacy progress evidence and clears prior verification on a new run. Automatic provider recovery remains separate.",
       "next_loop": "ai_thread_history"
     },
     {
