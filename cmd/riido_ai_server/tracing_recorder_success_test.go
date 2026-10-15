@@ -41,7 +41,7 @@ func TestOtelTraceRecorderRecordsSpanAttributesAndErrors(t *testing.T) {
 	if got.Name() != "riido.test.span" || got.SpanKind() != trace.SpanKindServer {
 		t.Fatalf("span = %q/%v", got.Name(), got.SpanKind())
 	}
-	if got.Status().Code != codes.Error || got.Status().Description != "boom" {
+	if got.Status().Code != codes.Error || got.Status().Description != "operation failed" {
 		t.Fatalf("span status = %v/%q", got.Status().Code, got.Status().Description)
 	}
 	attrs := map[string]attribute.Value{}

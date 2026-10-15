@@ -13,7 +13,7 @@ func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelA
 		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan cancelAssignmentResult, 1)
-	if err := s.send(ctx, cancelAssignmentCmd{taskID: taskID, req: req, reply: reply}); err != nil {
+	if err := s.send(ctx, cancelAssignmentCmd{ctx: ctx, taskID: taskID, req: req, reply: reply}); err != nil {
 		return Assignment{}, err
 	}
 	select {

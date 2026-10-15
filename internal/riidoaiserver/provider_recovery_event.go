@@ -55,7 +55,7 @@ func (s *Store) validateRecoveryEvent(state *storeState, current Assignment, req
 			return req, errors.New("recovery event provider is outside accepted policy")
 		}
 		if context.State == "checking" || context.State == "switching" {
-			if err := s.recheckRecoveryCandidate(current, context.Provider); err != nil {
+			if err := s.checkRecoveryCandidateApproval(current, context.Provider); err != nil {
 				return req, err
 			}
 		}

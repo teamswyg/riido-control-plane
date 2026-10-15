@@ -50,12 +50,6 @@ type AssignmentProjectionReader interface {
 	LoadAssignmentProjection(ctx context.Context, assignmentID string) (AssignmentProjection, bool, error)
 }
 
-type AssignmentProjection struct {
-	Assignment   Assignment
-	LastEventSeq int64
-	Recovery     *recoveryWatermark `json:"-"`
-}
-
 type AssignmentActiveLease struct {
 	AgentID            string
 	ActiveAssignmentID string
@@ -84,6 +78,7 @@ type AssignmentClaimResult struct {
 
 type AssignmentOperationRecord struct {
 	ExpectedProjection *AssignmentProjection `json:"-"`
+	eventACK           *assignmentEventACKReceipt
 	createsExecution   bool
 	SchemaVersion      string                  `json:"schema_version"`
 	OperationID        string                  `json:"operation_id"`

@@ -13,7 +13,8 @@ const (
 type assignmentProjectionRecord struct {
 	Assignment   Assignment
 	LastEventSeq int64
-	Recovery     *recoveryWatermark `json:"-"`
+	Recovery     *recoveryWatermark          `json:"-"`
+	EventACKs    []assignmentEventACKReceipt `json:"-"`
 }
 
 func dynamoDBAssignmentProjectionPK(assignmentID string) string {

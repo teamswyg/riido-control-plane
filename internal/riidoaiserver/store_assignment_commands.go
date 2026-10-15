@@ -1,5 +1,7 @@
 package riidoaiserver
 
+import "context"
+
 type assignCmd struct {
 	creationReceipt           *taskAgentCreationReceipt
 	taskID                    string
@@ -22,6 +24,7 @@ type CancelAssignmentRequest struct {
 }
 
 type cancelAssignmentCmd struct {
+	ctx    context.Context
 	taskID string
 	req    CancelAssignmentRequest
 	reply  chan cancelAssignmentResult

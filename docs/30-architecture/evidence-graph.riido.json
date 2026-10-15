@@ -58,8 +58,8 @@
     },
     {
       "id": "agent_notification_retry_delivery_5829",
-      "observation": "Live-only task notifications could be dropped behind a full progress buffer, and a committed assignment event could receive HTTP success before its client projection persisted. Legacy needs-input events also used an undeclared assignment state.",
-      "hypothesis": "Priority displacement and retryable projection failures preserve notifications without changing existing SSE replay cursors or exposing task content to other recipients.",
+      "observation": "Live-only task notifications could be dropped behind a full progress buffer, and a committed assignment event could receive HTTP success before its client projection persisted. Legacy needs-input events also used an undeclared assignment state. A slow fallback inventory lookup occupied the assignment actor, valid snapshot storage deadlines were HTTP 400, and replica retries lost local terminal event-key history. A lost Ready response also needs a durable ACK without authorizing an already running or stopped execution.",
+      "hypothesis": "Priority displacement and retryable projection failures preserve notifications without changing existing SSE replay cursors or exposing task content to other recipients. Cancellable bounded inventory preflight outside the actor plus final lease/state/policy/CAS validation preserves stop responsiveness. Bounded private hashed lifecycle receipts atomically committed with projection retain original ACKs across replicas and reject altered payloads; typed snapshot failures separate client input from server dependencies.",
       "claims": [
         "sse_reconnect_must_resume_after_last_event_id"
       ],
@@ -75,12 +75,120 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/agent_task_notification.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_event_ack.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_event_ack_check.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_event_ack_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_event_ack_receipt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_event_ack_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_assignment_event_ack.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_ready_event_lease.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_preflight.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_preflight_approval.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_candidate_fence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/provider_recovery_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_event_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/durable_assignment_mutation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/runtime_snapshot_error.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_daemon_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_operation_lock.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_list_ai_agent_devices.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_list_ai_agent_task_assignable_agents.go"
         }
       ],
       "verifiers": [
         {
           "kind": "test",
           "path": "internal/riidoaiserver/agent_notification_regression_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_ack_durable_terminal_ack_replays_across_replicas_and_restart_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_ack_durable_ready_ack_does_not_authorize_running_or_terminal_execution_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_ack_ready_ack_preserves_legacy_v88_key_without_lease_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_event_ack_durable_ack_refuses_changed_payload_without_replacing_receipt_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_preflight_inventory_cancellation_does_not_block_assignment_actor_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/provider_recovery_preflight_inventory_approval_rejects_stop_during_lookup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_snapshot_error_test.go"
         }
       ],
       "evidence": [
@@ -90,7 +198,7 @@
           "redacted": true
         }
       ],
-      "decision": "Displace buffered progress for notifications, return retryable HTTP 503 on projection failure, preserve stable event identity on retry, and map legacy input waits to declared states. Notifications remain live-only; this does not claim durable offline delivery.",
+      "decision": "Displace buffered progress for notifications, return retryable HTTP 503 on projection failure, preserve stable event identity on retry, and map legacy input waits to declared states. Notifications remain live-only; this does not claim durable offline delivery. Preserve legacy daemon keys; only active leased/ready non-expired executions can reuse a Ready dispatch authorization. Strip the Ready lease token before ACK, event persistence or diagnostics. Do not introduce an unproven snapshot size limit or global SSE timeout, and do not claim the historic 60-second production cause is resolved.",
       "next_loop": "ai_thread_history"
     },
     {

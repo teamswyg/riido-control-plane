@@ -26,5 +26,9 @@ func assignmentProjectionFromDynamoDBItem(item map[string]map[string]string) (as
 	if err != nil {
 		return assignmentProjectionRecord{}, err
 	}
-	return assignmentProjectionRecord{Assignment: assignment, LastEventSeq: lastEventSeq, Recovery: watermark}, nil
+	acks, err := assignmentEventACKsFromJSON(dynamoDBStringValue(item, "event_ack_receipts_json"), lastEventSeq)
+	if err != nil {
+		return assignmentProjectionRecord{}, err
+	}
+	return assignmentProjectionRecord{Assignment: assignment, LastEventSeq: lastEventSeq, Recovery: watermark, EventACKs: acks}, nil
 }

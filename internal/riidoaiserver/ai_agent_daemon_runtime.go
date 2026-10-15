@@ -94,21 +94,21 @@ func (s *DevelopmentAIAgentClientStore) syncAIAgentDaemonRuntimeSnapshot(ctx con
 		req.UptimeSeconds = 0
 	}
 	if principal.PrincipalID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("principal_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, invalidRuntimeSnapshot(errors.New("principal_id is required"))
 	}
 	if req.DeviceID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("device_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, invalidRuntimeSnapshot(errors.New("device_id is required"))
 	}
 	if req.DaemonID == "" {
-		return DeviceRuntimeSnapshotSyncResponse{}, false, errors.New("daemon_id is required")
+		return DeviceRuntimeSnapshotSyncResponse{}, false, invalidRuntimeSnapshot(errors.New("daemon_id is required"))
 	}
 	expectedProfile, changed, err := s.rejectUnexpectedDaemonProfileSnapshot(req)
 	if err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, changed, err
+		return DeviceRuntimeSnapshotSyncResponse{}, changed, invalidRuntimeSnapshot(err)
 	}
 	runtimes, err := normalizeRuntimeSnapshotRecords(req.DeviceID, principal.PrincipalID, req.DaemonID, req.Profile, req.Runtimes)
 	if err != nil {
-		return DeviceRuntimeSnapshotSyncResponse{}, false, err
+		return DeviceRuntimeSnapshotSyncResponse{}, false, invalidRuntimeSnapshot(err)
 	}
 	now := time.Now().UTC()
 	startedAt := req.StartedAt

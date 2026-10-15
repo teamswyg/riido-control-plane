@@ -23,8 +23,11 @@ func (f *membershipSharedDynamoFixture) condition(t *testing.T, p *membershipDyn
 	case "attribute_not_exists(publication_committed)":
 		_, exists := previous["publication_committed"]
 		return !exists
-	case "attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq", "(attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq) AND attribute_not_exists(recovery_watermark_json)":
+	case "attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq", "(attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq) AND attribute_not_exists(recovery_watermark_json) AND attribute_not_exists(event_ack_receipts_json)":
 		if strings.Contains(p.ConditionExpression, "recovery_watermark_json") && previous["recovery_watermark_json"] != nil {
+			return false
+		}
+		if strings.Contains(p.ConditionExpression, "event_ack_receipts_json") && previous["event_ack_receipts_json"] != nil {
 			return false
 		}
 		old, _ := strconv.ParseInt(previous["last_event_seq"]["N"], 10, 64)
