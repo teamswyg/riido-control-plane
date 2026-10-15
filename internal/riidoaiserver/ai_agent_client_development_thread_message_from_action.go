@@ -23,6 +23,7 @@ func taskThreadMessageFromAction(response AIAgentTaskActionResponse, sourceMessa
 		Message:            response.Message,
 		ResultMessage:      response.ResultMessage,
 		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
+		ExecutionContext:   copyExecutionContext(response.ExecutionContext),
 		StartedAt:          now,
 		Lines:              []AgentThreadProgressLine{},
 	}

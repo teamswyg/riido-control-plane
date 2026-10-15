@@ -31,3 +31,7 @@ Verification covers rich document rendering, budgets, denied/mismatched parents,
 deadline cancellation, conversation isolation and latest-instruction precedence.
 Fixtures are synthetic; customer task bodies and authentication values are not
 published as evidence. No frontend deployment is required by this change.
+
+## Execution context · RIID-5820
+
+Shared `assignment.ExecutionContext` carries bounded workspace kind, verification status, diagnostic code and next action. The server sanitizes the context before storing or returning it, retains it across legacy progress without new context, and copies it to action responses, cold thread/history and work-status events. New assignments never inherit a previous run's context. Absolute directories and verification argv stay in the daemon's host-only IPC. Missing context is legacy/unknown, not host-verified completion or a retry authorization. Provider recovery/failover execution remains outside this change.

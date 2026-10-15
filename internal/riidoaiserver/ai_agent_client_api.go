@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/teamswyg/riido-contracts/assignment"
+
 	"github.com/teamswyg/riido-contracts/hostintegration"
 )
 
@@ -452,6 +454,7 @@ type AIAgentTaskActionResponse struct {
 	Message            string                               `json:"message"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
 	ActiveStream       *AIAgentTaskThreadStreamLink         `json:"active_stream,omitempty"`
 }
 
@@ -508,6 +511,7 @@ type AIAgentTaskThreadRecord struct {
 	AssignmentState    AgentAssignmentState                 `json:"assignment_state"`
 	QueueDiagnostics   *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
 	CommentKind        AgentTaskCommentKind                 `json:"comment_kind"`
 	Message            string                               `json:"message"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
@@ -565,6 +569,7 @@ type AgentWorkStatusChangedEvent struct {
 	CommentKind        AgentTaskCommentKind                 `json:"comment_kind,omitempty"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
 }
 
 type AgentThreadProgressLine struct {

@@ -23,6 +23,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		Message:            response.Message,
 		ResultMessage:      response.ResultMessage,
 		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
+		ExecutionContext:   copyExecutionContext(response.ExecutionContext),
 		StartedAt:          now,
 		Lines:              []AgentThreadProgressLine{},
 	}
@@ -51,6 +52,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = nil
 		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
+		threads[i].ExecutionContext = copyExecutionContext(response.ExecutionContext)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage

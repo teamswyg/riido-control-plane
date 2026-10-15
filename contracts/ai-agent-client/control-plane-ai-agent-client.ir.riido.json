@@ -775,6 +775,75 @@
   ],
   "components": [
     {
+      "name": "AIAgentExecutionContext",
+      "schema": {
+        "name": "AIAgentExecutionContext",
+        "description": "RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.",
+        "type": "object",
+        "required": [
+          "workspace_kind",
+          "verification_status",
+          "diagnostic_code",
+          "next_action"
+        ],
+        "properties": [
+          {
+            "name": "workspace_kind",
+            "type": "string",
+            "enum": [
+              "unknown",
+              "isolated",
+              "repository_clone",
+              "assignment_worktree",
+              "native_resume"
+            ]
+          },
+          {
+            "name": "verification_status",
+            "type": "string",
+            "enum": [
+              "not_configured",
+              "not_run",
+              "pending",
+              "passed",
+              "failed",
+              "cancelled",
+              "unknown"
+            ]
+          },
+          {
+            "name": "diagnostic_code",
+            "type": "string",
+            "enum": [
+              "none",
+              "user_cancelled",
+              "run_cancelled",
+              "run_timeout",
+              "workspace_preparation_failed",
+              "session_scope_conflict",
+              "host_verification_failed",
+              "provider_blocked",
+              "provider_failed",
+              "process_aborted",
+              "unknown"
+            ]
+          },
+          {
+            "name": "next_action",
+            "type": "string",
+            "enum": [
+              "none",
+              "check_workspace",
+              "review_session",
+              "review_result",
+              "check_provider",
+              "review_permissions"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "RuntimeModelRecord",
       "schema": {
         "name": "RuntimeModelRecord",
@@ -2309,6 +2378,10 @@
               "answer_required",
               "approval_required"
             ]
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
           }
         ]
       }
@@ -2484,6 +2557,10 @@
               "answer_required",
               "approval_required"
             ]
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
           }
         ]
       }
@@ -2748,6 +2825,10 @@
               "answer_required",
               "approval_required"
             ]
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
           }
         ]
       }
@@ -3168,6 +3249,14 @@
           {
             "name": "active_stream",
             "ref": "AIAgentTaskThreadStreamLink"
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
+          },
+          {
+            "name": "failure_diagnostics",
+            "ref": "AIAgentTaskThreadFailureDiagnostics"
           }
         ]
       }

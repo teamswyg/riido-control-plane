@@ -8,5 +8,6 @@ func shouldFanoutAgentTaskActionEvent(hadThread bool, previous AIAgentTaskThread
 		previous.AssignmentState != response.AssignmentState ||
 		previous.CommentKind != response.CommentKind ||
 		previous.ConfirmationReason != response.ConfirmationReason ||
-		!failureDiagnosticsEqual(previous.FailureDiagnostics, response.FailureDiagnostics)
+		!failureDiagnosticsEqual(previous.FailureDiagnostics, response.FailureDiagnostics) ||
+		!executionContextsEqual(previous.ExecutionContext, response.ExecutionContext)
 }
