@@ -35,6 +35,8 @@ type AIAgentClientSnapshot struct {
 	DeviceConnectionGrants  []DeviceConnectionGrant                      `json:"device_connection_grants,omitempty"`
 	Daemons                 []DeviceDaemonRecord                         `json:"daemons"`
 	Agents                  []AgentClientRecord                          `json:"agents"`
+	OnboardingCreatedIDs    []string                                     `json:"onboarding_created_agent_ids,omitempty"`
+	OnboardingCompletions   map[string]string                            `json:"onboarding_completed_tasks,omitempty"`
 	Fixtures                []AgentOnboardingFixture                     `json:"fixtures"`
 	TaskAgentMemberships    map[string]map[string]AIAgentTaskMembership  `json:"task_agent_memberships"`
 	TaskThreads             map[string][]AIAgentTaskThreadRecord         `json:"task_threads"`
@@ -306,6 +308,8 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
 		TaskThreads:             taskThreads,
 		TaskRequestReceipts:     cloneTaskRequestReceipts(s.taskRequestReceipts),
+		OnboardingCreatedIDs:    onboardingCreatedAgentIDsSnapshot(s.onboardingCreated),
+		OnboardingCompletions:   cloneOnboardingCompletedTasks(s.onboardingCompletions),
 		TaskAgentMemberships:    copyTaskAgentMemberships(s.taskAgentMemberships),
 		TaskThreadMessages:      taskThreadMessages,
 		Events:                  events,
@@ -451,6 +455,8 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
 	s.taskRequestReceipts = cloneTaskRequestReceipts(snapshot.TaskRequestReceipts)
+	s.onboardingCreated = onboardingCreatedAgentsFromSnapshot(snapshot.OnboardingCreatedIDs)
+	s.onboardingCompletions = cloneOnboardingCompletedTasks(snapshot.OnboardingCompletions)
 	s.taskAgentMemberships = copyTaskAgentMemberships(snapshot.TaskAgentMemberships)
 	if s.taskAgentMemberships == nil {
 		s.taskAgentMemberships = legacyTaskAgentMemberships(taskThreads)

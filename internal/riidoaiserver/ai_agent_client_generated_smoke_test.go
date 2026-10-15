@@ -284,7 +284,18 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
-	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/task-smoke-onboarding/onboarding-completion", token, `{"agent_id":"agent-owned-codex","template_key":"schedule"}`, http.StatusAccepted)
+	onboardingAgentBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/onboarding/fixtures/riido_pm/agents", token, aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
+		Name:       "v2 smoke onboarding agent",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-dev",
+		ModelID:    stringPtr("cursor-auto"),
+	}), http.StatusCreated)
+	var onboardingAgent AgentClientRecordResponse
+	aiAgentSmokeDecode(t, onboardingAgentBytes, &onboardingAgent)
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/task-smoke-onboarding/onboarding-completion", token, aiAgentSmokeJSON(t, CompleteAIAgentOnboardingTaskRequest{
+		AgentID:     onboardingAgent.Agent.AgentID,
+		TemplateKey: AIAgentOnboardingTemplateSchedule,
+	}), http.StatusAccepted)
 }
 
 func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {

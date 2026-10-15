@@ -4389,7 +4389,10 @@
         },
         "x-riido-scenarios": [
           "completeAIAgentOnboardingTaskV2.onboarding-completion-records-a-participant-and-a-completed-agent-comment-without-execution",
-          "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent"
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent",
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-requires-an-onboarding-created-owned-agent",
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-is-one-time-per-agent",
+          "completeAIAgentOnboardingTaskV2.onboarding-request-id-rejects-reuse-for-another-target"
         ]
       }
     },

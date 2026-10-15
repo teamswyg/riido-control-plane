@@ -466,7 +466,14 @@
         "copy_interview_ko: 질문지를 이 작업의 문서로 남겼어요. \"~라면 쓰시겠어요?\"처럼 답을 유도하는 질문은 뺐어요.",
         "copy_interview_en: Saved the questions as this task's document. Leading questions like \"Would you use it if…?\" were left out.",
         "copy_launch_ko: 항목 9개를 이 작업의 하위 작업으로 추가하고 D-3, 당일, D+7 마감일을 넣어 뒀어요.",
-        "copy_launch_en: Added the 9 items as subtasks of this task with D-3, launch-day, and D+7 due dates."
+        "copy_launch_en: Added the 9 items as subtasks of this task with D-3, launch-day, and D+7 due dates.",
+        "precondition_task: the target task must be the first-task bundle created by the monolith importOnboardingFirstTaskBundle; its subtasks and document already exist from that mutation. This completion never creates subtasks or documents, and the copy describes only what that mutation already created. control-plane checks agent eligibility and history but cannot verify task provenance itself; the monolith flow that creates the bundle is responsible for calling this endpoint only with its own task",
+        "eligibility: the agent must be owned by the authorized principal (owner_principal_id) and visible in the same workspace, and must have been created through the onboarding fixture path; a non-owned agent is reported as not found, and an owned agent without onboarding provenance is rejected as an invalid request",
+        "one_completion_per_agent: an onboarding-created agent completes onboarding at most once across all tasks; a second completion on another task is rejected with 409 conflict and records nothing",
+        "no_prior_history: the target task must have no existing assignment, thread, or participant membership for the agent; otherwise the request is rejected with 409 conflict. A repeat for the same task and agent is not a new completion and returns the existing record (idempotent) before this check",
+        "active_execution: a queued or running execution for the same task and agent is part of the prior history, so the completion is rejected with 409 conflict and never serializes behind it",
+        "request_id_scope: request_id is scoped to workspace_id, the authorized owner principal, and this operation; it never shares receipts with assignment request_id values. Reusing a request_id for a different task or agent is rejected with 409 conflict instead of replaying the other record",
+        "membership_removal: an onboarding-seed participant is removable through the normal participant removal path only while the membership has no durable assignment generation; a removal that names an onboarding-seed assignment on a membership with durable generation is rejected with 409 membership-changed"
       ]
     }
   ],
@@ -5893,7 +5900,10 @@
       },
       "scenario_ids": [
         "completeAIAgentOnboardingTaskV2.onboarding-completion-records-a-participant-and-a-completed-agent-comment-without-execution",
-        "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent"
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent",
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-requires-an-onboarding-created-owned-agent",
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-is-one-time-per-agent",
+        "completeAIAgentOnboardingTaskV2.onboarding-request-id-rejects-reuse-for-another-target"
       ]
     },
     {
@@ -6740,6 +6750,30 @@
       "given": "the same task and agent, or the same request_id, already has an onboarding completion",
       "when": "client repeats the completion request",
       "then": "control-plane returns the existing completion response without adding participants or messages"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-completion-requires-an-onboarding-created-owned-agent",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding completion requires an onboarding-created owned agent",
+      "given": "the agent was not created through the onboarding fixture path, or it is owned by another principal",
+      "when": "client calls the onboarding completion for that agent",
+      "then": "control-plane rejects the request and records nothing; non-owned agents are reported as not found"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-completion-is-one-time-per-agent",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding completion is one-time per agent",
+      "given": "the agent already completed onboarding on another task, or the target task already has assignment, thread, or membership history for the agent",
+      "when": "client submits a completion",
+      "then": "control-plane rejects the request with 409 conflict and records nothing"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-request-id-rejects-reuse-for-another-target",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding request_id rejects reuse for another target",
+      "given": "the principal already used a request_id in this workspace for one task and agent",
+      "when": "client reuses that request_id for a different task or agent",
+      "then": "control-plane rejects the request with 409 conflict instead of returning the other record"
     },
     {
       "scenario_id": "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",

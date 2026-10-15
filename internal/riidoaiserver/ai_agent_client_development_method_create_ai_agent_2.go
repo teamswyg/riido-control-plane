@@ -9,12 +9,12 @@ import (
 // createAIAgent creates a directly configured agent. Its profile color is chosen
 // from the least-used colors in the workspace.
 func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string) (AgentClientRecordResponse, error) {
-	return s.createAIAgentWithProfileColor(ctx, principal, req, tmpColor, "")
+	return s.createAIAgentWithProfileColor(ctx, principal, req, tmpColor, "", false)
 }
 
 // createAIAgentWithProfileColor creates an agent with a fixed profile color. An empty
 // profileColor selects one of the least-used colors inside the store lock.
-func (s *DevelopmentAIAgentClientStore) createAIAgentWithProfileColor(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string, profileColor AgentProfileColor) (AgentClientRecordResponse, error) {
+func (s *DevelopmentAIAgentClientStore) createAIAgentWithProfileColor(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string, profileColor AgentProfileColor, onboardingCreated bool) (AgentClientRecordResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
@@ -57,5 +57,8 @@ func (s *DevelopmentAIAgentClientStore) createAIAgentWithProfileColor(ctx contex
 		UpdatedAt:           now,
 	}
 	s.agents[agent.AgentID] = agent
+	if onboardingCreated {
+		s.markOnboardingCreatedAgentLocked(agent.AgentID)
+	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }

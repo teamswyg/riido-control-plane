@@ -29,7 +29,7 @@
         "path": "internal/riidoaiserver",
         "max_files": 85,
         "max_lines": 838,
-        "max_total_over_target_lines": 14007
+        "max_total_over_target_lines": 14252
       },
       {
         "path": "internal/authpep",

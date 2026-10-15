@@ -11,7 +11,8 @@ const onboardingCompletionRunIDPrefix = "run-onboarding-seed-"
 
 // CompleteAIAgentOnboardingTask adds the onboarding agent as a task participant and
 // records one completed, agent-authored task_completed comment. It never calls the
-// assignment queue and never starts execution.
+// assignment queue and never starts execution. Eligibility rules are in
+// ai_agent_onboarding_completion_guard.go.
 func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx context.Context, principal AuthorizationResult, taskID string, req CompleteAIAgentOnboardingTaskRequest) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
@@ -32,18 +33,24 @@ func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx contex
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	agent, ok := s.visibleAgent(principal, req.AgentID)
-	if !ok {
+	if !ok || agent.OwnerPrincipalID != principal.PrincipalID {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
-	receiptKey := taskRequestReceiptKey(principal, taskID, AssignAIAgentTaskRequest{AgentID: req.AgentID, RequestID: req.RequestID})
+	receiptKey := onboardingCompletionReceiptKey(principal, req.RequestID)
 	if receiptKey != "" {
 		if response, ok := s.taskRequestReceipts[receiptKey]; ok {
+			if response.TaskID != taskID || response.AgentID != agent.AgentID {
+				return AIAgentTaskActionResponse{}, errOnboardingCompletionConflictForRequestID()
+			}
 			return response, nil
 		}
 	}
 	assignmentID := onboardingSeedAssignmentID(taskID, agent.AgentID)
 	if thread, ok := s.onboardingSeedThreadLocked(taskID, assignmentID); ok {
 		return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(thread, principal.WorkspaceID)), nil
+	}
+	if err := s.checkOnboardingCompletionEligibleLocked(taskID, agent.AgentID); err != nil {
+		return AIAgentTaskActionResponse{}, err
 	}
 	now := time.Now().UTC()
 	s.assignTaskAgentMemberLocked(taskID, agent)
@@ -64,6 +71,7 @@ func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx contex
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.dropTaskThreadHistoryCacheLocked(response.ThreadID)
 	s.appendAgentTaskActionEvent(response)
+	s.markOnboardingCompletedLocked(agent.AgentID, taskID)
 	stored, ok := s.onboardingSeedThreadLocked(taskID, assignmentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, errors.New("onboarding completion thread was not recorded")

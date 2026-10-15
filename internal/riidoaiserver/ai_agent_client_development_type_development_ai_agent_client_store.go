@@ -28,4 +28,6 @@ type DevelopmentAIAgentClientStore struct {
 	subscribers             map[int]aiAgentClientSubscriber
 	nextSubscriberID        int
 	profileColorIndex       func(n int) int
+	onboardingCreated       map[string]bool
+	onboardingCompletions   map[string]string
 }
