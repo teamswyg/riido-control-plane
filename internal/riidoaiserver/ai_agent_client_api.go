@@ -388,6 +388,10 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
+	RequestID                       string              `json:"request_id,omitempty"`
+	Instruction                     string              `json:"instruction,omitempty"`
+	SourceCommentID                 string              `json:"-"`
+	VerifiedTaskContext             *AIAgentTaskContext `json:"-"`
 	membershipPublicationGeneration string
 	AgentID                         string `json:"agent_id"`
 	AssignmentID                    string `json:"-"`
@@ -513,10 +517,11 @@ type AIAgentTaskThreadRecord struct {
 }
 
 type AIAgentTaskThreadCollectionResponse struct {
-	SchemaVersion string                       `json:"schema_version"`
-	TaskID        string                       `json:"task_id"`
-	Threads       []AIAgentTaskThreadRecord    `json:"threads"`
-	ActiveStream  *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
+	AssignedAgentIDs []string                     `json:"assigned_agent_ids"`
+	SchemaVersion    string                       `json:"schema_version"`
+	TaskID           string                       `json:"task_id"`
+	Threads          []AIAgentTaskThreadRecord    `json:"threads"`
+	ActiveStream     *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
 }
 
 type AIAgentTaskThreadStreamSubscriptionResponse struct {

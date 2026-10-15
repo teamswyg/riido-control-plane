@@ -17,11 +17,13 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreads(ctx context.Conte
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	ids := s.visibleTaskMemberIDsLocked(principal, taskID)
 	threads := s.visibleTaskThreadsLocked(principal, taskID)
 	response := AIAgentTaskThreadCollectionResponse{
-		SchemaVersion: SchemaVersion,
-		TaskID:        taskID,
-		Threads:       threads,
+		SchemaVersion:    SchemaVersion,
+		AssignedAgentIDs: ids,
+		TaskID:           taskID,
+		Threads:          threads,
 	}
 	streamHref := s.eventStreamHrefLocked(principal.WorkspaceID)
 	for _, thread := range slices.Backward(threads) {

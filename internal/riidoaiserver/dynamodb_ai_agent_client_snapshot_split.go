@@ -3,6 +3,7 @@ package riidoaiserver
 const dynamoDBAIAgentClientSnapshotSplitStorageVersion = "riido-ai-agent-client-snapshot-split.v1"
 
 const (
+	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts  = "TASK_REQUEST_RECEIPTS"
 	dynamoDBAIAgentClientSnapshotPartDevices              = "DEVICES"
 	dynamoDBAIAgentClientSnapshotPartDeviceCredentials    = "DEVICE_CREDENTIALS"
 	dynamoDBAIAgentClientSnapshotPartDeviceConnections    = "DEVICE_CONNECTION_GRANTS"
@@ -26,6 +27,7 @@ var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
 }
 
 var dynamoDBAIAgentClientSnapshotOptionalPartNames = []string{
+	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts,
 	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships,
 	dynamoDBAIAgentClientSnapshotPartDeviceConnections,
 	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages,

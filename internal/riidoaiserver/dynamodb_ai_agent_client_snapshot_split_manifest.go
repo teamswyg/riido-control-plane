@@ -4,6 +4,7 @@ import "encoding/json"
 
 func dynamoDBAIAgentClientSnapshotFromManifest(item map[string]map[string]string) AIAgentClientSnapshot {
 	return AIAgentClientSnapshot{
+		Version:                 int64(parseDynamoDBAIAgentClientSnapshotInt(item, "version")),
 		SchemaVersion:           dynamoDBStringValue(item, "schema_version"),
 		SavedAt:                 parseDynamoDBAIAgentClientSnapshotSavedAt(item),
 		WorkspaceID:             dynamoDBStringValue(item, "workspace_id"),

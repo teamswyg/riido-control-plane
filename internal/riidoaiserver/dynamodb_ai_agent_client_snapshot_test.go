@@ -30,14 +30,18 @@ func TestDynamoDBAIAgentClientSnapshotSavesAndLoads(t *testing.T) {
 
 func assertSnapshotFirstPutRequest(t *testing.T, request capturedDynamoDBRequest) {
 	t.Helper()
-	assertDynamoDBTarget(t, request, dynamoDBPutItemTarget)
-	var payload struct {
-		TableName string                       `json:"TableName"`
-		Item      map[string]map[string]string `json:"Item"`
+	assertDynamoDBTarget(t, request, dynamoDBTransactWriteTarget)
+	var transaction struct {
+		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
 	}
-	if err := json.Unmarshal(request.body, &payload); err != nil {
-		t.Fatalf("decode PutItem payload: %v", err)
+	if err := json.Unmarshal(request.body, &transaction); err != nil {
+		t.Fatal(err)
 	}
+	if len(transaction.TransactItems) == 0 {
+		t.Fatal("empty transaction")
+	}
+	payload := transaction.TransactItems[0].Put
+
 	if payload.TableName != "riido-ai-agent-development" {
 		t.Fatalf("put table = %q", payload.TableName)
 	}
@@ -52,7 +56,7 @@ func assertSnapshotQueryRequest(t *testing.T, request capturedDynamoDBRequest) {
 	if err := json.Unmarshal(request.body, &payload); err != nil {
 		t.Fatalf("decode Query payload: %v", err)
 	}
-	if payload.TableName != "riido-ai-agent-development" || payload.ConsistentRead || payload.KeyConditionExpression != "pk = :pk" {
+	if payload.TableName != "riido-ai-agent-development" || !payload.ConsistentRead || payload.KeyConditionExpression != "pk = :pk" {
 		t.Fatalf("query payload = %+v", payload)
 	}
 	assertDynamoDBString(t, payload.ExpressionValues, ":pk", dynamoDBAIAgentClientSnapshotPK)

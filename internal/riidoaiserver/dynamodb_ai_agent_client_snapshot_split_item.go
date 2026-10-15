@@ -7,6 +7,7 @@ import (
 
 func dynamoDBAIAgentClientSnapshotManifestItem(snapshot AIAgentClientSnapshot, hashes map[string]string) map[string]map[string]string {
 	return map[string]map[string]string{
+		"version":                    {"N": strconv.FormatInt(snapshot.Version, 10)},
 		"pk":                         {"S": dynamoDBAIAgentClientSnapshotPK},
 		"sk":                         {"S": dynamoDBAIAgentClientSnapshotSK},
 		"schema_version":             {"S": AIAgentClientPersistenceSchemaVersion},

@@ -9,12 +9,10 @@ import (
 
 func agentHistoryPK(agentID string) string { return "AGENT_HISTORY#" + sha256Hex([]byte(agentID)) }
 func (s *DynamoDBAssignmentOperationStore) saveAgentHistoryOperation(ctx context.Context, record AssignmentOperationRecord, credentials AWSCredentials) error {
-	item, err := assignmentOperationDynamoDBItem(record)
+	item, err := agentHistoryOperationItem(record)
 	if err != nil {
 		return err
 	}
-	item["pk"] = map[string]string{"S": agentHistoryPK(record.AgentID)}
-	item["sk"] = map[string]string{"S": record.OperationID}
 	payload, err := json.Marshal(struct {
 		TableName           string
 		Item                map[string]map[string]string
@@ -29,4 +27,14 @@ func (s *DynamoDBAssignmentOperationStore) saveAgentHistoryOperation(ctx context
 		return nil
 	}
 	return err
+}
+
+func agentHistoryOperationItem(record AssignmentOperationRecord) (map[string]map[string]string, error) {
+	item, err := assignmentOperationDynamoDBItem(record)
+	if err != nil {
+		return nil, err
+	}
+	item["pk"] = map[string]string{"S": agentHistoryPK(record.AgentID)}
+	item["sk"] = map[string]string{"S": record.OperationID}
+	return item, nil
 }

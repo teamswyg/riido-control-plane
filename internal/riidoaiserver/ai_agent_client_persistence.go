@@ -24,6 +24,7 @@ type AIAgentClientSnapshotStore interface {
 }
 
 type AIAgentClientSnapshot struct {
+	TaskRequestReceipts     map[string]AIAgentTaskActionResponse         `json:"task_request_receipts,omitempty"`
 	Version                 int64                                        `json:"version,omitempty"`
 	ExpectedVersion         int64                                        `json:"-"`
 	SchemaVersion           string                                       `json:"schema_version"`
@@ -222,6 +223,9 @@ func (s *PersistentAIAgentClientStore) snapshotNow() time.Time {
 func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClientSnapshot, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.taskAgentMemberships == nil {
+		s.taskAgentMemberships = legacyTaskAgentMemberships(s.taskThreads)
+	}
 	credentials := make([]AIAgentClientDeviceCredentialSnapshot, 0, len(s.deviceCredentials))
 	for _, record := range s.deviceCredentials {
 		credentials = append(credentials, AIAgentClientDeviceCredentialSnapshot{
@@ -267,7 +271,12 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		// stream is unaffected — it delivers every line in real time.
 		retainedThreads := threads
 		if len(retainedThreads) > aiAgentClientThreadsPerTaskLimit {
-			retainedThreads = retainedThreads[len(retainedThreads)-aiAgentClientThreadsPerTaskLimit:]
+			retainedThreads = make([]AIAgentTaskThreadRecord, 0, len(threads))
+			for index, thread := range threads {
+				if index >= len(threads)-aiAgentClientThreadsPerTaskLimit || taskThreadNeedsRetention(thread) {
+					retainedThreads = append(retainedThreads, thread)
+				}
+			}
 		}
 		copied := make([]AIAgentTaskThreadRecord, len(retainedThreads))
 		for i, thread := range retainedThreads {
@@ -296,6 +305,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		Agents:                  agents,
 		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
 		TaskThreads:             taskThreads,
+		TaskRequestReceipts:     cloneTaskRequestReceipts(s.taskRequestReceipts),
 		TaskAgentMemberships:    copyTaskAgentMemberships(s.taskAgentMemberships),
 		TaskThreadMessages:      taskThreadMessages,
 		Events:                  events,
@@ -440,6 +450,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
+	s.taskRequestReceipts = cloneTaskRequestReceipts(snapshot.TaskRequestReceipts)
 	s.taskAgentMemberships = copyTaskAgentMemberships(snapshot.TaskAgentMemberships)
 	if s.taskAgentMemberships == nil {
 		s.taskAgentMemberships = legacyTaskAgentMemberships(taskThreads)

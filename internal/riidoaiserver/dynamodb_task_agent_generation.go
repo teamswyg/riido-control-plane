@@ -49,6 +49,13 @@ func (s *DynamoDBAssignmentOperationStore) saveTaskAgentCreation(ctx context.Con
 		}
 		items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, Item: item, ConditionExpression: condition}})
 	}
+	if s.enableAgentHistory {
+		history, err := agentHistoryOperationItem(record)
+		if err != nil {
+			return err
+		}
+		items = append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, Item: history, ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)"}})
+	}
 	payload, err := json.Marshal(struct{ TransactItems []dynamoDBTransactWriteItem }{items})
 	if err != nil {
 		return err
@@ -56,6 +63,15 @@ func (s *DynamoDBAssignmentOperationStore) saveTaskAgentCreation(ctx context.Con
 	_, err = doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 	if err == nil {
 		return nil
+	}
+	if record.Assignment.RequestID != "" {
+		existing, found, readErr := s.loadAssignmentProjection(ctx, record.AssignmentID, credentials)
+		if readErr != nil {
+			return readErr
+		}
+		if found && existing.Assignment.RequestID == record.Assignment.RequestID && existing.Assignment.WorkspaceID == record.Assignment.WorkspaceID && existing.Assignment.CreatedBy == record.Assignment.CreatedBy && existing.Assignment.TaskID == record.TaskID && existing.Assignment.AgentID == record.AgentID {
+			return errIdentifiedExecutionExists
+		}
 	}
 	// Any failed response may follow a committed transaction. Confirm the exact
 	// creation before reporting failure; a missing or different record is not success.

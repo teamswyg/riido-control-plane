@@ -10,7 +10,7 @@ import (
 
 func (s *DynamoDBAssignmentOperationStore) save(ctx context.Context, record AssignmentOperationRecord, credentials AWSCredentials) (err error) {
 	defer func() {
-		if err == nil && s.enableAgentHistory {
+		if err == nil && s.enableAgentHistory && record.ExpectedProjection == nil && !record.createsExecution && (record.OperationType != AssignmentOperationAssignTask || record.Assignment.RequestID == "") {
 			err = s.saveAgentHistoryOperation(ctx, record, credentials)
 		}
 	}()
@@ -23,7 +23,10 @@ func (s *DynamoDBAssignmentOperationStore) save(ctx context.Context, record Assi
 	if err := validateAssignmentOperationRecord(record); err != nil {
 		return err
 	}
-	if record.createsExecution {
+	if record.ExpectedProjection != nil {
+		return s.saveConditionalAssignment(ctx, record, credentials)
+	}
+	if record.createsExecution || (record.OperationType == AssignmentOperationAssignTask && record.Assignment.RequestID != "") {
 		return s.saveTaskAgentCreation(ctx, record, credentials)
 	}
 	payload, err := s.putOperationPayload(record)

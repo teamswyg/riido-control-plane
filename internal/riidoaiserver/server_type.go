@@ -6,6 +6,7 @@ import (
 )
 
 type ServerConfig struct {
+	CommentDelivery          CommentDeliveryConfig
 	Authorizer               RequestAuthorizer
 	AgentCatalogStore        AgentCatalogStore
 	AIAgentClient            AIAgentClientStore
