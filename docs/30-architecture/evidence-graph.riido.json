@@ -21971,8 +21971,8 @@
     },
     {
       "id": "closed_loop_candidate_review_expiry_recovery_loop",
-      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates.",
-      "hypothesis": "Re-reviewing the current redacted queue and advancing only its owner-bound review deadline will restore fail-closed decision verification without hiding candidates, weakening expiry enforcement, changing dispositions, or claiming runtime readiness.",
+      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates. On 2026-10-16 both previous main 2c0a7f4a and new main 4eb11c66 failed the same unchanged July 29 policy; current redacted sources again contain nine pressure, nine readiness partial, and one stale refresh-source candidate, while four sources have none.",
+      "hypothesis": "Re-reviewing the current redacted queue and advancing only its owner-bound review deadline will restore fail-closed decision verification without hiding candidates, weakening expiry enforcement, changing dispositions, or claiming runtime readiness. Item-level observations, retained acceptance gaps, seven-day review ownership, and current UTC/expiry regression make the renewed review traceable without treating a date change as completed readiness.",
       "claims": [
         "candidate_decisions_must_match_consumed_candidates",
         "candidate_decision_evidence_must_expose_next_command"
@@ -22005,6 +22005,22 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/current_review_types_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/current_review_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/current_review_coverage_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/current_review_boundary_test.go"
         }
       ],
       "verifiers": [
@@ -22047,9 +22063,18 @@
           "kind": "artifact",
           "path": "github-actions-run-29882928818",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-review-2026-10-16",
+          "redacted": true
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/current_review_test.go"
         }
       ],
-      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation.",
+      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation. The 2026-10-16 source/evidence review retains all 25 pending records and three templates, leaves the adopted record untouched, and sets the next review to October 23 UTC. Current-time verification passes all 19 real redacted candidates without a clock override; the original manifest and renewed post-deadline policy still fail. Provider/model, visual, alarm apply, capacity and chaos acceptance gaps remain open; no producer rerun or workload mutation is performed.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
