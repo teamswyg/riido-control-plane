@@ -2,7 +2,7 @@ package riidoaiserver
 
 import "testing"
 
-func TestAnswerOnlyProseKeepsIntentGate(t *testing.T) {
+func TestAnswerOnlyProseRemainsAdvisoryBackground(t *testing.T) {
 	for _, prose := range []string{
 		"This section explains the strategy.", "This section compares the alternatives.",
 		"This paragraph summarizes the planning note.", "The glossary translates the marketing terms.",
@@ -13,7 +13,7 @@ func TestAnswerOnlyProseKeepsIntentGate(t *testing.T) {
 		t.Run(prose, func(t *testing.T) {
 			input := answerRequestIntentInput()
 			input.Context.Document.Content = prose
-			assertAnswerRequestGate(t, input, true)
+			assertAdvisoryAnswerRequestClassification(t, input, true)
 		})
 	}
 }
@@ -23,10 +23,10 @@ func TestNominalAnswerRequestsAreScopedToRequestFields(t *testing.T) {
 		t.Run(request, func(t *testing.T) {
 			input := answerRequestIntentInput()
 			input.UserInstruction = request
-			assertAnswerRequestGate(t, input, false)
+			assertAdvisoryAnswerRequestClassification(t, input, false)
 			input.UserInstruction = ""
 			input.Context.Component.Title = request
-			assertAnswerRequestGate(t, input, false)
+			assertAdvisoryAnswerRequestClassification(t, input, false)
 		})
 	}
 }
@@ -35,7 +35,7 @@ func TestAnswerOnlyDirectiveSyntaxRemainsExecutable(t *testing.T) {
 	for _, request := range []string{"Summarize this planning note", "Please explain this marketing plan", "Could you translate this planning note?", "Compare these marketing plans", "이 기획안을 요약", "이 차이를 설명", "이 내용을 번역", "이 두 계획을 비교"} {
 		input := answerRequestIntentInput()
 		input.Context.Document.Content = "Planning context.\n" + request
-		assertAnswerRequestGate(t, input, false)
+		assertAdvisoryAnswerRequestClassification(t, input, false)
 	}
 }
 
@@ -46,21 +46,24 @@ func answerRequestIntentInput() AIAgentAssignmentPromptInput {
 	}}
 }
 
-func assertAnswerRequestGate(t *testing.T, input AIAgentAssignmentPromptInput, want bool) {
+func assertAdvisoryAnswerRequestClassification(t *testing.T, input AIAgentAssignmentPromptInput, want bool) {
 	t.Helper()
 	got, err := ComposeAIAgentAssignmentPrompt(input)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.IntentGateRequired != want {
+	if got.IntentGateRequired {
 		t.Fatalf("intent gate=%v want=%v for title=%q instruction=%q document=%q", got.IntentGateRequired, want, input.Context.Component.Title, input.UserInstruction, input.Context.Document.Content)
+	}
+	if advisoryExplicit := classifyTaskContextIntent(input.Context.Component, input.Context.Document, input.UserInstruction) == taskIntentExplicit; advisoryExplicit == want {
+		t.Fatalf("advisory classification changed: explicit=%v background=%v", advisoryExplicit, want)
 	}
 }
 
-func TestAnswerOnlyProseTitleKeepsIntentGate(t *testing.T) {
+func TestAnswerOnlyProseTitleRemainsAdvisoryBackground(t *testing.T) {
 	for _, title := range []string{"This section explains the strategy", "This section compares the alternatives", "기획안 요약 및 마케팅 비교 자료"} {
 		input := answerRequestIntentInput()
 		input.Context.Component.Title = title
-		assertAnswerRequestGate(t, input, true)
+		assertAdvisoryAnswerRequestClassification(t, input, true)
 	}
 }

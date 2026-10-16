@@ -23912,6 +23912,59 @@
       ],
       "decision": "RED fixtures become GREEN without model calls, customer assignments or external database writes. Repeated stale writes preserve the original completion comment, response and scoped request ownership; deletion does not resurrect old receipts. Failed persistence remains retryable with fixed messages and emits no live completion. This is an intentional imported onboarding record, not evidence that an Agent model performed the task. The existing v3 read metadata and generated query key are restored, and completion invalidation includes that exact canonical key; unrelated Dashboard/version/notification mirror differences are preserved. No web or desktop merge/deployment is performed. The read-only evidence and loop workflows now watch the contract mirror path. The baseline CI parity digest is refreshed to that reviewed trigger-only evidence workflow content; native mappings, artifact permissions, deployment authority and retirement authority are unchanged.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "direct_assignment_without_keyword_gate_5827",
+      "observation": "Four legacy/additive HTTP cases returned the generic waiting_for_user question before reaching the daemon, including a concrete Korean comparison request without recognized keywords. RED on main f9bcb0c.",
+      "hypothesis": "Treat keyword labels as advisory and use the existing provider turn to execute supported work or ask a concrete blocking question. Verify context preservation at daemon poll.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_direct_execution_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_delivery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_needs_input_event_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_direct_execution_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_delivery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_needs_input_event_test.go"
+        }
+      ],
+      "decision": "New assignments execute without automatic first-response intent gating. Task body, explicit instruction and verified comment text remain in one assignment; retries reuse its identity. Genuine provider needs_input and legacy waiting threads still work. No extra classifier/reviewer call or daemon/client code change. Supersedes historical ask-before-work decisions, including task_context_composition_intent_gate_coverage_loop.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

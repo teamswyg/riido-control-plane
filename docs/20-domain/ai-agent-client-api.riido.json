@@ -674,7 +674,7 @@
       "name": "non-command-component-intent-gate-test",
       "file": "internal/riidoaiserver/ai_agent_assignment_prompt_non_command_component_test.go",
       "contains": [
-        "TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument",
+        "TestAssignmentPromptDoesNotGateNonCommandComponentDocument",
         "TestAssignmentPromptKeepsExplicitTitleWithPreferenceDocumentExecutable"
       ]
     },

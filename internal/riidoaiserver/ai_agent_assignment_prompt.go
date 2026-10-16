@@ -100,7 +100,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	}
 	writeParentTaskContextDocuments(&builder, hierarchy)
 	writeTaskContextResources(&builder, input.Context.Resources, input.Context.ResourceStatus, 2500)
-	writePromptTaskInterpretation(&builder, component, document, intentClass)
+	writePromptTaskInterpretation(&builder, intentClass)
 	writePromptInteractionPolicy(&builder)
 
 	if instruction := strings.TrimSpace(input.UserInstruction); instruction != "" {
@@ -111,7 +111,8 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 		Prompt:             builder.String(),
 		SelectedRepository: repository,
 		HasRepository:      hasRepository,
-		IntentGateRequired: intentGateRequiredBool(intentClass),
+		// Retained for legacy consumers; heuristic labels never gate new work.
+		IntentGateRequired: false,
 	}, nil
 }
 
