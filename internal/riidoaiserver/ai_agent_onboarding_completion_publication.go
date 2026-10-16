@@ -58,7 +58,7 @@ func (s Server) onboardingCompletionHasDurableRun(ctx context.Context, taskID, a
 	}
 	history, err := reader.LoadAgentDashboardHistory(ctx, agentID)
 	if err != nil {
-		return false, err
+		return false, assignmentDependencyFailure(err)
 	}
 	for _, run := range history.Runs {
 		if run.Assignment.TaskID == taskID && run.Assignment.AgentID == agentID {

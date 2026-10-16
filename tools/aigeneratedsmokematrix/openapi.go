@@ -52,7 +52,7 @@ func loadOpenAPIGenerated(path string) (map[string]generatedOperation, operation
 			counts.Total++
 			if strings.HasPrefix(op.Client.GeneratedPath, "v2.") {
 				counts.V2++
-			} else {
+			} else if !strings.HasPrefix(op.Client.GeneratedPath, "v3.") {
 				counts.V1++
 			}
 			ops[op.Client.GeneratedPath] = generatedOperation{strings.ToUpper(method), route}

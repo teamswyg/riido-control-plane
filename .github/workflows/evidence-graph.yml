@@ -6,7 +6,10 @@ on:
     - cron: "29 20 * * *"
   pull_request:
     paths:
+      - "contracts/ai-agent-client/**"
       - ".github/workflows/evidence-graph.yml"
+      - "config/ci/baseline-go-workflow-parity.riido.json"
+      - "tools/ciworkflowparity/**"
       - ".github/workflows/agent-runtime-binding.yml"
       - ".github/workflows/go-ci.yml"
       - ".github/workflows/harness-promotion.yml"
@@ -175,6 +178,8 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/evidence-graph.yml"
+      - "config/ci/baseline-go-workflow-parity.riido.json"
+      - "tools/ciworkflowparity/**"
       - ".github/workflows/agent-runtime-binding.yml"
       - ".github/workflows/go-ci.yml"
       - ".github/workflows/harness-promotion.yml"

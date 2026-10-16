@@ -3924,6 +3924,53 @@ export function createAIAgentTaskThreadMessageV2MutationOptions(config: RiidoCli
 }
 
 /**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentTaskThreadHistoryV3PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ */
+export async function listAIAgentTaskThreadHistoryV3(config: RiidoClientConfig, params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadHistoryCollectionResponse> {
+  const path = `/v3/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadHistoryCollectionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * cache tag: `v3.aiAgent.tasks.threads`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentTaskThreadHistoryV3QueryKeyRoot(): readonly unknown[] {
+  return ["v3.aiAgent.tasks.threads"] as const;
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentTaskThreadHistoryV3QueryKey(params: ListAIAgentTaskThreadHistoryV3PathParams): readonly unknown[] {
+  return [...listAIAgentTaskThreadHistoryV3QueryKeyRoot(), params] as const;
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentTaskThreadHistoryV3QueryOptions(config: RiidoClientConfig, params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentTaskThreadHistoryV3QueryKey(params),
+    queryFn: () => listAIAgentTaskThreadHistoryV3(config, params, { signal }),
+  };
+}
+
+/**
  * Figma agent 추가 화면에서 AI agent 설정을 생성합니다
  * 계약 generated path: `aiAgent.agents.create`
  * 검색용 generated 경로: `agents.create`
@@ -6423,6 +6470,10 @@ export interface CompleteAIAgentOnboardingTaskV2Endpoint {
      */
     readonly aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => Promise<void>;
     /**
+     * `v3.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly v3AiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
      * 선언된 모든 cache tag를 한 번에 무효화합니다.
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
@@ -6613,6 +6664,48 @@ export interface CreateAIAgentTaskThreadMessageV2Endpoint {
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
   };
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 계약 generated path: `v3.aiAgent.tasks.threads`
+ * 검색용 generated 경로: `aiAgent.tasks.threads`
+ * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+ * cache tag: `v3.aiAgent.tasks.threads`
+ */
+export interface ListAIAgentTaskThreadHistoryV3Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskThreadHistoryCollectionResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentTaskThreadHistoryV3PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadHistoryV3QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadHistoryV3QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => Promise<void>;
 }
 
 /**
@@ -7210,7 +7303,7 @@ export interface RiidoV2AIAgentTasksOnboardingCompletionNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
    * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
    * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`, `v3.aiAgent.tasks.threads`
    */
   readonly create: CompleteAIAgentOnboardingTaskV2Endpoint;
 }
@@ -7360,6 +7453,40 @@ export interface RiidoV2Module {
 }
 
 /**
+ * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+ */
+export interface RiidoV3AIAgentTasksNamespace {
+  /**
+   * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+   * 계약 generated path: `v3.aiAgent.tasks.threads`
+   * 검색용 generated 경로: `aiAgent.tasks.threads`
+   * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+   * cache tag: `v3.aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadHistoryV3Endpoint;
+}
+
+/**
+ * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+ */
+export interface RiidoV3AIAgentNamespace {
+  /**
+   * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+   */
+  readonly tasks: RiidoV3AIAgentTasksNamespace;
+}
+
+/**
+ * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+ */
+export interface RiidoV3Module {
+  /**
+   * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+   */
+  readonly aiAgent: RiidoV3AIAgentNamespace;
+}
+
+/**
  * control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.
  */
 export interface RiidoControlPlaneClient {
@@ -7371,6 +7498,10 @@ export interface RiidoControlPlaneClient {
    * v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.
    */
   readonly v2: RiidoV2Module;
+  /**
+   * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+   */
+  readonly v3: RiidoV3Module;
 }
 
 /**
@@ -8022,7 +8153,8 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
                 aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
                 aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }),
-                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() })]),
+                v3AiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() })]),
               },
             },
           },
@@ -8099,6 +8231,22 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
               all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() })]),
             },
+          },
+        },
+      },
+    },
+    v3: {
+      aiAgent: {
+        tasks: {
+          threads: {
+            request: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoRequestOptions) => listAIAgentTaskThreadHistoryV3(config, params, options),
+            queryKeyRoot: listAIAgentTaskThreadHistoryV3QueryKeyRoot,
+            queryKey: listAIAgentTaskThreadHistoryV3QueryKey,
+            query: (params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse> = {}) => listAIAgentTaskThreadHistoryV3QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse> = {}) => listAIAgentTaskThreadHistoryV3QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => queryClient.prefetchQuery(listAIAgentTaskThreadHistoryV3QueryOptions(config, params, options)),
           },
         },
       },

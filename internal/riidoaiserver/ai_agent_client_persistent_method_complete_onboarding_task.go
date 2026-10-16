@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"errors"
 	"strings"
 )
 
@@ -14,7 +15,33 @@ func (s *PersistentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx context
 	req.AgentID = strings.TrimSpace(req.AgentID)
 	// Not a publication: the membership carries no durable generation, so removal
 	// fences treat it as a plain, non-executing participant.
-	return s.mutateTaskAgentMembership(ctx, taskID, req.AgentID, "", nil, false, func() (AIAgentTaskActionResponse, error) {
-		return s.DevelopmentAIAgentClientStore.CompleteAIAgentOnboardingTask(ctx, principal, taskID, req)
+	var pending []ClientStreamEvent
+	var mutationErr error
+	response, err := s.mutateTaskAgentMembership(ctx, taskID, req.AgentID, "", nil, false, func() (AIAgentTaskActionResponse, error) {
+		s.mu.Lock()
+		lastSeq := s.nextClientEventSeqLocked() - 1
+		s.mu.Unlock()
+		response, err := s.completeAIAgentOnboardingTask(ctx, principal, taskID, req, false)
+		mutationErr = err
+		s.mu.Lock()
+		pending = nil
+		for _, event := range s.events {
+			if event.Seq > lastSeq {
+				pending = append(pending, event)
+			}
+		}
+		s.mu.Unlock()
+		return response, err
 	})
+	if err != nil && mutationErr == nil && !errors.Is(err, ErrAIAgentMembershipChanged) {
+		err = assignmentDependencyFailure(err)
+	}
+	if err == nil {
+		s.mu.Lock()
+		for _, event := range pending {
+			s.fanoutClientEventLocked(event)
+		}
+		s.mu.Unlock()
+	}
+	return response, err
 }

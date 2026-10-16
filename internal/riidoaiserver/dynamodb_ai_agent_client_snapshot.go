@@ -32,4 +32,5 @@ type DynamoDBAIAgentClientSnapshot struct {
 	credentialsProvider AWSCredentialsProvider
 	metrics             *AIAgentClientPersistenceMetrics
 	partHashes          map[string]string
+	onboardingBaseline  AIAgentClientSnapshot
 }

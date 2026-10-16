@@ -1,7 +1,15 @@
 package riidoaiserver
 
 func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAgentTaskActionResponse) {
-	s.appendClientEventLocked(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
+	s.appendAgentTaskActionEventWithFanout(response, true)
+}
+
+func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEventWithFanout(response AIAgentTaskActionResponse, fanout bool) {
+	appendEvent := s.appendClientEventWithoutFanoutLocked
+	if fanout {
+		appendEvent = s.appendClientEventLocked
+	}
+	appendEvent(AgentClientEventWorkStatusChanged, AgentWorkStatusChangedEvent{
 		EventType:          AgentClientEventWorkStatusChanged,
 		SchemaVersion:      SchemaVersion,
 		AgentID:            response.AgentID,
@@ -18,6 +26,6 @@ func (s *DevelopmentAIAgentClientStore) appendAgentTaskActionEvent(response AIAg
 		ExecutionContext:   copyExecutionContext(response.ExecutionContext),
 	})
 	if event, ok := terminalAgentTaskProgressEvent(response); ok {
-		s.appendClientEventLocked(event.EventType, event)
+		appendEvent(event.EventType, event)
 	}
 }
