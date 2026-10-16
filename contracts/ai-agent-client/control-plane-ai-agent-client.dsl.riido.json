@@ -186,6 +186,33 @@
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
         }
       ]
+    },
+    {
+      "module": "v3",
+      "description": "v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.",
+      "namespaces": [
+        {
+          "path": [
+            "aiAgent"
+          ],
+          "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks"
+          ],
+          "description": "선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "description": "agent/user/progress message history와 deduplicated agent snapshot map을 함께 읽는 v3 thread history namespace입니다."
+        }
+      ]
     }
   ],
   "resources": [
@@ -6030,7 +6057,8 @@
           "v2.aiAgent.tasks.assignableAgents",
           "v2.aiAgent.tasks.threads",
           "v2.aiAgent.tasks.assignedAgentProfiles",
-          "v2.aiAgent.tasks.threadStreamSubscription"
+          "v2.aiAgent.tasks.threadStreamSubscription",
+          "v3.aiAgent.tasks.threads"
         ]
       },
       "auth": {
@@ -6307,6 +6335,58 @@
           "type": "integer",
           "minimum": 1,
           "default": 1
+        }
+      ]
+    },
+    {
+      "operation_id": "listAIAgentTaskThreadHistoryV3",
+      "kind": "query",
+      "summary": "AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)",
+      "description": "v2 threads 응답은 thread별 최신 projection을 유지합니다. v3는 사용자가 thread에 남긴 다음 지시와 agent 결과를 messages[] timeline으로 보존하고, agent snapshot은 agent_snapshot_id와 agent_snapshots map으로 분리합니다. conversation_id는 같은 댓글 카드 안의 reply chain을 묶고, parent_thread_id는 후속 답글 run의 원본 thread를 가리킵니다.",
+      "method": "GET",
+      "path": "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v3",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "threads"
+        ],
+        "cache_tag": "v3.aiAgent.tasks.threads"
+      },
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_history_collection.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadHistoryCollectionResponse"
+      },
+      "scenarios": [
+        {
+          "name": "user follow-up survives refresh",
+          "given": "a user posts a next instruction to an AI Agent thread and reloads the task screen",
+          "when": "the client calls riido.v3.aiAgent.tasks.threads",
+          "then": "the target thread messages array contains the user message and the agent projection messages in observed_at order"
+        },
+        {
+          "name": "agent snapshot is referenced once",
+          "given": "several historical threads share the same captured agent settings",
+          "when": "the client reads the v3 thread history collection",
+          "then": "each thread carries agent_snapshot_id and the repeated snapshot body is available once in agent_snapshots"
+        },
+        {
+          "name": "follow-up and reassignment keep separate conversations",
+          "given": "the same agent is assigned again from the participant dropdown and also receives a follow-up reply on an older thread",
+          "when": "the client calls riido.v3.aiAgent.tasks.threads",
+          "then": "the reassignment thread has a different conversation_id, while the follow-up thread inherits the original conversation_id and carries parent_thread_id"
         }
       ]
     }

@@ -98,7 +98,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `api_client_delivery_requirements_adapter` | `tools/apiclientdelivery/requirements` | 100% | `d055ebae7bb8` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_runconfig_adapter` | `tools/apiclientdelivery/runconfig` | 100% | `10d6af178589` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `figma_projection_guard` | `tools/figmaprojection` | 100% | `528ec57a5878` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
-| `generated_smoke_matrix_guard` | `tools/aigeneratedsmokematrix` | 100% | `f12536b0ef5c` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_guard` | `tools/aigeneratedsmokematrix` | 100% | `2df1268b2899` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_doccheck_adapter` | `tools/aigeneratedsmokematrix/doccheck` | 100% | `70e1db0bac3d` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_path_adapter` | `tools/aigeneratedsmokematrix/pathutil` | 100% | `ceb43ad61b7c` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_rendertext_adapter` | `tools/aigeneratedsmokematrix/rendertext` | 100% | `9d974e7f5f4f` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
@@ -114,16 +114,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `4af6fc6f5e9f` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `store_snapshot_file_outbox_guard` | `tools/storesnapshotoutbox` | 100% | `069f1635d5a6` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d68d9d907f0b` | `react_query_generator_must_preserve_generated_client_surface` |
+| `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d23929aab84a` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `59d5e92884fe` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `e8897f3421f8` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `3753`
-- tracked files: `3753`
+- Go files: `3760`
+- tracked files: `3760`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -169,16 +169,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3753`
-- unique syntax hashes: `3550`
+- tracked files: `3760`
+- unique syntax hashes: `3557`
 - compression gain: `203`
-- analysis reduction: `5.40%`
+- analysis reduction: `5.39%`
 - collision count: `0`
-- relocation mappings: `3753`
+- relocation mappings: `3760`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `111`
 - missing golden commands: `0`
-- efficiency score: `540`
+- efficiency score: `539`
 - compression score: `203`
-- weighted score: `743`
+- weighted score: `742`

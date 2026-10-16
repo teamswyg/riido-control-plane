@@ -19,7 +19,10 @@ func verifyEvidenceTests(m manifest, entry smokeEntry) error {
 	if wantsV2(entry) && !hasString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV2") {
 		return fmt.Errorf("v2 entry missing v2 evidence: %s", entry.GeneratedPath)
 	}
-	if !wantsV2(entry) && !hasString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV1") {
+	if wantsV3(entry) && !hasString(entry.EvidenceTests, "TestHTTPAIAgentClientV3ThreadHistory") {
+		return fmt.Errorf("v3 entry missing canonical history evidence: %s", entry.GeneratedPath)
+	}
+	if !wantsV2(entry) && !wantsV3(entry) && !hasString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV1") {
 		return fmt.Errorf("v1 entry missing v1 evidence: %s", entry.GeneratedPath)
 	}
 	return nil

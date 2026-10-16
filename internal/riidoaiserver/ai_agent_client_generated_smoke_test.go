@@ -304,6 +304,7 @@ func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {
 	knownEvidenceTests := map[string]struct{}{
 		"TestHTTPAIAgentClientGeneratedEndpointSmokeV1": {},
 		"TestHTTPAIAgentClientGeneratedEndpointSmokeV2": {},
+		"TestHTTPAIAgentClientV3ThreadHistory":          {},
 	}
 
 	if matrix.SchemaVersion != "riido-ai-agent-generated-endpoint-smoke-matrix.v1" {
@@ -332,12 +333,7 @@ func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {
 				t.Fatalf("unknown matrix evidence test %q for %s", evidence, entry.GeneratedPath)
 			}
 		}
-		if strings.HasPrefix(entry.GeneratedPath, "v2.") && !containsString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV2") {
-			t.Fatalf("v2 matrix entry must cite v2 smoke evidence: %+v", entry)
-		}
-		if !strings.HasPrefix(entry.GeneratedPath, "v2.") && !containsString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV1") {
-			t.Fatalf("v1 matrix entry must cite v1 smoke evidence: %+v", entry)
-		}
+		verifyGeneratedSmokeVersionEvidence(t, entry)
 		matrixByGeneratedPath[entry.GeneratedPath] = entry
 	}
 

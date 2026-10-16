@@ -23,14 +23,14 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 | Class | Count |
 | --- | ---: |
-| OpenAPI operations | 60 |
+| OpenAPI operations | 61 |
 | v1 operations | 27 |
 | v2 operations | 33 |
-| smoke matrix entries | 60 |
+| smoke matrix entries | 61 |
 
 ## Required Generated Paths
 
-- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.devices.daemons.list`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.devices.daemons.list`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`
+- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.devices.daemons.list`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.devices.daemons.list`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`, `v3.aiAgent.tasks.threads`
 
 ## Runtime Config Keys
 

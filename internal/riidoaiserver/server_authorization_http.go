@@ -64,7 +64,7 @@ func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req Aut
 		case errors.Is(err, ErrAuthorizationInvalidCredential):
 			writeUnauthorized(w)
 		default:
-			writeError(w, http.StatusServiceUnavailable, err.Error())
+			writeError(w, http.StatusServiceUnavailable, "authorization dependency unavailable")
 		}
 		return AuthorizationResult{}, false
 	}

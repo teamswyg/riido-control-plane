@@ -189,6 +189,33 @@
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
         }
       ]
+    },
+    {
+      "module": "v3",
+      "description": "v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.",
+      "namespaces": [
+        {
+          "path": [
+            "aiAgent"
+          ],
+          "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks"
+          ],
+          "description": "선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "description": "agent/user/progress message history와 deduplicated agent snapshot map을 함께 읽는 v3 thread history namespace입니다."
+        }
+      ]
     }
   ],
   "paths": {
@@ -4384,7 +4411,8 @@
             "v2.aiAgent.tasks.assignableAgents",
             "v2.aiAgent.tasks.threads",
             "v2.aiAgent.tasks.assignedAgentProfiles",
-            "v2.aiAgent.tasks.threadStreamSubscription"
+            "v2.aiAgent.tasks.threadStreamSubscription",
+            "v3.aiAgent.tasks.threads"
           ]
         },
         "x-riido-scenarios": [
@@ -4717,6 +4745,81 @@
             "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
+      }
+    },
+    "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "listAIAgentTaskThreadHistoryV3",
+        "summary": "AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadHistoryCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_history_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v3",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "generated_path": "v3.aiAgent.tasks.threads",
+          "cache_tag": "v3.aiAgent.tasks.threads"
+        },
+        "x-riido-scenarios": [
+          "listAIAgentTaskThreadHistoryV3.user-follow-up-survives-refresh",
+          "listAIAgentTaskThreadHistoryV3.agent-snapshot-is-referenced-once",
+          "listAIAgentTaskThreadHistoryV3.follow-up-and-reassignment-keep-separate-conversations"
+        ]
       }
     }
   },

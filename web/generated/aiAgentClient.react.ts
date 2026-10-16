@@ -850,6 +850,20 @@ export interface CreateAIAgentTaskThreadMessageV2ReactEndpoint extends core.Crea
 }
 
 /**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 계약 generated path: `v3.aiAgent.tasks.threads`
+ * 검색용 generated 경로: `aiAgent.tasks.threads`
+ * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentTaskThreadHistoryV3ReactEndpoint extends core.ListAIAgentTaskThreadHistoryV3Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentTaskThreadHistoryV3PathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadHistoryCollectionResponse>) => UseQueryResult<core.AIAgentTaskThreadHistoryCollectionResponse, Error>;
+}
+
+/**
  * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentAgentsDaemonReactNamespace {
@@ -1444,7 +1458,7 @@ export interface RiidoV2AIAgentTasksOnboardingCompletionReactNamespace {
    * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
    * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
    * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
-   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`, `v3.aiAgent.tasks.threads`
    */
   readonly create: CompleteAIAgentOnboardingTaskV2ReactEndpoint;
 }
@@ -1594,6 +1608,40 @@ export interface RiidoV2ReactModule {
 }
 
 /**
+ * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+ */
+export interface RiidoV3AIAgentTasksReactNamespace {
+  /**
+   * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+   * 계약 generated path: `v3.aiAgent.tasks.threads`
+   * 검색용 generated 경로: `aiAgent.tasks.threads`
+   * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+   * cache tag: `v3.aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadHistoryV3ReactEndpoint;
+}
+
+/**
+ * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+ */
+export interface RiidoV3AIAgentReactNamespace {
+  /**
+   * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+   */
+  readonly tasks: RiidoV3AIAgentTasksReactNamespace;
+}
+
+/**
+ * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+ */
+export interface RiidoV3ReactModule {
+  /**
+   * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+   */
+  readonly aiAgent: RiidoV3AIAgentReactNamespace;
+}
+
+/**
  * control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.
  */
 export interface RiidoControlPlaneReactClient {
@@ -1605,6 +1653,10 @@ export interface RiidoControlPlaneReactClient {
    * v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.
    */
   readonly v2: RiidoV2ReactModule;
+  /**
+   * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+   */
+  readonly v3: RiidoV3ReactModule;
 }
 
 /**
@@ -1906,6 +1958,16 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             unassign: {
               ...coreClient.v2.aiAgent.tasks.unassign,
               useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.UnassignAIAgentTaskV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.UnassignAIAgentTaskV2MutationVariables>(coreClient.v2.aiAgent.tasks.unassign.mutation(options)),
+            },
+          },
+        },
+      },
+      v3: {
+        aiAgent: {
+          tasks: {
+            threads: {
+              ...coreClient.v3.aiAgent.tasks.threads,
+              useQuery: (params: core.ListAIAgentTaskThreadHistoryV3PathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadHistoryCollectionResponse>) => useQuery<core.AIAgentTaskThreadHistoryCollectionResponse, Error>(coreClient.v3.aiAgent.tasks.threads.query(params, options)),
             },
           },
         },
