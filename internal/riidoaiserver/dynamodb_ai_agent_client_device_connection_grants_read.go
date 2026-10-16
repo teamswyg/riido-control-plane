@@ -18,7 +18,9 @@ type deviceConnectionGrantsReader interface {
 // not checked against the manifest: a part observed mid-write is still a real
 // grant list, either the previous or the next one.
 func (s *DynamoDBAIAgentClientSnapshot) loadDeviceConnectionGrants(ctx context.Context) ([]DeviceConnectionGrant, error) {
-	credentials, err := cachedAWSCredentials(ctx, s.now, s.credentialsProvider, nil)
+	s.grantsReadMu.Lock()
+	credentials, err := cachedAWSCredentials(ctx, s.now, s.credentialsProvider, &s.grantsReadCredentials)
+	s.grantsReadMu.Unlock()
 	if err != nil {
 		return nil, err
 	}
