@@ -31,12 +31,3 @@ func containsAny(text string, markers []string) bool {
 	}
 	return false
 }
-
-func looksKorean(text string) bool {
-	for _, r := range text {
-		if isHangulRune(r) {
-			return true
-		}
-	}
-	return false
-}

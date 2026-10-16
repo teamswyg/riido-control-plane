@@ -10,49 +10,20 @@ const (
 
 func writePromptTaskInterpretation(
 	builder *strings.Builder,
-	component AIAgentTaskContextComponent,
-	document AIAgentTaskContextDocument,
 	intentClass string,
 ) {
 	builder.WriteString("## Task Interpretation\n")
 	writePromptLine(builder, "intent_class", intentClass)
-	writePromptLine(builder, "intent_gate_required", intentGateRequired(intentClass))
+	writePromptLine(builder, "intent_gate_required", "false")
 	writePromptLine(builder, "first_response_policy", firstResponsePolicy(intentClass))
-	writePromptLine(builder, "clarification_question_example", clarificationQuestionExample(component))
+	writePromptLine(builder, "clarification_policy", "identify_the_specific_blocker_and_ask_one_focused_question_only_if_needed")
 	writePromptLine(builder, "provider_limit_result_message", clientMessageCloudCreditInsufficient)
 	builder.WriteString("\n")
 }
 
 func firstResponsePolicy(intentClass string) string {
-	switch intentClass {
-	case taskIntentIntentOriented:
-		return "ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies"
-	case taskIntentMetadataOnly:
-		return "infer_from_metadata_then_ask_when_unsure"
-	default:
+	if intentClass == taskIntentExplicit {
 		return "execute_the_explicit_instruction"
 	}
-}
-
-func intentGateRequired(intentClass string) string {
-	if intentGateRequiredBool(intentClass) {
-		return "true"
-	}
-	return "false"
-}
-
-func intentGateRequiredBool(intentClass string) bool {
-	switch intentClass {
-	case taskIntentIntentOriented, taskIntentMetadataOnly:
-		return true
-	default:
-		return false
-	}
-}
-
-func clarificationQuestionExample(component AIAgentTaskContextComponent) string {
-	if looksKorean(component.Title) {
-		return "작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요."
-	}
-	return "I reviewed the task context. Please reply with the outcome or direction you want."
+	return "act_on_requested_outcome_ask_only_for_specific_blocking_information"
 }

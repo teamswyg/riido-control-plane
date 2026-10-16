@@ -7,19 +7,19 @@ import (
 	"testing"
 )
 
-func TestHTTPAIAgentClientLegacyAssignIntentGateWaitsBeforeDurableAssignment(t *testing.T) {
+func TestHTTPAIAgentClientLegacyAssignExecutesWithoutIntentGate(t *testing.T) {
 	handler, assignmentStore := newIntentGateHTTPTestServer(t)
 	resp := serveAssignTaskBoundary(handler, "/v1/client/ai-agent/tasks/task-copy/assignment", "user-token", `{"agent_id":"agent-owned-codex"}`)
 	if resp.Code != http.StatusAccepted {
 		t.Fatalf("status=%d body=%s", resp.Code, resp.Body.String())
 	}
 	assigned := decodeAIAgentTaskActionResponse(t, resp.Body.Bytes())
-	assertIntentGateAction(t, assigned)
+	assertDirectAssignmentAction(t, assigned)
 	poll, err := assignmentStore.PollAgent(t.Context(), assigned.AgentID, PollRequest{
 		DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev",
 	})
-	if err != nil || poll.Action != PollNone || poll.Assignment != nil {
-		t.Fatalf("legacy intent-gated assignment reached daemon: poll=%+v err=%v", poll, err)
+	if err != nil || poll.Action != PollStart || poll.Assignment == nil {
+		t.Fatalf("legacy assignment did not reach daemon: poll=%+v err=%v", poll, err)
 	}
 }
 

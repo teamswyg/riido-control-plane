@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestIdentifiedIntentGateHTTPRetryKeepsFirstRequest(t *testing.T) {
+func TestIdentifiedAssignmentHTTPRetryKeepsFirstRequest(t *testing.T) {
 	handler, assignments := newIntentGateHTTPTestServer(t)
 	var first AIAgentTaskActionResponse
 	for attempt := 0; attempt < 2; attempt++ {
@@ -26,12 +26,12 @@ func TestIdentifiedIntentGateHTTPRetryKeepsFirstRequest(t *testing.T) {
 		if attempt == 0 {
 			first = result
 		} else if result.AssignmentID != first.AssignmentID || result.ThreadID != first.ThreadID {
-			t.Fatalf("duplicate gate: %+v %+v", first, result)
+			t.Fatalf("duplicate assignment: %+v %+v", first, result)
 		}
 	}
 	poll, err := assignments.PollAgent(t.Context(), first.AgentID, PollRequest{DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev"})
-	if err != nil || poll.Action != PollNone {
-		t.Fatalf("gate executed: %+v %v", poll, err)
+	if err != nil || poll.Action != PollStart {
+		t.Fatalf("request did not execute: %+v %v", poll, err)
 	}
 }
 
