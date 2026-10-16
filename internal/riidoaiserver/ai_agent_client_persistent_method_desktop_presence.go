@@ -6,25 +6,27 @@ import (
 	"time"
 )
 
-// DesktopPresenceLastSeenAt reads the saved snapshot's connection grants
-// without restoring it into memory. A full reload would replace in-memory
-// daemon heartbeats that are saved only every few minutes, while the default
-// reload interval is too slow for onboarding polls; a desktop connection saved
-// by another control-plane instance is still visible on the next poll.
+// DesktopPresenceLastSeenAt answers onboarding polls without reloading the
+// snapshot. A reload restores every part and replaces in-memory daemon
+// heartbeats that are saved only every few minutes, and the default reload
+// interval is too slow for polling. Instead it reads only the saved connection
+// grants, so a desktop connection saved by another instance shows up on the
+// next poll; stores without a grants reader answer from memory.
 func (s *PersistentAIAgentClientStore) DesktopPresenceLastSeenAt(ctx context.Context, principal AuthorizationResult) (time.Time, error) {
 	lastSeenAt, err := s.DevelopmentAIAgentClientStore.DesktopPresenceLastSeenAt(ctx, principal)
 	principalID := strings.TrimSpace(principal.PrincipalID)
-	if err != nil || principalID == "" || s.snapshotStore == nil {
+	if err != nil || principalID == "" {
 		return lastSeenAt, err
 	}
-	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
-	if err != nil {
-		return time.Time{}, err
-	}
+	reader, ok := s.snapshotStore.(deviceConnectionGrantsReader)
 	if !ok {
 		return lastSeenAt, nil
 	}
-	for _, grant := range snapshot.DeviceConnectionGrants {
+	grants, err := reader.loadDeviceConnectionGrants(ctx)
+	if err != nil {
+		return time.Time{}, err
+	}
+	for _, grant := range grants {
 		if strings.TrimSpace(grant.PrincipalID) == principalID && grant.LastSeenAt.After(lastSeenAt) {
 			lastSeenAt = grant.LastSeenAt.UTC()
 		}

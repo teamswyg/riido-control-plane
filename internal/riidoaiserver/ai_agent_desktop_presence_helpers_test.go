@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -39,4 +40,14 @@ func connectDesktopForPresence(t *testing.T, server http.Handler, token, machine
 	if resp.Code != http.StatusOK {
 		t.Fatalf("connect status=%d body=%s", resp.Code, resp.Body.String())
 	}
+}
+
+// grantsReadingSnapshotStore stands in for a store with a targeted grants read.
+type grantsReadingSnapshotStore struct {
+	*memoryAIAgentClientSnapshotStore
+}
+
+func (s grantsReadingSnapshotStore) loadDeviceConnectionGrants(ctx context.Context) ([]DeviceConnectionGrant, error) {
+	snapshot, _, err := s.LoadAIAgentClientSnapshot(ctx)
+	return snapshot.DeviceConnectionGrants, err
 }

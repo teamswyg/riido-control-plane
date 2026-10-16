@@ -45,7 +45,7 @@ func TestHTTPDesktopPresenceRejectsWrites(t *testing.T) {
 
 func TestPersistentDesktopPresenceSeesConnectionsFromAnotherInstance(t *testing.T) {
 	ctx := context.Background()
-	snapshots := &memoryAIAgentClientSnapshotStore{}
+	snapshots := grantsReadingSnapshotStore{&memoryAIAgentClientSnapshotStore{}}
 	reader, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
 	if err != nil {
 		t.Fatalf("open reader: %v", err)
