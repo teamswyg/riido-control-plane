@@ -311,7 +311,7 @@ type AgentOnboardingFixtureListResponse struct {
 type AssignedAgentProfile struct {
 	AvatarURL    string            `json:"avatar_url,omitempty"`
 	TmpColor     string            `json:"tmp_color,omitempty"`
-	ProfileColor AgentProfileColor `json:"profile_color,omitempty"`
+	ProfileColor AgentProfileColor `json:"profile_color"`
 }
 
 type AssignedAgentProfileMapResponse struct {

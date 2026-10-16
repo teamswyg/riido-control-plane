@@ -629,7 +629,7 @@ export interface AssignedAgentProfile {
   /**
    * 배정된 Agent의 고정 profile 색상입니다. tmp_color와 독립적으로 항상 내려갑니다.
    */
-  profile_color?: AgentProfileColor;
+  profile_color: AgentProfileColor;
   /**
    * fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452.
    */

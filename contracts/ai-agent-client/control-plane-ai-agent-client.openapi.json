@@ -4368,7 +4368,7 @@
           "task:{task_id}:assign",
           "task:{task_id}:write"
         ],
-        "x-riido-rbac-policy": "api_codegen_safety.v1",
+        "x-riido-rbac-policy": "ai_agent_onboarding_completion.v1",
         "x-riido-operation-kind": "command",
         "x-riido-client": {
           "module": "v2",
@@ -6276,6 +6276,9 @@
             "type": "string"
           }
         },
+        "required": [
+          "profile_color"
+        ],
         "type": "object"
       },
       "AssignedAgentProfileMapResponse": {

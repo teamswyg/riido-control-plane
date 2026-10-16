@@ -22,6 +22,9 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
+	if s.stopTargetsOnboardingCompletionLocked(taskID, agent.AgentID, req.AssignmentID) {
+		return AIAgentTaskActionResponse{}, errOnboardingCompletionStopConflict
+	}
 	workStatus, assignmentState, completed := stopReadModelProjection(req.durableState)
 	response := AIAgentTaskActionResponse{
 		SchemaVersion:   SchemaVersion,
@@ -55,4 +58,22 @@ func (s *DevelopmentAIAgentClientStore) StopAIAgentTask(ctx context.Context, pri
 	}
 	s.appendAgentTaskActionEvent(response)
 	return response, nil
+}
+
+// stopTargetsOnboardingCompletionLocked reports whether a stop would land on the
+// onboarding completion record: the named assignment is onboarding-seed, or the
+// resolved target thread is one, or no target is named and the only record for
+// this agent on the task is the onboarding completion.
+func (s *DevelopmentAIAgentClientStore) stopTargetsOnboardingCompletionLocked(taskID, agentID, assignmentID string) bool {
+	if isOnboardingSeedAssignmentID(assignmentID) {
+		return true
+	}
+	if thread, ok := s.taskThreadForStopTargetLocked(taskID, agentID, assignmentID); ok {
+		return isOnboardingSeedAssignmentID(thread.AssignmentID)
+	}
+	if assignmentID != "" {
+		return false
+	}
+	_, ok := s.onboardingSeedThreadLocked(taskID, onboardingSeedAssignmentID(taskID, agentID))
+	return ok
 }

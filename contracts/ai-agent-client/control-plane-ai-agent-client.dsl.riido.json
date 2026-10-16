@@ -458,6 +458,7 @@
         "server: the completion comment is an agent-authored message with comment_kind task_completed; agents cannot edit task bodies",
         "idempotency: the same task and agent, or the same request_id, returns the existing completion response without duplicating participants or messages",
         "non_durable: onboarding-seed- assignment IDs are non-durable; stop, cancel, participant removal, and reconcile paths must not treat them as queued executions",
+        "stop_rejected: a stop request that names an onboarding-seed assignment, or resolves to one, is rejected with 409 task thread conflict and changes nothing; the completed thread and its task_completed message stay as recorded",
         "access: the workspace, task, and agent must be visible to the authorized principal, using the same checks as agent assignment",
         "locale: template copy is selected by locale ko or en; omitted locale means ko",
         "copy_schedule_ko: 단계 4개를 이 작업의 하위 작업으로 추가하고 마감일을 넣어 뒀어요. 참여자는 비워 뒀으니 팀원을 초대하면 바로 넣을 수 있어요.",
@@ -1519,6 +1520,9 @@
       "name": "AssignedAgentProfile",
       "description": "workspace task/card 목록에서 현재 배정된 AI Agent를 표시하기 위한 최소 profile 값입니다.",
       "type": "object",
+      "required": [
+        "profile_color"
+      ],
       "properties": [
         {
           "name": "avatar_url",
@@ -6034,7 +6038,7 @@
           "task:{task_id}:write"
         ]
       },
-      "rbac_policy": "api_codegen_safety.v1",
+      "rbac_policy": "ai_agent_onboarding_completion.v1",
       "request": {
         "ref": "CompleteAIAgentOnboardingTaskRequest",
         "required": true

@@ -56,7 +56,12 @@ func backfillTaskSnapshotProfileColors(
 ) {
 	for taskID := range threads {
 		for i := range threads[taskID] {
-			fillTaskSnapshotProfileColor(threads[taskID][i].AgentSnapshot, agents)
+			thread := &threads[taskID][i]
+			if fillTaskSnapshotProfileColor(thread.AgentSnapshot, agents) && thread.AgentSnapshotID != "" {
+				// The ID is a hash of the snapshot content. Refill changed the content, so
+				// recompute it; a later backfill finds the color set and keeps this ID.
+				thread.AgentSnapshotID = taskThreadAgentSnapshotID(thread.AgentSnapshot)
+			}
 		}
 	}
 	for _, members := range memberships {
@@ -66,15 +71,17 @@ func backfillTaskSnapshotProfileColors(
 	}
 }
 
-func fillTaskSnapshotProfileColor(snapshot *AIAgentTaskThreadAgentSnapshot, agents map[string]AgentClientRecord) {
+// fillTaskSnapshotProfileColor reports whether it changed the snapshot.
+func fillTaskSnapshotProfileColor(snapshot *AIAgentTaskThreadAgentSnapshot, agents map[string]AgentClientRecord) bool {
 	if snapshot == nil || isAgentProfileColor(snapshot.ProfileColor) {
-		return
+		return false
 	}
 	if agent, ok := agents[snapshot.AgentID]; ok && isAgentProfileColor(agent.ProfileColor) {
 		snapshot.ProfileColor = agent.ProfileColor
-		return
+		return true
 	}
 	snapshot.ProfileColor = fallbackAgentProfileColor(snapshot.AgentID)
+	return true
 }
 
 func (s *DevelopmentAIAgentClientStore) ensureAgentProfileColorsLocked() {

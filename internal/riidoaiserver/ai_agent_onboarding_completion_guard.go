@@ -16,6 +16,11 @@ var errOnboardingCompletionIneligible = errors.New("onboarding completion requir
 // prior task history, active executions, and request_id reuse for another target.
 var errOnboardingCompletionConflict = errors.New("onboarding completion conflicts with existing agent history")
 
+// errOnboardingCompletionStopConflict rejects a stop that names, or resolves to, an
+// onboarding-seed record. That record is a completed message, not an execution, so
+// the stop must not overwrite it. It maps to 409.
+var errOnboardingCompletionStopConflict = errors.New("onboarding completion is a completed record and cannot be stopped")
+
 // onboardingCompletionReceiptKey scopes request_id to workspace, owner principal and
 // operation. It never matches assignment receipts, which use identifiedAssignmentID.
 func onboardingCompletionReceiptKey(principal AuthorizationResult, requestID string) string {
