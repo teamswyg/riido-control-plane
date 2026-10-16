@@ -2,17 +2,6 @@ package riidoaiserver
 
 import "testing"
 
-func assertIntentDialoguePollNone(t *testing.T, store *Store, action AIAgentTaskActionResponse) {
-	t.Helper()
-	pollNone, err := store.PollAgent(t.Context(), action.AgentID, intentDialoguePollRequest())
-	if err != nil {
-		t.Fatalf("PollAgent before followup: %v", err)
-	}
-	if pollNone.Action != PollNone || pollNone.Assignment != nil {
-		t.Fatalf("intent-gated assignment must not reach daemon before user reply: %+v", pollNone)
-	}
-}
-
 func assertIntentDialoguePollWork(t *testing.T, store *Store, action AIAgentTaskActionResponse) {
 	t.Helper()
 	pollWork, err := store.PollAgent(t.Context(), action.AgentID, intentDialoguePollRequest())

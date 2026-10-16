@@ -9,7 +9,9 @@
     "internal/riidoaiserver/agent_response_timing.go",
     "internal/riidoaiserver/ai_agent_assignment_prompt_answer_request.go",
     "internal/riidoaiserver/task_conversation_messages.go",
-    "internal/riidoaiserver/task_conversation_context.go"
+    "internal/riidoaiserver/task_conversation_context.go",
+    "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go",
+    "internal/riidoaiserver/server_assignment_request.go"
   ],
   "invariants": [
     "No additional classifier, reviewer or quality-retry model turn on the default path.",
@@ -17,7 +19,8 @@
     "Only observed evidence may substantiate completion.",
     "Timing logs never contain prompt, answer or credential content.",
     "Answer-only intent signals require directive syntax; nominal requests are recognized only in the task title or explicit user instruction, not source-document prose.",
-    "Messages that render empty, including empty editor HTML, are excluded before the recent-message budget; eligibility and prompt rendering use the same normalization."
+    "Messages that render empty, including empty editor HTML, are excluded before the recent-message budget; eligibility and prompt rendering use the same normalization.",
+    "Keyword intent classification is advisory only; every new assignment reaches the existing provider turn, preserving task context and explicit instruction without an extra model request."
   ],
   "verification": {
     "tests": [
@@ -25,11 +28,12 @@
       "TestEmptyHistoryRetainsPreviousFinalAnswer",
       "TestResponseTimingLogsOnlyAcceptedDeliveryMetadata",
       "TestEmptyRecentMessagesDoNotDisplaceUserRequirements",
-      "TestAnswerOnlyProseKeepsIntentGate",
+      "TestAnswerOnlyProseRemainsAdvisoryBackground",
       "TestNominalAnswerRequestsAreScopedToRequestFields",
       "TestAnswerOnlyDirectiveSyntaxRemainsExecutable",
-      "TestAnswerOnlyProseTitleKeepsIntentGate",
-      "TestAcceptanceRenderedEmptyHistoryPreservesEarlierRequirement"
+      "TestAnswerOnlyProseTitleRemainsAdvisoryBackground",
+      "TestAcceptanceRenderedEmptyHistoryPreservesEarlierRequirement",
+      "TestAssignmentDirectExecutionPreservesRequest"
     ],
     "live_test_opt_in": "AGENTBRIDGE_INTEGRATION=1",
     "measurement_script": "riido-daemon/scripts/measure-single-pass-response.py"

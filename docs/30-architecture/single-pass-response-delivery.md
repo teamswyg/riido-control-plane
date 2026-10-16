@@ -142,3 +142,26 @@ benchmark after the correction measured 28382/21454/35903 ns/op (20 allocs/op),
 which measures prompt construction only and does not establish model latency.
 
 Empty editor HTML messages are normalized with the same renderer as prompt history and excluded before the recent-message budget. `TestAcceptanceRenderedEmptyHistoryPreservesEarlierRequirement` preserves earlier user constraints across empty editor status rows.
+
+## Direct assignment execution · RIID-5827
+
+Assigning an agent requests execution of the task's intended outcome. Keyword
+classification is advisory metadata only: neither missing command verbs nor a
+marketing/planning task type may prevent publication to the existing provider
+turn. All intent classes have `intent_gate_required: false`. The same turn
+interprets the title, current document and latest user instruction, proceeds
+with supported work and asks only a concrete question about information that
+actually blocks progress. Generic requests to repeat the desired outcome are
+not the default first response. Tool authorization and genuine provider
+`needs_input` results retain their existing behavior; persisted legacy intent
+threads remain readable and can accept follow-ups.
+
+HTTP regressions cover legacy and additive assignment APIs, requests without
+command keywords, task-body and explicit-instruction preservation, and duplicate
+request IDs resolving to the same assignment. Verified comment delivery must
+retain the comment body and task snapshot as well. No classifier/reviewer
+request, automatic follow-up or second provider run is introduced. UI assignee
+selection sends an agent ID; the authorized server reader loads the saved task
+document. Unsaved editor text is not part of that snapshot. Existing document
+size limits still explicitly mark truncation; no test claims unlimited context
+or proves the contents of an unobserved customer request.

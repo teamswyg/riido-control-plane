@@ -51,7 +51,7 @@ func TestParentContextDoesNotChangeTaskIntentOrMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !got.IntentGateRequired || strings.Count(got.Prompt, "\n## Task\n") != 1 {
+	if got.IntentGateRequired || !strings.Contains(got.Prompt, "intent_class: intent_oriented") || strings.Count(got.Prompt, "\n## Task\n") != 1 {
 		t.Fatalf("reference changed intent/structure: %q", got.Prompt)
 	}
 	if strings.Index(got.Prompt, "## Task\n") > strings.Index(got.Prompt, "## Interaction Policy") {

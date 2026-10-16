@@ -9,7 +9,7 @@ import (
 	"github.com/teamswyg/riido-contracts/metadatakeys"
 )
 
-func assertMarketingPromptAsksForIntent(t *testing.T) {
+func assertMarketingPromptAllowsExecution(t *testing.T) {
 	t.Helper()
 	prompt, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{TaskID: "task-copywriting", Context: AIAgentTaskContext{
 		Component: AIAgentTaskContextComponent{ID: "task-copywriting", Title: "[1.23 신기능 마케팅] 카피라이트 3개안 준비"},
@@ -18,8 +18,8 @@ func assertMarketingPromptAsksForIntent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ComposeAIAgentAssignmentPrompt: %v", err)
 	}
-	if !strings.Contains(prompt.Prompt, "intent_class: intent_oriented") || !strings.Contains(prompt.Prompt, "원하는 결과물이나 방향") {
-		t.Fatalf("marketing prompt did not ask for intent:\n%s", prompt.Prompt)
+	if !strings.Contains(prompt.Prompt, "intent_class: intent_oriented") || !strings.Contains(prompt.Prompt, "act_on_requested_outcome_ask_only_for_specific_blocking_information") || prompt.IntentGateRequired {
+		t.Fatalf("marketing prompt did not preserve direct execution policy:\n%s", prompt.Prompt)
 	}
 }
 
