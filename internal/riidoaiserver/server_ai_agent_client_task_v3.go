@@ -1,6 +1,8 @@
 package riidoaiserver
 
 import (
+	"context"
+	"errors"
 	"net/http"
 )
 
@@ -33,7 +35,8 @@ func (s Server) handleAIAgentClientTaskThreadsV3(w http.ResponseWriter, r *http.
 	}
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
 		logRequestFailure(r, "projection_reconcile", err)
-		writeError(w, http.StatusBadGateway, err.Error())
+		status, message := threadProjectionErrorResponse(err)
+		writeError(w, status, message)
 		return
 	}
 	response, err := s.aiAgent.ListAIAgentTaskThreadHistory(r.Context(), principal, taskID)
@@ -43,4 +46,15 @@ func (s Server) handleAIAgentClientTaskThreadsV3(w http.ResponseWriter, r *http.
 		return
 	}
 	writeJSON(w, http.StatusOK, response)
+}
+
+func threadProjectionErrorResponse(err error) (int, string) {
+	switch {
+	case errors.Is(err, context.Canceled):
+		return http.StatusRequestTimeout, "thread projection request cancelled"
+	case errors.Is(err, context.DeadlineExceeded):
+		return http.StatusGatewayTimeout, "thread projection synchronization timed out"
+	default:
+		return http.StatusBadGateway, "thread projection synchronization unavailable"
+	}
 }

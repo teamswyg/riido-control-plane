@@ -115,7 +115,7 @@
     "implementation_steps": [
       {
         "name": "initial-load-v3",
-        "detail": "When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model."
+        "detail": "When the task screen opens or refreshes, call GET /v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads and use it as the canonical read model. Projection cancellation returns 408, deadline 504, and other dependency failures 502 with fixed response messages; do not count a cancelled read as an Agent execution failure."
       },
       {
         "name": "group-by-conversation-id",
