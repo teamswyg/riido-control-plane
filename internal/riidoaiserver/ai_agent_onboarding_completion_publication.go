@@ -10,30 +10,52 @@ type agentDashboardHistoryReader interface {
 	LoadAgentDashboardHistory(context.Context, string) (AgentDashboardHistory, error)
 }
 
+type onboardingCompletionRecordChecker interface {
+	hasOnboardingCompletionRecord(taskID, agentID string) bool
+}
+
 // completeAIAgentOnboardingTaskUnderGate records the completion inside the task
 // publication gate. An assignment holds the same gate from its durable write until its
 // thread is published, so a completion sees either all of an assignment or none of it.
-// It also refuses while the assignment store holds a non-terminal execution of this
-// agent on this task.
+// A repeat of an existing completion is answered by the store with the recorded
+// response. A new completion is refused while the assignment store has any run of this
+// agent on this task, including a finished one.
 func (s Server) completeAIAgentOnboardingTaskUnderGate(ctx context.Context, principal AuthorizationResult, taskID string, req CompleteAIAgentOnboardingTaskRequest) (AIAgentTaskActionResponse, error) {
 	release, err := s.taskAgentExecutionGate.beginPublication(ctx, taskID)
 	if err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
 	defer release()
-	active, err := s.onboardingCompletionHasDurableExecution(ctx, taskID, strings.TrimSpace(req.AgentID))
-	if err != nil {
-		return AIAgentTaskActionResponse{}, err
-	}
-	if active {
-		return AIAgentTaskActionResponse{}, fmt.Errorf("%w: agent has a durable assignment on this task", errOnboardingCompletionConflict)
+	agentID := strings.TrimSpace(req.AgentID)
+	if !s.onboardingCompletionRecorded(taskID, agentID) {
+		hasRun, err := s.onboardingCompletionHasDurableRun(ctx, taskID, agentID)
+		if err != nil {
+			return AIAgentTaskActionResponse{}, err
+		}
+		if hasRun {
+			return AIAgentTaskActionResponse{}, fmt.Errorf("%w: agent has a durable assignment on this task", errOnboardingCompletionConflict)
+		}
 	}
 	return s.aiAgent.CompleteAIAgentOnboardingTask(ctx, principal, taskID, req)
 }
 
-// onboardingCompletionHasDurableExecution reports whether the assignment store holds a
-// non-terminal run of this agent on this task. A store without run history reports none.
-func (s Server) onboardingCompletionHasDurableExecution(ctx context.Context, taskID, agentID string) (bool, error) {
+// onboardingCompletionRecorded reports whether this agent already has a completion
+// record on this task. The store answers such a repeat itself, so later runs must not
+// block it.
+func (s Server) onboardingCompletionRecorded(taskID, agentID string) bool {
+	checker, ok := s.aiAgent.(onboardingCompletionRecordChecker)
+	return ok && checker.hasOnboardingCompletionRecord(taskID, agentID)
+}
+
+func (s *DevelopmentAIAgentClientStore) hasOnboardingCompletionRecord(taskID, agentID string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.onboardingCompletions[agentID] == taskID
+}
+
+// onboardingCompletionHasDurableRun reports whether the assignment store holds any run
+// of this agent on this task. A store without run history reports none.
+func (s Server) onboardingCompletionHasDurableRun(ctx context.Context, taskID, agentID string) (bool, error) {
 	reader, ok := s.assignment.(agentDashboardHistoryReader)
 	if !ok || agentID == "" {
 		return false, nil
@@ -43,7 +65,7 @@ func (s Server) onboardingCompletionHasDurableExecution(ctx context.Context, tas
 		return false, err
 	}
 	for _, run := range history.Runs {
-		if run.Assignment.TaskID == taskID && run.Assignment.AgentID == agentID && !isTerminal(run.Assignment.State) {
+		if run.Assignment.TaskID == taskID && run.Assignment.AgentID == agentID {
 			return true, nil
 		}
 	}
