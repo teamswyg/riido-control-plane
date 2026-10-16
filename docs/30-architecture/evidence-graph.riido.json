@@ -23912,6 +23912,76 @@
       ],
       "decision": "RED fixtures become GREEN without model calls, customer assignments or external database writes. Repeated stale writes preserve the original completion comment, response and scoped request ownership; deletion does not resurrect old receipts. Failed persistence remains retryable with fixed messages and emits no live completion. This is an intentional imported onboarding record, not evidence that an Agent model performed the task. The existing v3 read metadata and generated query key are restored, and completion invalidation includes that exact canonical key; unrelated Dashboard/version/notification mirror differences are preserved. No web or desktop merge/deployment is performed. The read-only evidence and loop workflows now watch the contract mirror path. The baseline CI parity digest is refreshed to that reviewed trigger-only evidence workflow content; native mappings, artifact permissions, deployment authority and retirement authority are unchanged.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "web_onboarding_desktop_presence_loop",
+      "observation": "RIID-5854 web onboarding must notice when the user opens the desktop app with the same account, but bootstrap has_live_my_device turns on only after runtime discovery, device records carry no creation time, and a reinstall keeps the same device ID. Local review of a reload-based read found that the one-minute snapshot reload hid connections saved by another instance, faster full reloads replaced unsaved daemon heartbeats, and loading the whole snapshot outside operationMu advanced DynamoDB part hashes used by concurrent save fences.",
+      "hypothesis": "Exposing the latest per-principal device connection grant last_seen_at with a server checked_at lets the web compare server time only. Reading just the DEVICE_CONNECTION_GRANTS part with GetItem and cached credentials, without restoring the snapshot, keeps a connection saved by another instance visible on the next poll while leaving in-memory liveness and snapshot bookkeeping untouched.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "react_query_generator_must_preserve_generated_client_surface"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_desktop_presence_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_desktop_presence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_workspace_http.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_credentials_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/reactquerygen"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Add GET /v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence as a principal-scoped DeviceRead query that returns the newer of the in-memory and saved grant last_seen_at plus server checked_at, omits last_seen_at when no grant exists, and exposes no device identity. Thread history, assignment, bootstrap, and SSE semantics are unchanged; ai-agent-client-api documents change only through the generated operation counts and listing, and the smoke matrix gains the v2.aiAgent.desktopPresence row.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
