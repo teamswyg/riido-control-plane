@@ -20,6 +20,61 @@
   ],
   "chains": [
     {
+      "id": "single_pass_response_quality_and_delivery_5827",
+      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison).",
+      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "sse_reconnect_must_resume_after_last_event_id",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_conversation_messages.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_response_timing.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_assignment_prompt_answer_request.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/single_pass_response_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_response_timing_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/single_pass_benchmark_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/answer_request_intent_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "request_identity_membership_integration_5828",
       "observation": "Retry identities and explicit new submissions need different execution behavior while existing participant removal generations must remain authoritative.",
       "hypothesis": "Scoped deterministic request IDs and independent receipts can integrate into existing four-item creation transactions and atomic snapshot commits.",

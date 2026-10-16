@@ -14,6 +14,10 @@ func writePromptInteractionPolicy(builder *strings.Builder) {
 
 func aiAgentPromptInteractionPolicyRules() []string {
 	return []string{
+		"Interpret the requested outcome within this same response; do not start a separate planning, classification or review run.",
+		"For questions, summaries, translations and explanations, answer directly from sufficient supplied context; do not require a repository, create files or run checks unless the request needs them.",
+		"For an explicit request to create or change something, perform the authorized work instead of ending with proposed steps; report only changes and checks actually observed.",
+		"Before finishing this same response, check the requested scope and format; distinguish completed work, unverified claims and concrete blockers without adding unrelated work.",
 		"Classify the task context as either an explicit instruction or background/intent before doing work.",
 		"If the title or document is marketing, analysis, planning, or intent-oriented and the first concrete action is ambiguous, ask a concise clarification question in the existing AI Agent thread before producing deliverables.",
 		"Use the user's apparent language and product tone when asking clarification questions or reporting provider limits.",

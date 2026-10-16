@@ -5,10 +5,15 @@ import "strings"
 func classifyTaskContextIntent(
 	component AIAgentTaskContextComponent,
 	document AIAgentTaskContextDocument,
+	userInstruction string,
 ) string {
-	text := strings.ToLower(component.Title + "\n" + document.Content)
-	if strings.TrimSpace(document.Content) == "" {
-		if hasExplicitInstructionSignal(text) {
+	text := strings.ToLower(component.Title + "\n" + document.Content + "\n" + userInstruction)
+	explicit := hasAnswerOnlyInstruction(component.Title, true) ||
+		hasAnswerOnlyInstruction(userInstruction, true) ||
+		hasExplicitInstructionSignal(text) ||
+		hasAnswerOnlyInstruction(document.Content, false)
+	if strings.TrimSpace(document.Content) == "" && strings.TrimSpace(userInstruction) == "" {
+		if explicit {
 			return taskIntentExplicit
 		}
 		if containsAny(text, intentOrientedTaskMarkers()) {
@@ -16,7 +21,7 @@ func classifyTaskContextIntent(
 		}
 		return taskIntentMetadataOnly
 	}
-	if hasExplicitInstructionSignal(text) {
+	if explicit {
 		return taskIntentExplicit
 	}
 	if containsAny(text, intentOrientedTaskMarkers()) || nonCommandComponentType(component.ComponentType) {
