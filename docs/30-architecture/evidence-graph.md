@@ -10,22 +10,22 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - manual refresh: `gh workflow run evidence-graph.yml --ref main`
 - evidence artifact: `evidence-graph-evidence`
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
-- chains: `257`
-- claim refs: `360`
-- change refs: `2516`
-- verifier refs: `1480`
-- evidence refs: `803`
+- chains: `259`
+- claim refs: `363`
+- change refs: `2540`
+- verifier refs: `1495`
+- evidence refs: `805`
 
 ## Compiled Chain Summary
 
-- complete chains: `257` / `257`
-- claim-bound chains: `257`
+- complete chains: `259` / `259`
+- claim-bound chains: `259`
 - unclaimed chains: `0`
 - next-loop targets: `10`
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `165` | `204` | `1543` | `826` | `496` |
+| `closed_loop_candidate` | `167` | `207` | `1567` | `841` | `498` |
 | `control_plane_performance_harness` | `32` | `36` | `240` | `258` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `14` | `24` | `281` | `133` | `66` |
@@ -295,8 +295,10 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `persistent_agent_participant_review_5841` | `2` | `74` | `42` | `43` | `ai_thread_history` |
 | `agent_dashboard_scoped_read_and_pagination_5830` | `2` | `5` | `5` | `1` | `ai_agent_load_harness` |
 | `onboarding_completion_replica_commit_5846` | `6` | `22` | `7` | `1` | `ai_thread_history` |
+| `private_task_context_split_graphql_endpoint_1099` | `1` | `3` | `3` | `1` | `closed_loop_candidate` |
 | `direct_assignment_without_keyword_gate_5827` | `2` | `3` | `3` | `3` | `closed_loop_candidate` |
-| `web_onboarding_desktop_presence_loop` | `2` | `7` | `5` | `1` | `closed_loop_candidate` |
+| `web_onboarding_desktop_presence_loop` | `3` | `24` | `14` | `1` | `closed_loop_candidate` |
+| `denied_request_finite_credential_diagnostics_loop` | `1` | `4` | `3` | `1` | `closed_loop_candidate` |
 
 ## Loop
 

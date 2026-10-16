@@ -31,7 +31,7 @@ func TestDynamoDBLoadDeviceConnectionGrantsReadsOnlyTheGrantsPart(t *testing.T) 
 	hasPart := true
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
-		if r.Header.Get("X-Amz-Target") != dynamoDBGetItemTarget || !strings.Contains(string(body), partSK) {
+		if r.Header.Get("X-Amz-Target") != dynamoDBGetItemTarget || (!strings.Contains(string(body), partSK) && !strings.Contains(string(body), dynamoDBAIAgentClientSnapshotSK)) {
 			t.Errorf("request target=%q body=%s", r.Header.Get("X-Amz-Target"), body)
 		}
 		response := map[string]any{}

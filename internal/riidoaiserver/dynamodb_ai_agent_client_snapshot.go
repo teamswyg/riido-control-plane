@@ -37,5 +37,6 @@ type DynamoDBAIAgentClientSnapshot struct {
 	// grantsReadCredentials caches credentials for presence polls that read
 	// connection grants outside the command loop.
 	grantsReadMu          sync.Mutex
+	grantsReadPending     chan struct{}
 	grantsReadCredentials AWSCredentials
 }

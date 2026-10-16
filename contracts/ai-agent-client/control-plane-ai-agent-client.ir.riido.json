@@ -375,7 +375,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
+        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -507,15 +507,18 @@
     {
       "policy_id": "desktop_presence.v1",
       "kind": "liveness",
-      "description": "웹 온보딩은 같은 계정이 데스크톱 앱에 접속했는지를 서버 시각 기준의 마지막 접속 시각으로만 확인합니다.",
+      "description": "웹 온보딩은 같은 계정의 승인된 과거 데스크톱 앱 접속을 서버 시각으로 확인합니다. 현재 온라인 상태나 자격 증명 유효성을 보증하지 않습니다.",
       "rules": [
-        "server: last_seen_at is the latest last-seen time among desktop device connection grants owned by the authorized principal",
-        "server: last_seen_at advances whenever the signed-in desktop app calls devices/connect, which it does on every page open, or enrolls a device credential; daemon heartbeats do not advance it",
-        "server: last_seen_at is omitted when the principal has no desktop device connection grant",
+        "server: last_seen_at is the latest server-recorded last-seen time among successfully authorized desktop device connection records owned by the authorized principal; another principal's records never count",
+        "server: last_seen_at advances only on successful authorized devices/connect or device credential enrollment; desktop navigation attempts a connection when login, machine, and workspace context are available, while failed or skipped calls and daemon heartbeats do not advance it",
+        "server: last_seen_at is omitted when no owned desktop connection record has a usable last-seen timestamp; zero or malformed timestamps are not evidence of a connection",
         "server: checked_at is the server time when the response was built; clients compare last_seen_at only against server time derived from checked_at, never against the browser clock",
         "scope: presence is principal-scoped; the workspace_id path segment selects the authorization scope and never exposes other members' devices",
         "privacy: the response carries no device_id, device name, platform, IP address, or app version",
-        "client: web onboarding sets its server-time watch start to checked_at minus the time it had already been watching when it sent that request, so a same-account connection made after watching starts counts even when it lands before the first response; a connection inside one request's network latency is caught on the desktop app's next page open; account-mismatch guidance and polling cadence are client presentation"
+        "history: a connection grant is append-only evidence of a past authorized connection, not an active authorization grant; last_seen_at may remain after credential revocation or membership removal and does not prove that a device is online, a credential is currently valid, or the principal still belongs to the historical workspace",
+        "read_boundary: a store with a persistent connection-record reader returns only its observed committed records without restoring a stale full snapshot or advancing daemon liveness; an authoritative read or integrity failure is an error, never a checked_at-only success or a stale in-memory fallback",
+        "fallback: stores without a persistent connection-record reader may answer from current-process memory, which does not guarantee cross-replica visibility or history after restart; an omitted last_seen_at is not a global proof that the account has never connected",
+        "client: web onboarding sets its server-time watch start to checked_at minus the time it had already been watching when it sent that request, and uses last_seen_at strictly later than that start; a connection during the first request's network latency may be missed until a later devices/connect or device enrollment, so an app that remains on the same page is not guaranteed to be detected; account-mismatch guidance and polling cadence are client presentation"
       ]
     }
   ],

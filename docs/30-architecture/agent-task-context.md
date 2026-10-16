@@ -32,6 +32,16 @@ deadline cancellation, conversation isolation and latest-instruction precedence.
 Fixtures are synthetic; customer task bodies and authentication values are not
 published as evidence. No frontend deployment is required by this change.
 
+Private metadata reads for Agent Records and first-task onboarding provenance
+can use `RIIDO_AI_SERVER_TASK_CONTEXT_GRAPHQL_URL` for the monolith GraphQL
+endpoint. The caller's viewer Bearer and workspace/task checks remain required.
+When omitted, the existing REST base plus `/graphql` remains the fallback.
+REST component and provider-document reads keep their original base URL;
+timeouts and redirect policy remain shared. Endpoint userinfo, query strings
+and fragments are rejected by the existing URL validator. Synthetic two-server
+regressions cover both metadata paths and REST preservation; they do not prove
+live customer onboarding or authorize arbitrary linked-document fetches.
+
 ## Execution context · RIID-5820
 
 Shared `assignment.ExecutionContext` carries bounded workspace kind, verification status, diagnostic code and next action. The server sanitizes the context before storing or returning it, retains it across legacy progress without new context, and copies it to action responses, cold thread/history and work-status events. New assignments never inherit a previous run's context. Absolute directories and verification argv stay in the daemon's host-only IPC. Missing context is legacy/unknown, not host-verified completion or a retry authorization. Provider recovery/failover execution remains outside this change.

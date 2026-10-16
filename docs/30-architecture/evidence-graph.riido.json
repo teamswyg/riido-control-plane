@@ -23914,6 +23914,51 @@
       "next_loop": "ai_thread_history"
     },
     {
+      "id": "private_task_context_split_graphql_endpoint_1099",
+      "observation": "The legacy REST API can return404 for /graphql while Agent Records and onboarding provenance require the monolith GraphQL contract.",
+      "hypothesis": "One optional private GraphQL endpoint can route metadata to the monolith while retaining existing REST documents and the viewer JWT boundary.",
+      "claims": [
+        "runtime_adapter_config_must_preserve_public_env_contract"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_private_task_context_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_dashboard_task_context.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/task_context_config.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/agent_dashboard_endpoint_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/onboarding_graphql_endpoint_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_private_task_context_config_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep REST and GraphQL bases independently configurable; use the existing viewer JWT for both metadata reads and onboarding provenance, retain default fallback and reject unsafe URL shapes. Synthetic two-server routing tests do not claim live customer onboarding success.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "direct_assignment_without_keyword_gate_5827",
       "observation": "Four legacy/additive HTTP cases returned the generic waiting_for_user question before reaching the daemon, including a concrete Korean comparison request without recognized keywords. RED on main f9bcb0c.",
       "hypothesis": "Treat keyword labels as advisory and use the existing provider turn to execute supported work or ask a concrete blocking question. Verify context preservation at daemon poll.",
@@ -23968,11 +24013,12 @@
     },
     {
       "id": "web_onboarding_desktop_presence_loop",
-      "observation": "RIID-5854 web onboarding must notice when the user opens the desktop app with the same account, but bootstrap has_live_my_device turns on only after runtime discovery, device records carry no creation time, and a reinstall keeps the same device ID. Local review of a reload-based read found that the one-minute snapshot reload hid connections saved by another instance, faster full reloads replaced unsaved daemon heartbeats, and loading the whole snapshot outside operationMu advanced DynamoDB part hashes used by concurrent save fences.",
-      "hypothesis": "Exposing the latest per-principal device connection grant last_seen_at with a server checked_at lets the web compare server time only. Reading just the DEVICE_CONNECTION_GRANTS part with GetItem and cached credentials, without restoring the snapshot, keeps a connection saved by another instance visible on the next poll while leaving in-memory liveness and snapshot bookkeeping untouched.",
+      "observation": "RIID-5854 web onboarding must notice when the user opens the desktop app with the same account, but bootstrap has_live_my_device turns on only after runtime discovery, device records carry no creation time, and a reinstall keeps the same device ID. Local review of a reload-based read found that the one-minute snapshot reload hid connections saved by another instance, faster full reloads replaced unsaved daemon heartbeats, and loading the whole snapshot outside operationMu advanced DynamoDB part hashes used by concurrent save fences. Independent local native-Dynamo regression reproduced uncommitted memory winning over durable absence and stale ordinary profile writers erasing a saved connection. Failed connect/enroll grants also needed a scoped rollback and explicit modern empty-array restart semantics.",
+      "hypothesis": "A committed-only same-account grant query with fixed safe dependency failures, validated bounded single-part reads, cancellation-aware cached credentials, grant rollback and append-only CAS preservation keeps the polling endpoint fast without inventing online or credential-validity semantics.",
       "claims": [
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
-        "react_query_generator_must_preserve_generated_client_surface"
+        "react_query_generator_must_preserve_generated_client_surface",
+        "desktop_presence_must_observe_committed_account_connections"
       ],
       "changes": [
         {
@@ -24002,6 +24048,74 @@
         {
           "kind": "manifest",
           "path": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/desktop_presence_grants.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/desktop_presence_grant_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_credentials.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_inline.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_legacy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read_keys.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_connect_ai_agent_device.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_enroll_device_credential.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/deploy-ai-agent-testnet.yml"
         }
       ],
       "verifiers": [
@@ -24024,6 +24138,42 @@
         {
           "kind": "tool",
           "path": "tools/reactquerygen"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_profile_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence_committed_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_credentials_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_integrity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_legacy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_presence_failed_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_presence_empty_restart_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
         }
       ],
       "evidence": [
@@ -24033,7 +24183,56 @@
           "redacted": true
         }
       ],
-      "decision": "Add GET /v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence as a principal-scoped DeviceRead query that returns the newer of the in-memory and saved grant last_seen_at plus server checked_at, omits last_seen_at when no grant exists, and exposes no device identity. Thread history, assignment, bootstrap, and SSE semantics are unchanged; ai-agent-client-api documents change only through the generated operation counts and listing, and the smoke matrix gains the v2.aiAgent.desktopPresence row.",
+      "decision": "Use the durable grants reader when available, with memory fallback only for unsupported stores. Keep a normal single strong GetItem because snapshot CURRENT and changed parts commit atomically. Validate part envelope/hash/JSON/identity, bound decoded data to 16MiB, inspect CURRENT only on part absence for inline legacy compatibility, and preserve read errors as 503/504/408. Preserve append-only grants under existing CURRENT CAS and restore grant-only memory state after a failed connect/enroll save. Explicit [] survives inline/file JSON; nil alone selects legacy credential backfill. Pre-grant split history, device/credential concurrency, historical revocation and server clock skew remain explicit limits. No bootstrap, SSE, web or desktop behavior is changed. The existing authenticated staging deployment smoke also checks desktop-presence response key allowlist and UTC timestamp shape without printing credentials or response bodies.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "denied_request_finite_credential_diagnostics_loop",
+      "observation": "Natural production task-thread subscription requests returned 401, but existing safe authorization logs could not distinguish missing, opaque, oversized or unverified JWT-shaped credential input. No valid-credential rejection or actual expiry root cause was established from the earlier finite logs.",
+      "hypothesis": "After denial, bounded local shape inspection can emit only fixed enums for token source, format, unverified expiry hint and dual-header equality, improving diagnosis without accepting, refreshing or transmitting credentials.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/request_failure_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_token_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_jwt_payload_observation.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/request-authorization.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_token_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_token_observation_bounds_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Preserve existing authentication decisions, token precedence and HTTP status. Denied request logs gain only allowlisted enums; payload decoding has fixed byte/field bounds and unverified hints never prove expiry, authorize another token or trigger client recovery. Synthetic secret-bearing regression cases check output privacy. Historical 401 cause and client renewal behavior remain separate from this diagnostic-only server change.",
       "next_loop": "closed_loop_candidate"
     }
   ],

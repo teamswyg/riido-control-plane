@@ -3,34 +3,44 @@ package riidoaiserver
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 )
 
-// deviceConnectionGrantsReader reads only the saved device connection grants.
-// It must not change snapshot bookkeeping, so a presence poll can run outside
-// operationMu without affecting the hash fences of concurrent saves.
+// A presence read observes committed grants without changing snapshot fences.
+// Atomic snapshot writes make a single part a committed old/new value.
 type deviceConnectionGrantsReader interface {
 	loadDeviceConnectionGrants(ctx context.Context) ([]DeviceConnectionGrant, error)
 }
 
-// loadDeviceConnectionGrants gets the DEVICE_CONNECTION_GRANTS part directly
-// instead of loading every snapshot part through the command loop. Its hash is
-// not checked against the manifest: a part observed mid-write is still a real
-// grant list, either the previous or the next one.
 func (s *DynamoDBAIAgentClientSnapshot) loadDeviceConnectionGrants(ctx context.Context) ([]DeviceConnectionGrant, error) {
-	s.grantsReadMu.Lock()
-	credentials, err := cachedAWSCredentials(ctx, s.now, s.credentialsProvider, &s.grantsReadCredentials)
-	s.grantsReadMu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	select {
+	case <-s.done:
+		return nil, errDynamoDBAIAgentClientSnapshotClosed()
+	default:
+	}
+	credentials, err := s.desktopPresenceCredentials(ctx)
 	if err != nil {
 		return nil, err
 	}
+	item, err := s.readDesktopPresenceItem(ctx, dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartDeviceConnections), credentials)
+	if err != nil {
+		return nil, err
+	}
+	if len(item) == 0 {
+		return s.readLegacyDesktopPresence(ctx, credentials)
+	}
+	return decodeDesktopPresencePart(item)
+}
+
+func (s *DynamoDBAIAgentClientSnapshot) readDesktopPresenceItem(ctx context.Context, sk string, credentials AWSCredentials) (map[string]map[string]string, error) {
 	payload, err := json.Marshal(struct {
 		TableName      string                       `json:"TableName"`
 		ConsistentRead bool                         `json:"ConsistentRead"`
 		Key            map[string]map[string]string `json:"Key"`
 	}{s.tableName, true, map[string]map[string]string{
-		"pk": {"S": dynamoDBAIAgentClientSnapshotPK},
-		"sk": {"S": dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartDeviceConnections)},
+		"pk": {"S": dynamoDBAIAgentClientSnapshotPK}, "sk": {"S": sk},
 	}})
 	if err != nil {
 		return nil, err
@@ -47,18 +57,7 @@ func (s *DynamoDBAIAgentClientSnapshot) loadDeviceConnectionGrants(ctx context.C
 		Item map[string]map[string]string `json:"Item"`
 	}
 	if err := json.Unmarshal(body, &response); err != nil {
-		return nil, fmt.Errorf("decode DynamoDB device connection grants response: %w", err)
+		return nil, err
 	}
-	if len(response.Item) == 0 {
-		return nil, nil
-	}
-	raw, err := gunzipBase64(dynamoDBStringValue(response.Item, "part_gzip"))
-	if err != nil {
-		return nil, fmt.Errorf("decode DynamoDB device connection grants part: %w", err)
-	}
-	var grants []DeviceConnectionGrant
-	if err := json.Unmarshal(raw, &grants); err != nil {
-		return nil, fmt.Errorf("decode DynamoDB device connection grants part: %w", err)
-	}
-	return grants, nil
+	return response.Item, nil
 }

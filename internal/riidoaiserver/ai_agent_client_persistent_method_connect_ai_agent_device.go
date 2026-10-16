@@ -8,9 +8,10 @@ func (s *PersistentAIAgentClientStore) ConnectAIAgentDevice(ctx context.Context,
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return DeviceRecord{}, err
 	}
+	grantsBefore := s.desktopPresenceGrantCheckpoint()
 	device, err := s.DevelopmentAIAgentClientStore.ConnectAIAgentDevice(ctx, principal, machineID)
 	if err != nil {
 		return device, err
 	}
-	return device, s.saveSnapshot(ctx)
+	return device, s.commitDesktopPresenceGrants(ctx, grantsBefore)
 }

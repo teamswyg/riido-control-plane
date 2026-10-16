@@ -27,7 +27,7 @@ func (s *DevelopmentAIAgentClientStore) DesktopPresenceLastSeenAt(ctx context.Co
 	}
 	principalID := strings.TrimSpace(principal.PrincipalID)
 	if principalID == "" {
-		return time.Time{}, nil
+		return time.Time{}, ErrAuthorizationForbidden
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()

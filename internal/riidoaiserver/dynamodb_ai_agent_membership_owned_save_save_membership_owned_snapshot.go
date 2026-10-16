@@ -52,6 +52,9 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 			}
 		}
 		if current != nil {
+			if err := mergeCommittedDeviceConnectionGrants(committed, &snapshot); err != nil {
+				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
+			}
 			if err := s.mergeCommittedOnboardingSnapshot(committed, &snapshot); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 			}

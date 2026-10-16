@@ -146,15 +146,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/devices", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/desktop-presence", token, "", http.StatusOK)
-	profileUploadBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/profile-thumbnails/uploads", token, `{"content_type":"image/jpeg","content_length_bytes":2048}`, http.StatusCreated)
-	var profileUpload AgentProfileThumbnailUploadResponse
-	aiAgentSmokeDecode(t, profileUploadBytes, &profileUpload)
-	if profileUpload.Method != http.MethodPost ||
-		profileUpload.FormFileField != "file" ||
-		!strings.HasPrefix(profileUpload.ProfileThumbnailURL, "https://cdn.example.test/thumbnail/ai/profile/") ||
-		!strings.HasSuffix(profileUpload.ProfileThumbnailURL, ".jpg") {
-		t.Fatalf("v2 profile thumbnail upload intent = %+v", profileUpload)
-	}
+	assertAIAgentV2SmokeProfileUpload(t, server, base, token)
 
 	fixtureCreateBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
 		Name:       "v2 smoke fixture agent",

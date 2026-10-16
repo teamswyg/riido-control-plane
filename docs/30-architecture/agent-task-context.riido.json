@@ -23,7 +23,12 @@
     "internal/riidoaiserver/task_conversation_context.go",
     "internal/riidoaiserver/task_conversation_messages.go",
     "internal/riidoaiserver/task_conversation_selection.go",
-    "internal/riidoaiserver/task_context_document_source.go"
+    "internal/riidoaiserver/task_context_document_source.go",
+    "internal/riidoaiserver/ai_agent_private_task_context_config.go",
+    "internal/riidoaiserver/agent_dashboard_task_context.go",
+    "internal/riidoaiserver/ai_agent_onboarding_task_provenance.go",
+    "cmd/riido_ai_server/task_context_config.go",
+    "cmd/riido_ai_server/task_context_private.go"
   ],
   "policy": {
     "identity": "same task/agent/conversation; latest directive authoritative",
@@ -41,7 +46,8 @@
     "followup_reads": "one canonical history read, no additional legacy thread-list read",
     "permissions": "no caller permission widening or anonymous fallback",
     "freshness": "fresh provider document when available; component fallback explicitly unconfirmed; no atomic cross-document claim",
-    "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed."
+    "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed.",
+    "graphql_metadata_endpoint": "Private viewer-authorized GraphQL metadata and onboarding provenance may use a separate monolith endpoint. When omitted, the previous REST base plus /graphql remains. REST component/document reads and shared client timeout/redirect policy are unchanged; endpoint userinfo/query/fragment are rejected by the existing URL validator."
   },
   "verification": {
     "synthetic_only": true,
@@ -58,7 +64,10 @@
       "TestTaskContextFallbackDocumentDoesNotClaimFreshness",
       "TestAnswerOnlyRequestsDoNotRequireIntentClarification",
       "TestEmptyHistoryRetainsPreviousFinalAnswer",
-      "TestEmptyRecentMessagesDoNotDisplaceUserRequirements"
+      "TestEmptyRecentMessagesDoNotDisplaceUserRequirements",
+      "TestAgentDashboardUsesSeparateGraphQLEndpoint",
+      "TestOnboardingProvenanceUsesSeparateGraphQLEndpoint",
+      "TestPrivateTaskContextGraphQLEndpointValidation"
     ]
   },
   "limits": [

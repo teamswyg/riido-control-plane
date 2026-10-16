@@ -8,9 +8,10 @@ func (s *PersistentAIAgentClientStore) EnrollDeviceCredential(ctx context.Contex
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return EnrollDeviceResponse{}, err
 	}
+	grantsBefore := s.desktopPresenceGrantCheckpoint()
 	response, err := s.DevelopmentAIAgentClientStore.EnrollDeviceCredential(ctx, principal, workspaceID, req)
 	if err != nil {
 		return response, err
 	}
-	return response, s.saveSnapshot(ctx)
+	return response, s.commitDesktopPresenceGrants(ctx, grantsBefore)
 }

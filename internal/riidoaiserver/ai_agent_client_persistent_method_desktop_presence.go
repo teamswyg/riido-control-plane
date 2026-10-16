@@ -13,23 +13,20 @@ import (
 // grants, so a desktop connection saved by another instance shows up on the
 // next poll; stores without a grants reader answer from memory.
 func (s *PersistentAIAgentClientStore) DesktopPresenceLastSeenAt(ctx context.Context, principal AuthorizationResult) (time.Time, error) {
-	lastSeenAt, err := s.DevelopmentAIAgentClientStore.DesktopPresenceLastSeenAt(ctx, principal)
+	if err := ctx.Err(); err != nil {
+		return time.Time{}, err
+	}
 	principalID := strings.TrimSpace(principal.PrincipalID)
-	if err != nil || principalID == "" {
-		return lastSeenAt, err
+	if principalID == "" {
+		return time.Time{}, ErrAuthorizationForbidden
 	}
 	reader, ok := s.snapshotStore.(deviceConnectionGrantsReader)
 	if !ok {
-		return lastSeenAt, nil
+		return s.DevelopmentAIAgentClientStore.DesktopPresenceLastSeenAt(ctx, principal)
 	}
 	grants, err := reader.loadDeviceConnectionGrants(ctx)
 	if err != nil {
 		return time.Time{}, err
 	}
-	for _, grant := range grants {
-		if strings.TrimSpace(grant.PrincipalID) == principalID && grant.LastSeenAt.After(lastSeenAt) {
-			lastSeenAt = grant.LastSeenAt.UTC()
-		}
-	}
-	return lastSeenAt, nil
+	return desktopPresenceFromGrants(grants, principalID)
 }
