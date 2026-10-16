@@ -53,8 +53,8 @@ func appendFollowupExecutionPolicy(b *strings.Builder) {
 
 func followupExecutionPolicyRules() []string {
 	return []string{
-		"The New User Instruction is authoritative for this run.",
-		"Re-read the latest Task Document before answering because it may have changed after the previous run.",
+		"The New User Instruction is authoritative for this run, including over earlier task intent gates and requests to modify files.",
+		"Use the supplied task document and recent conversation context. Fetch more only when needed context is missing or its stated freshness is insufficient for the current request.",
 		"Do not ask the user to click local CLI, desktop, or provider approval dialogs.",
 		"Do not ask conversational permission questions for file, shell, or tool execution; invoke the tool and let the structured daemon/control-plane approval channel decide.",
 		"Ask a conversational question only when task intent, business requirements, or missing context are ambiguous.",
