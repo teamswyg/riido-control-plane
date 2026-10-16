@@ -28,7 +28,11 @@ func (o *externalAuthorizerObservation) start(
 	return ctx, func(err error) {
 		duration := time.Since(started)
 		remaining := o.inFlight.Add(-1)
+		failureKind, responseError, upstreamStatus := externalAuthorizerFailureFields(err)
 		span.SetAttributes(
+			StringTraceAttribute("riido.external_authorizer.failure_kind", failureKind),
+			StringTraceAttribute("riido.external_authorizer.response_error", responseError),
+			Int64TraceAttribute("riido.external_authorizer.upstream_http_status", int64(upstreamStatus)),
 			StringTraceAttribute("riido.external_authorizer.outcome", externalAuthorizerOutcome(err)),
 			Int64TraceAttribute("riido.external_authorizer.duration_ms", duration.Milliseconds()),
 			Int64TraceAttribute("riido.external_authorizer.in_flight_remaining", remaining),
@@ -37,7 +41,7 @@ func (o *externalAuthorizerObservation) start(
 		FinishTraceSpan(span, err)
 		if duration >= externalAuthorizerSlowThreshold || externalAuthorizerLogFailure(err) {
 			outcome := externalAuthorizerOutcome(err)
-			log.Printf("event=external_authorizer_request outcome=%q error_type=%q failure_stage=%q retryable=%t resource=%q action=%q duration_ms=%d in_flight_at_start=%d in_flight_remaining=%d timeout_ms=%d", outcome, outcome, "authorize", externalAuthorizerRetryable(err), req.Resource, req.Action, duration.Milliseconds(), inFlight, remaining, timeout.Milliseconds())
+			log.Printf("event=external_authorizer_request outcome=%q error_type=%q failure_kind=%q response_error=%q upstream_http_status=%d failure_stage=%q retryable=%t resource=%q action=%q duration_ms=%d in_flight_at_start=%d in_flight_remaining=%d timeout_ms=%d", outcome, outcome, failureKind, responseError, upstreamStatus, "authorize", externalAuthorizerRetryable(err), req.Resource, req.Action, duration.Milliseconds(), inFlight, remaining, timeout.Milliseconds())
 		}
 	}
 }
