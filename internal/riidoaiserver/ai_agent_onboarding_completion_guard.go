@@ -62,11 +62,34 @@ func (s *DevelopmentAIAgentClientStore) markOnboardingCreatedAgentLocked(agentID
 	s.onboardingCreated[agentID] = true
 }
 
-func (s *DevelopmentAIAgentClientStore) markOnboardingCompletedLocked(agentID, taskID string) {
+func (s *DevelopmentAIAgentClientStore) markOnboardingCompletedLocked(agentID, taskID string, thread AIAgentTaskThreadRecord) {
 	if s.onboardingCompletions == nil {
 		s.onboardingCompletions = map[string]string{}
 	}
+	if s.onboardingCompletionThreads == nil {
+		s.onboardingCompletionThreads = map[string]AIAgentTaskThreadRecord{}
+	}
 	s.onboardingCompletions[agentID] = taskID
+	s.onboardingCompletionThreads[agentID] = copyTaskThread(thread)
+}
+
+// onboardingCompletionThreadLocked returns the completion thread for this agent and
+// task. It reads the live task history first. When that history has been truncated
+// past the completion thread, it uses the copy kept with the completion record. A
+// record for another task never matches.
+func (s *DevelopmentAIAgentClientStore) onboardingCompletionThreadLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
+	assignmentID := onboardingSeedAssignmentID(taskID, agentID)
+	if thread, ok := s.onboardingSeedThreadLocked(taskID, assignmentID); ok {
+		return thread, true
+	}
+	if s.onboardingCompletions[agentID] != taskID {
+		return AIAgentTaskThreadRecord{}, false
+	}
+	thread, ok := s.onboardingCompletionThreads[agentID]
+	if !ok || thread.TaskID != taskID || thread.AssignmentID != assignmentID {
+		return AIAgentTaskThreadRecord{}, false
+	}
+	return copyTaskThread(thread), true
 }
 
 func onboardingCreatedAgentIDsSnapshot(agents map[string]bool) []string {
@@ -88,10 +111,35 @@ func onboardingCreatedAgentsFromSnapshot(ids []string) map[string]bool {
 	return agents
 }
 
+// backfillOnboardingCreatedFromFixtureTmpColor marks agents whose tmp_color is one of
+// the onboarding fixture colors. Only the fixture-create path writes tmp_color: the
+// public create request has no tmp_color field, and the normal create path passes an
+// empty value. So this check proves fixture provenance for snapshots that predate
+// onboarding_created_agent_ids. Any other agent is left unmarked.
+func backfillOnboardingCreatedFromFixtureTmpColor(created map[string]bool, agents map[string]AgentClientRecord) {
+	fixtureColors := make(map[string]bool, len(aiAgentOnboardingFixtureTmpColors))
+	for _, color := range aiAgentOnboardingFixtureTmpColors {
+		fixtureColors[color] = true
+	}
+	for agentID, agent := range agents {
+		if fixtureColors[strings.TrimSpace(agent.TmpColor)] {
+			created[agentID] = true
+		}
+	}
+}
+
 func cloneOnboardingCompletedTasks(input map[string]string) map[string]string {
 	result := make(map[string]string, len(input))
 	for agentID, taskID := range input {
 		result[agentID] = taskID
+	}
+	return result
+}
+
+func cloneOnboardingCompletionThreads(input map[string]AIAgentTaskThreadRecord) map[string]AIAgentTaskThreadRecord {
+	result := make(map[string]AIAgentTaskThreadRecord, len(input))
+	for agentID, thread := range input {
+		result[agentID] = copyTaskThread(thread)
 	}
 	return result
 }

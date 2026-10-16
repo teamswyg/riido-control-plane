@@ -45,6 +45,7 @@ func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([
 		{name: dynamoDBAIAgentClientSnapshotPartEvents, value: snapshot.Events},
 		{name: dynamoDBAIAgentClientSnapshotPartOnboardingCreated, value: snapshot.OnboardingCreatedIDs},
 		{name: dynamoDBAIAgentClientSnapshotPartOnboardingDone, value: snapshot.OnboardingCompletions},
+		{name: dynamoDBAIAgentClientSnapshotPartOnboardingThreads, value: snapshot.OnboardingCompletionThreads},
 	}
 	parts := make([]dynamoDBAIAgentClientSnapshotPart, 0, len(values))
 	for _, value := range values {

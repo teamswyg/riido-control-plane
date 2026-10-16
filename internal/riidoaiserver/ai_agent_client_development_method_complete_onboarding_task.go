@@ -46,7 +46,7 @@ func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx contex
 		}
 	}
 	assignmentID := onboardingSeedAssignmentID(taskID, agent.AgentID)
-	if thread, ok := s.onboardingSeedThreadLocked(taskID, assignmentID); ok {
+	if thread, ok := s.onboardingCompletionThreadLocked(taskID, agent.AgentID); ok {
 		return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(thread, principal.WorkspaceID)), nil
 	}
 	if err := s.checkOnboardingCompletionEligibleLocked(taskID, agent.AgentID); err != nil {
@@ -71,11 +71,11 @@ func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx contex
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.dropTaskThreadHistoryCacheLocked(response.ThreadID)
 	s.appendAgentTaskActionEvent(response)
-	s.markOnboardingCompletedLocked(agent.AgentID, taskID)
 	stored, ok := s.onboardingSeedThreadLocked(taskID, assignmentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, errors.New("onboarding completion thread was not recorded")
 	}
+	s.markOnboardingCompletedLocked(agent.AgentID, taskID, stored)
 	return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(stored, principal.WorkspaceID)), nil
 }
 

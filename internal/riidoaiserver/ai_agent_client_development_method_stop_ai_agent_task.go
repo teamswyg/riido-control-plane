@@ -74,6 +74,6 @@ func (s *DevelopmentAIAgentClientStore) stopTargetsOnboardingCompletionLocked(ta
 	if assignmentID != "" {
 		return false
 	}
-	_, ok := s.onboardingSeedThreadLocked(taskID, onboardingSeedAssignmentID(taskID, agentID))
+	_, ok := s.onboardingCompletionThreadLocked(taskID, agentID)
 	return ok
 }

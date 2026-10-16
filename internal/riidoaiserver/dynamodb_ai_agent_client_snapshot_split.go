@@ -16,6 +16,7 @@ const (
 	dynamoDBAIAgentClientSnapshotPartEvents               = "EVENTS"
 	dynamoDBAIAgentClientSnapshotPartOnboardingCreated    = "ONBOARDING_CREATED_IDS"
 	dynamoDBAIAgentClientSnapshotPartOnboardingDone       = "ONBOARDING_COMPLETIONS"
+	dynamoDBAIAgentClientSnapshotPartOnboardingThreads    = "ONBOARDING_COMPLETION_THREADS"
 )
 
 var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
@@ -33,6 +34,7 @@ var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
 var dynamoDBAIAgentClientSnapshotOptionalPartNames = []string{
 	dynamoDBAIAgentClientSnapshotPartOnboardingCreated,
 	dynamoDBAIAgentClientSnapshotPartOnboardingDone,
+	dynamoDBAIAgentClientSnapshotPartOnboardingThreads,
 	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts,
 	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships,
 	dynamoDBAIAgentClientSnapshotPartDeviceConnections,

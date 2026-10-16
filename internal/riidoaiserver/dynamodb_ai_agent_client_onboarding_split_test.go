@@ -16,6 +16,7 @@ func onboardingSplitItemsWithoutOnboardingParts(t *testing.T, items []map[string
 	dropped := map[string]bool{
 		dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartOnboardingCreated): true,
 		dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartOnboardingDone):    true,
+		dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartOnboardingThreads): true,
 	}
 	var out []map[string]map[string]string
 	for _, item := range items {
@@ -30,6 +31,7 @@ func onboardingSplitItemsWithoutOnboardingParts(t *testing.T, items []map[string
 			}
 			delete(hashes, dynamoDBAIAgentClientSnapshotPartOnboardingCreated)
 			delete(hashes, dynamoDBAIAgentClientSnapshotPartOnboardingDone)
+			delete(hashes, dynamoDBAIAgentClientSnapshotPartOnboardingThreads)
 			copied := map[string]map[string]string{}
 			for k, v := range item {
 				copied[k] = v
@@ -77,6 +79,9 @@ func TestDynamoDBSplitSnapshotRoundTripsOnboardingState(t *testing.T) {
 	}
 	if !reflect.DeepEqual(decoded.OnboardingCompletions, snapshot.OnboardingCompletions) {
 		t.Fatalf("completions = %v, want %v", decoded.OnboardingCompletions, snapshot.OnboardingCompletions)
+	}
+	if len(decoded.OnboardingCompletionThreads) != 1 || decoded.OnboardingCompletionThreads[created.Agent.AgentID].TaskID != "task-split-1" {
+		t.Fatalf("completion threads = %+v, want one thread for task-split-1", decoded.OnboardingCompletionThreads)
 	}
 
 	// The restored store keeps provenance and the one-time rule.

@@ -30,4 +30,7 @@ type DevelopmentAIAgentClientStore struct {
 	profileColorIndex       func(n int) int
 	onboardingCreated       map[string]bool
 	onboardingCompletions   map[string]string
+	// onboardingCompletionThreads keeps the completion thread per agent, so a repeat
+	// completion can be answered after the task thread list is truncated.
+	onboardingCompletionThreads map[string]AIAgentTaskThreadRecord
 }
