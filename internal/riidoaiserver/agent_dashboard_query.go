@@ -21,7 +21,7 @@ func buildAgentDashboard(agent AgentClientRecord, history AgentDashboardHistory,
 			continue
 		}
 		assignment := run.Assignment
-		item := AgentDashboardTask{AgentID: assignment.AgentID, TaskID: assignment.TaskID, AssignmentID: assignment.ID, RunID: "run-" + assignment.ID, Title: task.Title, KeyNumber: task.KeyNumber, State: string(assignment.State), Message: run.Message, ConfirmationReason: string(assignment.ConfirmationReason), QueuePosition: run.QueuePosition, QueuedAt: assignment.CreatedAt, StartedAt: run.StartedAt, EndedAt: run.EndedAt}
+		item := AgentDashboardTask{CreatedBy: assignment.CreatedBy, AgentID: assignment.AgentID, TaskID: assignment.TaskID, AssignmentID: assignment.ID, RunID: "run-" + assignment.ID, Title: task.Title, KeyNumber: task.KeyNumber, State: string(assignment.State), Message: run.Message, ConfirmationReason: string(assignment.ConfirmationReason), QueuePosition: run.QueuePosition, QueuedAt: assignment.CreatedAt, StartedAt: run.StartedAt, EndedAt: run.EndedAt}
 		if !assignment.CreatedAt.IsZero() && (out.ObservedSince == nil || assignment.CreatedAt.Before(*out.ObservedSince)) {
 			at := assignment.CreatedAt
 			out.ObservedSince = &at

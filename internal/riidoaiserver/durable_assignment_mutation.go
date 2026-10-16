@@ -10,12 +10,15 @@ var errAssignmentProjectionConflict = errors.New("assignment changed concurrentl
 
 // Cancellation and daemon events share a conditional operation+projection commit.
 // Nothing is broadcast before the durable write has won the race.
-func (s *Store) mutateDurableAssignment(state *storeState, id string, kind AssignmentOperationType, mutate func(*Store, *storeState) (Assignment, error), observe ...func(TaskEvent)) (Assignment, error) {
+func (s *Store) mutateDurableAssignment(ctx context.Context, state *storeState, id string, kind AssignmentOperationType, mutate func(*Store, *storeState) (Assignment, error), observe ...func(TaskEvent)) (Assignment, error) {
 	reader := s.operationStore.(AssignmentProjectionReader)
 	for range 3 {
-		expected, found, err := reader.LoadAssignmentProjection(context.Background(), id)
-		if err != nil {
+		if err := ctx.Err(); err != nil {
 			return Assignment{}, err
+		}
+		expected, found, err := reader.LoadAssignmentProjection(ctx, id)
+		if err != nil {
+			return Assignment{}, assignmentDependencyFailure(err)
 		}
 		if !found {
 			return Assignment{}, fmt.Errorf("assignment %s not found", id)
@@ -29,6 +32,8 @@ func (s *Store) mutateDurableAssignment(state *storeState, id string, kind Assig
 		quiet := *s
 		quiet.outbox = nil
 		quiet.recoveryFence = expected.Recovery
+		quiet.eventACKFence = expected.EventACKs
+		quiet.eventACK = nil
 		assignment, err := mutate(&quiet, &trial)
 		if err != nil {
 			return Assignment{}, err
@@ -43,17 +48,23 @@ func (s *Store) mutateDurableAssignment(state *storeState, id string, kind Assig
 			OperationID:   assignmentOperationID(kind, assignment, events),
 			OperationType: kind, TaskID: assignment.TaskID, AssignmentID: assignment.ID,
 			AgentID: assignment.AgentID, Assignment: assignment, Events: events,
-			RecordedAt: s.now(), ExpectedProjection: &expected,
+			RecordedAt: s.now(), ExpectedProjection: &expected, eventACK: quiet.eventACK,
 		}
-		err = s.operationStore.SaveAssignmentOperation(context.Background(), record)
+		if _, err := encodeAssignmentEventACKs(record); err != nil {
+			return Assignment{}, err
+		}
+		if err := ctx.Err(); err != nil {
+			return Assignment{}, err
+		}
+		err = s.operationStore.SaveAssignmentOperation(ctx, record)
 		if errors.Is(err, errAssignmentProjectionConflict) {
 			continue
 		}
 		if err != nil {
-			return Assignment{}, err
+			return Assignment{}, assignmentDependencyFailure(err)
 		}
 		if err = s.saveSnapshot(&trial); err != nil {
-			return Assignment{}, err
+			return Assignment{}, assignmentDependencyFailure(err)
 		}
 		applyAssignmentToState(state, assignment)
 		state.agentEventsTotal = trial.agentEventsTotal

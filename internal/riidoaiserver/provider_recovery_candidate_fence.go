@@ -8,15 +8,15 @@ import (
 )
 
 // A stored opt-in is not proof that a provider is still safe to dispatch now.
-func (s *Store) recheckRecoveryCandidate(current Assignment, provider string) error {
+func (s *Store) recheckRecoveryCandidate(ctx context.Context, current Assignment, provider string) error {
 	client, ok := s.agentRegistry.(AIAgentClientStore)
 	if !ok {
 		return errors.New("current provider recovery inventory is unavailable")
 	}
 	principal := AuthorizationResult{PrincipalID: current.CreatedBy, WorkspaceID: current.WorkspaceID}
-	agents, err := client.ListAIAgentTaskAssignableAgents(context.Background(), principal, current.TaskID)
+	agents, err := client.ListAIAgentTaskAssignableAgents(ctx, principal, current.TaskID)
 	if err != nil {
-		return err
+		return assignmentDependencyFailure(err)
 	}
 	selected, err := selectAssignableAgent(agents.Agents, current.AgentID)
 	if err != nil {
@@ -39,6 +39,6 @@ func (s *Store) recheckRecoveryCandidate(current Assignment, provider string) er
 	if len(policy.Fallbacks) != 1 {
 		return errors.New("provider recovery candidate was not approved")
 	}
-	_, err = (Server{aiAgent: client}).authorizeRecoveryPolicy(context.Background(), principal, selected, binding, current.AllowExperimentalRuntime, policy)
+	_, err = (Server{aiAgent: client}).authorizeRecoveryPolicy(ctx, principal, selected, binding, current.AllowExperimentalRuntime, policy)
 	return err
 }

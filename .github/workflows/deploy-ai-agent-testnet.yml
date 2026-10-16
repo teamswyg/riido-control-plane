@@ -166,6 +166,7 @@ jobs:
           docker buildx create --use --name riido-runtime-builder
           docker buildx build \
             --file packaging/containers/riido_ai_server.Dockerfile \
+            --build-arg "RIIDO_SOURCE_REVISION=${GITHUB_SHA}" \
             --tag "$tagged_image" \
             --cache-from "type=gha,scope=${cache_scope}" \
             --cache-to "type=gha,mode=max,scope=${cache_scope}" \

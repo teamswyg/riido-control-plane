@@ -14,6 +14,9 @@ type Store struct {
 	operationMetrics    *StoreOperationMetrics
 	traceRecorder       TraceRecorder
 	recoveryFence       *recoveryWatermark
+	recoveryApproval    *recoveryCandidateApproval
+	eventACKFence       []assignmentEventACKReceipt
+	eventACK            *assignmentEventACKReceipt
 
 	taskAgentExecutionGate taskAgentExecutionGate
 }

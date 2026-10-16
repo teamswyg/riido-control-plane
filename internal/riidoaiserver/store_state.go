@@ -13,6 +13,7 @@ type storeState struct {
 	providerStatuses        map[string]ProviderStatusSyncResponse
 	agentCatalog            map[string]AgentCatalogRecord
 	events                  map[string][]TaskEvent
+	assignmentEventACKs     map[string][]assignmentEventACKReceipt
 	subscribers             map[string]map[int64]chan TaskEvent
 	agentWaiters            map[string]map[int64]chan struct{}
 	toolApprovals           map[string]ToolApprovalRequest

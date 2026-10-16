@@ -48,7 +48,11 @@ func (s *conditionalTestOperations) SaveAssignmentOperation(_ context.Context, r
 	if err != nil {
 		return err
 	}
-	s.projection = AssignmentProjection{Assignment: record.Assignment, LastEventSeq: assignmentOperationLastEventSeq(record), Recovery: watermark}
+	acks, err := assignmentEventACKsForRecord(record)
+	if err != nil {
+		return err
+	}
+	s.projection = AssignmentProjection{Assignment: record.Assignment, LastEventSeq: assignmentOperationLastEventSeq(record), Recovery: watermark, EventACKs: acks}
 	return nil
 }
 

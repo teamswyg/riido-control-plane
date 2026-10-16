@@ -12,24 +12,16 @@ func appendTaskConversationContext(out *strings.Builder, thread AIAgentTaskThrea
 	remaining := conversationContextLimit
 	for i := len(messages) - 1; i >= start && remaining > 128; i-- {
 		message := messages[i]
-		body := message.Body
-		format := "message"
-		if message.Role == AIAgentTaskThreadMessageRoleAgent {
-			if message.ResultMessage != "" {
-				body = message.ResultMessage
-				format = "markdown"
-			}
-		}
-		text := taskContextText(body, format, min(2000, remaining-64))
-		if format == "message" {
-			text = taskMessageContextText(body, min(2000, remaining-64))
-		}
+		text := taskConversationMessageText(message, min(2000, remaining-64))
 		if text == "" {
 			continue
 		}
 		part := "\n### Previous " + string(message.Role) + " message\n" + text + "\n"
 		parts = append(parts, part)
 		remaining -= len([]rune(part))
+	}
+	if len(parts) == 0 {
+		return false
 	}
 	out.WriteString("\n\n## Recent conversation context\nReference history; the New User Instruction below is authoritative.\n")
 	if len(parts) < len(messages) {
@@ -39,4 +31,13 @@ func appendTaskConversationContext(out *strings.Builder, thread AIAgentTaskThrea
 		out.WriteString(parts[i])
 	}
 	return true
+}
+
+// Keep the eligibility filter and final rendering identical so empty rich-text
+// status rows cannot consume the finite recent-message budget.
+func taskConversationMessageText(message AIAgentTaskThreadHistoryMessage, limit int) string {
+	if message.Role == AIAgentTaskThreadMessageRoleAgent && message.ResultMessage != "" {
+		return taskContextText(message.ResultMessage, "markdown", limit)
+	}
+	return taskMessageContextText(message.Body, limit)
 }

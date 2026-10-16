@@ -40,7 +40,8 @@
     "format": "readable HTML-to-text; valid Unicode; head/tail truncation marked",
     "followup_reads": "one canonical history read, no additional legacy thread-list read",
     "permissions": "no caller permission widening or anonymous fallback",
-    "freshness": "fresh provider document when available; component fallback explicitly unconfirmed; no atomic cross-document claim"
+    "freshness": "fresh provider document when available; component fallback explicitly unconfirmed; no atomic cross-document claim",
+    "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed."
   },
   "verification": {
     "synthetic_only": true,
@@ -54,7 +55,10 @@
       "TestFollowupBudgetKeepsRecentHistoryAndRejectsCrossTaskSelection",
       "TestTaskContextManifestBudgetsMatchRuntime",
       "TestTaskContextResourceIdentityAndIncompleteURLsStayExplicit",
-      "TestTaskContextFallbackDocumentDoesNotClaimFreshness"
+      "TestTaskContextFallbackDocumentDoesNotClaimFreshness",
+      "TestAnswerOnlyRequestsDoNotRequireIntentClarification",
+      "TestEmptyHistoryRetainsPreviousFinalAnswer",
+      "TestEmptyRecentMessagesDoNotDisplaceUserRequirements"
     ]
   },
   "limits": [

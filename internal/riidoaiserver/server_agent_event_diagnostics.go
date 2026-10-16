@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"errors"
 	"log"
+	"net/http"
 	"strings"
 )
 
@@ -16,9 +17,14 @@ const (
 	agentEventErrorCategoryBadRequest         = "bad_request"
 )
 
-func logAgentEventRejected(agentID string, req AgentEventRequest, err error) {
+func logAgentEventRejected(agentID string, req AgentEventRequest, err error, statuses ...int) {
+	status := http.StatusBadRequest
+	if len(statuses) > 0 {
+		status = statuses[0]
+	}
 	log.Printf(
-		"event=agent_event_rejected route=/v1/agents/{agent_id}/events status=400 agent_id=%q assignment_id=%q event_type=%q requested_state=%q event_error_category=%q",
+		"event=agent_event_rejected route=/v1/agents/{agent_id}/events status=%d agent_id=%q assignment_id=%q event_type=%q requested_state=%q event_error_category=%q",
+		status,
 		strings.TrimSpace(agentID),
 		strings.TrimSpace(req.AssignmentID),
 		strings.TrimSpace(req.EventType),
@@ -30,6 +36,10 @@ func logAgentEventRejected(agentID string, req AgentEventRequest, err error) {
 func agentEventErrorCategory(err error) string {
 	if err == nil {
 		return agentEventErrorCategoryBadRequest
+	}
+	var dependency assignmentDependencyError
+	if errors.As(err, &dependency) {
+		return agentEventErrorCategoryStoreFailure
 	}
 	message := err.Error()
 	switch {

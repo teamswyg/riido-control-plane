@@ -45,6 +45,7 @@ type httpTransactionKey struct {
 	route         string
 	clientSurface string
 	statusCode    int
+	durationKind  string
 }
 
 type httpTransactionBucket struct {

@@ -3390,6 +3390,10 @@
         {
           "name": "duration_seconds",
           "type": "integer"
+        },
+        {
+          "name": "created_by",
+          "type": "string"
         }
       ]
     },

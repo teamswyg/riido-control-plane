@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"net/http"
+	"time"
 )
 
 func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID string) {
@@ -17,10 +18,12 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	receivedAt := time.Now()
 	response, err := s.assignment.RecordAgentEvent(r.Context(), agentID, req)
 	if err != nil {
-		logAgentEventRejected(agentID, req, err)
-		writeError(w, http.StatusBadRequest, err.Error())
+		status, message := agentEventErrorResponse(err)
+		logAgentEventRejected(agentID, req, err, status)
+		writeError(w, status, message)
 		return
 	}
 	if recorder, ok := s.aiAgent.(AIAgentAssignmentEventRecorder); ok {
@@ -29,5 +32,6 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 			return
 		}
 	}
+	logAgentResponseDelivery(req, response, receivedAt, time.Now())
 	writeJSON(w, http.StatusOK, response)
 }

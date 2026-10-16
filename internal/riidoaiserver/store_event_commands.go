@@ -3,10 +3,11 @@ package riidoaiserver
 import "context"
 
 type eventCmd struct {
-	ctx     context.Context
-	agentID string
-	req     AgentEventRequest
-	reply   chan eventResult
+	ctx      context.Context
+	approval *recoveryCandidateApproval
+	agentID  string
+	req      AgentEventRequest
+	reply    chan eventResult
 }
 
 type eventResult struct {

@@ -35,7 +35,7 @@ Runtime env reads: `54`; manifest entries: `54`; secret/credential entries: `8`;
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | `disabled` | `public` | Positive stdout CloudWatch EMF publish interval. |
 | `RIIDO_AI_SERVER_PPROF_ADDR` | `disabled` | `operator` | Optional loopback-only pprof listener address. |
 | `RIIDO_AI_SERVER_TRACING_ENABLED` | `false` | `public` | Opt-in OpenTelemetry trace export switch. |
-| `RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO` | `0.01` | `public` | Trace sampling ratio from 0 to 1. |
+| `RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO` | `0.01` | `public` | Finite trace sampling ratio from 0 to 1; NaN and infinities are rejected. |
 | `RIIDO_AI_SERVER_OTEL_EXPORTER_OTLP_ENDPOINT` | `empty` | `operator` | Riido-specific OTLP/HTTP collector endpoint override. |
 | `RIIDO_AI_SERVER_TRACING_SERVICE_NAME` | `riido_ai_server` | `public` | OpenTelemetry service.name override. |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | `empty` | `public` | Comma-separated exact browser origins allowed by CORS. |
@@ -73,7 +73,7 @@ Runtime env reads: `54`; manifest entries: `54`; secret/credential entries: `8`;
 
 ## Runtime Rules
 
-Every runtime env read by cmd/riido_ai_server must appear exactly once in this manifest.; Generated docs must not contain live values, account ids, raw tokens, or deployment evidence.; Secret or credential env vars may document names and semantics only, never values.; Profile thumbnail configuration signs upload intents; image bytes are never proxied by control-plane.; Tracing metadata must use route patterns and operation names only, not task ids, prompts, credentials, or raw content.; Public PR checks must not require AWS credentials or Terraform state..
+Every runtime env read by cmd/riido_ai_server must appear exactly once in this manifest.; Generated docs must not contain live values, account ids, raw tokens, or deployment evidence.; Secret or credential env vars may document names and semantics only, never values.; Profile thumbnail configuration signs upload intents; image bytes are never proxied by control-plane.; Tracing metadata must use route patterns and operation names only, not task ids, prompts, credentials, or raw content.; Public PR checks must not require AWS credentials or Terraform state.; service.version is a validated 40-character source revision embedded by the image workflow; dirty, invalid or unversioned builds report unknown without exporting environment or filesystem paths.; SSE stream_open, stream_closed and terminal_delivery logs reference short completed observation spans rather than waiting for the long-lived connection span; actual X-Ray retention and joins require deployment evidence..
 
 ## Evidence Loop
 

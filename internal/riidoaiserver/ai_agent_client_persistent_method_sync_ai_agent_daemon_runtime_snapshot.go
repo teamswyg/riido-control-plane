@@ -3,7 +3,9 @@ package riidoaiserver
 import "context"
 
 func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx context.Context, principal AuthorizationResult, req DeviceRuntimeSnapshotSyncRequest) (DeviceRuntimeSnapshotSyncResponse, error) {
-	s.operationMu.Lock()
+	if err := s.lockOperationContext(ctx); err != nil {
+		return DeviceRuntimeSnapshotSyncResponse{}, err
+	}
 	defer s.operationMu.Unlock()
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return DeviceRuntimeSnapshotSyncResponse{}, err

@@ -50,11 +50,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	if component.Title == "" && document.Content == "" {
 		return AIAgentAssignmentPrompt{}, errors.New("task context title or document content is required")
 	}
-	intentDocument := document
-	if instruction := strings.TrimSpace(input.UserInstruction); instruction != "" {
-		intentDocument.Content += "\n" + instruction
-	}
-	intentClass := classifyTaskContextIntent(component, intentDocument)
+	intentClass := classifyTaskContextIntent(component, document, input.UserInstruction)
 
 	var builder strings.Builder
 	builder.WriteString("# Riido AI Agent Assignment\n\n")

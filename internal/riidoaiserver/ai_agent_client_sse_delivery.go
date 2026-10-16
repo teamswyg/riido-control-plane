@@ -47,6 +47,8 @@ func logAIAgentClientTerminalDelivery(phase string, event ClientStreamEvent, wor
 	if len(contexts) > 0 {
 		ctx = contexts[0]
 	}
+	ctx, span := startSSEObservation(ctx, "terminal_delivery", StringTraceAttribute("riido.sse.delivery_phase", boundedTerminalPhase(phase)), StringTraceAttribute("riido.assignment.state", boundedTerminalState(progress.AssignmentState)))
+	defer span.End()
 	traceID, spanID := traceCorrelationFromContext(ctx)
 	log.Printf(
 		"riido_ai_agent_sse event=terminal_delivery phase=%q workspace_ref=%q assignment_ref=%q thread_ref=%q run_ref=%q state=%q trace_id=%q span_id=%q",

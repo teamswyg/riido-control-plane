@@ -44,7 +44,10 @@ func boundedRequestFailureType(err error) string {
 		var timeout net.Error
 		var syntax *json.SyntaxError
 		var tooLarge *http.MaxBytesError
+		var snapshotValidation runtimeSnapshotValidationError
 		switch {
+		case errors.As(err, &snapshotValidation):
+			return "invalid_runtime_snapshot"
 		case errors.As(err, &timeout) && timeout.Timeout():
 			return "timeout"
 		case errors.Is(err, io.EOF), errors.Is(err, io.ErrUnexpectedEOF):
