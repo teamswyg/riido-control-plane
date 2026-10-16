@@ -114,13 +114,13 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 		},
 	})
 	if err != nil {
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: encode external authorizer request: %w", err)
+		return AuthorizationResult{}, externalAuthorizerFailed("internal", "none", 0, fmt.Errorf("riidoaiserver: encode external authorizer request: %w", err))
 	}
 	requestCtx, cancel := context.WithTimeout(ctx, a.timeout)
 	defer cancel()
 	httpReq, err := http.NewRequestWithContext(requestCtx, http.MethodPost, a.endpoint, bytes.NewReader(payload))
 	if err != nil {
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: create external authorizer request: %w", err)
+		return AuthorizationResult{}, externalAuthorizerFailed("internal", "none", 0, fmt.Errorf("riidoaiserver: create external authorizer request: %w", err))
 	}
 	httpReq.Header.Set("Accept", "application/json")
 	httpReq.Header.Set("Content-Type", "application/json")
@@ -131,7 +131,7 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 
 	resp, err := a.httpClient.Do(httpReq)
 	if err != nil {
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: external authorizer request failed: %w", err)
+		return AuthorizationResult{}, externalAuthorizerFailed("transport", "none", 0, fmt.Errorf("riidoaiserver: external authorizer request failed: %w", err))
 	}
 	defer resp.Body.Close()
 	switch resp.StatusCode {
@@ -144,32 +144,32 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 1024))
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: external authorizer returned HTTP %d", resp.StatusCode)
+		return AuthorizationResult{}, externalAuthorizerFailed("upstream_http", "none", resp.StatusCode, fmt.Errorf("riidoaiserver: external authorizer returned HTTP %d", resp.StatusCode))
 	}
 
 	var out externalAuthorizerResponse
 	dec := json.NewDecoder(io.LimitReader(resp.Body, 1<<20))
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&out); err != nil {
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: decode external authorizer response: %w", err)
+		return AuthorizationResult{}, externalAuthorizerFailed("invalid_response", "decode", resp.StatusCode, fmt.Errorf("riidoaiserver: decode external authorizer response: %w", err))
 	}
 	var extra struct{}
 	if err := dec.Decode(&extra); err != io.EOF {
-		return AuthorizationResult{}, errors.New("riidoaiserver: decode external authorizer response: trailing data")
+		return AuthorizationResult{}, externalAuthorizerFailed("invalid_response", "decode", resp.StatusCode, errors.New("riidoaiserver: decode external authorizer response: trailing data"))
 	}
 	if out.SchemaVersion != ExternalAuthorizerResponseSchemaVersion {
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: unsupported external authorizer schema_version %q", out.SchemaVersion)
+		return AuthorizationResult{}, externalAuthorizerFailed("invalid_response", "schema", resp.StatusCode, fmt.Errorf("riidoaiserver: unsupported external authorizer schema_version %q", out.SchemaVersion))
 	}
 	if !out.Allowed {
 		return AuthorizationResult{}, ErrAuthorizationForbidden
 	}
 	out.PrincipalID = strings.TrimSpace(out.PrincipalID)
 	if out.PrincipalID == "" {
-		return AuthorizationResult{}, errors.New("riidoaiserver: external authorizer principal_id is required when allowed")
+		return AuthorizationResult{}, externalAuthorizerFailed("invalid_response", "contract", resp.StatusCode, errors.New("riidoaiserver: external authorizer principal_id is required when allowed"))
 	}
 	roles, err := normalizeAgentCatalogRoles(out.Roles)
 	if err != nil {
-		return AuthorizationResult{}, fmt.Errorf("riidoaiserver: external authorizer roles: %w", err)
+		return AuthorizationResult{}, externalAuthorizerFailed("invalid_response", "contract", resp.StatusCode, fmt.Errorf("riidoaiserver: external authorizer roles: %w", err))
 	}
 	return AuthorizationResult{PrincipalID: out.PrincipalID, WorkspaceID: strings.TrimSpace(req.WorkspaceID), Roles: roles}, nil
 }
