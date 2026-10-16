@@ -5556,7 +5556,7 @@
     {
       "id": "thread_history_user_followup_retention_loop",
       "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, can lose the actual reply author when another workspace member writes inside the thread, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide. RIID-5820: execution evidence also disappeared in v3 cold history because only message fields were projected. RIID-5819 acceptance found that the first SaaS assignment persisted a native session but its same-thread HTTP follow-up omitted ResumeSessionID, creating another provider session/clone. Existing tests manually supplied resume IDs and missed the API boundary.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent \ud2f0\ud0a4\ud0c0\uce74 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior. Carry the exact authorized selected terminal assignment native identity into a new explicit follow-up, preserving provider/model/worktree/current-owner guards and daemon-local retained binding; classify unavailable durable authority as retryable rather than a fresh-session success.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior. Carry the exact authorized selected terminal assignment native identity into a new explicit follow-up, preserving provider/model/worktree/current-owner guards and daemon-local retained binding; classify unavailable durable authority as retryable rather than a fresh-session success.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -13033,7 +13033,7 @@
     },
     {
       "id": "notion_qa_intent_waiting_copy_loop",
-      "observation": "Notion QA feedback said the waiting_for_user copy '\uc5b4\ub5a4 \uc791\uc5c5\ubd80\ud130 \uc9c4\ud589\ud560\uae4c\uc694?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
+      "observation": "Notion QA feedback said the waiting_for_user copy '어떤 작업부터 진행할까요?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
       "hypothesis": "Keeping the same waiting_for_user state contract while changing the server-visible needs_input copy and prompt clarification example can preserve the intent gate but make the AI thread feel like it reviewed the task and is asking for desired output or direction.",
       "claims": [
         "ambiguous_task_context_must_ask_before_work",
@@ -13108,13 +13108,13 @@
           "redacted": true
         }
       ],
-      "decision": "The server now returns '\uc791\uc5c5 \ub0b4\uc6a9\uc744 \ud655\uc778\ud588\uc5b4\uc694. \uc6d0\ud558\ub294 \uacb0\uacfc\ubb3c\uc774\ub098 \ubc29\ud5a5\uc744 \ub313\uae00\ub85c \uc54c\ub824\uc8fc\uc138\uc694.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
+      "decision": "The server now returns '작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
       "id": "notion_p0_server_status_transfer_loop",
-      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][\uc9c4\ud589\uc911]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
-      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][\uc644\ub8cc][\uc804\ub2ec\uc694\uccad] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
+      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][진행중]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
+      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][완료][전달요청] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate"
@@ -16641,7 +16641,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile\ubcc4 daemon list handoff without changing v3 thread history semantics.",
+      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile별 daemon list handoff without changing v3 thread history semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -24009,6 +24009,230 @@
         }
       ],
       "decision": "New assignments execute without automatic first-response intent gating. Task body, explicit instruction and verified comment text remain in one assignment; retries reuse its identity. Genuine provider needs_input and legacy waiting threads still work. No extra classifier/reviewer call or daemon/client code change. Supersedes historical ask-before-work decisions, including task_context_composition_intent_gate_coverage_loop.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "web_onboarding_desktop_presence_loop",
+      "observation": "RIID-5854 web onboarding must notice when the user opens the desktop app with the same account, but bootstrap has_live_my_device turns on only after runtime discovery, device records carry no creation time, and a reinstall keeps the same device ID. Local review of a reload-based read found that the one-minute snapshot reload hid connections saved by another instance, faster full reloads replaced unsaved daemon heartbeats, and loading the whole snapshot outside operationMu advanced DynamoDB part hashes used by concurrent save fences. Independent local native-Dynamo regression reproduced uncommitted memory winning over durable absence and stale ordinary profile writers erasing a saved connection. Failed connect/enroll grants also needed a scoped rollback and explicit modern empty-array restart semantics.",
+      "hypothesis": "A committed-only same-account grant query with fixed safe dependency failures, validated bounded single-part reads, cancellation-aware cached credentials, grant rollback and append-only CAS preservation keeps the polling endpoint fast without inventing online or credential-validity semantics.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "react_query_generator_must_preserve_generated_client_surface",
+        "desktop_presence_must_observe_committed_account_connections"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_desktop_presence_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_desktop_presence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_workspace_http.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/desktop_presence_grants.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/desktop_presence_grant_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_credentials.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_inline.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_legacy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read_keys.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_connect_ai_agent_device.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_enroll_device_credential.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/deploy-ai-agent-testnet.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_credentials_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/reactquerygen"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_profile_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence_committed_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_desktop_presence_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_credentials_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_integrity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_desktop_presence_legacy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_presence_failed_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_presence_empty_restart_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Use the durable grants reader when available, with memory fallback only for unsupported stores. Keep a normal single strong GetItem because snapshot CURRENT and changed parts commit atomically. Validate part envelope/hash/JSON/identity, bound decoded data to 16MiB, inspect CURRENT only on part absence for inline legacy compatibility, and preserve read errors as 503/504/408. Preserve append-only grants under existing CURRENT CAS and restore grant-only memory state after a failed connect/enroll save. Explicit [] survives inline/file JSON; nil alone selects legacy credential backfill. Pre-grant split history, device/credential concurrency, historical revocation and server clock skew remain explicit limits. No bootstrap, SSE, web or desktop behavior is changed. The existing authenticated staging deployment smoke also checks desktop-presence response key allowlist and UTC timestamp shape without printing credentials or response bodies.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "denied_request_finite_credential_diagnostics_loop",
+      "observation": "Natural production task-thread subscription requests returned 401, but existing safe authorization logs could not distinguish missing, opaque, oversized or unverified JWT-shaped credential input. No valid-credential rejection or actual expiry root cause was established from the earlier finite logs.",
+      "hypothesis": "After denial, bounded local shape inspection can emit only fixed enums for token source, format, unverified expiry hint and dual-header equality, improving diagnosis without accepting, refreshing or transmitting credentials.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/request_failure_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_token_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_jwt_payload_observation.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/request-authorization.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_token_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_token_observation_bounds_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Preserve existing authentication decisions, token precedence and HTTP status. Denied request logs gain only allowlisted enums; payload decoding has fixed byte/field bounds and unverified hints never prove expiry, authorize another token or trigger client recovery. Synthetic secret-bearing regression cases check output privacy. Historical 401 cause and client renewal behavior remain separate from this diagnostic-only server change.",
       "next_loop": "closed_loop_candidate"
     }
   ],

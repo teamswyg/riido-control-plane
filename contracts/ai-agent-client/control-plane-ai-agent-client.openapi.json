@@ -2912,6 +2912,71 @@
         }
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence": {
+      "get": {
+        "operationId": "getAIAgentDesktopPresenceV2",
+        "summary": "같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentDesktopPresenceResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read"
+        ],
+        "x-riido-rbac-policy": "desktop_presence.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "desktopPresence"
+          ],
+          "generated_path": "v2.aiAgent.desktopPresence",
+          "cache_tag": "v2.aiAgent.desktopPresence"
+        },
+        "x-riido-scenarios": [
+          "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",
+          "getAIAgentDesktopPresenceV2.no-desktop-connection-yet",
+          "getAIAgentDesktopPresenceV2.other-account-does-not-count"
+        ]
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/devices": {
       "get": {
         "operationId": "listAIAgentDeviceRuntimesV2",
@@ -4825,6 +4890,25 @@
   },
   "components": {
     "schemas": {
+      "AIAgentDesktopPresenceResponse": {
+        "description": "같은 계정의 데스크톱 앱 마지막 접속 시각과 서버 응답 시각입니다. 웹 온보딩이 앱 연결을 확인할 때 씁니다.",
+        "properties": {
+          "checked_at": {
+            "description": "서버가 이 응답을 만든 시각입니다. 클라이언트는 브라우저 시계 대신 이 값으로 비교합니다.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "description": "같은 계정이 데스크톱 앱에 마지막으로 접속한 서버 시각입니다. 접속 기록이 없으면 생략합니다.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "checked_at"
+        ],
+        "type": "object"
+      },
       "AIAgentExecutionContext": {
         "description": "RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.",
         "properties": {

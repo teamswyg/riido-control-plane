@@ -32,7 +32,7 @@ type AIAgentClientSnapshot struct {
 	WorkspaceID                 string                                       `json:"workspace_id"`
 	Devices                     []DeviceRecord                               `json:"devices"`
 	DeviceCredentials           []AIAgentClientDeviceCredentialSnapshot      `json:"device_credentials"`
-	DeviceConnectionGrants      []DeviceConnectionGrant                      `json:"device_connection_grants,omitempty"`
+	DeviceConnectionGrants      []DeviceConnectionGrant                      `json:"device_connection_grants"`
 	Daemons                     []DeviceDaemonRecord                         `json:"daemons"`
 	Agents                      []AgentClientRecord                          `json:"agents"`
 	OnboardingCreatedIDs        []string                                     `json:"onboarding_created_agent_ids,omitempty"`
@@ -378,25 +378,27 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	// Older v2 snapshots predate explicit account connection grants. The
 	// credential row proves the original account/workspace connection, so seed
 	// that fact without changing the device owner or rotating its secret.
-	for _, credential := range deviceCredentials {
-		if credential.ownerPrincipalID == "" || credential.workspaceID == "" {
-			continue
-		}
-		key := deviceConnectionGrantKey(credential.deviceID, credential.ownerPrincipalID, credential.workspaceID)
-		deviceGrants := deviceConnectionGrants[credential.deviceID]
-		if deviceGrants == nil {
-			deviceGrants = map[string]DeviceConnectionGrant{}
-			deviceConnectionGrants[credential.deviceID] = deviceGrants
-		}
-		if _, ok := deviceGrants[key]; ok {
-			continue
-		}
-		deviceGrants[key] = DeviceConnectionGrant{
-			DeviceID:    credential.deviceID,
-			PrincipalID: credential.ownerPrincipalID,
-			WorkspaceID: credential.workspaceID,
-			ConnectedAt: credential.issuedAt,
-			LastSeenAt:  credential.issuedAt,
+	if snapshot.DeviceConnectionGrants == nil {
+		for _, credential := range deviceCredentials {
+			if credential.ownerPrincipalID == "" || credential.workspaceID == "" {
+				continue
+			}
+			key := deviceConnectionGrantKey(credential.deviceID, credential.ownerPrincipalID, credential.workspaceID)
+			deviceGrants := deviceConnectionGrants[credential.deviceID]
+			if deviceGrants == nil {
+				deviceGrants = map[string]DeviceConnectionGrant{}
+				deviceConnectionGrants[credential.deviceID] = deviceGrants
+			}
+			if _, ok := deviceGrants[key]; ok {
+				continue
+			}
+			deviceGrants[key] = DeviceConnectionGrant{
+				DeviceID:    credential.deviceID,
+				PrincipalID: credential.ownerPrincipalID,
+				WorkspaceID: credential.workspaceID,
+				ConnectedAt: credential.issuedAt,
+				LastSeenAt:  credential.issuedAt,
+			}
 		}
 	}
 	daemons := make(map[string]DeviceDaemonRecord, len(snapshot.Daemons))

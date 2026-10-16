@@ -380,6 +380,14 @@ jobs:
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ok"' >/dev/null
           curl_json "$base_url/readyz" \
             | jq -e '.schema_version == "riido-ai-server.v1" and .status == "ready"' >/dev/null
+          curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/desktop-presence" \
+            | jq -e '
+                def utc_timestamp: type == "string" and test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,9})?Z$");
+                type == "object"
+                and ((keys - ["checked_at", "last_seen_at"]) | length == 0)
+                and (.checked_at | utc_timestamp)
+                and (if has("last_seen_at") then (.last_seen_at | utc_timestamp) else true end)
+              ' >/dev/null
           curl_json -H "$auth_header" "$base_url/v2/client/workspaces/$workspace_id/ai-agent/bootstrap" \
             | jq -e --arg workspace_id "$workspace_id" '.schema_version == "riido-ai-server.v1" and .workspace_id == $workspace_id and (.devices | type) == "array"' >/dev/null
           device_id="$(

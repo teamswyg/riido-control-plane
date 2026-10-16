@@ -301,6 +301,14 @@
       ]
     },
     {
+      "generated_path": "v2.aiAgent.desktopPresence",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
       "generated_path": "v2.aiAgent.devices.daemon.details",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/devices/{device_id}/daemon",

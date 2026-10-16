@@ -528,6 +528,20 @@ export interface GetAIAgentClientBootstrapV2ReactEndpoint extends core.GetAIAgen
 }
 
 /**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.desktopPresence`
+ * 검색용 generated 경로: `aiAgent.desktopPresence`
+ * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAIAgentDesktopPresenceV2ReactEndpoint extends core.GetAIAgentDesktopPresenceV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAIAgentDesktopPresenceV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentDesktopPresenceResponse>) => UseQueryResult<core.AIAgentDesktopPresenceResponse, Error>;
+}
+
+/**
  * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.devices.runtimes`
  * 검색용 generated 경로: `aiAgent.devices.runtimes`
@@ -1576,6 +1590,14 @@ export interface RiidoV2AIAgentReactNamespace {
    */
   readonly bootstrap: GetAIAgentClientBootstrapV2ReactEndpoint;
   /**
+   * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.desktopPresence`
+   * 검색용 generated 경로: `aiAgent.desktopPresence`
+   * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+   * cache tag: `v2.aiAgent.desktopPresence`
+   */
+  readonly desktopPresence: GetAIAgentDesktopPresenceV2ReactEndpoint;
+  /**
    * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
    */
   readonly devices: RiidoV2AIAgentDevicesReactNamespace;
@@ -1845,6 +1867,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           bootstrap: {
             ...coreClient.v2.aiAgent.bootstrap,
             useQuery: (params: core.GetAIAgentClientBootstrapV2PathParams, options?: core.RiidoQueryOptions<core.ClientBootstrapResponseV2>) => useQuery<core.ClientBootstrapResponseV2, Error>(coreClient.v2.aiAgent.bootstrap.query(params, options)),
+          },
+          desktopPresence: {
+            ...coreClient.v2.aiAgent.desktopPresence,
+            useQuery: (params: core.GetAIAgentDesktopPresenceV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentDesktopPresenceResponse>) => useQuery<core.AIAgentDesktopPresenceResponse, Error>(coreClient.v2.aiAgent.desktopPresence.query(params, options)),
           },
           devices: {
             daemon: {

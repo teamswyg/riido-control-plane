@@ -375,7 +375,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
+        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -502,6 +502,23 @@
         "active_execution: a queued or running execution for the same task and agent is part of the prior history, so the completion is rejected with 409 conflict and never serializes behind it",
         "request_id_scope: request_id is scoped to workspace_id, the authorized owner principal, and this operation; it never shares receipts with assignment request_id values. Reusing a request_id for a different task or agent is rejected with 409 conflict instead of replaying the other record",
         "membership_removal: an onboarding-seed participant is removable through the normal participant removal path only while the membership has no durable assignment generation; a removal that names an onboarding-seed assignment on a membership with durable generation is rejected with 409 membership-changed"
+      ]
+    },
+    {
+      "policy_id": "desktop_presence.v1",
+      "kind": "liveness",
+      "description": "웹 온보딩은 같은 계정의 승인된 과거 데스크톱 앱 접속을 서버 시각으로 확인합니다. 현재 온라인 상태나 자격 증명 유효성을 보증하지 않습니다.",
+      "rules": [
+        "server: last_seen_at is the latest server-recorded last-seen time among successfully authorized desktop device connection records owned by the authorized principal; another principal's records never count",
+        "server: last_seen_at advances only on successful authorized devices/connect or device credential enrollment; desktop navigation attempts a connection when login, machine, and workspace context are available, while failed or skipped calls and daemon heartbeats do not advance it",
+        "server: last_seen_at is omitted when no owned desktop connection record has a usable last-seen timestamp; zero or malformed timestamps are not evidence of a connection",
+        "server: checked_at is the server time when the response was built; clients compare last_seen_at only against server time derived from checked_at, never against the browser clock",
+        "scope: presence is principal-scoped; the workspace_id path segment selects the authorization scope and never exposes other members' devices",
+        "privacy: the response carries no device_id, device name, platform, IP address, or app version",
+        "history: a connection grant is append-only evidence of a past authorized connection, not an active authorization grant; last_seen_at may remain after credential revocation or membership removal and does not prove that a device is online, a credential is currently valid, or the principal still belongs to the historical workspace",
+        "read_boundary: a store with a persistent connection-record reader returns only its observed committed records without restoring a stale full snapshot or advancing daemon liveness; an authoritative read or integrity failure is an error, never a checked_at-only success or a stale in-memory fallback",
+        "fallback: stores without a persistent connection-record reader may answer from current-process memory, which does not guarantee cross-replica visibility or history after restart; an omitted last_seen_at is not a global proof that the account has never connected",
+        "client: web onboarding sets its server-time watch start to checked_at minus the time it had already been watching when it sent that request, and uses last_seen_at strictly later than that start; a connection during the first request's network latency may be missed until a later devices/connect or device enrollment, so an app that remains on the same page is not guaranteed to be detected; account-mismatch guidance and polling cadence are client presentation"
       ]
     }
   ],
@@ -3788,6 +3805,31 @@
           }
         ]
       }
+    },
+    {
+      "name": "AIAgentDesktopPresenceResponse",
+      "schema": {
+        "name": "AIAgentDesktopPresenceResponse",
+        "description": "같은 계정의 데스크톱 앱 마지막 접속 시각과 서버 응답 시각입니다. 웹 온보딩이 앱 연결을 확인할 때 씁니다.",
+        "type": "object",
+        "required": [
+          "checked_at"
+        ],
+        "properties": [
+          {
+            "name": "last_seen_at",
+            "type": "string",
+            "description": "같은 계정이 데스크톱 앱에 마지막으로 접속한 서버 시각입니다. 접속 기록이 없으면 생략합니다.",
+            "format": "date-time"
+          },
+          {
+            "name": "checked_at",
+            "type": "string",
+            "description": "서버가 이 응답을 만든 시각입니다. 클라이언트는 브라우저 시계 대신 이 값으로 비교합니다.",
+            "format": "date-time"
+          }
+        ]
+      }
     }
   ],
   "operations": [
@@ -4969,6 +5011,41 @@
         "status": 200,
         "ref": "DeviceRuntimeListResponse"
       }
+    },
+    {
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "desktopPresence"
+        ],
+        "generated_path": "v2.aiAgent.desktopPresence",
+        "cache_tag": "v2.aiAgent.desktopPresence"
+      },
+      "summary": "같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read"
+        ]
+      },
+      "rbac_policy": "desktop_presence.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentDesktopPresenceResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",
+        "getAIAgentDesktopPresenceV2.no-desktop-connection-yet",
+        "getAIAgentDesktopPresenceV2.other-account-does-not-count"
+      ]
     },
     {
       "operation_id": "getAIAgentDaemonV2",
@@ -6727,6 +6804,30 @@
       "given": "Figma node-id=432-46849 asks the client to let the user choose or configure an agent draft before runtime and workspace selection",
       "when": "the client finalizes fixture creation",
       "then": "riido.v2.aiAgent.onboarding.fixtures.createAgent still requires workspace_id in the URL path and runtime_id in the create request body before any durable agent is saved"
+    },
+    {
+      "scenario_id": "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "name": "web onboarding detects the desktop app opened with the same account",
+      "given": "the user is on the web onboarding install or waiting screen and then signs in to the desktop app with the same account",
+      "when": "the client polls riido.v2.aiAgent.desktopPresence",
+      "then": "last_seen_at becomes later than the server-time watch start derived from checked_at and the client moves to the connected state"
+    },
+    {
+      "scenario_id": "getAIAgentDesktopPresenceV2.no-desktop-connection-yet",
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "name": "no desktop connection yet",
+      "given": "the principal has never connected a desktop app",
+      "when": "the client reads desktop presence",
+      "then": "the response contains checked_at only and omits last_seen_at"
+    },
+    {
+      "scenario_id": "getAIAgentDesktopPresenceV2.other-account-does-not-count",
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "name": "other account does not count",
+      "given": "the desktop app is signed in with a different account than the web session",
+      "when": "the client reads desktop presence for the web session principal",
+      "then": "last_seen_at does not advance, so the client keeps waiting and may show account guidance"
     },
     {
       "scenario_id": "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",

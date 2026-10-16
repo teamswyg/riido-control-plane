@@ -18,16 +18,7 @@ func (s *DynamoDBAIAgentClientSnapshot) readMembershipCommit(ctx context.Context
 	type action struct {
 		Get get `json:"Get"`
 	}
-	keys := []string{dynamoDBAIAgentClientSnapshotSK, dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships)}
-	for _, part := range onboardingOwnedPartNames {
-		keys = append(keys, dynamoDBAIAgentClientSnapshotPartSK(part))
-	}
-	if fresh, _ := ctx.Value(taskAgentFreshSnapshotContextKey{}).(bool); fresh {
-		keys = []string{dynamoDBAIAgentClientSnapshotSK}
-		for _, part := range dynamoDBAIAgentClientSnapshotPartNames {
-			keys = append(keys, dynamoDBAIAgentClientSnapshotPartSK(part))
-		}
-	}
+	keys := membershipSnapshotReadKeys(ctx)
 	actions := make([]action, 0, len(keys))
 	for _, sk := range keys {
 		actions = append(actions, action{get{s.tableName, map[string]map[string]string{"pk": {"S": dynamoDBAIAgentClientSnapshotPK}, "sk": {"S": sk}}}})
