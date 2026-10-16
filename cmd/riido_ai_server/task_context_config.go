@@ -11,6 +11,7 @@ import (
 func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) {
 	raw := taskContextRawEnv{
 		baseURL:     strings.TrimSpace(os.Getenv(envTaskContextBaseURL)),
+		graphqlURL:  strings.TrimSpace(os.Getenv(envTaskContextGraphQLURL)),
 		workspaceID: strings.TrimSpace(os.Getenv(envTaskContextWorkspaceID)),
 		teamID:      strings.TrimSpace(os.Getenv(envTaskContextTeamID)),
 		apiKey:      strings.TrimSpace(os.Getenv(envTaskContextAPIKey)),
@@ -27,7 +28,7 @@ func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) 
 		return nil, err
 	}
 	if raw.openAPIUnset() {
-		return privateTaskContextReader(raw.baseURL, timeout)
+		return privateTaskContextReader(raw.baseURL, raw.graphqlURL, timeout)
 	}
 	if !raw.openAPIComplete() {
 		return nil, fmt.Errorf("%s, %s, and %s must be set together for OpenAPI task context; omit all three to use private JWT task context", envTaskContextWorkspaceID, envTaskContextTeamID, envTaskContextAPIKey)

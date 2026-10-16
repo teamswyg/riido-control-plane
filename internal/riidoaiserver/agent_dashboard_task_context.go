@@ -51,7 +51,7 @@ func (c *AIAgentPrivateTaskContextClient) dashboardGraphQL(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	endpoint := strings.TrimRight(c.baseURL, "/")
+	endpoint := strings.TrimRight(c.graphqlURL, "/")
 	if !strings.HasSuffix(endpoint, "/graphql") {
 		endpoint += "/graphql"
 	}

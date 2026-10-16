@@ -2,6 +2,7 @@ package main
 
 type taskContextRawEnv struct {
 	baseURL     string
+	graphqlURL  string
 	workspaceID string
 	teamID      string
 	apiKey      string
@@ -9,7 +10,7 @@ type taskContextRawEnv struct {
 }
 
 func (raw taskContextRawEnv) empty() bool {
-	return raw.baseURL == "" &&
+	return raw.baseURL == "" && raw.graphqlURL == "" &&
 		raw.workspaceID == "" &&
 		raw.teamID == "" &&
 		raw.apiKey == "" &&
