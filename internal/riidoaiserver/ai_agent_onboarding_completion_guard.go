@@ -74,16 +74,17 @@ func (s *DevelopmentAIAgentClientStore) markOnboardingCompletedLocked(agentID, t
 }
 
 // onboardingCompletionThreadLocked returns the completion thread for this agent and
-// task. It reads the live task history first. When that history has been truncated
-// past the completion thread, it uses the copy kept with the completion record. A
-// record for another task never matches.
+// task. The completion record gates every lookup: a thread without a record for this
+// task, such as one left by a deleted agent with the same ID, never matches. With a
+// record, it reads the live task history first and falls back to the copy kept with
+// the record once truncation has dropped the live thread.
 func (s *DevelopmentAIAgentClientStore) onboardingCompletionThreadLocked(taskID, agentID string) (AIAgentTaskThreadRecord, bool) {
+	if s.onboardingCompletions[agentID] != taskID {
+		return AIAgentTaskThreadRecord{}, false
+	}
 	assignmentID := onboardingSeedAssignmentID(taskID, agentID)
 	if thread, ok := s.onboardingSeedThreadLocked(taskID, assignmentID); ok {
 		return thread, true
-	}
-	if s.onboardingCompletions[agentID] != taskID {
-		return AIAgentTaskThreadRecord{}, false
 	}
 	thread, ok := s.onboardingCompletionThreads[agentID]
 	if !ok || thread.TaskID != taskID || thread.AssignmentID != assignmentID {

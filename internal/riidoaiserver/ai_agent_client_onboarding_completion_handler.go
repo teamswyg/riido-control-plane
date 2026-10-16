@@ -26,7 +26,7 @@ func (s Server) handleAIAgentClientCompleteOnboardingTask(w http.ResponseWriter,
 		writeOnboardingTaskProvenanceError(w, err)
 		return
 	}
-	response, err := s.aiAgent.CompleteAIAgentOnboardingTask(r.Context(), principal, taskID, req)
+	response, err := s.completeAIAgentOnboardingTaskUnderGate(r.Context(), principal, taskID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
