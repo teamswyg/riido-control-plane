@@ -29,7 +29,8 @@ func TestHTTPDesktopPresenceDependencyErrorsAreSafeAndRetryable(t *testing.T) {
 	}{
 		{"dependency", errors.New(private), 503},
 		{"cancelled", fmt.Errorf("%s: %w", private, context.Canceled), 408},
-		{"deadline", fmt.Errorf("%s: %w", private, context.DeadlineExceeded), 504}, {"forbidden", ErrAuthorizationForbidden, 403},
+		{"deadline", fmt.Errorf("%s: %w", private, context.DeadlineExceeded), 504},
+		{"forbidden", ErrAuthorizationForbidden, 403},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			store := unavailablePresenceStore{NewDevelopmentAIAgentClientStore(), tc.cause}
