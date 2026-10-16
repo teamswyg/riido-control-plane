@@ -7,6 +7,10 @@ configured verification continuations and provider recovery are unchanged.
 ## Contract
 
 - Answer-only requests need no repository, file mutation or shell check.
+- Answer-only intent recognition requires directive syntax, not a substring in
+  prose. Nominal requests (summary, translation, explanation, comparison) are
+  recognized in the task title or explicit user instruction, not document headings.
+  This remains a deterministic heuristic, not a semantic language classifier.
 - The latest user request controls scope; historical task instructions are context.
 - Requested execution must be reported with observed evidence, not proposed steps.
 - A provider success with no non-whitespace answer and no verified host result is
@@ -125,3 +129,14 @@ golangci-lint run ./... --timeout=5m
 Both full Go suites and the listed race checks passed. Lint is recorded in the PR.
 Raw local logs are intentionally excluded; sanitized measurement values are kept
 in the companion executable manifest.
+
+## PR review follow-up
+
+PR #1094 review regressions reproduce prose keyword false positives and missed
+nominal requests on the pre-fix head. The matcher now retains UserInstruction as a
+separate field, requires anchored directive syntax and recognizes nominal requests
+in titles/user instructions without treating document headings as commands.
+The earlier live SSE measurements predate this matcher correction. No new provider
+run was needed for this deterministic classification fix. The same local prompt
+benchmark after the correction measured 28382/21454/35903 ns/op (20 allocs/op),
+which measures prompt construction only and does not establish model latency.

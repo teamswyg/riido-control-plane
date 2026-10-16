@@ -6,20 +6,26 @@
   "owning_code": [
     "internal/riidoaiserver/ai_agent_assignment_prompt_policy.go",
     "internal/riidoaiserver/server_thread_message_prompt.go",
-    "internal/riidoaiserver/agent_response_timing.go"
+    "internal/riidoaiserver/agent_response_timing.go",
+    "internal/riidoaiserver/ai_agent_assignment_prompt_answer_request.go"
   ],
   "invariants": [
     "No additional classifier, reviewer or quality-retry model turn on the default path.",
     "Answer-only requests require neither a repository nor file changes.",
     "Only observed evidence may substantiate completion.",
-    "Timing logs never contain prompt, answer or credential content."
+    "Timing logs never contain prompt, answer or credential content.",
+    "Answer-only intent signals require directive syntax; nominal requests are recognized only in the task title or explicit user instruction, not source-document prose."
   ],
   "verification": {
     "tests": [
       "TestAnswerOnlyRequestsDoNotRequireIntentClarification",
       "TestEmptyHistoryRetainsPreviousFinalAnswer",
       "TestResponseTimingLogsOnlyAcceptedDeliveryMetadata",
-      "TestEmptyRecentMessagesDoNotDisplaceUserRequirements"
+      "TestEmptyRecentMessagesDoNotDisplaceUserRequirements",
+      "TestAnswerOnlyProseKeepsIntentGate",
+      "TestNominalAnswerRequestsAreScopedToRequestFields",
+      "TestAnswerOnlyDirectiveSyntaxRemainsExecutable",
+      "TestAnswerOnlyProseTitleKeepsIntentGate"
     ],
     "live_test_opt_in": "AGENTBRIDGE_INTEGRATION=1",
     "measurement_script": "riido-daemon/scripts/measure-single-pass-response.py"
@@ -98,6 +104,12 @@
       "process_start_count": 1,
       "provider_elapsed_ms": 5272
     },
-    "interpretation": "Small unrandomized sample; observed medians increased; no speedup/no-regression claim. SSE receipt, not UI paint."
+    "interpretation": "Small unrandomized sample; observed medians increased; no speedup/no-regression claim. SSE receipt, not UI paint.",
+    "review_matcher_prompt_benchmark_ns": [
+      28382,
+      21454,
+      35903
+    ],
+    "review_matcher_live_sse_rerun": false
   }
 }
