@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `253`
 - claim refs: `346`
-- change refs: `2449`
-- verifier refs: `1438`
+- change refs: `2451`
+- verifier refs: `1439`
 - evidence refs: `785`
 
 ## Compiled Chain Summary
@@ -32,7 +32,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate_decision` | `10` | `35` | `186` | `95` | `46` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
-| `ai_agent_load_harness` | `2` | `4` | `8` | `9` | `2` |
+| `ai_agent_load_harness` | `2` | `4` | `10` | `10` | `2` |
 | `loop_closure_audit` | `2` | `4` | `24` | `12` | `8` |
 | `open_decision_queue` | `1` | `1` | `7` | `4` | `2` |
 
@@ -292,7 +292,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `control_plane_owner_graphql_source_ready_boundary` | `2` | `7` | `6` | `5` | `closed_loop_candidate` |
 | `agent_execution_delivery_modular_integration_20261013` | `2` | `5` | `5` | `1` | `ai_agent_load_harness` |
 | `persistent_agent_participant_review_5841` | `2` | `74` | `42` | `43` | `ai_thread_history` |
-| `agent_dashboard_scoped_read_and_pagination_5830` | `2` | `3` | `4` | `1` | `ai_agent_load_harness` |
+| `agent_dashboard_scoped_read_and_pagination_5830` | `2` | `5` | `5` | `1` | `ai_agent_load_harness` |
 
 ## Loop
 

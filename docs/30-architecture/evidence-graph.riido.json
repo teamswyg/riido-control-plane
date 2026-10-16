@@ -23421,6 +23421,14 @@
         {
           "kind": "code",
           "path": "tools/reactquerygen/operation_writer.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_dashboard_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_dashboard_query.go"
         }
       ],
       "verifiers": [
@@ -23439,6 +23447,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/dynamodb_agent_history_atomic_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_dashboard_requester_test.go"
         }
       ],
       "evidence": [
