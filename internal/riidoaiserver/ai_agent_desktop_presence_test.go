@@ -46,21 +46,26 @@ func TestHTTPDesktopPresenceRejectsWrites(t *testing.T) {
 func TestPersistentDesktopPresenceSeesConnectionsFromAnotherInstance(t *testing.T) {
 	ctx := context.Background()
 	snapshots := &memoryAIAgentClientSnapshotStore{}
+	now := time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)
 	reader, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
 	if err != nil {
 		t.Fatalf("open reader: %v", err)
 	}
-	reader.snapshotReloadInterval = 0
+	reader.snapshotClock = func() time.Time { return now }
 	writer, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
 	if err != nil {
 		t.Fatalf("open writer: %v", err)
 	}
 	principal := AuthorizationResult{PrincipalID: "web-user", WorkspaceID: "workspace-beta"}
+	if lastSeenAt, err := reader.DesktopPresenceLastSeenAt(ctx, principal); err != nil || !lastSeenAt.IsZero() {
+		t.Fatalf("presence before connect = %s, err = %v", lastSeenAt, err)
+	}
 	if _, err := writer.ConnectAIAgentDevice(ctx, principal, "machine-web"); err != nil {
 		t.Fatalf("connect: %v", err)
 	}
+	now = now.Add(desktopPresenceSnapshotMaxAge)
 	lastSeenAt, err := reader.DesktopPresenceLastSeenAt(ctx, principal)
 	if err != nil || lastSeenAt.IsZero() {
-		t.Fatalf("reader presence = %s, err = %v", lastSeenAt, err)
+		t.Fatalf("reader presence %s after the connect = %s, err = %v", desktopPresenceSnapshotMaxAge, lastSeenAt, err)
 	}
 }
