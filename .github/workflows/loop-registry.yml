@@ -59,6 +59,8 @@ on:
       - "docs/30-architecture/review-account-seed.riido.json"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/config-reference.riido.json"
+      - "docs/30-architecture/agent-task-context.md"
+      - "docs/30-architecture/agent-task-context.riido.json"
       - "docs/30-architecture/go-ci-baseline.md"
       - "docs/30-architecture/go-ci-baseline.riido.json"
       - "docs/30-architecture/web-frontend-api.md"

@@ -58,7 +58,7 @@ Runtime env reads: `55`; manifest entries: `55`; secret/credential entries: `8`;
 | `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS` | `300` | `public` | Lifetime for the signed S3 POST upload intent. |
 | `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT` | `AWS bucket endpoint` | `operator` | Optional S3-compatible endpoint override for tests. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL` | `empty` | `operator` | Existing Riido API server base URL for server-to-server task context lookup. |
-| `RIIDO_AI_SERVER_TASK_CONTEXT_GRAPHQL_URL` | `task context base URL + /graphql` | `operator` | GraphQL endpoint for agent dashboard metadata. Set the monolith endpoint when private REST task context uses a separate server; viewer JWT authorization is preserved. |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_GRAPHQL_URL` | `task context base URL + /graphql` | `operator` | Optional monolith GraphQL endpoint for private viewer-authorized Agent Records metadata and onboarding first-task provenance. Defaults to the REST task-context base URL plus /graphql; REST document/component routes keep their original base URL. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID` | `empty` | `operator` | Legacy Open API task-context adapter workspace id. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID` | `empty` | `operator` | Legacy Open API task-context adapter team id. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY` | `empty` | `secret` | Legacy task-context workspace API key sent server-to-server. |
