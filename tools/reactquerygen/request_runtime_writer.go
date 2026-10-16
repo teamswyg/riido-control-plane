@@ -2,6 +2,10 @@ package main
 
 import "strings"
 
+func writeViewerHeadersRuntime(b *strings.Builder) {
+	b.WriteString("function riidoViewerHeaders(options: RiidoRequestOptions): Record<string, string> {\n  return options.viewerJwt ? { Authorization: `Bearer ${options.viewerJwt}` } : {};\n}\n\n")
+}
+
 func writeRequestRuntime(b *strings.Builder) {
 	b.WriteString("async function riidoRequest<T>(config: RiidoClientConfig, path: string, init: RequestInit = {}): Promise<T> {\n")
 	b.WriteString("  const fetcher = config.fetcher ?? fetch;\n")

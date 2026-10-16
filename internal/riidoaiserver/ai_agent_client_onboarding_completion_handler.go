@@ -22,7 +22,7 @@ func (s Server) handleAIAgentClientCompleteOnboardingTask(w http.ResponseWriter,
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := s.verifyOnboardingFirstTaskBundleTask(r.Context(), bearerToken, workspaceID, taskID); err != nil {
+	if err := s.verifyOnboardingFirstTaskBundleTask(r.Context(), bearerToken, workspaceID, principal.PrincipalID, taskID, req.TemplateKey); err != nil {
 		writeOnboardingTaskProvenanceError(w, err)
 		return
 	}

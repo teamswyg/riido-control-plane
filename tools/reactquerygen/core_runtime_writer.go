@@ -14,12 +14,13 @@ func writeCoreRuntime(b *strings.Builder) {
 		"`fetcher`는 테스트나 앱 공통 transport 래핑이 필요할 때만 주입합니다.",
 	)
 	b.WriteString("export interface RiidoClientConfig {\n  baseUrl: string;\n  aiAgentToken: string;\n  fetcher?: RiidoFetcher;\n}\n\n")
-	writeJSDoc(b, "요청 단위로 전달할 수 있는 옵션입니다. 현재는 AbortSignal만 전달합니다.")
-	b.WriteString("export interface RiidoRequestOptions {\n  signal?: AbortSignal;\n}\n\n")
+	writeJSDoc(b, "요청 단위로 전달할 수 있는 옵션입니다. AbortSignal과 viewer JWT를 전달합니다.")
+	b.WriteString("export interface RiidoRequestOptions {\n  signal?: AbortSignal;\n  /** 호출자의 Riido 사용자 JWT입니다. 설정하면 `Authorization: Bearer`로 함께 보냅니다. 온보딩 완료처럼 viewer 증명이 필요한 요청에만 전달합니다. */\n  viewerJwt?: string;\n}\n\n")
 	writeJSDoc(b, "React Query query option에 Riido 요청 옵션을 함께 전달하기 위한 타입입니다.")
 	b.WriteString("export type RiidoQueryOptions<TData> = Omit<UseQueryOptions<TData>, 'queryKey' | 'queryFn'> & RiidoRequestOptions;\n\n")
 	writeJSDoc(b, "React Query mutation option을 Riido endpoint 변수 타입과 묶은 타입입니다.")
 	b.WriteString("export type RiidoMutationOptions<TData, TVariables> = UseMutationOptions<TData, Error, TVariables>;\n\n")
+	writeViewerHeadersRuntime(b)
 	writeRequestRuntime(b)
 	writeRawRequestRuntime(b)
 }

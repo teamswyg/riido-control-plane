@@ -1123,10 +1123,12 @@ export interface RiidoClientConfig {
 }
 
 /**
- * 요청 단위로 전달할 수 있는 옵션입니다. 현재는 AbortSignal만 전달합니다.
+ * 요청 단위로 전달할 수 있는 옵션입니다. AbortSignal과 viewer JWT를 전달합니다.
  */
 export interface RiidoRequestOptions {
   signal?: AbortSignal;
+  /** 호출자의 Riido 사용자 JWT입니다. 설정하면 `Authorization: Bearer`로 함께 보냅니다. 온보딩 완료처럼 viewer 증명이 필요한 요청에만 전달합니다. */
+  viewerJwt?: string;
 }
 
 /**
@@ -1138,6 +1140,10 @@ export type RiidoQueryOptions<TData> = Omit<UseQueryOptions<TData>, 'queryKey' |
  * React Query mutation option을 Riido endpoint 변수 타입과 묶은 타입입니다.
  */
 export type RiidoMutationOptions<TData, TVariables> = UseMutationOptions<TData, Error, TVariables>;
+
+function riidoViewerHeaders(options: RiidoRequestOptions): Record<string, string> {
+  return options.viewerJwt ? { Authorization: `Bearer ${options.viewerJwt}` } : {};
+}
 
 async function riidoRequest<T>(config: RiidoClientConfig, path: string, init: RequestInit = {}): Promise<T> {
   const fetcher = config.fetcher ?? fetch;
@@ -1176,7 +1182,7 @@ async function riidoRawRequest(config: RiidoClientConfig, path: string, init: Re
  */
 export async function createAIAgent(config: RiidoClientConfig, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = "/v1/client/ai-agent/agents";
-  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1185,6 +1191,7 @@ export async function createAIAgent(config: RiidoClientConfig, body: CreateAgent
  */
 export interface CreateAIAgentMutationVariables {
   body: CreateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1203,7 +1210,7 @@ export function createAIAgentMutationOptions(config: RiidoClientConfig, options:
   return {
     ...options,
     mutationKey: createAIAgentMutationKey(),
-    mutationFn: (variables: CreateAIAgentMutationVariables) => createAIAgent(config, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentMutationVariables) => createAIAgent(config, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1220,7 +1227,7 @@ export interface DeleteAIAgentPathParams {
  */
 export async function deleteAIAgent(config: RiidoClientConfig, params: DeleteAIAgentPathParams, options: RiidoRequestOptions = {}): Promise<DeleteAgentResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1229,6 +1236,7 @@ export async function deleteAIAgent(config: RiidoClientConfig, params: DeleteAIA
  */
 export interface DeleteAIAgentMutationVariables {
   params: DeleteAIAgentPathParams;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1247,7 +1255,7 @@ export function deleteAIAgentMutationOptions(config: RiidoClientConfig, options:
   return {
     ...options,
     mutationKey: deleteAIAgentMutationKey(),
-    mutationFn: (variables: DeleteAIAgentMutationVariables) => deleteAIAgent(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentMutationVariables) => deleteAIAgent(config, variables.params, variables.options ?? {}),
   };
 }
 
@@ -1264,7 +1272,7 @@ export interface UpdateAIAgentConfigurationPathParams {
  */
 export async function updateAIAgentConfiguration(config: RiidoClientConfig, params: UpdateAIAgentConfigurationPathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'PATCH', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'PATCH', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1274,6 +1282,7 @@ export async function updateAIAgentConfiguration(config: RiidoClientConfig, para
 export interface UpdateAIAgentConfigurationMutationVariables {
   params: UpdateAIAgentConfigurationPathParams;
   body: UpdateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1292,7 +1301,7 @@ export function updateAIAgentConfigurationMutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: updateAIAgentConfigurationMutationKey(),
-    mutationFn: (variables: UpdateAIAgentConfigurationMutationVariables) => updateAIAgentConfiguration(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UpdateAIAgentConfigurationMutationVariables) => updateAIAgentConfiguration(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1309,7 +1318,7 @@ export interface GetAIAgentDaemonPathParams {
  */
 export async function getAIAgentDaemon(config: RiidoClientConfig, params: GetAIAgentDaemonPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1355,7 +1364,7 @@ export interface RestartAIAgentDaemonPathParams {
  */
 export async function restartAIAgentDaemon(config: RiidoClientConfig, params: RestartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1365,6 +1374,7 @@ export async function restartAIAgentDaemon(config: RiidoClientConfig, params: Re
 export interface RestartAIAgentDaemonMutationVariables {
   params: RestartAIAgentDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1383,7 +1393,7 @@ export function restartAIAgentDaemonMutationOptions(config: RiidoClientConfig, o
   return {
     ...options,
     mutationKey: restartAIAgentDaemonMutationKey(),
-    mutationFn: (variables: RestartAIAgentDaemonMutationVariables) => restartAIAgentDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDaemonMutationVariables) => restartAIAgentDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1400,7 +1410,7 @@ export interface StartAIAgentDaemonPathParams {
  */
 export async function startAIAgentDaemon(config: RiidoClientConfig, params: StartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1410,6 +1420,7 @@ export async function startAIAgentDaemon(config: RiidoClientConfig, params: Star
 export interface StartAIAgentDaemonMutationVariables {
   params: StartAIAgentDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1428,7 +1439,7 @@ export function startAIAgentDaemonMutationOptions(config: RiidoClientConfig, opt
   return {
     ...options,
     mutationKey: startAIAgentDaemonMutationKey(),
-    mutationFn: (variables: StartAIAgentDaemonMutationVariables) => startAIAgentDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDaemonMutationVariables) => startAIAgentDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1445,7 +1456,7 @@ export interface StopAIAgentDaemonPathParams {
  */
 export async function stopAIAgentDaemon(config: RiidoClientConfig, params: StopAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1455,6 +1466,7 @@ export async function stopAIAgentDaemon(config: RiidoClientConfig, params: StopA
 export interface StopAIAgentDaemonMutationVariables {
   params: StopAIAgentDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1473,7 +1485,7 @@ export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, opti
   return {
     ...options,
     mutationKey: stopAIAgentDaemonMutationKey(),
-    mutationFn: (variables: StopAIAgentDaemonMutationVariables) => stopAIAgentDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDaemonMutationVariables) => stopAIAgentDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1494,7 +1506,7 @@ export async function getAgentDashboard(config: RiidoClientConfig, params: GetAg
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set("page", String(params.page));
   const requestPath = query.size ? `${path}?${query.toString()}` : path;
-  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1540,7 +1552,7 @@ export interface GetAIAgentEditabilityPathParams {
  */
 export async function getAIAgentEditability(config: RiidoClientConfig, params: GetAIAgentEditabilityPathParams, options: RiidoRequestOptions = {}): Promise<AgentEditabilityResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/editability`;
-  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1578,7 +1590,7 @@ export function getAIAgentEditabilityQueryOptions(config: RiidoClientConfig, par
  */
 export async function getAIAgentClientBootstrap(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponse> {
   const path = "/v1/client/ai-agent/bootstrap";
-  return riidoRequest<ClientBootstrapResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<ClientBootstrapResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1616,7 +1628,7 @@ export function getAIAgentClientBootstrapQueryOptions(config: RiidoClientConfig,
  */
 export async function listAIAgentDeviceRuntimes(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<DeviceRuntimeListResponse> {
   const path = "/v1/client/ai-agent/devices";
-  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1662,7 +1674,7 @@ export interface GetAIAgentDeviceDaemonPathParams {
  */
 export async function getAIAgentDeviceDaemon(config: RiidoClientConfig, params: GetAIAgentDeviceDaemonPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1708,7 +1720,7 @@ export interface RestartAIAgentDeviceDaemonPathParams {
  */
 export async function restartAIAgentDeviceDaemon(config: RiidoClientConfig, params: RestartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1718,6 +1730,7 @@ export async function restartAIAgentDeviceDaemon(config: RiidoClientConfig, para
 export interface RestartAIAgentDeviceDaemonMutationVariables {
   params: RestartAIAgentDeviceDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1736,7 +1749,7 @@ export function restartAIAgentDeviceDaemonMutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: restartAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: RestartAIAgentDeviceDaemonMutationVariables) => restartAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDeviceDaemonMutationVariables) => restartAIAgentDeviceDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1753,7 +1766,7 @@ export interface StartAIAgentDeviceDaemonPathParams {
  */
 export async function startAIAgentDeviceDaemon(config: RiidoClientConfig, params: StartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1763,6 +1776,7 @@ export async function startAIAgentDeviceDaemon(config: RiidoClientConfig, params
 export interface StartAIAgentDeviceDaemonMutationVariables {
   params: StartAIAgentDeviceDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1781,7 +1795,7 @@ export function startAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfi
   return {
     ...options,
     mutationKey: startAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: StartAIAgentDeviceDaemonMutationVariables) => startAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDeviceDaemonMutationVariables) => startAIAgentDeviceDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1798,7 +1812,7 @@ export interface StopAIAgentDeviceDaemonPathParams {
  */
 export async function stopAIAgentDeviceDaemon(config: RiidoClientConfig, params: StopAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1808,6 +1822,7 @@ export async function stopAIAgentDeviceDaemon(config: RiidoClientConfig, params:
 export interface StopAIAgentDeviceDaemonMutationVariables {
   params: StopAIAgentDeviceDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1826,7 +1841,7 @@ export function stopAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig
   return {
     ...options,
     mutationKey: stopAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: StopAIAgentDeviceDaemonMutationVariables) => stopAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDeviceDaemonMutationVariables) => stopAIAgentDeviceDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1843,7 +1858,7 @@ export interface ListAIAgentDeviceDaemonsPathParams {
  */
 export async function listAIAgentDeviceDaemons(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemons`;
-  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1881,7 +1896,7 @@ export function listAIAgentDeviceDaemonsQueryOptions(config: RiidoClientConfig, 
  */
 export async function streamAIAgentClientEvents(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = "/v1/client/ai-agent/events";
-  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal });
+  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1919,7 +1934,7 @@ export function streamAIAgentClientEventsQueryOptions(config: RiidoClientConfig,
  */
 export async function listAIAgentOnboardingFixtures(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<AgentOnboardingFixtureListResponse> {
   const path = "/v1/client/ai-agent/onboarding/fixtures";
-  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1965,7 +1980,7 @@ export interface CreateAIAgentFromOnboardingFixturePathParams {
  */
 export async function createAIAgentFromOnboardingFixture(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = `/v1/client/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
-  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1975,6 +1990,7 @@ export async function createAIAgentFromOnboardingFixture(config: RiidoClientConf
 export interface CreateAIAgentFromOnboardingFixtureMutationVariables {
   params: CreateAIAgentFromOnboardingFixturePathParams;
   body: CreateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1993,7 +2009,7 @@ export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoC
   return {
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureMutationKey(),
-    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2002,7 +2018,7 @@ export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoC
  */
 export async function createAIAgentProfileThumbnailUpload(config: RiidoClientConfig, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
   const path = "/v1/client/ai-agent/profile-thumbnails/uploads";
-  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2011,6 +2027,7 @@ export async function createAIAgentProfileThumbnailUpload(config: RiidoClientCon
  */
 export interface CreateAIAgentProfileThumbnailUploadMutationVariables {
   body: CreateAgentProfileThumbnailUploadRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2029,7 +2046,7 @@ export function createAIAgentProfileThumbnailUploadMutationOptions(config: Riido
   return {
     ...options,
     mutationKey: createAIAgentProfileThumbnailUploadMutationKey(),
-    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadMutationVariables) => createAIAgentProfileThumbnailUpload(config, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadMutationVariables) => createAIAgentProfileThumbnailUpload(config, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2046,7 +2063,7 @@ export interface ListAIAgentTaskAssignableAgentsPathParams {
  */
 export async function listAIAgentTaskAssignableAgents(config: RiidoClientConfig, params: ListAIAgentTaskAssignableAgentsPathParams, options: RiidoRequestOptions = {}): Promise<AgentClientListResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignable-agents`;
-  return riidoRequest<AgentClientListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentClientListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2092,7 +2109,7 @@ export interface UnassignAIAgentTaskPathParams {
  */
 export async function unassignAIAgentTask(config: RiidoClientConfig, params: UnassignAIAgentTaskPathParams, body: UnassignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2102,6 +2119,7 @@ export async function unassignAIAgentTask(config: RiidoClientConfig, params: Una
 export interface UnassignAIAgentTaskMutationVariables {
   params: UnassignAIAgentTaskPathParams;
   body: UnassignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2120,7 +2138,7 @@ export function unassignAIAgentTaskMutationOptions(config: RiidoClientConfig, op
   return {
     ...options,
     mutationKey: unassignAIAgentTaskMutationKey(),
-    mutationFn: (variables: UnassignAIAgentTaskMutationVariables) => unassignAIAgentTask(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UnassignAIAgentTaskMutationVariables) => unassignAIAgentTask(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2137,7 +2155,7 @@ export interface AssignAIAgentTaskPathParams {
  */
 export async function assignAIAgentTask(config: RiidoClientConfig, params: AssignAIAgentTaskPathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2147,6 +2165,7 @@ export async function assignAIAgentTask(config: RiidoClientConfig, params: Assig
 export interface AssignAIAgentTaskMutationVariables {
   params: AssignAIAgentTaskPathParams;
   body: AssignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2165,7 +2184,7 @@ export function assignAIAgentTaskMutationOptions(config: RiidoClientConfig, opti
   return {
     ...options,
     mutationKey: assignAIAgentTaskMutationKey(),
-    mutationFn: (variables: AssignAIAgentTaskMutationVariables) => assignAIAgentTask(config, variables.params, variables.body, {}),
+    mutationFn: (variables: AssignAIAgentTaskMutationVariables) => assignAIAgentTask(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2182,7 +2201,7 @@ export interface SubmitAIAgentTaskCommentPathParams {
  */
 export async function submitAIAgentTaskComment(config: RiidoClientConfig, params: SubmitAIAgentTaskCommentPathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/comments`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2192,6 +2211,7 @@ export async function submitAIAgentTaskComment(config: RiidoClientConfig, params
 export interface SubmitAIAgentTaskCommentMutationVariables {
   params: SubmitAIAgentTaskCommentPathParams;
   body: SubmitAIAgentTaskCommentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2210,7 +2230,7 @@ export function submitAIAgentTaskCommentMutationOptions(config: RiidoClientConfi
   return {
     ...options,
     mutationKey: submitAIAgentTaskCommentMutationKey(),
-    mutationFn: (variables: SubmitAIAgentTaskCommentMutationVariables) => submitAIAgentTaskComment(config, variables.params, variables.body, {}),
+    mutationFn: (variables: SubmitAIAgentTaskCommentMutationVariables) => submitAIAgentTaskComment(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2227,7 +2247,7 @@ export interface StopAIAgentTaskPathParams {
  */
 export async function stopAIAgentTask(config: RiidoClientConfig, params: StopAIAgentTaskPathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/stop`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2237,6 +2257,7 @@ export async function stopAIAgentTask(config: RiidoClientConfig, params: StopAIA
 export interface StopAIAgentTaskMutationVariables {
   params: StopAIAgentTaskPathParams;
   body: StopAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2255,7 +2276,7 @@ export function stopAIAgentTaskMutationOptions(config: RiidoClientConfig, option
   return {
     ...options,
     mutationKey: stopAIAgentTaskMutationKey(),
-    mutationFn: (variables: StopAIAgentTaskMutationVariables) => stopAIAgentTask(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentTaskMutationVariables) => stopAIAgentTask(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2272,7 +2293,7 @@ export interface ListAIAgentTaskThreadsPathParams {
  */
 export async function listAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads`;
-  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2319,7 +2340,7 @@ export interface CreateAIAgentTaskThreadMessagePathParams {
  */
 export async function createAIAgentTaskThreadMessage(config: RiidoClientConfig, params: CreateAIAgentTaskThreadMessagePathParams, body: CreateAIAgentTaskThreadMessageRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2329,6 +2350,7 @@ export async function createAIAgentTaskThreadMessage(config: RiidoClientConfig, 
 export interface CreateAIAgentTaskThreadMessageMutationVariables {
   params: CreateAIAgentTaskThreadMessagePathParams;
   body: CreateAIAgentTaskThreadMessageRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2347,7 +2369,7 @@ export function createAIAgentTaskThreadMessageMutationOptions(config: RiidoClien
   return {
     ...options,
     mutationKey: createAIAgentTaskThreadMessageMutationKey(),
-    mutationFn: (variables: CreateAIAgentTaskThreadMessageMutationVariables) => createAIAgentTaskThreadMessage(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentTaskThreadMessageMutationVariables) => createAIAgentTaskThreadMessage(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2364,7 +2386,7 @@ export interface CreateAIAgentV2PathParams {
  */
 export async function createAIAgentV2(config: RiidoClientConfig, params: CreateAIAgentV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents`;
-  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2374,6 +2396,7 @@ export async function createAIAgentV2(config: RiidoClientConfig, params: CreateA
 export interface CreateAIAgentV2MutationVariables {
   params: CreateAIAgentV2PathParams;
   body: CreateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2392,7 +2415,7 @@ export function createAIAgentV2MutationOptions(config: RiidoClientConfig, option
   return {
     ...options,
     mutationKey: createAIAgentV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentV2MutationVariables) => createAIAgentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentV2MutationVariables) => createAIAgentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2410,7 +2433,7 @@ export interface DeleteAIAgentV2PathParams {
  */
 export async function deleteAIAgentV2(config: RiidoClientConfig, params: DeleteAIAgentV2PathParams, options: RiidoRequestOptions = {}): Promise<DeleteAgentResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2419,6 +2442,7 @@ export async function deleteAIAgentV2(config: RiidoClientConfig, params: DeleteA
  */
 export interface DeleteAIAgentV2MutationVariables {
   params: DeleteAIAgentV2PathParams;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2437,7 +2461,7 @@ export function deleteAIAgentV2MutationOptions(config: RiidoClientConfig, option
   return {
     ...options,
     mutationKey: deleteAIAgentV2MutationKey(),
-    mutationFn: (variables: DeleteAIAgentV2MutationVariables) => deleteAIAgentV2(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentV2MutationVariables) => deleteAIAgentV2(config, variables.params, variables.options ?? {}),
   };
 }
 
@@ -2455,7 +2479,7 @@ export interface UpdateAIAgentConfigurationV2PathParams {
  */
 export async function updateAIAgentConfigurationV2(config: RiidoClientConfig, params: UpdateAIAgentConfigurationV2PathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'PATCH', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'PATCH', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2465,6 +2489,7 @@ export async function updateAIAgentConfigurationV2(config: RiidoClientConfig, pa
 export interface UpdateAIAgentConfigurationV2MutationVariables {
   params: UpdateAIAgentConfigurationV2PathParams;
   body: UpdateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2483,7 +2508,7 @@ export function updateAIAgentConfigurationV2MutationOptions(config: RiidoClientC
   return {
     ...options,
     mutationKey: updateAIAgentConfigurationV2MutationKey(),
-    mutationFn: (variables: UpdateAIAgentConfigurationV2MutationVariables) => updateAIAgentConfigurationV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UpdateAIAgentConfigurationV2MutationVariables) => updateAIAgentConfigurationV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2501,7 +2526,7 @@ export interface GetAIAgentDaemonV2PathParams {
  */
 export async function getAIAgentDaemonV2(config: RiidoClientConfig, params: GetAIAgentDaemonV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2548,7 +2573,7 @@ export interface RestartAIAgentDaemonV2PathParams {
  */
 export async function restartAIAgentDaemonV2(config: RiidoClientConfig, params: RestartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2558,6 +2583,7 @@ export async function restartAIAgentDaemonV2(config: RiidoClientConfig, params: 
 export interface RestartAIAgentDaemonV2MutationVariables {
   params: RestartAIAgentDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2576,7 +2602,7 @@ export function restartAIAgentDaemonV2MutationOptions(config: RiidoClientConfig,
   return {
     ...options,
     mutationKey: restartAIAgentDaemonV2MutationKey(),
-    mutationFn: (variables: RestartAIAgentDaemonV2MutationVariables) => restartAIAgentDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDaemonV2MutationVariables) => restartAIAgentDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2594,7 +2620,7 @@ export interface StartAIAgentDaemonV2PathParams {
  */
 export async function startAIAgentDaemonV2(config: RiidoClientConfig, params: StartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2604,6 +2630,7 @@ export async function startAIAgentDaemonV2(config: RiidoClientConfig, params: St
 export interface StartAIAgentDaemonV2MutationVariables {
   params: StartAIAgentDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2622,7 +2649,7 @@ export function startAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, o
   return {
     ...options,
     mutationKey: startAIAgentDaemonV2MutationKey(),
-    mutationFn: (variables: StartAIAgentDaemonV2MutationVariables) => startAIAgentDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDaemonV2MutationVariables) => startAIAgentDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2640,7 +2667,7 @@ export interface StopAIAgentDaemonV2PathParams {
  */
 export async function stopAIAgentDaemonV2(config: RiidoClientConfig, params: StopAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2650,6 +2677,7 @@ export async function stopAIAgentDaemonV2(config: RiidoClientConfig, params: Sto
 export interface StopAIAgentDaemonV2MutationVariables {
   params: StopAIAgentDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2668,7 +2696,7 @@ export function stopAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, op
   return {
     ...options,
     mutationKey: stopAIAgentDaemonV2MutationKey(),
-    mutationFn: (variables: StopAIAgentDaemonV2MutationVariables) => stopAIAgentDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDaemonV2MutationVariables) => stopAIAgentDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2690,7 +2718,7 @@ export async function getAgentDashboardV2(config: RiidoClientConfig, params: Get
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set("page", String(params.page));
   const requestPath = query.size ? `${path}?${query.toString()}` : path;
-  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2737,7 +2765,7 @@ export interface GetAIAgentEditabilityV2PathParams {
  */
 export async function getAIAgentEditabilityV2(config: RiidoClientConfig, params: GetAIAgentEditabilityV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentEditabilityResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/editability`;
-  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2783,7 +2811,7 @@ export interface GetAIAgentClientBootstrapV2PathParams {
  */
 export async function getAIAgentClientBootstrapV2(config: RiidoClientConfig, params: GetAIAgentClientBootstrapV2PathParams, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/bootstrap`;
-  return riidoRequest<ClientBootstrapResponseV2>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<ClientBootstrapResponseV2>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2829,7 +2857,7 @@ export interface ListAIAgentDeviceRuntimesV2PathParams {
  */
 export async function listAIAgentDeviceRuntimesV2(config: RiidoClientConfig, params: ListAIAgentDeviceRuntimesV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceRuntimeListResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices`;
-  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2876,7 +2904,7 @@ export interface GetAIAgentDeviceDaemonV2PathParams {
  */
 export async function getAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: GetAIAgentDeviceDaemonV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2923,7 +2951,7 @@ export interface RestartAIAgentDeviceDaemonV2PathParams {
  */
 export async function restartAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: RestartAIAgentDeviceDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2933,6 +2961,7 @@ export async function restartAIAgentDeviceDaemonV2(config: RiidoClientConfig, pa
 export interface RestartAIAgentDeviceDaemonV2MutationVariables {
   params: RestartAIAgentDeviceDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2951,7 +2980,7 @@ export function restartAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientC
   return {
     ...options,
     mutationKey: restartAIAgentDeviceDaemonV2MutationKey(),
-    mutationFn: (variables: RestartAIAgentDeviceDaemonV2MutationVariables) => restartAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDeviceDaemonV2MutationVariables) => restartAIAgentDeviceDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2969,7 +2998,7 @@ export interface StartAIAgentDeviceDaemonV2PathParams {
  */
 export async function startAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: StartAIAgentDeviceDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2979,6 +3008,7 @@ export async function startAIAgentDeviceDaemonV2(config: RiidoClientConfig, para
 export interface StartAIAgentDeviceDaemonV2MutationVariables {
   params: StartAIAgentDeviceDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2997,7 +3027,7 @@ export function startAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: startAIAgentDeviceDaemonV2MutationKey(),
-    mutationFn: (variables: StartAIAgentDeviceDaemonV2MutationVariables) => startAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDeviceDaemonV2MutationVariables) => startAIAgentDeviceDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3015,7 +3045,7 @@ export interface StopAIAgentDeviceDaemonV2PathParams {
  */
 export async function stopAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: StopAIAgentDeviceDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3025,6 +3055,7 @@ export async function stopAIAgentDeviceDaemonV2(config: RiidoClientConfig, param
 export interface StopAIAgentDeviceDaemonV2MutationVariables {
   params: StopAIAgentDeviceDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3043,7 +3074,7 @@ export function stopAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientConf
   return {
     ...options,
     mutationKey: stopAIAgentDeviceDaemonV2MutationKey(),
-    mutationFn: (variables: StopAIAgentDeviceDaemonV2MutationVariables) => stopAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDeviceDaemonV2MutationVariables) => stopAIAgentDeviceDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3061,7 +3092,7 @@ export interface ListAIAgentDeviceDaemonsV2PathParams {
  */
 export async function listAIAgentDeviceDaemonsV2(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemons`;
-  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3107,7 +3138,7 @@ export interface StreamAIAgentClientEventsV2PathParams {
  */
 export async function streamAIAgentClientEventsV2(config: RiidoClientConfig, params: StreamAIAgentClientEventsV2PathParams, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/events`;
-  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal });
+  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3153,7 +3184,7 @@ export interface ListAIAgentOnboardingFixturesV2PathParams {
  */
 export async function listAIAgentOnboardingFixturesV2(config: RiidoClientConfig, params: ListAIAgentOnboardingFixturesV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentOnboardingFixtureListResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures`;
-  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3200,7 +3231,7 @@ export interface CreateAIAgentFromOnboardingFixtureV2PathParams {
  */
 export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
-  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3210,6 +3241,7 @@ export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientCo
 export interface CreateAIAgentFromOnboardingFixtureV2MutationVariables {
   params: CreateAIAgentFromOnboardingFixtureV2PathParams;
   body: CreateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3228,7 +3260,7 @@ export function createAIAgentFromOnboardingFixtureV2MutationOptions(config: Riid
   return {
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3245,7 +3277,7 @@ export interface CreateAIAgentProfileThumbnailUploadV2PathParams {
  */
 export async function createAIAgentProfileThumbnailUploadV2(config: RiidoClientConfig, params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/profile-thumbnails/uploads`;
-  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3255,6 +3287,7 @@ export async function createAIAgentProfileThumbnailUploadV2(config: RiidoClientC
 export interface CreateAIAgentProfileThumbnailUploadV2MutationVariables {
   params: CreateAIAgentProfileThumbnailUploadV2PathParams;
   body: CreateAgentProfileThumbnailUploadRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3273,7 +3306,7 @@ export function createAIAgentProfileThumbnailUploadV2MutationOptions(config: Rii
   return {
     ...options,
     mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3290,7 +3323,7 @@ export interface ListWorkspaceAssignedAgentProfilesV2PathParams {
  */
 export async function listWorkspaceAssignedAgentProfilesV2(config: RiidoClientConfig, params: ListWorkspaceAssignedAgentProfilesV2PathParams, options: RiidoRequestOptions = {}): Promise<AssignedAgentProfileMapResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/assigned-agent-profiles`;
-  return riidoRequest<AssignedAgentProfileMapResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AssignedAgentProfileMapResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3337,7 +3370,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2PathParams {
  */
 export async function createAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: CreateAIAgentTaskAgentAssignmentV2PathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3347,6 +3380,7 @@ export async function createAIAgentTaskAgentAssignmentV2(config: RiidoClientConf
 export interface CreateAIAgentTaskAgentAssignmentV2MutationVariables {
   params: CreateAIAgentTaskAgentAssignmentV2PathParams;
   body: AssignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3365,7 +3399,7 @@ export function createAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoC
   return {
     ...options,
     mutationKey: createAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentTaskAgentAssignmentV2MutationVariables) => createAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentTaskAgentAssignmentV2MutationVariables) => createAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3384,7 +3418,7 @@ export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
  */
 export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments/${params.agent_id}`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3394,6 +3428,7 @@ export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConf
 export interface DeleteAIAgentTaskAgentAssignmentV2MutationVariables {
   params: DeleteAIAgentTaskAgentAssignmentV2PathParams;
   body: DeleteAIAgentTaskAgentAssignmentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3412,7 +3447,7 @@ export function deleteAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoC
   return {
     ...options,
     mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3431,7 +3466,7 @@ export interface StopAIAgentTaskAgentAssignmentV2PathParams {
  */
 export async function stopAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: StopAIAgentTaskAgentAssignmentV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments/${params.agent_id}/stop`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3440,6 +3475,7 @@ export async function stopAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig
  */
 export interface StopAIAgentTaskAgentAssignmentV2MutationVariables {
   params: StopAIAgentTaskAgentAssignmentV2PathParams;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3458,7 +3494,7 @@ export function stopAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoCli
   return {
     ...options,
     mutationKey: stopAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: StopAIAgentTaskAgentAssignmentV2MutationVariables) => stopAIAgentTaskAgentAssignmentV2(config, variables.params, {}),
+    mutationFn: (variables: StopAIAgentTaskAgentAssignmentV2MutationVariables) => stopAIAgentTaskAgentAssignmentV2(config, variables.params, variables.options ?? {}),
   };
 }
 
@@ -3476,7 +3512,7 @@ export interface ListAIAgentTaskAssignableAgentsV2PathParams {
  */
 export async function listAIAgentTaskAssignableAgentsV2(config: RiidoClientConfig, params: ListAIAgentTaskAssignableAgentsV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentClientListResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignable-agents`;
-  return riidoRequest<AgentClientListResponseV2>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentClientListResponseV2>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3523,7 +3559,7 @@ export interface UnassignAIAgentTaskV2PathParams {
  */
 export async function unassignAIAgentTaskV2(config: RiidoClientConfig, params: UnassignAIAgentTaskV2PathParams, body: UnassignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3533,6 +3569,7 @@ export async function unassignAIAgentTaskV2(config: RiidoClientConfig, params: U
 export interface UnassignAIAgentTaskV2MutationVariables {
   params: UnassignAIAgentTaskV2PathParams;
   body: UnassignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3551,7 +3588,7 @@ export function unassignAIAgentTaskV2MutationOptions(config: RiidoClientConfig, 
   return {
     ...options,
     mutationKey: unassignAIAgentTaskV2MutationKey(),
-    mutationFn: (variables: UnassignAIAgentTaskV2MutationVariables) => unassignAIAgentTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UnassignAIAgentTaskV2MutationVariables) => unassignAIAgentTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3569,7 +3606,7 @@ export interface AssignAIAgentTaskV2PathParams {
  */
 export async function assignAIAgentTaskV2(config: RiidoClientConfig, params: AssignAIAgentTaskV2PathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3579,6 +3616,7 @@ export async function assignAIAgentTaskV2(config: RiidoClientConfig, params: Ass
 export interface AssignAIAgentTaskV2MutationVariables {
   params: AssignAIAgentTaskV2PathParams;
   body: AssignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3597,7 +3635,7 @@ export function assignAIAgentTaskV2MutationOptions(config: RiidoClientConfig, op
   return {
     ...options,
     mutationKey: assignAIAgentTaskV2MutationKey(),
-    mutationFn: (variables: AssignAIAgentTaskV2MutationVariables) => assignAIAgentTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: AssignAIAgentTaskV2MutationVariables) => assignAIAgentTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3615,7 +3653,7 @@ export interface SubmitAIAgentTaskCommentV2PathParams {
  */
 export async function submitAIAgentTaskCommentV2(config: RiidoClientConfig, params: SubmitAIAgentTaskCommentV2PathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/comments`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3625,6 +3663,7 @@ export async function submitAIAgentTaskCommentV2(config: RiidoClientConfig, para
 export interface SubmitAIAgentTaskCommentV2MutationVariables {
   params: SubmitAIAgentTaskCommentV2PathParams;
   body: SubmitAIAgentTaskCommentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3643,7 +3682,7 @@ export function submitAIAgentTaskCommentV2MutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: submitAIAgentTaskCommentV2MutationKey(),
-    mutationFn: (variables: SubmitAIAgentTaskCommentV2MutationVariables) => submitAIAgentTaskCommentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: SubmitAIAgentTaskCommentV2MutationVariables) => submitAIAgentTaskCommentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3661,7 +3700,7 @@ export interface CompleteAIAgentOnboardingTaskV2PathParams {
  */
 export async function completeAIAgentOnboardingTaskV2(config: RiidoClientConfig, params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/onboarding-completion`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3671,6 +3710,7 @@ export async function completeAIAgentOnboardingTaskV2(config: RiidoClientConfig,
 export interface CompleteAIAgentOnboardingTaskV2MutationVariables {
   params: CompleteAIAgentOnboardingTaskV2PathParams;
   body: CompleteAIAgentOnboardingTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3689,7 +3729,7 @@ export function completeAIAgentOnboardingTaskV2MutationOptions(config: RiidoClie
   return {
     ...options,
     mutationKey: completeAIAgentOnboardingTaskV2MutationKey(),
-    mutationFn: (variables: CompleteAIAgentOnboardingTaskV2MutationVariables) => completeAIAgentOnboardingTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CompleteAIAgentOnboardingTaskV2MutationVariables) => completeAIAgentOnboardingTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3707,7 +3747,7 @@ export interface StopAIAgentTaskV2PathParams {
  */
 export async function stopAIAgentTaskV2(config: RiidoClientConfig, params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/stop`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3717,6 +3757,7 @@ export async function stopAIAgentTaskV2(config: RiidoClientConfig, params: StopA
 export interface StopAIAgentTaskV2MutationVariables {
   params: StopAIAgentTaskV2PathParams;
   body: StopAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3735,7 +3776,7 @@ export function stopAIAgentTaskV2MutationOptions(config: RiidoClientConfig, opti
   return {
     ...options,
     mutationKey: stopAIAgentTaskV2MutationKey(),
-    mutationFn: (variables: StopAIAgentTaskV2MutationVariables) => stopAIAgentTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentTaskV2MutationVariables) => stopAIAgentTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3753,7 +3794,7 @@ export interface GetAIAgentTaskThreadStreamSubscriptionV2PathParams {
  */
 export async function getAIAgentTaskThreadStreamSubscriptionV2(config: RiidoClientConfig, params: GetAIAgentTaskThreadStreamSubscriptionV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadStreamSubscriptionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/thread-stream-subscription`;
-  return riidoRequest<AIAgentTaskThreadStreamSubscriptionResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AIAgentTaskThreadStreamSubscriptionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3800,7 +3841,7 @@ export interface ListAIAgentTaskThreadsV2PathParams {
  */
 export async function listAIAgentTaskThreadsV2(config: RiidoClientConfig, params: ListAIAgentTaskThreadsV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads`;
-  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3848,7 +3889,7 @@ export interface CreateAIAgentTaskThreadMessageV2PathParams {
  */
 export async function createAIAgentTaskThreadMessageV2(config: RiidoClientConfig, params: CreateAIAgentTaskThreadMessageV2PathParams, body: CreateAIAgentTaskThreadMessageRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3858,6 +3899,7 @@ export async function createAIAgentTaskThreadMessageV2(config: RiidoClientConfig
 export interface CreateAIAgentTaskThreadMessageV2MutationVariables {
   params: CreateAIAgentTaskThreadMessageV2PathParams;
   body: CreateAIAgentTaskThreadMessageRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3876,7 +3918,7 @@ export function createAIAgentTaskThreadMessageV2MutationOptions(config: RiidoCli
   return {
     ...options,
     mutationKey: createAIAgentTaskThreadMessageV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentTaskThreadMessageV2MutationVariables) => createAIAgentTaskThreadMessageV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentTaskThreadMessageV2MutationVariables) => createAIAgentTaskThreadMessageV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 

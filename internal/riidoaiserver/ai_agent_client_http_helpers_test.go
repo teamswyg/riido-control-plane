@@ -35,7 +35,7 @@ func newAIAgentClientHTTPTestServer(t *testing.T, credentials []StaticTokenCrede
 		AIAgentClient:            aiAgentStore,
 		AIAgentProfileThumbnails: profileThumbnails,
 		Assignment:               assignmentStore,
-		TaskContext:              &onboardingTaskProvenanceReader{AIAgentTaskContextReader: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}, matched: true},
+		TaskContext:              &onboardingTaskProvenanceReader{AIAgentTaskContextReader: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}, answer: onboardingFirstTaskBundleAnswer{ViewerID: "user-1", Template: AIAgentOnboardingTemplateSchedule}},
 		Authorizer:               authorizer,
 	}).Handler()
 }

@@ -10,27 +10,37 @@ import (
 	"testing"
 )
 
-const onboardingCompletionViewerJWT = "viewer-riido-jwt"
+const (
+	onboardingCompletionViewerJWT = "viewer-riido-jwt"
+	onboardingCompletionOwnerID   = "user-1"
+)
 
 // onboardingTaskProvenanceReader answers the monolith provenance question with a fixed result.
 type onboardingTaskProvenanceReader struct {
 	AIAgentTaskContextReader
-	matched bool
+	answer  onboardingFirstTaskBundleAnswer
 	err     error
 	bearers []string
 }
 
-func (r *onboardingTaskProvenanceReader) IsOnboardingFirstTaskBundleTask(ctx context.Context, bearerToken, workspaceID, taskID string) (bool, error) {
+func (r *onboardingTaskProvenanceReader) OnboardingFirstTaskBundleTemplate(ctx context.Context, bearerToken, workspaceID, taskID string) (onboardingFirstTaskBundleAnswer, error) {
 	r.bearers = append(r.bearers, bearerToken)
 	if err := ctx.Err(); err != nil {
-		return false, err
+		return onboardingFirstTaskBundleAnswer{}, err
 	}
-	return r.matched, r.err
+	return r.answer, r.err
 }
 
 func newOnboardingCompletionHTTPTestServer(t *testing.T) (http.Handler, *Store) {
 	t.Helper()
-	return newOnboardingCompletionHTTPTestServerWith(t, &onboardingTaskProvenanceReader{matched: true})
+	return newOnboardingCompletionHTTPTestServerWithTemplate(t, AIAgentOnboardingTemplateSchedule)
+}
+
+func newOnboardingCompletionHTTPTestServerWithTemplate(t *testing.T, template AIAgentOnboardingTaskTemplateKey) (http.Handler, *Store) {
+	t.Helper()
+	return newOnboardingCompletionHTTPTestServerWith(t, &onboardingTaskProvenanceReader{
+		answer: onboardingFirstTaskBundleAnswer{ViewerID: onboardingCompletionOwnerID, Template: template},
+	})
 }
 
 func newOnboardingCompletionHTTPTestServerWith(t *testing.T, provenance *onboardingTaskProvenanceReader) (http.Handler, *Store) {
@@ -39,7 +49,7 @@ func newOnboardingCompletionHTTPTestServerWith(t *testing.T, provenance *onboard
 		provenance.AIAgentTaskContextReader = &assignmentHTTPRequestTaskContextReader{contextSnapshot: marketingTaskContextFixture()}
 	}
 	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{{
-		PrincipalID: "user-1",
+		PrincipalID: onboardingCompletionOwnerID,
 		Token:       "user-token",
 		Scopes:      []string{"ai-agent:*", "agent:agent-owned-codex:poll"},
 	}})
@@ -59,8 +69,8 @@ func newOnboardingCompletionHTTPTestServerWith(t *testing.T, provenance *onboard
 }
 
 func TestHTTPOnboardingCompletionRequiresMonolithConfirmedFirstTaskBundle(t *testing.T) {
-	t.Run("monolith says the task is not the viewer's bundle", func(t *testing.T) {
-		provenance := &onboardingTaskProvenanceReader{matched: false}
+	t.Run("task is not the viewer's bundle task", func(t *testing.T) {
+		provenance := &onboardingTaskProvenanceReader{answer: onboardingFirstTaskBundleAnswer{ViewerID: onboardingCompletionOwnerID}}
 		handler, _ := newOnboardingCompletionHTTPTestServerWith(t, provenance)
 		agentID := createOnboardingAgentHTTP(t, handler, "온보딩 에이전트")
 		rec := postOnboardingCompletion(t, handler, "task-provenance-1", onboardingCompletionBody(agentID, "schedule"))
@@ -70,8 +80,8 @@ func TestHTTPOnboardingCompletionRequiresMonolithConfirmedFirstTaskBundle(t *tes
 		if len(provenance.bearers) != 1 || provenance.bearers[0] != onboardingCompletionViewerJWT {
 			t.Fatalf("monolith must receive the viewer Bearer JWT, got %v", provenance.bearers)
 		}
-		// Nothing was recorded, so the same agent can still complete a real bundle task.
-		provenance.matched = true
+		// Nothing was recorded, so the same agent can still complete the real bundle task.
+		provenance.answer.Template = AIAgentOnboardingTemplateSchedule
 		decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-provenance-1", onboardingCompletionBody(agentID, "schedule")))
 	})
 	t.Run("monolith is unavailable", func(t *testing.T) {
@@ -86,11 +96,41 @@ func TestHTTPOnboardingCompletionRequiresMonolithConfirmedFirstTaskBundle(t *tes
 			t.Fatalf("monolith detail leaked into the response: %s", rec.Body.String())
 		}
 		provenance.err = nil
-		provenance.matched = true
+		provenance.answer = onboardingFirstTaskBundleAnswer{ViewerID: onboardingCompletionOwnerID, Template: AIAgentOnboardingTemplateSchedule}
 		decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-provenance-2", onboardingCompletionBody(agentID, "schedule")))
 	})
+	t.Run("answer without a viewer id fails closed", func(t *testing.T) {
+		provenance := &onboardingTaskProvenanceReader{answer: onboardingFirstTaskBundleAnswer{Template: AIAgentOnboardingTemplateSchedule}}
+		handler, _ := newOnboardingCompletionHTTPTestServerWith(t, provenance)
+		agentID := createOnboardingAgentHTTP(t, handler, "온보딩 에이전트")
+		rec := postOnboardingCompletion(t, handler, "task-provenance-6", onboardingCompletionBody(agentID, "schedule"))
+		if rec.Code != http.StatusBadGateway {
+			t.Fatalf("status=%d, want 502 for a missing viewer id; body=%s", rec.Code, rec.Body.String())
+		}
+	})
+	t.Run("Riido session belongs to another account", func(t *testing.T) {
+		provenance := &onboardingTaskProvenanceReader{answer: onboardingFirstTaskBundleAnswer{ViewerID: "user-2", Template: AIAgentOnboardingTemplateSchedule}}
+		handler, _ := newOnboardingCompletionHTTPTestServerWith(t, provenance)
+		agentID := createOnboardingAgentHTTP(t, handler, "온보딩 에이전트")
+		rec := postOnboardingCompletion(t, handler, "task-provenance-4", onboardingCompletionBody(agentID, "schedule"))
+		if rec.Code != http.StatusForbidden {
+			t.Fatalf("status=%d, want 403; body=%s", rec.Code, rec.Body.String())
+		}
+		provenance.answer.ViewerID = onboardingCompletionOwnerID
+		decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-provenance-4", onboardingCompletionBody(agentID, "schedule")))
+	})
+	t.Run("template_key differs from the bundle template", func(t *testing.T) {
+		provenance := &onboardingTaskProvenanceReader{answer: onboardingFirstTaskBundleAnswer{ViewerID: onboardingCompletionOwnerID, Template: AIAgentOnboardingTemplateLaunch}}
+		handler, _ := newOnboardingCompletionHTTPTestServerWith(t, provenance)
+		agentID := createOnboardingAgentHTTP(t, handler, "온보딩 에이전트")
+		rec := postOnboardingCompletion(t, handler, "task-provenance-5", onboardingCompletionBody(agentID, "schedule"))
+		if rec.Code != http.StatusBadRequest || !strings.Contains(rec.Body.String(), "template_key") {
+			t.Fatalf("status=%d body=%s, want 400 naming template_key", rec.Code, rec.Body.String())
+		}
+		decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-provenance-5", onboardingCompletionBody(agentID, "launch")))
+	})
 	t.Run("viewer Bearer JWT missing", func(t *testing.T) {
-		provenance := &onboardingTaskProvenanceReader{matched: true}
+		provenance := &onboardingTaskProvenanceReader{answer: onboardingFirstTaskBundleAnswer{ViewerID: onboardingCompletionOwnerID, Template: AIAgentOnboardingTemplateSchedule}}
 		handler, _ := newOnboardingCompletionHTTPTestServerWith(t, provenance)
 		agentID := createOnboardingAgentHTTP(t, handler, "온보딩 에이전트")
 		req := httptest.NewRequest(http.MethodPost, onboardingCompletionWorkspacePath+"task-provenance-3/onboarding-completion", strings.NewReader(onboardingCompletionBody(agentID, "schedule")))
@@ -138,22 +178,25 @@ func TestRequestBearerTokenIgnoresAgentTokenHeader(t *testing.T) {
 	}
 }
 
-func TestAIAgentPrivateTaskContextOnboardingBundleCheckFailsClosed(t *testing.T) {
+func TestAIAgentPrivateTaskContextOnboardingTemplateFailsClosed(t *testing.T) {
 	cases := []struct {
-		name        string
-		mode        string
-		bearer      string
-		want        bool
-		wantErr     bool
-		wantQueries int
+		name         string
+		mode         string
+		bearer       string
+		wantViewer   string
+		wantTemplate AIAgentOnboardingTaskTemplateKey
+		wantErr      bool
+		wantQueries  int
 	}{
-		{name: "own bundle task", mode: "true", want: true, wantQueries: 2},
-		{name: "monolith says no", mode: "false", want: false, wantQueries: 2},
+		{name: "own bundle task", mode: "owned", wantViewer: onboardingCompletionOwnerID, wantTemplate: AIAgentOnboardingTemplateSchedule, wantQueries: 2},
+		{name: "not the viewer's bundle task", mode: "not_owned", wantViewer: onboardingCompletionOwnerID, wantQueries: 2},
 		{name: "monolith HTTP error", mode: "monolith_error", wantErr: true, wantQueries: 1},
-		{name: "task not visible to viewer", mode: "forbidden_location", want: false, wantQueries: 1},
-		{name: "task in another workspace", mode: "other_workspace", want: false, wantQueries: 1},
-		{name: "answer field missing", mode: "missing_answer", wantErr: true, wantQueries: 2},
-		{name: "empty bearer makes no request", mode: "true", bearer: " ", want: false, wantQueries: 0},
+		{name: "task not visible to viewer", mode: "forbidden_location", wantQueries: 1},
+		{name: "task in another workspace", mode: "other_workspace", wantQueries: 1},
+		{name: "answer forbidden", mode: "forbidden_answer", wantQueries: 2},
+		{name: "viewer id missing", mode: "missing_viewer", wantTemplate: AIAgentOnboardingTemplateSchedule, wantQueries: 2},
+		{name: "unknown template value", mode: "unknown_template", wantErr: true, wantQueries: 2},
+		{name: "empty bearer makes no request", mode: "owned", bearer: " ", wantErr: true, wantQueries: 0},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -186,15 +229,21 @@ func TestAIAgentPrivateTaskContextOnboardingBundleCheckFailsClosed(t *testing.T)
 					}}})
 					return
 				}
-				if !strings.Contains(body.Query, "isOnboardingFirstTaskBundleTask") || body.Variables["teamId"] != "team-1" || body.Variables["taskId"] != "task-1" {
-					t.Errorf("provenance query changed: %+v", body)
+				if !strings.Contains(body.Query, "getMyAccountInfo { id }") || !strings.Contains(body.Query, "onboardingFirstTaskBundleTemplate(teamId: $teamId, taskId: $taskId)") ||
+					body.Variables["teamId"] != "team-1" || body.Variables["taskId"] != "task-1" {
+					t.Errorf("answer query changed: %+v", body)
 				}
 				switch tc.mode {
-				case "missing_answer":
-					_, _ = w.Write([]byte(`{"data":{}}`))
+				case "forbidden_answer":
+					_, _ = w.Write([]byte(`{"errors":[{"extensions":{"code":"FORBIDDEN"}}]}`))
+				case "missing_viewer":
+					_, _ = w.Write([]byte(`{"data":{"getMyAccountInfo":null,"onboardingFirstTaskBundleTemplate":"schedule"}}`))
+				case "not_owned":
+					_, _ = w.Write([]byte(`{"data":{"getMyAccountInfo":{"id":"user-1"},"onboardingFirstTaskBundleTemplate":null}}`))
+				case "unknown_template":
+					_, _ = w.Write([]byte(`{"data":{"getMyAccountInfo":{"id":"user-1"},"onboardingFirstTaskBundleTemplate":"bogus"}}`))
 				default:
-					answer := tc.mode == "true"
-					_ = json.NewEncoder(w).Encode(map[string]any{"data": map[string]any{"isOnboardingFirstTaskBundleTask": answer}})
+					_, _ = w.Write([]byte(`{"data":{"getMyAccountInfo":{"id":"user-1"},"onboardingFirstTaskBundleTemplate":"schedule"}}`))
 				}
 			}))
 			defer server.Close()
@@ -206,12 +255,12 @@ func TestAIAgentPrivateTaskContextOnboardingBundleCheckFailsClosed(t *testing.T)
 			if tc.bearer != "" {
 				bearer = tc.bearer
 			}
-			got, err := client.IsOnboardingFirstTaskBundleTask(context.Background(), bearer, "workspace-a", "task-1")
+			got, err := client.OnboardingFirstTaskBundleTemplate(context.Background(), bearer, "workspace-a", "task-1")
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("err = %v, wantErr %v", err, tc.wantErr)
 			}
-			if got != tc.want {
-				t.Fatalf("answer = %v, want %v", got, tc.want)
+			if got.ViewerID != tc.wantViewer || got.Template != tc.wantTemplate {
+				t.Fatalf("answer = %+v, want viewer %q template %q", got, tc.wantViewer, tc.wantTemplate)
 			}
 			if queries != tc.wantQueries {
 				t.Fatalf("monolith queries = %d, want %d", queries, tc.wantQueries)

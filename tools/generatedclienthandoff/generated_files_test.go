@@ -43,7 +43,7 @@ func assertGeneratedClientHandoffHashes(t *testing.T, out string) {
 		"README.generated.md":           "4de27c750ce6b3a1d92bb07a0d118c02d536a8459512ab6bc56c4eb9b1b4f1fd",
 		"PR_BODY.generated.md":          "0fa37a6cc144e34a52591d8faaf6d0e7a5622dcc24719b66087243d8ac29127d",
 		"apiHistory.generated.ts":       "d1b692d025ed0dc6e4c138f0de0db52506262cc97acb30c4ff00d8784b894c3c",
-		"contractManifest.generated.ts": "98e62075ea55fce2f3d5f4e46bdc5da002fd7d0b7ff16a60c407c69bb268420a",
+		"contractManifest.generated.ts": "2549f69743b608eb159c905db97543ac5a66cc257213f7f7d71df4bcb589d0aa",
 		"index.ts":                      "4f8d1b47853ebfa45c713d0ee5e40c13d19bfcb136418e6b2f4769f494909508",
 		"react.ts":                      "079eead5d4755055e92e09c456893f45fdc10eadbbbb1f32bd1b26ac893136c3",
 	}

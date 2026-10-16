@@ -134,7 +134,7 @@ func TestHTTPOnboardingCompletionUsesApprovedCopyPerTemplateAndLocale(t *testing
 		{"launch", "en", "Added the 9 items as subtasks of this task with D-3, launch-day, and D+7 due dates."},
 	}
 	for i, tc := range cases {
-		handler, _ := newOnboardingCompletionHTTPTestServer(t)
+		handler, _ := newOnboardingCompletionHTTPTestServerWithTemplate(t, AIAgentOnboardingTaskTemplateKey(tc.template))
 		agentID := createOnboardingAgentHTTP(t, handler, "copy agent")
 		body := fmt.Sprintf(`{"agent_id":%q,"template_key":%q,"locale":%q}`, agentID, tc.template, tc.locale)
 		response := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-copy-"+string(rune('a'+i)), body))
@@ -145,7 +145,7 @@ func TestHTTPOnboardingCompletionUsesApprovedCopyPerTemplateAndLocale(t *testing
 }
 
 func TestHTTPOnboardingCompletionDefaultsToKoreanLocale(t *testing.T) {
-	handler, _ := newOnboardingCompletionHTTPTestServer(t)
+	handler, _ := newOnboardingCompletionHTTPTestServerWithTemplate(t, AIAgentOnboardingTemplateLaunch)
 	agentID := createOnboardingAgentHTTP(t, handler, "locale agent")
 	response := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-launch-default",
 		onboardingCompletionBody(agentID, "launch")))
@@ -166,11 +166,15 @@ func TestHTTPOnboardingCompletionIsIdempotent(t *testing.T) {
 		t.Fatalf("request_id replay changed the record: first=%+v replay=%+v", first, replay)
 	}
 
-	// Same (task, agent) without request_id also returns the existing record, even with another template.
+	// Same (task, agent) without request_id returns the existing record for the same template.
 	repeat := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-idem-1",
-		onboardingCompletionBody(agentID, "launch")))
+		onboardingCompletionBody(agentID, "schedule")))
 	if repeat.ThreadID != first.ThreadID || repeat.Message != first.Message {
 		t.Fatalf("repeat for same task/agent duplicated the completion: %+v", repeat)
+	}
+	// A different template is refused by the bundle check before any record is read or written.
+	if rec := postOnboardingCompletion(t, handler, "task-idem-1", onboardingCompletionBody(agentID, "launch")); rec.Code != http.StatusBadRequest {
+		t.Fatalf("other template status=%d, want 400; body=%s", rec.Code, rec.Body.String())
 	}
 
 	threadsReq := httptest.NewRequest(http.MethodGet, onboardingCompletionWorkspacePath+"task-idem-1/threads", nil)
@@ -222,7 +226,7 @@ func TestHTTPOnboardingCompletionRejectsInvalidRequestsAndAccess(t *testing.T) {
 }
 
 func TestHTTPOnboardingCompletionRemovalDoesNotStartOrCancelExecution(t *testing.T) {
-	handler, assignmentStore := newOnboardingCompletionHTTPTestServer(t)
+	handler, assignmentStore := newOnboardingCompletionHTTPTestServerWithTemplate(t, AIAgentOnboardingTemplateInterview)
 	agentID := createOnboardingAgentHTTP(t, handler, "removal agent")
 	decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-remove-1",
 		onboardingCompletionBody(agentID, "interview")))
