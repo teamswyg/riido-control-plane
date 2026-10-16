@@ -16,6 +16,7 @@ func postOnboardingCompletion(t *testing.T, handler http.Handler, taskID, body s
 	t.Helper()
 	req := httptest.NewRequest(http.MethodPost, onboardingCompletionWorkspacePath+taskID+"/onboarding-completion", strings.NewReader(body))
 	req.Header.Set(aiAgentTokenHeader, "user-token")
+	req.Header.Set("Authorization", "Bearer "+onboardingCompletionViewerJWT)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 	return rec
@@ -76,7 +77,7 @@ func assertOnboardingCompletionNotLeasable(t *testing.T, assignmentStore *Store,
 }
 
 func TestHTTPOnboardingCompletionRecordsAgentCommentWithoutExecution(t *testing.T) {
-	handler, assignmentStore := newIntentGateHTTPTestServer(t)
+	handler, assignmentStore := newOnboardingCompletionHTTPTestServer(t)
 	agentID := createOnboardingAgentHTTP(t, handler, "온보딩 에이전트")
 
 	response := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-onboarding-1",
@@ -133,7 +134,7 @@ func TestHTTPOnboardingCompletionUsesApprovedCopyPerTemplateAndLocale(t *testing
 		{"launch", "en", "Added the 9 items as subtasks of this task with D-3, launch-day, and D+7 due dates."},
 	}
 	for i, tc := range cases {
-		handler, _ := newIntentGateHTTPTestServer(t)
+		handler, _ := newOnboardingCompletionHTTPTestServer(t)
 		agentID := createOnboardingAgentHTTP(t, handler, "copy agent")
 		body := fmt.Sprintf(`{"agent_id":%q,"template_key":%q,"locale":%q}`, agentID, tc.template, tc.locale)
 		response := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-copy-"+string(rune('a'+i)), body))
@@ -144,7 +145,7 @@ func TestHTTPOnboardingCompletionUsesApprovedCopyPerTemplateAndLocale(t *testing
 }
 
 func TestHTTPOnboardingCompletionDefaultsToKoreanLocale(t *testing.T) {
-	handler, _ := newIntentGateHTTPTestServer(t)
+	handler, _ := newOnboardingCompletionHTTPTestServer(t)
 	agentID := createOnboardingAgentHTTP(t, handler, "locale agent")
 	response := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-launch-default",
 		onboardingCompletionBody(agentID, "launch")))
@@ -154,7 +155,7 @@ func TestHTTPOnboardingCompletionDefaultsToKoreanLocale(t *testing.T) {
 }
 
 func TestHTTPOnboardingCompletionIsIdempotent(t *testing.T) {
-	handler, _ := newIntentGateHTTPTestServer(t)
+	handler, _ := newOnboardingCompletionHTTPTestServer(t)
 	agentID := createOnboardingAgentHTTP(t, handler, "idempotent agent")
 	first := decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-idem-1",
 		fmt.Sprintf(`{"agent_id":%q,"template_key":"schedule","request_id":"req-onboarding-1"}`, agentID)))
@@ -204,10 +205,11 @@ func TestHTTPOnboardingCompletionRejectsInvalidRequestsAndAccess(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			handler, assignmentStore := newIntentGateHTTPTestServer(t)
+			handler, assignmentStore := newOnboardingCompletionHTTPTestServer(t)
 			req := httptest.NewRequest(http.MethodPost, tc.path, strings.NewReader(tc.body))
 			if tc.token != "" {
 				req.Header.Set(aiAgentTokenHeader, tc.token)
+				req.Header.Set("Authorization", "Bearer "+onboardingCompletionViewerJWT)
 			}
 			rec := httptest.NewRecorder()
 			handler.ServeHTTP(rec, req)
@@ -220,7 +222,7 @@ func TestHTTPOnboardingCompletionRejectsInvalidRequestsAndAccess(t *testing.T) {
 }
 
 func TestHTTPOnboardingCompletionRemovalDoesNotStartOrCancelExecution(t *testing.T) {
-	handler, assignmentStore := newIntentGateHTTPTestServer(t)
+	handler, assignmentStore := newOnboardingCompletionHTTPTestServer(t)
 	agentID := createOnboardingAgentHTTP(t, handler, "removal agent")
 	decodeOnboardingCompletionResponse(t, postOnboardingCompletion(t, handler, "task-remove-1",
 		onboardingCompletionBody(agentID, "interview")))

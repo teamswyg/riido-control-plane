@@ -3,7 +3,8 @@ package riidoaiserver
 import "net/http"
 
 func (s Server) handleAIAgentClientCompleteOnboardingTask(w http.ResponseWriter, r *http.Request, taskID string) {
-	if aiAgentWorkspaceIDFromRequest(r) == "" {
+	workspaceID := aiAgentWorkspaceIDFromRequest(r)
+	if workspaceID == "" {
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	}
@@ -11,9 +12,18 @@ func (s Server) handleAIAgentClientCompleteOnboardingTask(w http.ResponseWriter,
 	if !ok {
 		return
 	}
+	bearerToken, ok := requestBearerToken(r)
+	if !ok {
+		writeUnauthorized(w)
+		return
+	}
 	var req CompleteAIAgentOnboardingTaskRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := s.verifyOnboardingFirstTaskBundleTask(r.Context(), bearerToken, workspaceID, taskID); err != nil {
+		writeOnboardingTaskProvenanceError(w, err)
 		return
 	}
 	response, err := s.aiAgent.CompleteAIAgentOnboardingTask(r.Context(), principal, taskID, req)
