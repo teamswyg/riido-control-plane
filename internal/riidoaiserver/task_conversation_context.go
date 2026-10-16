@@ -31,6 +31,9 @@ func appendTaskConversationContext(out *strings.Builder, thread AIAgentTaskThrea
 		parts = append(parts, part)
 		remaining -= len([]rune(part))
 	}
+	if len(parts) == 0 {
+		return false
+	}
 	out.WriteString("\n\n## Recent conversation context\nReference history; the New User Instruction below is authoritative.\n")
 	if len(parts) < len(messages) {
 		out.WriteString("[Earlier conversation messages omitted by context budget.]\n")

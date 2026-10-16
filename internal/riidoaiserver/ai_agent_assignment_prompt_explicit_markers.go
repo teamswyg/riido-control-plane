@@ -2,6 +2,8 @@ package riidoaiserver
 
 func explicitInstructionMarkers() []string {
 	return []string{
+		"요약", "설명", "번역", "비교",
+		"summarize", "summarise", "explain", "translate", "compare", //nolint:misspell // Accept British English user instructions too.
 		"해줘",
 		"해주세요",
 		"하라",
