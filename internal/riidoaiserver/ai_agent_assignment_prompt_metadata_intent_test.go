@@ -19,9 +19,9 @@ func TestAssignmentPromptClassifiesIntentFromMetadataWhenDocumentMissing(t *test
 	}
 	assertPromptHasAll(t, prompt.Prompt, []string{
 		"- intent_class: intent_oriented",
-		"- intent_gate_required: true",
-		"- first_response_policy: ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies",
-		"- clarification_question_example: 작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.",
+		"- intent_gate_required: false",
+		"- first_response_policy: act_on_requested_outcome_ask_only_for_specific_blocking_information",
+		"- clarification_policy: identify_the_specific_blocker_and_ask_one_focused_question_only_if_needed",
 	})
 }
 
@@ -42,7 +42,7 @@ func TestAssignmentPromptKeepsMetadataOnlyWhenDocumentAndIntentMarkersMissing(t 
 	}
 	assertPromptHasAll(t, prompt.Prompt, []string{
 		"- intent_class: metadata_only",
-		"- intent_gate_required: true",
-		"- first_response_policy: infer_from_metadata_then_ask_when_unsure",
+		"- intent_gate_required: false",
+		"- first_response_policy: act_on_requested_outcome_ask_only_for_specific_blocking_information",
 	})
 }

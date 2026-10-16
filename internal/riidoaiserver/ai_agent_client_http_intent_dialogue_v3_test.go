@@ -5,10 +5,10 @@ import "testing"
 func TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline(t *testing.T) {
 	handler, aiStore, assignmentStore := newIntentDialogueHTTPTestServer(t)
 	root := postIntentDialogueAssignment(t, handler, "agent-owned-codex")
-	assertIntentGateAction(t, root)
-	assertIntentDialoguePollNone(t, assignmentStore, root)
-
-	assertHTTPRootIntentQuestion(t, getIntentDialogueV3Thread(t, handler, root, root.ThreadID))
+	assertDirectAssignmentAction(t, root)
+	assertIntentDialoguePollWork(t, assignmentStore, root)
+	recordIntentDialogueRunning(t, assignmentStore, aiStore, root)
+	recordIntentDialogueCompleted(t, assignmentStore, aiStore, root, "초기 요청에 따라 카피 초안 3개를 준비했습니다.")
 
 	draft := postIntentDialogueThreadMessage(t, handler, root, "우리 신기능 셀링 포인트 세 가지 반영해서 훅이 강한 카피라이팅 초안 3개만 짜줘.")
 	assertIntentDialoguePollWork(t, assignmentStore, draft)

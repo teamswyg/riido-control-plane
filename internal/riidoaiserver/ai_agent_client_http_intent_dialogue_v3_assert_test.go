@@ -1,32 +1,8 @@
 package riidoaiserver
 
 import (
-	"net/http"
 	"testing"
 )
-
-func getIntentDialogueV3Thread(
-	t *testing.T,
-	handler http.Handler,
-	action AIAgentTaskActionResponse,
-	threadID string,
-) AIAgentTaskThreadHistoryRecord {
-	t.Helper()
-	return historyThreadByID(t, getIntentDialogueV3History(t, handler, action.TaskID), threadID)
-}
-
-func assertHTTPRootIntentQuestion(t *testing.T, thread AIAgentTaskThreadHistoryRecord) {
-	t.Helper()
-	if thread.WorkStatus != AgentWorkStatusWaitingForUser ||
-		thread.AssignmentState != AgentAssignmentStateWaiting ||
-		thread.ActiveStream != nil ||
-		!historyAgentMessageContains(thread, "원하는 결과물이나 방향") {
-		t.Fatalf("root thread did not ask for intent: %+v", thread)
-	}
-	if historyMessagesContainProgressBody(thread.Messages, "본문을 먼저 읽겠습니다.") {
-		t.Fatalf("intent-gated root thread reached runtime before user intent: %+v", thread.Messages)
-	}
-}
 
 func assertHTTPDraftReadsBodyBeforeCompletion(t *testing.T, thread AIAgentTaskThreadHistoryRecord) {
 	t.Helper()
