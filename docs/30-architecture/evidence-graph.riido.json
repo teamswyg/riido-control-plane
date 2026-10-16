@@ -5449,8 +5449,8 @@
     },
     {
       "id": "deleted_agent_thread_retention_loop",
-      "observation": "Deleting an AI Agent can accidentally remove or hide historical task thread replies if the read model depends on the live agent row.",
-      "hypothesis": "Capturing an agent snapshot on the thread and falling back to that snapshot for deleted agents keeps prior replies, results, and progress visible.",
+      "observation": "Deleting an AI Agent can accidentally remove or hide historical task thread replies if the read model depends on the live agent row, and it can leave onboarding state or completion receipts keyed to the deleted agent ID that a reused ID would inherit.",
+      "hypothesis": "Capturing an agent snapshot on the thread and falling back to that snapshot for deleted agents keeps prior replies, results, and progress visible, while forgetting onboarding state and onboarding completion receipts for the deleted agent ID keeps a reused ID from replaying a stale completion.",
       "claims": [
         "deleted_agent_threads_must_remain_visible"
       ],
@@ -5470,6 +5470,18 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_agent_delete.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_delete_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_receipt_delete_test.go"
         }
       ],
       "verifiers": [
@@ -5484,6 +5496,14 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/loop-registry.yml"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_delete_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_receipt_delete_test.go"
         }
       ],
       "evidence": [
@@ -5493,7 +5513,7 @@
           "redacted": true
         }
       ],
-      "decision": "Deleted-agent thread retention is a closed-loop claim: historical AI thread records use captured agent snapshots instead of disappearing with the mutable agent row.",
+      "decision": "Deleted-agent thread retention is a closed-loop claim: historical AI thread records use captured agent snapshots instead of disappearing with the mutable agent row. Deleting an agent also forgets its onboarding state and completion receipts, so thread history stays visible while a reused agent ID cannot inherit a stale onboarding completion.",
       "next_loop": "ai_thread_history"
     },
     {
