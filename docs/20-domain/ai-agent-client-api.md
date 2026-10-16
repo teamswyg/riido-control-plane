@@ -23,10 +23,10 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 | Class | Count |
 | --- | ---: |
-| OpenAPI operations | 61 |
+| OpenAPI operations | 62 |
 | v1 operations | 27 |
-| v2 operations | 33 |
-| smoke matrix entries | 61 |
+| v2 operations | 34 |
+| smoke matrix entries | 62 |
 
 ## Required Generated Paths
 
