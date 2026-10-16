@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"sort"
+	"strings"
 )
 
 func taskConversationMessages(thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history []AIAgentTaskThreadHistoryRecord) []AIAgentTaskThreadHistoryMessage {
@@ -20,6 +21,9 @@ func taskConversationMessages(thread AIAgentTaskThreadRecord, req CreateAIAgentT
 		}
 		for _, message := range record.Messages {
 			if message.Role != AIAgentTaskThreadMessageRoleUser && message.Role != AIAgentTaskThreadMessageRoleAgent {
+				continue
+			}
+			if strings.TrimSpace(message.Body) == "" && strings.TrimSpace(message.ResultMessage) == "" {
 				continue
 			}
 			if req.SourceMessageID != "" && message.SourceMessageID == req.SourceMessageID {
