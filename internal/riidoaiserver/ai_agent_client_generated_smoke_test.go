@@ -145,6 +145,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/devices", token, "", http.StatusOK)
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/desktop-presence", token, "", http.StatusOK)
 	profileUploadBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/profile-thumbnails/uploads", token, `{"content_type":"image/jpeg","content_length_bytes":2048}`, http.StatusCreated)
 	var profileUpload AgentProfileThumbnailUploadResponse
 	aiAgentSmokeDecode(t, profileUploadBytes, &profileUpload)

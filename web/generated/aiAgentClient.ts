@@ -4,6 +4,20 @@
 import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/react-query';
 
 /**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각과 서버 응답 시각입니다. 웹 온보딩이 앱 연결을 확인할 때 씁니다.
+ */
+export interface AIAgentDesktopPresenceResponse {
+  /**
+   * 서버가 이 응답을 만든 시각입니다. 클라이언트는 브라우저 시계 대신 이 값으로 비교합니다.
+   */
+  checked_at: string;
+  /**
+   * 같은 계정이 데스크톱 앱에 마지막으로 접속한 서버 시각입니다. 접속 기록이 없으면 생략합니다.
+   */
+  last_seen_at?: string;
+}
+
+/**
  * RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.
  */
 export interface AIAgentExecutionContext {
@@ -2846,6 +2860,52 @@ export function getAIAgentClientBootstrapV2QueryOptions(config: RiidoClientConfi
 }
 
 /**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface GetAIAgentDesktopPresenceV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ */
+export async function getAIAgentDesktopPresenceV2(config: RiidoClientConfig, params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentDesktopPresenceResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/desktop-presence`;
+  return riidoRequest<AIAgentDesktopPresenceResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.desktopPresence`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAIAgentDesktopPresenceV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.desktopPresence"] as const;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAIAgentDesktopPresenceV2QueryKey(params: GetAIAgentDesktopPresenceV2PathParams): readonly unknown[] {
+  return [...getAIAgentDesktopPresenceV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAIAgentDesktopPresenceV2QueryOptions(config: RiidoClientConfig, params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoQueryOptions<AIAgentDesktopPresenceResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAIAgentDesktopPresenceV2QueryKey(params),
+    queryFn: () => getAIAgentDesktopPresenceV2(config, params, { signal }),
+  };
+}
+
+/**
  * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
@@ -5603,6 +5663,48 @@ export interface GetAIAgentClientBootstrapV2Endpoint {
 }
 
 /**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.desktopPresence`
+ * 검색용 generated 경로: `aiAgent.desktopPresence`
+ * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+ * cache tag: `v2.aiAgent.desktopPresence`
+ */
+export interface GetAIAgentDesktopPresenceV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentDesktopPresenceResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAIAgentDesktopPresenceV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => ReturnType<typeof getAIAgentDesktopPresenceV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => ReturnType<typeof getAIAgentDesktopPresenceV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => Promise<void>;
+}
+
+/**
  * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.devices.runtimes`
  * 검색용 generated 경로: `aiAgent.devices.runtimes`
@@ -7421,6 +7523,14 @@ export interface RiidoV2AIAgentNamespace {
    */
   readonly bootstrap: GetAIAgentClientBootstrapV2Endpoint;
   /**
+   * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.desktopPresence`
+   * 검색용 generated 경로: `aiAgent.desktopPresence`
+   * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+   * cache tag: `v2.aiAgent.desktopPresence`
+   */
+  readonly desktopPresence: GetAIAgentDesktopPresenceV2Endpoint;
+  /**
    * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
    */
   readonly devices: RiidoV2AIAgentDevicesNamespace;
@@ -7945,6 +8055,16 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidate: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKey(params) }),
           invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
           prefetch: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => queryClient.prefetchQuery(getAIAgentClientBootstrapV2QueryOptions(config, params, options)),
+        },
+        desktopPresence: {
+          request: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoRequestOptions) => getAIAgentDesktopPresenceV2(config, params, options),
+          queryKeyRoot: getAIAgentDesktopPresenceV2QueryKeyRoot,
+          queryKey: getAIAgentDesktopPresenceV2QueryKey,
+          query: (params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoQueryOptions<AIAgentDesktopPresenceResponse> = {}) => getAIAgentDesktopPresenceV2QueryOptions(config, params, options),
+          queryOptions: (params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoQueryOptions<AIAgentDesktopPresenceResponse> = {}) => getAIAgentDesktopPresenceV2QueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentDesktopPresenceV2QueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDesktopPresenceV2QueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => queryClient.prefetchQuery(getAIAgentDesktopPresenceV2QueryOptions(config, params, options)),
         },
         devices: {
           daemon: {
