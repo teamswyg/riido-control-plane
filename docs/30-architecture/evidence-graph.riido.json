@@ -23448,7 +23448,7 @@
           "redacted": true
         }
       ],
-      "decision": "Retain startup-loaded legacy history, read new Agent journal rows with consistent partition queries and request deadlines, and keep task permission filtering before counts/pagination. Creation and conditional state updates commit their history row in the same transaction; other mutation acknowledgments retry a failed history mirror; sparse queue indexes and offline notification delivery are unchanged. Typed optional page reaches both the URL and query key. No frontend deployment or newly executed model task is claimed.",
+      "decision": "Retain startup-loaded legacy history, read new Agent journal rows with consistent partition queries and request deadlines, and keep task permission filtering before counts/pagination. Creation and conditional state updates commit their history row in the same transaction; other mutation acknowledgments retry a failed history mirror; sparse queue indexes and offline notification delivery are unchanged. Typed optional page reaches both the URL and query key. No frontend deployment or newly executed model task is claimed. The RIID-5830 record redesign additionally exposes the existing assignment CreatedBy as optional created_by after task access filtering. TestAgentDashboardPreservesRequesterPerExecution verifies the actual requester, omitted legacy values, and excluded inaccessible records. This projection copies one existing string per visible record without additional journal reads, member lookups, or changed query pagination; the client resolves member profiles separately. Regenerated syntax and contract hashes do not constitute a new runtime performance claim.",
       "next_loop": "ai_agent_load_harness"
     }
   ],
