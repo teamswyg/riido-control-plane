@@ -13,10 +13,10 @@
   "generated_core": "web/generated/aiAgentClient.ts",
   "generated_react": "web/generated/aiAgentClient.react.ts",
   "operation_counts": {
-    "total": 59,
+    "total": 61,
     "v1": 27,
-    "v2": 32,
-    "smoke_matrix": 59
+    "v2": 33,
+    "smoke_matrix": 61
   },
   "required_generated_paths": [
     "aiAgent.bootstrap",
@@ -30,7 +30,8 @@
     "v2.aiAgent.profileThumbnails.uploads.create",
     "v2.aiAgent.tasks.assignedAgentProfiles",
     "v2.aiAgent.tasks.agentAssignments.create",
-    "v2.aiAgent.tasks.threadStreamSubscription"
+    "v2.aiAgent.tasks.threadStreamSubscription",
+    "v3.aiAgent.tasks.threads"
   ],
   "runtime_config_keys": [
     "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
@@ -828,7 +829,7 @@
     "hypothesis": "A compact SSOT gate can prove the OpenAPI/generated client/smoke matrix mirror and keep required runtime/deployment strings visible without using prose as truth.",
     "execute": "Generate this reader doc from the manifest and run the aiagentclientapi verifier in CI.",
     "evaluate": "The verifier checks contract file presence, OpenAPI operation counts, v1/v2 split, generated path coverage, smoke matrix parity, source anchors, generated doc freshness, and CLI evidence output.",
-    "retrospective": "This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts."
+    "retrospective": "This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts. Onboarding first-task completion is an imported, non-executing record. Its one-time state and workspace/owner/operation receipts survive stale ordinary snapshot writers; completion SSE is published only after durable commit, and deletion clears only that incarnation metadata while retaining comments."
   },
   "non_goals": [
     "canonical riido-contracts changes",

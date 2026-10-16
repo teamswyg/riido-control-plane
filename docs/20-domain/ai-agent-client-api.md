@@ -23,14 +23,14 @@ Canonical domain changes start in `riido-contracts`; this repo verifies the exec
 
 | Class | Count |
 | --- | ---: |
-| OpenAPI operations | 59 |
+| OpenAPI operations | 61 |
 | v1 operations | 27 |
-| v2 operations | 32 |
-| smoke matrix entries | 59 |
+| v2 operations | 33 |
+| smoke matrix entries | 61 |
 
 ## Required Generated Paths
 
-- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.devices.daemons.list`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.devices.daemons.list`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`
+- `aiAgent.bootstrap`, `aiAgent.profileThumbnails.uploads.create`, `aiAgent.devices.daemons.list`, `aiAgent.tasks.assign`, `aiAgent.tasks.threadMessages.create`, `v2.aiAgent.bootstrap`, `v2.aiAgent.agents.create`, `v2.aiAgent.devices.daemons.list`, `v2.aiAgent.profileThumbnails.uploads.create`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.agentAssignments.create`, `v2.aiAgent.tasks.threadStreamSubscription`, `v3.aiAgent.tasks.threads`
 
 ## Runtime Config Keys
 
@@ -215,7 +215,7 @@ One stable timeline row inside a thread history record. message_id is the React 
 | Hypothesis | A compact SSOT gate can prove the OpenAPI/generated client/smoke matrix mirror and keep required runtime/deployment strings visible without using prose as truth. |
 | Execute | Generate this reader doc from the manifest and run the aiagentclientapi verifier in CI. |
 | Evaluate | The verifier checks contract file presence, OpenAPI operation counts, v1/v2 split, generated path coverage, smoke matrix parity, source anchors, generated doc freshness, and CLI evidence output. |
-| Retrospective | This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts. |
+| Retrospective | This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts. Onboarding first-task completion is an imported, non-executing record. Its one-time state and workspace/owner/operation receipts survive stale ordinary snapshot writers; completion SSE is published only after durable commit, and deletion clears only that incarnation metadata while retaining comments. |
 
 ## Non-Goals
 

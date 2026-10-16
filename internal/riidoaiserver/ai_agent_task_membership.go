@@ -22,12 +22,13 @@ type TaskAgentParticipantCollection struct {
 }
 
 type TaskAgentParticipantRecord struct {
-	AgentID             string `json:"agent_id"`
-	Name                string `json:"name"`
-	ProfileThumbnailURL string `json:"profile_thumbnail_url,omitempty"`
-	IsOwnedByViewer     bool   `json:"is_owned_by_viewer"`
-	IsStopRequired      bool   `json:"is_stop_required"`
-	LatestAssignmentID  string `json:"latest_assignment_id,omitempty"`
+	AgentID             string            `json:"agent_id"`
+	Name                string            `json:"name"`
+	ProfileThumbnailURL string            `json:"profile_thumbnail_url,omitempty"`
+	ProfileColor        AgentProfileColor `json:"profile_color"`
+	IsOwnedByViewer     bool              `json:"is_owned_by_viewer"`
+	IsStopRequired      bool              `json:"is_stop_required"`
+	LatestAssignmentID  string            `json:"latest_assignment_id,omitempty"`
 }
 
 func copyTaskAgentMemberships(source map[string]map[string]AIAgentTaskMembership) map[string]map[string]AIAgentTaskMembership {
@@ -136,6 +137,7 @@ func (s *DevelopmentAIAgentClientStore) taskAgentParticipantsLocked(principal Au
 			}
 			participant := TaskAgentParticipantRecord{
 				AgentID: agentID, Name: snapshot.Name, ProfileThumbnailURL: snapshot.ProfileThumbnailURL,
+				ProfileColor:    profileColorOrFallback(snapshot.ProfileColor, agentID),
 				IsOwnedByViewer: snapshot.OwnerPrincipalID == principal.PrincipalID,
 			}
 			if latest, ok := s.latestTaskThreadForAgentLocked(taskID, agentID); ok {

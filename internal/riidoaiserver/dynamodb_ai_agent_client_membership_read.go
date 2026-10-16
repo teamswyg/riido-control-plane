@@ -19,6 +19,9 @@ func (s *DynamoDBAIAgentClientSnapshot) readMembershipCommit(ctx context.Context
 		Get get `json:"Get"`
 	}
 	keys := []string{dynamoDBAIAgentClientSnapshotSK, dynamoDBAIAgentClientSnapshotPartSK(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships)}
+	for _, part := range onboardingOwnedPartNames {
+		keys = append(keys, dynamoDBAIAgentClientSnapshotPartSK(part))
+	}
 	if fresh, _ := ctx.Value(taskAgentFreshSnapshotContextKey{}).(bool); fresh {
 		keys = []string{dynamoDBAIAgentClientSnapshotSK}
 		for _, part := range dynamoDBAIAgentClientSnapshotPartNames {

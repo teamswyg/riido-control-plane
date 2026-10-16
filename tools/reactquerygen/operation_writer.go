@@ -38,7 +38,7 @@ func writeOperation(b *strings.Builder, op routeOperation) error {
 		}
 		b.WriteString("  const requestPath = query.size ? `${path}?${query.toString()}` : path;\n")
 	}
-	initParts := []string{fmt.Sprintf("method: '%s'", strings.ToUpper(op.Method)), "signal: options.signal"}
+	initParts := []string{fmt.Sprintf("method: '%s'", strings.ToUpper(op.Method)), "signal: options.signal", "headers: riidoViewerHeaders(options)"}
 	if info.RequestType != "" {
 		initParts = append(initParts, "body: JSON.stringify(body)")
 	}

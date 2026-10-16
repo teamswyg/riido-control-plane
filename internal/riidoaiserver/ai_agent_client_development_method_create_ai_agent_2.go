@@ -6,7 +6,15 @@ import (
 	"time"
 )
 
+// createAIAgent creates a directly configured agent. Its profile color is chosen
+// from the least-used colors in the workspace.
 func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string) (AgentClientRecordResponse, error) {
+	return s.createAIAgentWithProfileColor(ctx, principal, req, tmpColor, "", false)
+}
+
+// createAIAgentWithProfileColor creates an agent with a fixed profile color. An empty
+// profileColor selects one of the least-used colors inside the store lock.
+func (s *DevelopmentAIAgentClientStore) createAIAgentWithProfileColor(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string, profileColor AgentProfileColor, onboardingCreated bool) (AgentClientRecordResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
@@ -17,6 +25,9 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	workspaceID := s.workspaceScope(principal)
+	if !isAgentProfileColor(profileColor) {
+		profileColor = s.chooseNewAgentProfileColorLocked(workspaceID)
+	}
 	runtimeKind, runtimeModel, ok := runtimeSelectionFromDevices(s.visibleDevicesLocked(principal), input.RuntimeID, req.ModelID)
 	if !ok {
 		return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
@@ -31,6 +42,7 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 		Name:                input.Name,
 		ProfileThumbnailURL: input.ProfileThumbnailURL,
 		TmpColor:            input.TmpColor,
+		ProfileColor:        profileColor,
 		Description:         input.Description,
 		Instruction:         input.Instruction,
 		Visibility:          input.Visibility,
@@ -45,5 +57,8 @@ func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, princ
 		UpdatedAt:           now,
 	}
 	s.agents[agent.AgentID] = agent
+	if onboardingCreated {
+		s.markOnboardingCreatedAgentLocked(agent.AgentID)
+	}
 	return AgentClientRecordResponse{SchemaVersion: SchemaVersion, Agent: s.agentForPrincipal(agent, principal)}, nil
 }

@@ -25,6 +25,7 @@ func (s *DevelopmentAIAgentClientStore) DeleteAIAgent(ctx context.Context, princ
 	}
 	s.snapshotAgentTaskThreadsLocked(agent, time.Now().UTC())
 	delete(s.agents, agent.AgentID)
+	s.forgetOnboardingStateForAgentLocked(agent.AgentID)
 	stopped := s.markAgentTaskThreadsStoppedLocked(agent.AgentID, AgentTaskCommentStoppedByAgentDeleted, clientMessageAgentDeleted)
 	for _, thread := range stopped {
 		s.appendAgentTaskActionEvent(actionResponseFromThread(thread, principal.WorkspaceID))

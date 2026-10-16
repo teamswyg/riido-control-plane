@@ -21,5 +21,5 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx c
 	if !ok {
 		return AgentClientRecordResponse{}, ErrAIAgentNotFound
 	}
-	return s.createAIAgent(ctx, principal, req, fixture.TmpColor)
+	return s.createAIAgentWithProfileColor(ctx, principal, req, fixture.TmpColor, onboardingAgentProfileColor, true)
 }

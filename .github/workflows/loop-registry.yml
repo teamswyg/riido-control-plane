@@ -7,6 +7,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "contracts/ai-agent-client/**"
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/**"
       - ".github/workflows/evidence-graph.yml"
@@ -342,6 +343,7 @@ on:
       - "go.sum"
   pull_request:
     paths:
+      - "contracts/ai-agent-client/**"
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/**"
       - ".github/workflows/evidence-graph.yml"

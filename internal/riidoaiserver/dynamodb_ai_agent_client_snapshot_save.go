@@ -45,5 +45,6 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 		return err
 	}
 	s.partHashes = hashes
+	s.onboardingBaseline = onboardingOwnedSnapshot(snapshot)
 	return nil
 }

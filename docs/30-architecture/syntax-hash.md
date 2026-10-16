@@ -98,7 +98,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `api_client_delivery_requirements_adapter` | `tools/apiclientdelivery/requirements` | 100% | `d055ebae7bb8` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `api_client_delivery_runconfig_adapter` | `tools/apiclientdelivery/runconfig` | 100% | `10d6af178589` | `thread_history_v3_must_expose_stable_conversation_grouping` |
 | `figma_projection_guard` | `tools/figmaprojection` | 100% | `528ec57a5878` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
-| `generated_smoke_matrix_guard` | `tools/aigeneratedsmokematrix` | 100% | `f12536b0ef5c` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
+| `generated_smoke_matrix_guard` | `tools/aigeneratedsmokematrix` | 100% | `2df1268b2899` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_doccheck_adapter` | `tools/aigeneratedsmokematrix/doccheck` | 100% | `70e1db0bac3d` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_path_adapter` | `tools/aigeneratedsmokematrix/pathutil` | 100% | `ceb43ad61b7c` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
 | `generated_smoke_matrix_rendertext_adapter` | `tools/aigeneratedsmokematrix/rendertext` | 100% | `9d974e7f5f4f` | `generated_endpoint_smoke_matrix_must_remain_contract_gate` |
@@ -114,16 +114,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `generated_client_handoff_guard` | `tools/generatedclienthandoff` | 100% | `4af6fc6f5e9f` | `api_client_delivery_must_preserve_generated_handoff_boundary` |
 | `store_snapshot_file_outbox_guard` | `tools/storesnapshotoutbox` | 100% | `069f1635d5a6` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `b31f8ce1e2cf` | `react_query_generator_must_preserve_generated_client_surface` |
+| `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d23929aab84a` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `eded03e72715` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `e8897f3421f8` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `3724`
-- tracked files: `3724`
+- Go files: `3760`
+- tracked files: `3760`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -132,7 +132,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `91`
-- duplicate files: `314`
+- duplicate files: `315`
 - internal groups: `6`
 
 | Shape Hash | Files | Packages |
@@ -146,10 +146,10 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `57e35ce78429` | 7 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopclosureaudit` |
 | `7bfab29d8431` | 7 | `tools/cloudwatchemf`, `tools/healthreadycmd`, `tools/metricshttpadapter`, `tools/reviewaccountseed`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
 | `99ad4aab6a2c` | 7 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/metricshttpadapter`, `tools/providerstatus`, `tools/reviewaccountseed` |
+| `faa58e8068ec` | 7 | `internal/riidoaiserver`, `tools/loopclosureaudit`, `tools/reactquerygen` |
 | `952ec131238e` | 6 | `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/assignmentjournal`, `tools/contextmap`, `tools/providerstatus`, `tools/requestauth` |
 | `cf0fe1b458fe` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/runtimeboundary` |
 | `ef2c7580672d` | 6 | `tools/configreference`, `tools/gocibaseline`, `tools/integrationmatrix`, `tools/migrationledger`, `tools/moduledecomposition`, `tools/runtimecdownership` |
-| `faa58e8068ec` | 6 | `internal/riidoaiserver`, `tools/loopclosureaudit`, `tools/reactquerygen` |
 | `09a26b1d4d7d` | 5 | `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/harnesspromotion`, `tools/loopregistry` |
 | `7361781d8898` | 5 | `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/migrationledger` |
 | `252cbee00213` | 4 | `tools/healthreadycmd`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi` |
@@ -169,16 +169,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3724`
-- unique syntax hashes: `3521`
+- tracked files: `3760`
+- unique syntax hashes: `3557`
 - compression gain: `203`
-- analysis reduction: `5.45%`
+- analysis reduction: `5.39%`
 - collision count: `0`
-- relocation mappings: `3724`
+- relocation mappings: `3760`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `111`
 - missing golden commands: `0`
-- efficiency score: `545`
+- efficiency score: `539`
 - compression score: `203`
-- weighted score: `748`
+- weighted score: `742`

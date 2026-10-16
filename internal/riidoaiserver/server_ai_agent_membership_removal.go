@@ -27,10 +27,10 @@ func (s Server) prepareAIAgentMembershipRemoval(ctx context.Context, principal A
 		return nil, err
 	}
 	selector := assignmentID
-	if observation != nil && observation.durableGeneration != "" && isIntentGateAssignmentID(assignmentID) && observation.intentGateAssignmentID != assignmentID {
+	if observation != nil && observation.durableGeneration != "" && isNonDurableAssignmentID(assignmentID) && observation.intentGateAssignmentID != assignmentID {
 		return nil, ErrAIAgentMembershipChanged
 	}
-	if observation != nil && observation.durableGeneration != "" && !isIntentGateAssignmentID(assignmentID) {
+	if observation != nil && observation.durableGeneration != "" && !isNonDurableAssignmentID(assignmentID) {
 		if assignmentID != "" && strings.SplitN(observation.durableGeneration, "@", 2)[0] != assignmentID {
 			return nil, ErrAIAgentMembershipChanged
 		}
@@ -63,7 +63,7 @@ func (s Server) prepareAIAgentMembershipRemoval(ctx context.Context, principal A
 		if err != nil {
 			return nil, err
 		}
-		if generation != observation.durableGeneration || (assignmentID != "" && !isIntentGateAssignmentID(assignmentID) && generation != "" && strings.SplitN(generation, "@", 2)[0] != assignmentID) {
+		if generation != observation.durableGeneration || (assignmentID != "" && !isNonDurableAssignmentID(assignmentID) && generation != "" && strings.SplitN(generation, "@", 2)[0] != assignmentID) {
 			return nil, ErrAIAgentMembershipChanged
 		}
 		legacy, err := s.assignment.(interface {

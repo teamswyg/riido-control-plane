@@ -45,7 +45,7 @@ func (f *membershipSharedDynamoFixture) handle(t *testing.T, w http.ResponseWrit
 	if r.Header.Get("X-Amz-Target") == dynamoDBQueryTarget && p.ExpressionAttributeValues[":exec"]["S"] != "" && receiptHook != nil {
 		receiptHook()
 	}
-	if r.Header.Get("X-Amz-Target") == dynamoDBSnapshotTransactGetTarget && len(p.TransactItems) == 2 && ownedReadHook != nil {
+	if r.Header.Get("X-Amz-Target") == dynamoDBSnapshotTransactGetTarget && len(p.TransactItems) == 2+len(onboardingOwnedPartNames) && ownedReadHook != nil {
 		ownedReadHook()
 	}
 	if r.Header.Get("X-Amz-Target") == dynamoDBTransactWriteTarget && recoveryHook != nil {

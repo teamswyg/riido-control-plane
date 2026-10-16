@@ -1,0 +1,9 @@
+package riidoaiserver
+
+var onboardingOwnedPartNames = []string{
+	dynamoDBAIAgentClientSnapshotPartOnboardingCreated,
+	dynamoDBAIAgentClientSnapshotPartOnboardingDone,
+	dynamoDBAIAgentClientSnapshotPartOnboardingThreads,
+	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts,
+	dynamoDBAIAgentClientSnapshotPartTaskThreads,
+}

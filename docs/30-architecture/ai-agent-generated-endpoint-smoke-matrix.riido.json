@@ -10,13 +10,14 @@
   "smoke_matrix": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json",
   "smoke_schema_version": "riido-ai-agent-generated-endpoint-smoke-matrix.v1",
   "operation_counts": {
-    "total": 59,
+    "total": 61,
     "v1": 27,
-    "v2": 32
+    "v2": 33
   },
   "required_evidence_tests": [
     "TestHTTPAIAgentClientGeneratedEndpointSmokeV1",
-    "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+    "TestHTTPAIAgentClientGeneratedEndpointSmokeV2",
+    "TestHTTPAIAgentClientV3ThreadHistory"
   ],
   "source_checks": [
     {
@@ -50,6 +51,14 @@
       "contains": [
         "TestHTTPAIAgentClientGeneratedEndpointSmokeV2",
         "/v2/client/workspaces/"
+      ]
+    },
+    {
+      "name": "existing-v3-read-smoke",
+      "file": "internal/riidoaiserver/ai_agent_client_http_v3_thread_history_test.go",
+      "contains": [
+        "TestHTTPAIAgentClientV3ThreadHistory",
+        "/v3/client/workspaces/"
       ]
     }
   ],

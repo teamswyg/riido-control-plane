@@ -14,6 +14,9 @@ const (
 	dynamoDBAIAgentClientSnapshotPartTaskThreads          = "TASK_THREADS"
 	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages   = "TASK_THREAD_MESSAGES"
 	dynamoDBAIAgentClientSnapshotPartEvents               = "EVENTS"
+	dynamoDBAIAgentClientSnapshotPartOnboardingCreated    = "ONBOARDING_CREATED_IDS"
+	dynamoDBAIAgentClientSnapshotPartOnboardingDone       = "ONBOARDING_COMPLETIONS"
+	dynamoDBAIAgentClientSnapshotPartOnboardingThreads    = "ONBOARDING_COMPLETION_THREADS"
 )
 
 var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
@@ -26,7 +29,12 @@ var dynamoDBAIAgentClientSnapshotRequiredPartNames = []string{
 	dynamoDBAIAgentClientSnapshotPartEvents,
 }
 
+// Optional parts are absent from snapshots written before they existed. A missing
+// part decodes to its zero value.
 var dynamoDBAIAgentClientSnapshotOptionalPartNames = []string{
+	dynamoDBAIAgentClientSnapshotPartOnboardingCreated,
+	dynamoDBAIAgentClientSnapshotPartOnboardingDone,
+	dynamoDBAIAgentClientSnapshotPartOnboardingThreads,
 	dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts,
 	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships,
 	dynamoDBAIAgentClientSnapshotPartDeviceConnections,

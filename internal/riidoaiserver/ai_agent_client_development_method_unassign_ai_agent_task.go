@@ -24,10 +24,10 @@ func (s *DevelopmentAIAgentClientStore) UnassignAIAgentTask(ctx context.Context,
 	if err := validateTaskAgentMembershipRemovalObservation(taskID, req.AgentID, req.membershipRemovalFence, s.taskThreads[taskID]); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
-	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && isIntentGateAssignmentID(req.AssignmentID) && req.membershipRemovalFence.intentGateAssignmentID != req.AssignmentID {
+	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && isNonDurableAssignmentID(req.AssignmentID) && req.membershipRemovalFence.intentGateAssignmentID != req.AssignmentID {
 		return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
 	}
-	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && !isIntentGateAssignmentID(req.AssignmentID) {
+	if req.membershipRemovalFence != nil && req.membershipRemovalFence.durableGeneration != "" && !isNonDurableAssignmentID(req.AssignmentID) {
 		if req.AssignmentID != "" && strings.SplitN(req.membershipRemovalFence.durableGeneration, "@", 2)[0] != req.AssignmentID {
 			return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
 		}

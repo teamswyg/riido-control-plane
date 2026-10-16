@@ -60,6 +60,8 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		s.handleAIAgentClientCreateTaskThreadMessage(w, r, taskID, threadID)
+	case suffix == "onboarding-completion" && r.Method == http.MethodPost:
+		s.handleAIAgentClientCompleteOnboardingTask(w, r, taskID)
 	case suffix == "stop" && r.Method == http.MethodPost:
 		s.handleAIAgentClientStopTask(w, r, taskID)
 	default:

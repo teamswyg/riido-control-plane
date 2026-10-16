@@ -14,6 +14,7 @@ func (s *DevelopmentAIAgentClientStore) agentSnapshotFromAgent(agent AgentClient
 		Name:                agent.Name,
 		ProfileThumbnailURL: agent.ProfileThumbnailURL,
 		TmpColor:            agent.TmpColor,
+		ProfileColor:        profileColorOrFallback(agent.ProfileColor, agentID),
 		Visibility:          agent.Visibility,
 		RuntimeKind:         agent.RuntimeKind,
 		ModelID:             agent.ModelID,

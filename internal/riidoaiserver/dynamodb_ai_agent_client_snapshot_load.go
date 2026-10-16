@@ -35,6 +35,7 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 		return AIAgentClientSnapshot{}, false, err
 	}
 	s.partHashes = dynamoDBAIAgentClientSnapshotPartHashes(items)
+	s.onboardingBaseline = onboardingOwnedSnapshot(snapshot)
 	return snapshot, true, nil
 }
 

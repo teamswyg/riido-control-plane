@@ -6,6 +6,10 @@ import (
 )
 
 func decodeCommittedTaskAgentMemberships(current, item map[string]map[string]string, snapshot *AIAgentClientSnapshot) error {
+	return decodeCommittedAIAgentClientPart(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships, current, item, snapshot)
+}
+
+func decodeCommittedAIAgentClientPart(name string, current, item map[string]map[string]string, snapshot *AIAgentClientSnapshot) error {
 	var hashes map[string]string
 	manifest := dynamoDBStringValue(current, "part_hashes_json")
 	if manifest == "" {
@@ -14,7 +18,6 @@ func decodeCommittedTaskAgentMemberships(current, item map[string]map[string]str
 	if err := json.Unmarshal([]byte(manifest), &hashes); err != nil {
 		return fmt.Errorf("decode DynamoDB AI Agent client membership manifest: %w", err)
 	}
-	name := dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships
 	expected, advertised := hashes[name]
 	if !advertised {
 		return nil // Ignore leftovers from failed saves or older-server commits.

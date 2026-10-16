@@ -7,8 +7,9 @@ func assignedAgentProfileFromSnapshot(snapshot *AIAgentTaskThreadAgentSnapshot) 
 		return AssignedAgentProfile{}, false
 	}
 	profile := AssignedAgentProfile{
-		AvatarURL: strings.TrimSpace(snapshot.ProfileThumbnailURL),
-		TmpColor:  strings.TrimSpace(snapshot.TmpColor),
+		AvatarURL:    strings.TrimSpace(snapshot.ProfileThumbnailURL),
+		TmpColor:     strings.TrimSpace(snapshot.TmpColor),
+		ProfileColor: profileColorOrFallback(snapshot.ProfileColor, snapshot.AgentID),
 	}
-	return profile, profile.AvatarURL != "" || profile.TmpColor != ""
+	return profile, true
 }
