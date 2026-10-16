@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-type agentDashboardHistoryReader interface {
-	LoadAgentDashboardHistory(context.Context, string) (AgentDashboardHistory, error)
-}
-
 type onboardingCompletionRecordChecker interface {
 	hasOnboardingCompletionRecord(taskID, agentID string) bool
 }
@@ -56,7 +52,7 @@ func (s *DevelopmentAIAgentClientStore) hasOnboardingCompletionRecord(taskID, ag
 // onboardingCompletionHasDurableRun reports whether the assignment store holds any run
 // of this agent on this task. A store without run history reports none.
 func (s Server) onboardingCompletionHasDurableRun(ctx context.Context, taskID, agentID string) (bool, error) {
-	reader, ok := s.assignment.(agentDashboardHistoryReader)
+	reader, ok := s.assignment.(AgentDashboardHistoryReader)
 	if !ok || agentID == "" {
 		return false, nil
 	}
