@@ -1952,7 +1952,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a9807875360db701a256fbdd26395a4344b543007db1b14e305f9e07296bb0d9"
+      "semantic_hash": "5c2cbaec3d7011fb8cca14c747ea529de2e2e92500f0b6ecc38c1f5ae0534f0a"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
