@@ -14,6 +14,7 @@ func selectAIAgentHistoryThreadForFollowup(history AIAgentTaskThreadHistoryColle
 			AssignmentID: thread.AssignmentID, AgentID: thread.AgentID,
 			RunID: thread.RunID, WorkStatus: thread.WorkStatus,
 			AssignmentState: thread.AssignmentState,
+			AgentSnapshot:   copyTaskThreadAgentSnapshot(history.AgentSnapshots[thread.AgentSnapshotID]),
 		}, nil
 	}
 	return AIAgentTaskThreadRecord{}, ErrAIAgentNotFound

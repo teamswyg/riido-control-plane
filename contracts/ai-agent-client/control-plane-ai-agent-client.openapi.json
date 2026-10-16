@@ -5583,6 +5583,9 @@
           "confirmation_reason": {
             "type": "string"
           },
+          "created_by": {
+            "type": "string"
+          },
           "duration_seconds": {
             "type": "integer"
           },

@@ -368,6 +368,7 @@ export interface AgentDashboardTask {
   agent_id: string;
   assignment_id: string;
   confirmation_reason?: string;
+  created_by?: string;
   duration_seconds?: number;
   ended_at?: string;
   key_number: string;

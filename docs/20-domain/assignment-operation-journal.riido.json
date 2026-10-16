@@ -8,45 +8,187 @@
   "evidence_artifact": "assignment-operation-journal-evidence",
   "owner_package": "internal/riidoaiserver",
   "ports": [
-    {"name": "AssignmentOperationStore", "role": "append assignment mutation records"},
-    {"name": "AssignmentOperationLoader", "role": "load durable records for replay"},
-    {"name": "AssignmentQueueReader", "role": "read queued assignments by agent"},
-    {"name": "AssignmentClaimer", "role": "atomically claim next assignment"},
-    {"name": "AssignmentActiveLeaseStore", "role": "load and refresh active assignment leases"},
-    {"name": "AssignmentProjectionReader", "role": "load assignment read projections"}
+    {
+      "name": "AssignmentOperationStore",
+      "role": "append assignment mutation records"
+    },
+    {
+      "name": "AssignmentOperationLoader",
+      "role": "load durable records for replay"
+    },
+    {
+      "name": "AssignmentQueueReader",
+      "role": "read queued assignments by agent"
+    },
+    {
+      "name": "AssignmentClaimer",
+      "role": "atomically claim next assignment"
+    },
+    {
+      "name": "AssignmentActiveLeaseStore",
+      "role": "load and refresh active assignment leases"
+    },
+    {
+      "name": "AssignmentProjectionReader",
+      "role": "load assignment read projections"
+    }
   ],
   "records": [
-    {"name": "AssignmentOperationRecord", "role": "append-only mutation plus emitted task events"},
-    {"name": "AssignmentProjection", "role": "durable assignment read projection with private CAS-preserved bounded recovery and Ready/terminal ACK receipts; receipts never appear in public Assignment JSON"},
-    {"name": "AssignmentActiveLease", "role": "active assignment lease snapshot"},
-    {"name": "AssignmentClaimResult", "role": "claim outcome plus operation evidence"}
+    {
+      "name": "AssignmentOperationRecord",
+      "role": "append-only mutation plus emitted task events"
+    },
+    {
+      "name": "AssignmentProjection",
+      "role": "durable assignment read projection with private CAS-preserved bounded recovery and Ready/terminal ACK receipts; receipts never appear in public Assignment JSON"
+    },
+    {
+      "name": "AssignmentActiveLease",
+      "role": "active assignment lease snapshot"
+    },
+    {
+      "name": "AssignmentClaimResult",
+      "role": "claim outcome plus operation evidence"
+    }
   ],
   "replay_rules": [
-    {"id": "validate-before-apply", "kind": "replay", "rule": "validate every operation record before applying it"},
-    {"id": "stable-replay-order", "kind": "replay", "rule": "order by last event sequence, recorded_at, then operation_id"},
-    {"id": "dedupe-task-events", "kind": "replay", "rule": "dedupe events by task_id and sequence"},
-    {"id": "cross-task-same-seq", "kind": "replay", "rule": "keep same sequence events when task_id differs"},
-    {"id": "track-next-sequences", "kind": "replay", "rule": "rebuild next_event_seq and next_assignment_seq"},
-    {"id": "sort-replayed-events", "kind": "replay", "rule": "sort task event histories by sequence"},
-    {"id": "rebuild-current-assignment", "kind": "index", "rule": "rebuild task current_assignment_id from newest assignment ordering"},
-    {"id": "rebuild-agent-index", "kind": "index", "rule": "rebuild agent assignment lists in assignment creation order"},
-    {"id": "durable-daemon-event-ack", "kind": "replay", "rule": "For stable-key Ready and terminal events, atomically persist at most eight private hashed payload receipts with the operation and projection. Identical retries across replicas or restart restore the original event ACK and assignment acknowledgement fields without another event, outbox, log or span; reject semantic payload reuse and fail closed at the bound without evicting a receipt. A Ready ACK can authorize dispatch only while the current execution is still leased/ready with the same unexpired lease; Running, cancelling and terminal executions refuse it. The private receipt JSON is bounded to 16 KiB and validated before any durable write; the cap never evicts an original receipt."},
-    {"id": "candidate-preflight-outside-actor", "kind": "index", "rule": "Run selected fallback inventory authorization outside the assignment actor under caller cancellation and a two-second bound. The actor and each projection CAS retry recheck the observed assignment fingerprint, execution binding, active lease, state and request context; an intervening stop or lease/policy generation change invalidates approval."},
-    {"id": "daemon-event-dependency-status", "kind": "replay", "rule": "Ready, recovery journal and terminal event persistence failures remain retryable: dependency unavailability or exhausted CAS returns 503, deadline 504 and cancellation 408 with fixed messages. Input validation stays 400. A daemon retries the same stable event key within its existing finite budget; storage failures never authorize dispatch. Legacy snapshot-only and write-only journal event paths mutate a private trial and publish or retain ACKs only after their single authority accepts persistence. A non-projection legacy journal combined with a snapshot store has no atomic receipt port and fails closed before either write; production projection-backed journals and local snapshot-only mode remain supported."}
+    {
+      "id": "validate-before-apply",
+      "kind": "replay",
+      "rule": "validate every operation record before applying it"
+    },
+    {
+      "id": "stable-replay-order",
+      "kind": "replay",
+      "rule": "order by last event sequence, recorded_at, then operation_id"
+    },
+    {
+      "id": "dedupe-task-events",
+      "kind": "replay",
+      "rule": "dedupe events by task_id and sequence"
+    },
+    {
+      "id": "cross-task-same-seq",
+      "kind": "replay",
+      "rule": "keep same sequence events when task_id differs"
+    },
+    {
+      "id": "track-next-sequences",
+      "kind": "replay",
+      "rule": "rebuild next_event_seq and next_assignment_seq"
+    },
+    {
+      "id": "sort-replayed-events",
+      "kind": "replay",
+      "rule": "sort task event histories by sequence"
+    },
+    {
+      "id": "rebuild-current-assignment",
+      "kind": "index",
+      "rule": "rebuild task current_assignment_id from newest assignment ordering"
+    },
+    {
+      "id": "rebuild-agent-index",
+      "kind": "index",
+      "rule": "rebuild agent assignment lists in assignment creation order"
+    },
+    {
+      "id": "durable-daemon-event-ack",
+      "kind": "replay",
+      "rule": "For stable-key Ready and terminal events, atomically persist at most eight private hashed payload receipts with the operation and projection. Identical retries across replicas or restart restore the original event ACK and assignment acknowledgement fields without another event, outbox, log or span; reject semantic payload reuse and fail closed at the bound without evicting a receipt. A Ready ACK can authorize dispatch only while the current execution is still leased/ready with the same unexpired lease; Running, cancelling and terminal executions refuse it. The private receipt JSON is bounded to 16 KiB and validated before any durable write; the cap never evicts an original receipt."
+    },
+    {
+      "id": "candidate-preflight-outside-actor",
+      "kind": "index",
+      "rule": "Run selected fallback inventory authorization outside the assignment actor under caller cancellation and a two-second bound. The actor and each projection CAS retry recheck the observed assignment fingerprint, execution binding, active lease, state and request context; an intervening stop or lease/policy generation change invalidates approval."
+    },
+    {
+      "id": "daemon-event-dependency-status",
+      "kind": "replay",
+      "rule": "Ready, recovery journal and terminal event persistence failures remain retryable: dependency unavailability or exhausted CAS returns 503, deadline 504 and cancellation 408 with fixed messages. Input validation stays 400. A daemon retries the same stable event key within its existing finite budget; storage failures never authorize dispatch. Legacy snapshot-only and write-only journal event paths mutate a private trial and publish or retain ACKs only after their single authority accepts persistence. A non-projection legacy journal combined with a snapshot store has no atomic receipt port and fails closed before either write; production projection-backed journals and local snapshot-only mode remain supported. Stale Ready/recovery lease rechecks have a two-second total lookup deadline, including operation-store actor queueing; timeout is retryable 504 and never publishes or caches an ACK. This bounds the existing background lookup but does not claim caller-context propagation through all actor operations."
+    }
   ],
   "version_constants": [
-    {"name": "AssignmentOperationSchemaVersion", "value": "riido-ai-server-assignment-operation.v1"},
-    {"name": "AssignmentProjectionSchemaVersion", "value": "riido-ai-server-assignment-projection.v1"},
-    {"name": "AssignmentAgentActiveSchemaVersion", "value": "riido-ai-server-agent-active-assignment.v1"},
-    {"name": "DefaultAssignmentActiveLeaseSeconds", "value": "20"}
+    {
+      "name": "AssignmentOperationSchemaVersion",
+      "value": "riido-ai-server-assignment-operation.v1"
+    },
+    {
+      "name": "AssignmentProjectionSchemaVersion",
+      "value": "riido-ai-server-assignment-projection.v1"
+    },
+    {
+      "name": "AssignmentAgentActiveSchemaVersion",
+      "value": "riido-ai-server-agent-active-assignment.v1"
+    },
+    {
+      "name": "DefaultAssignmentActiveLeaseSeconds",
+      "value": "20"
+    }
   ],
   "source_checks": [
-    {"name": "port-surface", "file": "internal/riidoaiserver/assignment_operation_port.go", "contains": ["AssignmentOperationStore", "AssignmentOperationLoader", "AssignmentQueueReader", "AssignmentClaimer", "AssignmentActiveLeaseStore", "AssignmentProjectionReader"]},
-    {"name": "record-surface", "file": "internal/riidoaiserver/assignment_operation_port.go", "contains": ["AssignmentOperationRecord", "AssignmentProjection", "AssignmentActiveLease", "AssignmentClaimResult", "validateAssignmentOperationRecord"]},
-    {"name": "version-surface", "file": "internal/riidoaiserver/assignment_operation_port.go", "contains": ["AssignmentOperationSchemaVersion", "AssignmentProjectionSchemaVersion", "AssignmentAgentActiveSchemaVersion", "DefaultAssignmentActiveLeaseSeconds = 20"]},
-    {"name": "replay-reducer", "file": "internal/riidoaiserver/assignment_operation_replay.go", "contains": ["stateFromAssignmentOperations", "validateAssignmentOperationRecord", "assignmentOperationEventReplayKey", "rebuildAssignmentIndexes"]},
-    {"name": "port-tests", "file": "internal/riidoaiserver/assignment_operation_port_test.go", "contains": ["TestAssignmentOperationRecordValidation", "TestAssignmentActiveLeaseExpired", "TestAssignmentOperationPortsCompile"]},
-    {"name": "replay-tests", "file": "internal/riidoaiserver/assignment_operation_replay_test.go", "contains": ["TestAssignmentOperationReplayOrdersAndDedupesEvents", "TestAssignmentOperationReplayKeepsSameEventSeqAcrossDifferentTasks", "TestAssignmentOperationReplayRebuildsAssignmentIndexes", "TestAssignmentOperationReplayRejectsInvalidRecords"]}
+    {
+      "name": "port-surface",
+      "file": "internal/riidoaiserver/assignment_operation_port.go",
+      "contains": [
+        "AssignmentOperationStore",
+        "AssignmentOperationLoader",
+        "AssignmentQueueReader",
+        "AssignmentClaimer",
+        "AssignmentActiveLeaseStore",
+        "AssignmentProjectionReader"
+      ]
+    },
+    {
+      "name": "record-surface",
+      "file": "internal/riidoaiserver/assignment_operation_port.go",
+      "contains": [
+        "AssignmentOperationRecord",
+        "AssignmentProjection",
+        "AssignmentActiveLease",
+        "AssignmentClaimResult",
+        "validateAssignmentOperationRecord"
+      ]
+    },
+    {
+      "name": "version-surface",
+      "file": "internal/riidoaiserver/assignment_operation_port.go",
+      "contains": [
+        "AssignmentOperationSchemaVersion",
+        "AssignmentProjectionSchemaVersion",
+        "AssignmentAgentActiveSchemaVersion",
+        "DefaultAssignmentActiveLeaseSeconds = 20"
+      ]
+    },
+    {
+      "name": "replay-reducer",
+      "file": "internal/riidoaiserver/assignment_operation_replay.go",
+      "contains": [
+        "stateFromAssignmentOperations",
+        "validateAssignmentOperationRecord",
+        "assignmentOperationEventReplayKey",
+        "rebuildAssignmentIndexes"
+      ]
+    },
+    {
+      "name": "port-tests",
+      "file": "internal/riidoaiserver/assignment_operation_port_test.go",
+      "contains": [
+        "TestAssignmentOperationRecordValidation",
+        "TestAssignmentActiveLeaseExpired",
+        "TestAssignmentOperationPortsCompile"
+      ]
+    },
+    {
+      "name": "replay-tests",
+      "file": "internal/riidoaiserver/assignment_operation_replay_test.go",
+      "contains": [
+        "TestAssignmentOperationReplayOrdersAndDedupesEvents",
+        "TestAssignmentOperationReplayKeepsSameEventSeqAcrossDifferentTasks",
+        "TestAssignmentOperationReplayRebuildsAssignmentIndexes",
+        "TestAssignmentOperationReplayRejectsInvalidRecords"
+      ]
+    }
   ],
   "loop": {
     "observation": "Stable event keys previously deduplicated only local event history and fallback inventory reads could occupy the global assignment actor after caller cancellation.",
@@ -55,5 +197,14 @@
     "evaluate": "The journal verifier checks owning ports, source anchors and generated freshness; focused tests require exact original ACKs, no duplicate side effects and actor responsiveness during inventory stalls.",
     "retrospective": "Ready and terminal ACK guarantees cover newly committed stable-key receipts; legacy records without receipts retain compatibility and cannot retroactively prove a lost original acknowledgement."
   },
-  "non_goals": ["in-memory store actor behavior", "snapshot replay runtime wiring", "HTTP routes", "SSE fan-out", "DynamoDB payloads", "Terraform", "AWS credentials", "production deployment evidence"]
+  "non_goals": [
+    "in-memory store actor behavior",
+    "snapshot replay runtime wiring",
+    "HTTP routes",
+    "SSE fan-out",
+    "DynamoDB payloads",
+    "Terraform",
+    "AWS credentials",
+    "production deployment evidence"
+  ]
 }

@@ -17,9 +17,11 @@ func (s *Store) assignmentActiveLeaseExpired(state *storeState, assignment Assig
 	if !ok {
 		return false, nil
 	}
-	lease, exists, err := leaseStore.LoadAgentActiveAssignment(context.Background(), assignment.AgentID)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	lease, exists, err := leaseStore.LoadAgentActiveAssignment(ctx, assignment.AgentID)
 	if err != nil {
-		return false, err
+		return false, assignmentDependencyFailure(err)
 	}
 	if !exists {
 		return true, nil

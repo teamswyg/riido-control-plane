@@ -36,6 +36,9 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	if err != nil {
 		return AssignRequest{}, err
 	}
+	if err := s.applyThreadNativeResume(ctx, principal, selectedThread, &assignmentReq); err != nil {
+		return AssignRequest{}, err
+	}
 	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req, history.Threads...)
 	return assignmentReq, nil
 }
