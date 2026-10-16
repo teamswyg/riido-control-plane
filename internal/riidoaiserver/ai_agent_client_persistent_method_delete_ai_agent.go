@@ -5,7 +5,7 @@ import "context"
 func (s *PersistentAIAgentClientStore) DeleteAIAgent(ctx context.Context, principal AuthorizationResult, agentID string) (DeleteAgentResponse, error) {
 	s.operationMu.Lock()
 	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
+	if err := s.forceReloadMembershipSnapshot(ctx); err != nil {
 		return DeleteAgentResponse{}, err
 	}
 	response, err := s.DevelopmentAIAgentClientStore.DeleteAIAgent(ctx, principal, agentID)

@@ -51,6 +51,11 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 				}
 			}
 		}
+		if current != nil {
+			if err := s.mergeCommittedOnboardingSnapshot(committed, &snapshot); err != nil {
+				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
+			}
+		}
 		var committedHashes map[string]string
 		if current != nil {
 			if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
@@ -110,6 +115,9 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		_, err = doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 		if err == nil {
 			s.partHashes = hashes
+			// The caller still holds its requested cache; retain that observation as
+			// the delta baseline, not values preserved from another replica.
+			s.onboardingBaseline = onboardingOwnedSnapshot(requested)
 			return stats, encoded, nil
 		}
 		if !isDynamoDBTransactionContention(err) {

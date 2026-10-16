@@ -9,11 +9,7 @@ import (
 
 const onboardingCompletionRunIDPrefix = "run-onboarding-seed-"
 
-// CompleteAIAgentOnboardingTask adds the onboarding agent as a task participant and
-// records one completed, agent-authored task_completed comment. It never calls the
-// assignment queue and never starts execution. Eligibility rules are in
-// ai_agent_onboarding_completion_guard.go.
-func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx context.Context, principal AuthorizationResult, taskID string, req CompleteAIAgentOnboardingTaskRequest) (AIAgentTaskActionResponse, error) {
+func (s *DevelopmentAIAgentClientStore) completeAIAgentOnboardingTask(ctx context.Context, principal AuthorizationResult, taskID string, req CompleteAIAgentOnboardingTaskRequest, fanout bool) (AIAgentTaskActionResponse, error) {
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
@@ -70,20 +66,11 @@ func (s *DevelopmentAIAgentClientStore) CompleteAIAgentOnboardingTask(ctx contex
 	response.ThreadID = threadIDForRun(taskID, agent.AgentID, runID)
 	s.upsertTaskThreadFromActionLocked(response, "")
 	s.dropTaskThreadHistoryCacheLocked(response.ThreadID)
-	s.appendAgentTaskActionEvent(response)
+	s.appendAgentTaskActionEventWithFanout(response, fanout)
 	stored, ok := s.onboardingSeedThreadLocked(taskID, assignmentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, errors.New("onboarding completion thread was not recorded")
 	}
 	s.markOnboardingCompletedLocked(agent.AgentID, taskID, stored)
 	return s.rememberTaskRequestReceiptLocked(receiptKey, actionResponseFromThread(stored, principal.WorkspaceID)), nil
-}
-
-func (s *DevelopmentAIAgentClientStore) onboardingSeedThreadLocked(taskID, assignmentID string) (AIAgentTaskThreadRecord, bool) {
-	for _, thread := range s.taskThreads[taskID] {
-		if thread.AssignmentID == assignmentID {
-			return thread, true
-		}
-	}
-	return AIAgentTaskThreadRecord{}, false
 }

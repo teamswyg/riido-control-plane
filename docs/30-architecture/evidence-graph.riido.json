@@ -23733,6 +23733,105 @@
       ],
       "decision": "Retain startup-loaded legacy history, read new Agent journal rows with consistent partition queries and request deadlines, and keep task permission filtering before counts/pagination. Creation and conditional state updates commit their history row in the same transaction; other mutation acknowledgments retry a failed history mirror; sparse queue indexes and offline notification delivery are unchanged. Typed optional page reaches both the URL and query key. No frontend deployment or newly executed model task is claimed. The RIID-5830 record redesign additionally exposes the existing assignment CreatedBy as optional created_by after task access filtering. TestAgentDashboardPreservesRequesterPerExecution verifies the actual requester, omitted legacy values, and excluded inaccessible records. This projection copies one existing string per visible record without additional journal reads, member lookups, or changed query pagination; the client resolves member profiles separately. Regenerated syntax and contract hashes do not constitute a new runtime performance claim.",
       "next_loop": "ai_agent_load_harness"
+    },
+    {
+      "id": "onboarding_completion_replica_commit_5846",
+      "observation": "Independent review reproduced two failures: an unrelated cached profile writer erased durable one-time completion and receipt state, allowing the same Agent to complete another task; a rejected snapshot commit had already emitted a completed SSE event.",
+      "hypothesis": "Atomically read CURRENT with membership and onboarding parts, merge only baseline-to-request per-key changes into committed state, reject conflicting keys, and fan out staged completion events only after the existing atomic snapshot transaction succeeds. Deletion force-loads current completion metadata before clearing the incarnation.",
+      "claims": [
+        "onboarding_completion_must_be_durable_and_idempotent",
+        "deleted_agent_threads_must_remain_visible",
+        "sse_reconnect_must_resume_after_last_event_id"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_complete_onboarding_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_complete_onboarding_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion_guard.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion_publication.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_task_provenance.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_agent_delete.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_append_client_event_locked.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_parts.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_seed_thread.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_onboarding_completion.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_delete.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_stale_writer_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_commit_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion_guard_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_stale_delete_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_delete_commit_race_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "RED fixtures become GREEN without model calls, customer assignments or external database writes. Repeated stale writes preserve the original completion comment, response and scoped request ownership; deletion does not resurrect old receipts. Failed persistence remains retryable with fixed messages and emits no live completion. This is an intentional imported onboarding record, not evidence that an Agent model performed the task.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {
