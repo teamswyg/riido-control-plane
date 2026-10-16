@@ -140,3 +140,5 @@ The earlier live SSE measurements predate this matcher correction. No new provid
 run was needed for this deterministic classification fix. The same local prompt
 benchmark after the correction measured 28382/21454/35903 ns/op (20 allocs/op),
 which measures prompt construction only and does not establish model latency.
+
+Empty editor HTML messages are normalized with the same renderer as prompt history and excluded before the recent-message budget. `TestAcceptanceRenderedEmptyHistoryPreservesEarlierRequirement` preserves earlier user constraints across empty editor status rows.

@@ -97,19 +97,7 @@ func (s *Store) loop(state storeState) {
 				msg.reply <- eventResult{response: response, err: err}
 				continue
 			}
-			beforeEventSeq := state.nextEventSeq
-			eventStore := *s
-			eventStore.recoveryApproval = msg.approval
-			response, err := eventStore.handleEvent(&state, msg.agentID, msg.req)
-			if err == nil && state.nextEventSeq != beforeEventSeq {
-				err = s.saveOperation(&state, AssignmentOperationAgentEvent, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
-				if err == nil {
-					err = s.saveSnapshot(&state)
-				}
-			}
-			if err == nil && state.nextEventSeq != beforeEventSeq {
-				observeCommittedAssignmentEvent(msg.ctx, &state, response.Event)
-			}
+			response, err := s.commitLegacyAgentEvent(msg.ctx, &state, msg.agentID, msg.req, msg.approval)
 			msg.reply <- eventResult{response: response, err: err}
 		case heartbeatCmd:
 			response, mutations, err := s.handleHeartbeat(&state, msg.agentID, msg.req)

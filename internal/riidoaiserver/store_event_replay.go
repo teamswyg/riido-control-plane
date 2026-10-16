@@ -50,13 +50,5 @@ func (s *Store) appendRecordedEvent(state *storeState, event TaskEvent) {
 			state.assignments[assignment.ID] = assignment
 		}
 	}
-	if s.outbox != nil {
-		s.appendTaskEventToOutbox(state, recorded)
-	}
-	for _, ch := range state.subscribers[recorded.TaskID] {
-		select {
-		case ch <- recorded:
-		default:
-		}
-	}
+	s.publishTaskEvent(state, recorded)
 }

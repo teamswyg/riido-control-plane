@@ -22,7 +22,7 @@ func (s *Store) preflightRecoveryCandidate(ctx context.Context, agentID string, 
 	defer cancel()
 	projection, found, err := s.LoadAssignmentProjection(ctx, req.AssignmentID)
 	if err != nil {
-		return nil, err
+		return nil, assignmentDependencyFailure(err)
 	}
 	if !found {
 		return nil, errors.New("assignment not found")

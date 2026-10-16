@@ -16,7 +16,7 @@ func (s *Store) recheckRecoveryCandidate(ctx context.Context, current Assignment
 	principal := AuthorizationResult{PrincipalID: current.CreatedBy, WorkspaceID: current.WorkspaceID}
 	agents, err := client.ListAIAgentTaskAssignableAgents(ctx, principal, current.TaskID)
 	if err != nil {
-		return err
+		return assignmentDependencyFailure(err)
 	}
 	selected, err := selectAssignableAgent(agents.Agents, current.AgentID)
 	if err != nil {

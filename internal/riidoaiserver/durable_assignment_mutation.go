@@ -18,7 +18,7 @@ func (s *Store) mutateDurableAssignment(ctx context.Context, state *storeState, 
 		}
 		expected, found, err := reader.LoadAssignmentProjection(ctx, id)
 		if err != nil {
-			return Assignment{}, err
+			return Assignment{}, assignmentDependencyFailure(err)
 		}
 		if !found {
 			return Assignment{}, fmt.Errorf("assignment %s not found", id)
@@ -61,10 +61,10 @@ func (s *Store) mutateDurableAssignment(ctx context.Context, state *storeState, 
 			continue
 		}
 		if err != nil {
-			return Assignment{}, err
+			return Assignment{}, assignmentDependencyFailure(err)
 		}
 		if err = s.saveSnapshot(&trial); err != nil {
-			return Assignment{}, err
+			return Assignment{}, assignmentDependencyFailure(err)
 		}
 		applyAssignmentToState(state, assignment)
 		state.agentEventsTotal = trial.agentEventsTotal

@@ -30,16 +30,20 @@ func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, ev
 		At:                 at,
 	}
 	state.events[taskID] = append(state.events[taskID], event)
+	s.publishTaskEvent(state, event)
+	return event
+}
+
+func (s *Store) publishTaskEvent(state *storeState, event TaskEvent) {
 	if s.outbox != nil {
 		s.appendTaskEventToOutbox(state, event)
 	}
-	for _, ch := range state.subscribers[taskID] {
+	for _, ch := range state.subscribers[event.TaskID] {
 		select {
 		case ch <- event:
 		default:
 		}
 	}
-	return event
 }
 
 func (s *Store) appendTaskEventToOutbox(state *storeState, event TaskEvent) {

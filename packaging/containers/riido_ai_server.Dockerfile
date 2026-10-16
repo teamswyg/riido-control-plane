@@ -1,5 +1,6 @@
 ARG GO_IMAGE=golang:1.26.5
 FROM ${GO_IMAGE} AS build
+ARG RIIDO_SOURCE_REVISION
 
 WORKDIR /src
 COPY go.mod go.sum ./
@@ -10,7 +11,7 @@ COPY internal ./internal
 ENV CGO_ENABLED=0
 RUN --mount=type=cache,target=/go/pkg/mod \
   --mount=type=cache,target=/root/.cache/go-build \
-  go build -trimpath -ldflags="-s -w" -o /out/riido_ai_server ./cmd/riido_ai_server
+  go build -trimpath -ldflags="-s -w -X main.buildRevision=${RIIDO_SOURCE_REVISION}" -o /out/riido_ai_server ./cmd/riido_ai_server
 
 FROM scratch
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt

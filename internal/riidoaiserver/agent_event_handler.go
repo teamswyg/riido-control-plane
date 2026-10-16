@@ -21,8 +21,9 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 	receivedAt := time.Now()
 	response, err := s.assignment.RecordAgentEvent(r.Context(), agentID, req)
 	if err != nil {
-		logAgentEventRejected(agentID, req, err)
-		writeError(w, http.StatusBadRequest, err.Error())
+		status, message := agentEventErrorResponse(err)
+		logAgentEventRejected(agentID, req, err, status)
+		writeError(w, status, message)
 		return
 	}
 	if recorder, ok := s.aiAgent.(AIAgentAssignmentEventRecorder); ok {
