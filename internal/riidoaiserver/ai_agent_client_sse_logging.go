@@ -9,7 +9,9 @@ import (
 )
 
 func logAIAgentClientStreamOpen(r *http.Request, replayEvents int) {
-	traceID, spanID := traceCorrelationFromContext(r.Context())
+	ctx, span := startSSEObservation(r.Context(), "stream_open", StringTraceAttribute("http.route", sseLogRoute(r)), Int64TraceAttribute("riido.sse.replay_events", int64(replayEvents)))
+	defer span.End()
+	traceID, spanID := traceCorrelationFromContext(ctx)
 	log.Printf(
 		"riido_ai_agent_sse event=stream_open route=%q replay_cursor_present=%t replay_events=%d trace_id=%q span_id=%q",
 		sseLogRoute(r), strings.TrimSpace(r.Header.Get("Last-Event-ID")) != "", replayEvents, traceID, spanID,
@@ -17,7 +19,12 @@ func logAIAgentClientStreamOpen(r *http.Request, replayEvents int) {
 }
 
 func logAIAgentClientStreamClose(r *http.Request, reason string, err error) {
-	traceID, spanID := traceCorrelationFromContext(r.Context())
+	ctx, span := startSSEObservation(r.Context(), "stream_closed", StringTraceAttribute("http.route", sseLogRoute(r)), StringTraceAttribute("riido.sse.close_reason", boundedSSECloseReason(reason)), StringTraceAttribute("error.type", sseCloseErrorType(reason, err)))
+	defer span.End()
+	if sseCloseErrorType(reason, err) == "write_error" {
+		span.RecordError(errors.New("SSE write failed"))
+	}
+	traceID, spanID := traceCorrelationFromContext(ctx)
 	log.Printf(
 		"riido_ai_agent_sse event=stream_closed route=%q reason=%q error_type=%q trace_id=%q span_id=%q",
 		sseLogRoute(r), boundedSSECloseReason(reason), sseCloseErrorType(reason, err), traceID, spanID,

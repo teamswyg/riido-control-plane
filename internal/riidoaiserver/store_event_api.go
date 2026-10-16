@@ -18,7 +18,7 @@ func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentE
 	}
 	reply := make(chan eventResult, 1)
 	if err := s.send(ctx, eventCmd{ctx: ctx, approval: approval, agentID: agentID, req: req, reply: reply}); err != nil {
-		return AgentEventResponse{}, err
+		return AgentEventResponse{}, assignmentDependencyFailure(err)
 	}
 	select {
 	case res := <-reply:

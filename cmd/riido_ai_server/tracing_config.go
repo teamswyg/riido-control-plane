@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -30,7 +31,7 @@ func tracingConfigFromEnv() (tracingRuntimeConfig, error) {
 	if err != nil {
 		return tracingRuntimeConfig{}, err
 	}
-	if sampleRatio < 0 || sampleRatio > 1 {
+	if math.IsNaN(sampleRatio) || math.IsInf(sampleRatio, 0) || sampleRatio < 0 || sampleRatio > 1 {
 		return tracingRuntimeConfig{}, fmt.Errorf("%s must be between 0 and 1", envTracingSampleRatio)
 	}
 	return tracingRuntimeConfig{
