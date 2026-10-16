@@ -54,9 +54,6 @@ func TestPersistentDesktopPresenceSeesConnectionsFromAnotherInstance(t *testing.
 	if err != nil {
 		t.Fatalf("open writer: %v", err)
 	}
-	// Start the fake clock after both stores recorded their real open time.
-	now := time.Now().UTC()
-	reader.snapshotClock = func() time.Time { return now }
 	principal := AuthorizationResult{PrincipalID: "web-user", WorkspaceID: "workspace-beta"}
 	if lastSeenAt, err := reader.DesktopPresenceLastSeenAt(ctx, principal); err != nil || !lastSeenAt.IsZero() {
 		t.Fatalf("presence before connect = %s, err = %v", lastSeenAt, err)
@@ -64,9 +61,13 @@ func TestPersistentDesktopPresenceSeesConnectionsFromAnotherInstance(t *testing.
 	if _, err := writer.ConnectAIAgentDevice(ctx, principal, "machine-web"); err != nil {
 		t.Fatalf("connect: %v", err)
 	}
-	now = now.Add(desktopPresenceSnapshotMaxAge)
+	reloadedAt := reader.snapshotLastReloadAt
 	lastSeenAt, err := reader.DesktopPresenceLastSeenAt(ctx, principal)
 	if err != nil || lastSeenAt.IsZero() {
-		t.Fatalf("reader presence %s after the connect = %s, err = %v", desktopPresenceSnapshotMaxAge, lastSeenAt, err)
+		t.Fatalf("reader presence right after another instance connected = %s, err = %v", lastSeenAt, err)
+	}
+	// Restoring the snapshot would drop in-memory daemon heartbeats saved only every few minutes.
+	if !reader.snapshotLastReloadAt.Equal(reloadedAt) {
+		t.Fatalf("presence read restored the snapshot into memory")
 	}
 }

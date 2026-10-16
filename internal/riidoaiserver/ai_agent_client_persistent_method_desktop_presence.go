@@ -2,30 +2,32 @@ package riidoaiserver
 
 import (
 	"context"
+	"strings"
 	"time"
 )
 
-// desktopPresenceSnapshotMaxAge bounds how stale a presence answer can be when
-// the desktop app connected through another control-plane instance. The
-// default snapshot reload interval is a minute, too slow for onboarding polls,
-// while reloading on every poll would load the whole snapshot per request.
-const desktopPresenceSnapshotMaxAge = 2 * time.Second
-
-// DesktopPresenceLastSeenAt reloads a snapshot older than
-// desktopPresenceSnapshotMaxAge first, so at most one reload per instance runs
-// in that window however many web clients are polling.
+// DesktopPresenceLastSeenAt reads the saved snapshot's connection grants
+// without restoring it into memory. A full reload would replace in-memory
+// daemon heartbeats that are saved only every few minutes, while the default
+// reload interval is too slow for onboarding polls; a desktop connection saved
+// by another control-plane instance is still visible on the next poll.
 func (s *PersistentAIAgentClientStore) DesktopPresenceLastSeenAt(ctx context.Context, principal AuthorizationResult) (time.Time, error) {
-	if err := s.lockOperationContext(ctx); err != nil {
+	lastSeenAt, err := s.DevelopmentAIAgentClientStore.DesktopPresenceLastSeenAt(ctx, principal)
+	principalID := strings.TrimSpace(principal.PrincipalID)
+	if err != nil || principalID == "" || s.snapshotStore == nil {
+		return lastSeenAt, err
+	}
+	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
+	if err != nil {
 		return time.Time{}, err
 	}
-	defer s.operationMu.Unlock()
-	s.snapshotReloadMu.Lock()
-	if !s.snapshotNow().Before(s.snapshotLastReloadAt.Add(desktopPresenceSnapshotMaxAge)) {
-		s.snapshotLastReloadAt = time.Time{}
+	if !ok {
+		return lastSeenAt, nil
 	}
-	s.snapshotReloadMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return time.Time{}, err
+	for _, grant := range snapshot.DeviceConnectionGrants {
+		if strings.TrimSpace(grant.PrincipalID) == principalID && grant.LastSeenAt.After(lastSeenAt) {
+			lastSeenAt = grant.LastSeenAt.UTC()
+		}
 	}
-	return s.DevelopmentAIAgentClientStore.DesktopPresenceLastSeenAt(ctx, principal)
+	return lastSeenAt, nil
 }
