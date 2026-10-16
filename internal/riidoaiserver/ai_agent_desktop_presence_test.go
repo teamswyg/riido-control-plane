@@ -46,16 +46,17 @@ func TestHTTPDesktopPresenceRejectsWrites(t *testing.T) {
 func TestPersistentDesktopPresenceSeesConnectionsFromAnotherInstance(t *testing.T) {
 	ctx := context.Background()
 	snapshots := &memoryAIAgentClientSnapshotStore{}
-	now := time.Date(2026, 10, 16, 9, 0, 0, 0, time.UTC)
 	reader, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
 	if err != nil {
 		t.Fatalf("open reader: %v", err)
 	}
-	reader.snapshotClock = func() time.Time { return now }
 	writer, err := OpenPersistentAIAgentClientStore(ctx, NewDevelopmentAIAgentClientStore(), snapshots)
 	if err != nil {
 		t.Fatalf("open writer: %v", err)
 	}
+	// Start the fake clock after both stores recorded their real open time.
+	now := time.Now().UTC()
+	reader.snapshotClock = func() time.Time { return now }
 	principal := AuthorizationResult{PrincipalID: "web-user", WorkspaceID: "workspace-beta"}
 	if lastSeenAt, err := reader.DesktopPresenceLastSeenAt(ctx, principal); err != nil || !lastSeenAt.IsZero() {
 		t.Fatalf("presence before connect = %s, err = %v", lastSeenAt, err)
