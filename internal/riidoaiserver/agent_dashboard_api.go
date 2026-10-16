@@ -3,6 +3,7 @@ package riidoaiserver
 import "time"
 
 type AgentDashboardTask struct {
+	CreatedBy          string     `json:"created_by,omitempty"`
 	AgentID            string     `json:"agent_id"`
 	TaskID             string     `json:"task_id"`
 	AssignmentID       string     `json:"assignment_id"`
