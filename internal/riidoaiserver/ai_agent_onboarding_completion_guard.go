@@ -21,6 +21,10 @@ var errOnboardingCompletionConflict = errors.New("onboarding completion conflict
 // the stop must not overwrite it. It maps to 409.
 var errOnboardingCompletionStopConflict = errors.New("onboarding completion is a completed record and cannot be stopped")
 
+// onboardingCompletionReceiptKeyPrefix marks onboarding completion receipts, so that
+// deleting an agent can drop its completion receipts from the request receipt map.
+const onboardingCompletionReceiptKeyPrefix = "onboarding-completion-"
+
 // onboardingCompletionReceiptKey scopes request_id to workspace, owner principal and
 // operation. It never matches assignment receipts, which use identifiedAssignmentID.
 func onboardingCompletionReceiptKey(principal AuthorizationResult, requestID string) string {
@@ -29,7 +33,7 @@ func onboardingCompletionReceiptKey(principal AuthorizationResult, requestID str
 		return ""
 	}
 	sum := sha256.Sum256([]byte("onboarding-completion\x00" + principal.WorkspaceID + "\x00" + principal.PrincipalID + "\x00" + requestID))
-	return fmt.Sprintf("onboarding-completion-%x", sum)
+	return fmt.Sprintf("%s%x", onboardingCompletionReceiptKeyPrefix, sum)
 }
 
 // checkOnboardingCompletionEligibleLocked runs after the idempotent replay checks.
