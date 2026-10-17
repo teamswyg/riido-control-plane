@@ -20,7 +20,8 @@
     "Timing logs never contain prompt, answer or credential content.",
     "Answer-only intent signals require directive syntax; nominal requests are recognized only in the task title or explicit user instruction, not source-document prose.",
     "Messages that render empty, including empty editor HTML, are excluded before the recent-message budget; eligibility and prompt rendering use the same normalization.",
-    "Keyword intent classification is advisory only; every new assignment reaches the existing provider turn, preserving task context and explicit instruction without an extra model request."
+    "Keyword intent classification is advisory only; every new assignment reaches the existing provider turn, preserving task context and explicit instruction without an extra model request.",
+    "Separate successful assignment commit and client projection duration using one server clock; never log answer or credential content."
   ],
   "verification": {
     "tests": [
