@@ -78,3 +78,15 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 ## Non-Goals
 
 - `automatic production activation`, `centralizing tenant/resource policy in Auth`, `Terraform state`, `secret values`, `production token values`, `generated frontend implementation`
+
+### Desktop account connection with an existing device credential
+
+`POST /v2/desktop/workspaces/{workspace_id}/devices/connect` accepts an existing
+`device_id` with `X-Riido-Device-Secret`, in addition to the current user's
+`X-Riido-AI-Agent-Token`. Both user workspace authorization and device possession
+must pass. The device proof never replaces user authorization. This form connects
+the actual running device even if the shared machine UUID changed. It preserves
+the device ID, owner, secret, runtime snapshots, and existing account grants.
+Missing or invalid proof is rejected without falling back to machine-ID creation.
+Legacy `machine_id` requests remain supported. Desktop logout retires pending
+session work; it does not revoke the existing durable connection grants.
