@@ -6,6 +6,8 @@ import "strings"
 // may alter another profile while another replica commits a one-time completion.
 func onboardingOwnedSnapshot(snapshot AIAgentClientSnapshot) AIAgentClientSnapshot {
 	return AIAgentClientSnapshot{
+		OnboardingAgentCreates:      cloneOnboardingAgentCreates(snapshot.OnboardingAgentCreates),
+		Agents:                      append([]AgentClientRecord(nil), snapshot.Agents...),
 		OnboardingCreatedIDs:        append([]string(nil), snapshot.OnboardingCreatedIDs...),
 		OnboardingCompletions:       cloneOnboardingCompletedTasks(snapshot.OnboardingCompletions),
 		OnboardingCompletionThreads: cloneOnboardingCompletionThreads(snapshot.OnboardingCompletionThreads),
@@ -36,6 +38,9 @@ func (s *DynamoDBAIAgentClientSnapshot) mergeCommittedOnboardingSnapshot(items [
 		}
 	}
 	baseline := s.onboardingBaseline
+	if err := mergeCommittedOnboardingAgentCreates(baseline, committed, requested); err != nil {
+		return err
+	}
 	forgetDeletedOnboardingIncarnations(baseline, *requested, &committed)
 	created, err := mergeOnboardingMap(onboardingCreatedAgentsFromSnapshot(baseline.OnboardingCreatedIDs), onboardingCreatedAgentsFromSnapshot(requested.OnboardingCreatedIDs), onboardingCreatedAgentsFromSnapshot(committed.OnboardingCreatedIDs))
 	if err != nil {

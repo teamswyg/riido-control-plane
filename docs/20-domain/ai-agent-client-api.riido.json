@@ -60,7 +60,8 @@
     "agent_capability",
     "agent_supported",
     "update_required",
-    "download_url"
+    "download_url",
+    "request_id"
   ],
   "deployment_evidence": [
     "not from a manual",
@@ -104,7 +105,9 @@
       "A supported committed-grants reader is authoritative over memory: failed or uncommitted memory changes cannot win a max comparison. Failed dependency/integrity reads return fixed-message 503, deadline 504 or cancellation 408 rather than absence or raw backend diagnostics. Stores without this capability use memory with no cross-replica or restart freshness guarantee.",
       "DynamoDB presence normally reads one strongly consistent DEVICE_CONNECTION_GRANTS part; CURRENT and changed parts are written atomically together, so this yields a committed old/new list. Verify envelope identity/schema/storage, payload SHA256, valid grant identities and legacy ConnectedAt fallback; decode at most 16 MiB. The read changes no actor state, snapshot hashes or daemon heartbeats. Credential refresh is cached and a waiting poll can cancel independently.",
       "An absent grants part triggers a CURRENT read for inline legacy compatibility; an advertised missing part or malformed manifest is a dependency error. Pre-grant split manifests lacking the grant hash can omit older credential-only history until a later successful connect/enroll/save; omission is not global proof the account never connected.",
-      "Ordinary DynamoDB snapshot writers merge append-only committed grant keys and maximum LastSeenAt under the existing atomic CURRENT hash CAS. Enrollment stages credential/device/grant changes privately and publishes only after durable commit or matching authoritative readback; unresolved readback requires a fresh snapshot before later auth/write. Ordinary saves preserve committed credentials and enrollment-owned device fields; only a device-scoped expected-credential mutation may rotate one credential under the same CURRENT CAS. Connect failures retain scoped grant rollback. Explicit empty grant arrays survive inline/file JSON and suppress credential legacy backfill. No old readback is treated as proof an in-flight write cannot later commit; concurrent credential changes fail closed and require a fresh retry. Existing-device enrollment preserves daemon-owned runtime inventory and heartbeat time; enrollment time is not a new daemon heartbeat. New-device initial timestamps remain unchanged. Server clock skew is not corrected by this endpoint."
+      "Ordinary DynamoDB snapshot writers merge append-only committed grant keys and maximum LastSeenAt under the existing atomic CURRENT hash CAS. Enrollment stages credential/device/grant changes privately and publishes only after durable commit or matching authoritative readback; unresolved readback requires a fresh snapshot before later auth/write. Ordinary saves preserve committed credentials and enrollment-owned device fields; only a device-scoped expected-credential mutation may rotate one credential under the same CURRENT CAS. Connect failures retain scoped grant rollback. Explicit empty grant arrays survive inline/file JSON and suppress credential legacy backfill. No old readback is treated as proof an in-flight write cannot later commit; concurrent credential changes fail closed and require a fresh retry. Existing-device enrollment preserves daemon-owned runtime inventory and heartbeat time; enrollment time is not a new daemon heartbeat. New-device initial timestamps remain unchanged. Server clock skew is not corrected by this endpoint.",
+      "RIID-5866 fixture creation: optional request_id is a 1–128 byte ASCII token scoped to the authenticated principal, workspace and create operation. The full fixture/configuration fingerprint and original Agent incarnation are committed with AGENTS and CURRENT before publication. Within 24 hours, identical retries return the same Agent with 201 even if the runtime is now unavailable; changed payload/fixture or a deleted/reused Agent identity returns 409. Each retry still passes current authorization. No key or a new key remains an independent creation.",
+      "Fixture-create receipts are private hashed records, capped at 128 KiB without eviction of unexpired entries. Capacity and persistence uncertainty fail closed with sanitized 503 and require retrying the same key; canceled or failed commits cannot publish phantom Agents. Snapshot CAS, replica restart, concurrent ordinary profile writes and stale writers preserve committed receipts and Agent incarnations. Expired receipts are pruned from both durable and local state."
     ]
   },
   "thread_history_v3_frontend": {
@@ -828,6 +831,204 @@
         "TestRecoveryEventRejectsMissingLeaseUnauthorizedSwitchAndInvalidState",
         "TestRecoveryPhaseDoesNotProjectIntoAnotherTaskRun"
       ]
+    },
+    {
+      "name": "onboarding-fixture-create-idempotency-policy",
+      "file": "internal/riidoaiserver/onboarding_agent_create.go",
+      "contains": [
+        "CreateOnboardingAgentRequest",
+        "onboardingAgentCreateRetention    = 24 * time.Hour",
+        "onboardingAgentCreateReceiptBytes = 128 * 1024",
+        "AgentCreatedAt"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-http-wire-validation",
+      "file": "internal/riidoaiserver/ai_agent_client_onboarding_handler.go",
+      "contains": [
+        "CreateOnboardingAgentRequest",
+        "json.Unmarshal(req.RequestID, &requestID)",
+        "requestID == \"\"",
+        "withOnboardingAgentCreateRequestID"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-durable-publication",
+      "file": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_from_onboarding_fixture.go",
+      "contains": [
+        "requireOnboardingCreateReload",
+        "s.enrollmentTrial()",
+        "onboardingAgentCreateMutationContextKey{}",
+        "SaveAIAgentClientSnapshot",
+        "resolveOnboardingAgentCreate",
+        "publishOnboardingAgentCreate"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-strict-snapshot-cas",
+      "file": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go",
+      "contains": [
+        "createMutation && !maps.Equal(s.partHashes, committedHashes)",
+        "part_hashes_json = :snapshot_hashes"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_capacity_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_capacity_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateReceiptCapacityFailsClosedWithoutEviction"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_dynamo_replicas_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_dynamo_replicas_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateDynamoConcurrentReplicasConverge"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_dynamo_stale_writer_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_dynamo_stale_writer_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateDynamoSurvivesStaleOrdinaryWriter",
+        "TestOnboardingAgentCreateDynamoDeleteDoesNotReleaseRequestKey"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_dynamo_strict_cas_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_dynamo_strict_cas_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateDynamoStrictCASPreservesConcurrentOrdinaryProfile"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_fault_snapshot_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_fault_snapshot_test.go",
+      "contains": [
+        "LoadAIAgentClientSnapshot",
+        "SaveAIAgentClientSnapshot"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_http_helpers_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_http_helpers_test.go",
+      "contains": [
+        "onboardingAgentCreateHTTPHandler",
+        "onboardingAgentCreateHTTPBody"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_http_key_validation_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_http_key_validation_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateHTTPRejectsKeyConflictAndInvalidKeys",
+        "TestOnboardingAgentCreateHTTPRejectsExplicitEmptyKey",
+        "TestOnboardingAgentCreateHTTPRejectsNullKey"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_http_response_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_http_response_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateHTTPResponseLossReplaysOneAgent",
+        "TestOnboardingAgentCreateHTTPPreservesUnkeyedAndNewKeyCreates",
+        "TestOnboardingAgentCreateHTTPV1AndV2ReplaySameOperation"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_incarnation_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_incarnation_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateReplayRejectsReusedAgentIDIncarnation"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_persistent_rejected_commit_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_persistent_rejected_commit_test.go",
+      "contains": [
+        "TestOnboardingAgentCreatePersistentRejectedCommitDoesNotPublishPhantom"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_persistent_restart_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_persistent_restart_test.go",
+      "contains": [
+        "TestOnboardingAgentCreatePersistentSurvivesRestartAndCommitResponseLoss"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_replay_runtime_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_replay_runtime_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateReplayWorksWithoutRuntimeAndRejectsDeletedAgent"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_scope_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_scope_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateRequestKeyIsolatedByPrincipalAndWorkspace"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-onboarding_agent_create_ttl_test-regressions",
+      "file": "internal/riidoaiserver/onboarding_agent_create_ttl_test.go",
+      "contains": [
+        "TestOnboardingAgentCreateExpiredReceiptDoesNotBlockNewIntent",
+        "TestOnboardingAgentCreateDynamoOrdinaryWriterDoesNotRestoreExpiredReceipts"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-scoped-payload-identity",
+      "file": "internal/riidoaiserver/onboarding_agent_create_identity.go",
+      "contains": [
+        "principal.PrincipalID, workspaceID, id",
+        "onboarding-agent-create.v1",
+        "FixtureID string",
+        "len(id) > 128",
+        "sha256.Sum256(payload)"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-receipt-incarnation",
+      "file": "internal/riidoaiserver/onboarding_agent_create_receipt.go",
+      "contains": [
+        "receipt.Fingerprint != fingerprint",
+        "agent.OwnerPrincipalID != principal.PrincipalID",
+        "!agent.CreatedAt.Equal(receipt.AgentCreatedAt)",
+        "retainOnboardingAgentCreates"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-readback-fence",
+      "file": "internal/riidoaiserver/onboarding_agent_create_readback.go",
+      "contains": [
+        "context.WithoutCancel(ctx)",
+        "receipt.Fingerprint != expected.Fingerprint",
+        "!receipt.AgentCreatedAt.Equal(expected.AgentCreatedAt)",
+        "Keep the reload fence"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-committed-cache-publication",
+      "file": "internal/riidoaiserver/onboarding_agent_create_commit.go",
+      "contains": [
+        "snapshotReloadRequired = true",
+        "s.agents[agentID] = agent",
+        "cloneOnboardingAgentCreates(snapshot.OnboardingAgentCreates)"
+      ]
+    },
+    {
+      "name": "onboarding-fixture-create-safe-http-errors",
+      "file": "internal/riidoaiserver/server_ai_agent_client_error.go",
+      "contains": [
+        "onboardingAgentCreateDependencyError",
+        "http.StatusServiceUnavailable",
+        "http.StatusGatewayTimeout",
+        "errOnboardingAgentCreateConflict",
+        "http.StatusConflict",
+        "retry the same request_id"
+      ]
     }
   ],
   "loop": {
@@ -835,7 +1036,7 @@
     "hypothesis": "A compact SSOT gate can prove the OpenAPI/generated client/smoke matrix mirror and keep required runtime/deployment strings visible without using prose as truth.",
     "execute": "Generate this reader doc from the manifest and run the aiagentclientapi verifier in CI.",
     "evaluate": "The verifier checks contract file presence, OpenAPI operation counts, v1/v2 split, generated path coverage, smoke matrix parity, source anchors, generated doc freshness, and CLI evidence output.",
-    "retrospective": "This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts. Onboarding first-task completion is an imported, non-executing record. Its one-time state and workspace/owner/operation receipts survive stale ordinary snapshot writers; completion SSE is published only after durable commit, and deletion clears only that incarnation metadata while retaining comments."
+    "retrospective": "This slice proves the public control-plane mirror and generated-client evidence; canonical domain changes still start in riido-contracts. Onboarding first-task completion is an imported, non-executing record. Its one-time state and workspace/owner/operation receipts survive stale ordinary snapshot writers; completion SSE is published only after durable commit, and deletion clears only that incarnation metadata while retaining comments. Fixture Agent creation additionally binds retry keys to principal/workspace/full draft and original incarnation, commits private bounded receipts atomically, and preserves them across fresh and stale replicas; it does not execute a model."
   },
   "non_goals": [
     "canonical riido-contracts changes",

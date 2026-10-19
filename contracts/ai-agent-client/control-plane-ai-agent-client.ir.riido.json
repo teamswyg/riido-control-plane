@@ -375,7 +375,7 @@
       "kind": "telemetry",
       "description": "Daemon reports parsed runtime progress to the control plane as bounded task-thread batches instead of streaming provider tokens directly.",
       "rules": [
-        "daemon: parse only explicit runtime progress markers such as <riido_log>...<end>",
+        "daemon: parse only explicit runtime progress markers such as \u003criido_log\u003e...\u003cend\u003e",
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
@@ -464,7 +464,6 @@
         "model: AgentOnboardingFixture does not own model_id; model defaults are derived from the selected runtime model catalog until a separate model recommendation policy is promoted",
         "figma_138_7389: current onboarding fixture rows are 리도, 영실, 홍도, and 지원 in fixture response order",
         "figma_fixture_colors: onboarding avatar fallback colors are 리도 #C9A452, 영실 #6AA437, 홍도 #B87EAD, 지원 #2F84DE",
-        "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateAgentConfigurationRequest body and creates a normal owned agent",
         "fixture_identity: fixture-created agents keep the submitted display name exactly, may share names with other agents, use agent_id as durable identity and tie-breaker, and remain editable/deletable through normal agent RBAC and editability rules",
         "no_template_entity: the control plane must not expose template create/update/delete APIs or persist AgentTemplate records for this onboarding flow",
         "figma_432_46849: revised onboarding order is interpreted as client-local agent draft/configuration first, then runtime/workspace selection, while final fixture/direct create still requires selected workspace_id and runtime_id",
@@ -473,7 +472,17 @@
         "direct_setting_presentation: dimmed fixture rows, placeholder copy, row expansion, and scroll affordance are client presentation",
         "no_runtime: when no selectable runtime is detected, clients skip the fixture-selection step and show the no-installed-AI start state",
         "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
-        "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
+        "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout",
+        "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateOnboardingAgentRequest body and creates a normal owned agent",
+        "fixture_request: only fixture create v1/v2 uses CreateOnboardingAgentRequest, which adds optional request_id to the unchanged seven CreateAgentConfigurationRequest fields; direct create does not accept this deduplication contract",
+        "fixture_request_id: when present, request_id is 1..128 ASCII bytes matching ^[A-Za-z0-9._:-]{1,128}$; empty, whitespace, non-ASCII, or oversized values are invalid requests",
+        "fixture_idempotency_scope: scope request_id by the authorized principal, resolved workspace, and fixture-create operation; v1/v2 projection aliases of that operation share the same scope, while assignment and onboarding task completion use separate receipts",
+        "fixture_idempotency_payload: within the retained receipt window the same key plus the same fixture_id and full submitted creation payload returns the original agent_id with HTTP 201, including response loss and server restart; any changed field or fixture_id returns HTTP 409 without creation",
+        "fixture_idempotency_deleted: bind the receipt to the original agent_id and agent CreatedAt incarnation; if that agent has been deleted, or the same agent_id was reused with a different CreatedAt, replay returns HTTP 409 and never recreates or returns the replacement agent",
+        "fixture_idempotency_retention: retain every successful private creation receipt until 24 hours after the server-recorded creation-attempt timestamp (receipt created_at); this is the public replay window, not 24 hours after the HTTP response or durable acknowledgement; after expiry a request may be treated as a new creation, so clients must not assume deduplication beyond that window",
+        "fixture_idempotency_durability: commit agent creation and its private receipt atomically before HTTP 201; fixture creation emits no create event, and this retry contract adds none; receipt scope and request_id are hashed, never exposed in client records, events, logs, or telemetry; preserve no raw key in stored receipts",
+        "fixture_idempotency_capacity: bound private receipts and fail closed with HTTP 503 before agent creation if no capacity is available; never evict unexpired receipts to admit another key",
+        "fixture_idempotency_compatibility: callers without request_id keep independent-create behavior, including duplicate names; no deduplication is claimed for old callers, and display names remain non-unique identity hints rather than keys"
       ]
     },
     {
@@ -3830,6 +3839,67 @@
           }
         ]
       }
+    },
+    {
+      "name": "CreateOnboardingAgentRequest",
+      "schema": {
+        "name": "CreateOnboardingAgentRequest",
+        "description": "Fixture 전용 agent 생성 요청입니다. 기존 agent 설정 7개 필드를 그대로 사용하고, 응답 유실에 대비한 optional request_id만 추가합니다. 같은 소유자·workspace·operation 범위에서 같은 request_id와 전체 payload/fixture를 서버의 최초 생성 시도 timestamp부터 24시간 동안 재전송하면 같은 agent_id를 HTTP 201로 반환합니다. 일반 생성 요청에는 request_id를 추가하지 않습니다.",
+        "type": "object",
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "properties": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "agent 추가 화면의 이름 입력값입니다."
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "agent 추가 화면의 설명 입력값입니다.",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "description": "agent 추가 화면의 지침 textarea 입력값입니다.",
+            "max_length": 1000
+          },
+          {
+            "name": "visibility",
+            "description": "agent 공개 범위 radio 입력값입니다.",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_id",
+            "type": "string",
+            "description": "agent가 사용할 런타임 dropdown 선택값입니다."
+          },
+          {
+            "name": "model_id",
+            "type": "string",
+            "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+          },
+          {
+            "name": "request_id",
+            "type": "string",
+            "description": "선택적인 생성 재시도 식별자입니다. ASCII 영숫자와 . _ : - 만 1~128바이트 허용합니다. 클라이언트는 동일 생성 의도와 전체 payload에 같은 값을 유지하며 최초 생성 요청을 시작한 시점부터 24시간 이내에만 재시도 보장을 사용합니다. 생략 시 기존처럼 각 요청이 별도의 agent를 생성합니다.",
+            "min_length": 1,
+            "max_length": 128,
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        ]
+      }
     }
   ],
   "operations": [
@@ -3934,7 +4004,7 @@
       },
       "rbac_policy": "agent_onboarding_fixtures.v1",
       "request": {
-        "ref": "CreateAgentConfigurationRequest",
+        "ref": "CreateOnboardingAgentRequest",
         "required": true
       },
       "response": {
@@ -3944,7 +4014,11 @@
       "scenario_ids": [
         "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
         "createAIAgentFromOnboardingFixture.fixture-created-duplicate-name-stays-normal",
-        "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model"
+        "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model",
+        "createAIAgentFromOnboardingFixture.lost-response-retries-same-creation",
+        "createAIAgentFromOnboardingFixture.changed-creation-intent-conflicts",
+        "createAIAgentFromOnboardingFixture.unkeyed-create-preserves-duplicate-names",
+        "createAIAgentFromOnboardingFixture.receipt-capacity-fails-closed"
       ]
     },
     {
@@ -4968,7 +5042,7 @@
       },
       "rbac_policy": "agent_onboarding_fixtures.v1",
       "request": {
-        "ref": "CreateAgentConfigurationRequest",
+        "ref": "CreateOnboardingAgentRequest",
         "required": true
       },
       "response": {
@@ -4978,7 +5052,11 @@
       "scenario_ids": [
         "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
         "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal",
-        "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope"
+        "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope",
+        "createAIAgentFromOnboardingFixtureV2.lost-response-retries-same-creation",
+        "createAIAgentFromOnboardingFixtureV2.changed-creation-intent-conflicts",
+        "createAIAgentFromOnboardingFixtureV2.unkeyed-create-preserves-duplicate-names",
+        "createAIAgentFromOnboardingFixtureV2.receipt-capacity-fails-closed"
       ]
     },
     {
@@ -6334,6 +6412,38 @@
       "then": "the API applies the same runtime_id and model_id validation as createAIAgent before saving"
     },
     {
+      "scenario_id": "createAIAgentFromOnboardingFixture.lost-response-retries-same-creation",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "lost response retries same creation",
+      "given": "a fixture create with request_id was durably committed but its HTTP response was lost",
+      "when": "the same authorized principal retries the same workspace operation, request_id, fixture_id, and complete creation payload before the original server-recorded creation-attempt timestamp + 24 hours, including after server restart",
+      "then": "HTTP 201 returns the original agent_id and no second agent or create event is recorded"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.changed-creation-intent-conflicts",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "changed creation intent conflicts",
+      "given": "an unexpired receipt exists for this principal, workspace, operation, and request_id",
+      "when": "the caller changes fixture_id or any submitted creation field, or the original agent has been deleted",
+      "then": "HTTP 409 creates nothing; a deleted agent is never recreated by the replay"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.unkeyed-create-preserves-duplicate-names",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "unkeyed create preserves duplicate names",
+      "given": "two fixture create commands have identical display names and no request_id",
+      "when": "the caller submits both independently",
+      "then": "each successful command returns its own agent_id and preserves the submitted non-unique display name"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.receipt-capacity-fails-closed",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "receipt capacity fails closed",
+      "given": "the bounded private receipt store cannot admit this request without removing an unexpired receipt",
+      "when": "the caller sends a new keyed fixture create",
+      "then": "HTTP 503 creates no agent and no unexpired receipt is evicted"
+    },
+    {
       "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
       "operation_id": "listAIAgentDeviceRuntimes",
       "name": "missing runtime with assigned agent is offline",
@@ -6804,6 +6914,38 @@
       "given": "Figma node-id=432-46849 asks the client to let the user choose or configure an agent draft before runtime and workspace selection",
       "when": "the client finalizes fixture creation",
       "then": "riido.v2.aiAgent.onboarding.fixtures.createAgent still requires workspace_id in the URL path and runtime_id in the create request body before any durable agent is saved"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.lost-response-retries-same-creation",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "lost response retries same creation",
+      "given": "a fixture create with request_id was durably committed but its HTTP response was lost",
+      "when": "the same authorized principal retries the same workspace operation, request_id, fixture_id, and complete creation payload before the original server-recorded creation-attempt timestamp + 24 hours, including after server restart",
+      "then": "HTTP 201 returns the original agent_id and no second agent or create event is recorded"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.changed-creation-intent-conflicts",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "changed creation intent conflicts",
+      "given": "an unexpired receipt exists for this principal, workspace, operation, and request_id",
+      "when": "the caller changes fixture_id or any submitted creation field, or the original agent has been deleted",
+      "then": "HTTP 409 creates nothing; a deleted agent is never recreated by the replay"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.unkeyed-create-preserves-duplicate-names",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "unkeyed create preserves duplicate names",
+      "given": "two fixture create commands have identical display names and no request_id",
+      "when": "the caller submits both independently",
+      "then": "each successful command returns its own agent_id and preserves the submitted non-unique display name"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.receipt-capacity-fails-closed",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "receipt capacity fails closed",
+      "given": "the bounded private receipt store cannot admit this request without removing an unexpired receipt",
+      "when": "the caller sends a new keyed fixture create",
+      "then": "HTTP 503 creates no agent and no unexpired receipt is evicted"
     },
     {
       "scenario_id": "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",

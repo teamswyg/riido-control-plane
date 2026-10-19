@@ -24,6 +24,7 @@ type AIAgentClientSnapshotStore interface {
 }
 
 type AIAgentClientSnapshot struct {
+	OnboardingAgentCreates      map[string]onboardingAgentCreateReceipt      `json:"onboarding_agent_creates,omitempty"`
 	TaskRequestReceipts         map[string]AIAgentTaskActionResponse         `json:"task_request_receipts,omitempty"`
 	Version                     int64                                        `json:"version,omitempty"`
 	ExpectedVersion             int64                                        `json:"-"`
@@ -45,16 +46,6 @@ type AIAgentClientSnapshot struct {
 	Events                      []AIAgentClientEventSnapshot                 `json:"events"`
 	NextDeviceCredentialSeq     int                                          `json:"next_device_credential_seq"`
 	NextDaemonCommand           int                                          `json:"next_daemon_command"`
-}
-
-type AIAgentClientDeviceCredentialSnapshot struct {
-	DeviceID         string    `json:"device_id"`
-	MachineID        string    `json:"machine_id,omitempty"`
-	SecretHashSHA256 string    `json:"secret_hash_sha256"`
-	OwnerPrincipalID string    `json:"owner_principal_id"`
-	WorkspaceID      string    `json:"workspace_id"`
-	DisplayName      string    `json:"display_name,omitempty"`
-	IssuedAt         time.Time `json:"issued_at"`
 }
 
 type AIAgentClientEventSnapshot struct {
@@ -320,6 +311,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		Fixtures:                    copyAgentOnboardingFixtures(s.fixtures),
 		TaskThreads:                 taskThreads,
 		TaskRequestReceipts:         cloneTaskRequestReceipts(s.taskRequestReceipts),
+		OnboardingAgentCreates:      cloneOnboardingAgentCreates(s.onboardingAgentCreates),
 		OnboardingCreatedIDs:        onboardingCreatedAgentIDsSnapshot(s.onboardingCreated),
 		OnboardingCompletions:       cloneOnboardingCompletedTasks(s.onboardingCompletions),
 		OnboardingCompletionThreads: cloneOnboardingCompletionThreads(s.onboardingCompletionThreads),
@@ -470,6 +462,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
 	s.taskRequestReceipts = cloneTaskRequestReceipts(snapshot.TaskRequestReceipts)
+	s.onboardingAgentCreates = cloneOnboardingAgentCreates(snapshot.OnboardingAgentCreates)
 	s.onboardingCreated = onboardingCreatedAgentsFromSnapshot(snapshot.OnboardingCreatedIDs)
 	backfillOnboardingCreatedFromFixtureTmpColor(s.onboardingCreated, agents)
 	s.onboardingCompletions = cloneOnboardingCompletedTasks(snapshot.OnboardingCompletions)
