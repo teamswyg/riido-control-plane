@@ -5,6 +5,8 @@ import (
 )
 
 type DevelopmentAIAgentClientStore struct {
+	onboardingCreateMu      sync.Mutex
+	onboardingAgentCreates  map[string]onboardingAgentCreateReceipt
 	taskRequestReceipts     map[string]AIAgentTaskActionResponse
 	mu                      sync.Mutex
 	workspaceID             string

@@ -52,26 +52,3 @@ func copyStringMap(in map[string]string) map[string]string {
 	maps.Copy(out, in)
 	return out
 }
-
-func writeAIAgentClientError(w http.ResponseWriter, err error) {
-	var dependency assignmentDependencyError
-	switch {
-	case errors.As(err, &dependency):
-		status, message := agentEventErrorResponse(err)
-		writeError(w, status, message)
-	case errors.Is(err, ErrAuthorizationForbidden):
-		writeError(w, http.StatusForbidden, "forbidden")
-	case errors.Is(err, ErrAIAgentNotFound):
-		writeError(w, http.StatusNotFound, "not found")
-	case errors.Is(err, ErrAIAgentAssigned):
-		writeError(w, http.StatusConflict, err.Error())
-	case errors.Is(err, ErrAIAgentTaskThreadConflict):
-		writeError(w, http.StatusConflict, err.Error())
-	case errors.Is(err, ErrAIAgentMembershipChanged):
-		writeError(w, http.StatusConflict, err.Error())
-	case errors.Is(err, errOnboardingCompletionConflict), errors.Is(err, errOnboardingCompletionStopConflict):
-		writeError(w, http.StatusConflict, err.Error())
-	default:
-		writeError(w, http.StatusBadRequest, err.Error())
-	}
-}

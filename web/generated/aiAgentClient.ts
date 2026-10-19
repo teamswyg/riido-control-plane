@@ -795,6 +795,44 @@ export interface CreateAgentProfileThumbnailUploadRequest {
 }
 
 /**
+ * Fixture 전용 agent 생성 요청입니다. 기존 agent 설정 7개 필드를 그대로 사용하고, 응답 유실에 대비한 optional request_id만 추가합니다. 같은 소유자·workspace·operation 범위에서 같은 request_id와 전체 payload/fixture를 서버의 최초 생성 시도 timestamp부터 24시간 동안 재전송하면 같은 agent_id를 HTTP 201로 반환합니다. 일반 생성 요청에는 request_id를 추가하지 않습니다.
+ */
+export interface CreateOnboardingAgentRequest {
+  /**
+   * agent 추가 화면의 설명 입력값입니다.
+   */
+  description?: string;
+  /**
+   * agent 추가 화면의 지침 textarea 입력값입니다.
+   */
+  instruction?: string;
+  /**
+   * 선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다.
+   */
+  model_id?: string;
+  /**
+   * agent 추가 화면의 이름 입력값입니다.
+   */
+  name: string;
+  /**
+   * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
+   */
+  profile_thumbnail_url?: string;
+  /**
+   * 선택적인 생성 재시도 식별자입니다. ASCII 영숫자와 . _ : - 만 1~128바이트 허용합니다. 클라이언트는 동일 생성 의도와 전체 payload에 같은 값을 유지하며 최초 생성 요청을 시작한 시점부터 24시간 이내에만 재시도 보장을 사용합니다. 생략 시 기존처럼 각 요청이 별도의 agent를 생성합니다.
+   */
+  request_id?: string;
+  /**
+   * agent가 사용할 런타임 dropdown 선택값입니다.
+   */
+  runtime_id: string;
+  /**
+   * agent 공개 범위 radio 입력값입니다.
+   */
+  visibility: AgentVisibility;
+}
+
+/**
  * runtime 설정 화면에서 표시하는 desktop local daemon online/offline 상태입니다.
  */
 export type DaemonAvailability = "online" | "offline";
@@ -1993,7 +2031,7 @@ export interface CreateAIAgentFromOnboardingFixturePathParams {
 /**
  * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
  */
-export async function createAIAgentFromOnboardingFixture(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
+export async function createAIAgentFromOnboardingFixture(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateOnboardingAgentRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = `/v1/client/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
   return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
@@ -2004,7 +2042,7 @@ export async function createAIAgentFromOnboardingFixture(config: RiidoClientConf
  */
 export interface CreateAIAgentFromOnboardingFixtureMutationVariables {
   params: CreateAIAgentFromOnboardingFixturePathParams;
-  body: CreateAgentConfigurationRequest;
+  body: CreateOnboardingAgentRequest;
   options?: RiidoRequestOptions;
 }
 
@@ -3290,7 +3328,7 @@ export interface CreateAIAgentFromOnboardingFixtureV2PathParams {
 /**
  * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
  */
-export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
+export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateOnboardingAgentRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
   return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
@@ -3301,7 +3339,7 @@ export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientCo
  */
 export interface CreateAIAgentFromOnboardingFixtureV2MutationVariables {
   params: CreateAIAgentFromOnboardingFixtureV2PathParams;
-  body: CreateAgentConfigurationRequest;
+  body: CreateOnboardingAgentRequest;
   options?: RiidoRequestOptions;
 }
 
@@ -4826,7 +4864,7 @@ export interface CreateAIAgentFromOnboardingFixtureEndpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponse>;
+  readonly request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponse>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -6054,7 +6092,7 @@ export interface CreateAIAgentFromOnboardingFixtureV2Endpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
+  readonly request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -7828,7 +7866,7 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesQueryKeyRoot() }),
           prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => queryClient.prefetchQuery(listAIAgentOnboardingFixturesQueryOptions(config, options)),
           createAgent: {
-            request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixture(config, params, body, options),
+            request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixture(config, params, body, options),
             mutationKey: createAIAgentFromOnboardingFixtureMutationKey,
             mutation: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => createAIAgentFromOnboardingFixtureMutationOptions(config, options),
             mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => createAIAgentFromOnboardingFixtureMutationOptions(config, options),
@@ -8158,7 +8196,7 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesV2QueryKeyRoot() }),
             prefetch: (queryClient: QueryClient, params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => queryClient.prefetchQuery(listAIAgentOnboardingFixturesV2QueryOptions(config, params, options)),
             createAgent: {
-              request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixtureV2(config, params, body, options),
+              request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixtureV2(config, params, body, options),
               mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey,
               mutation: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => createAIAgentFromOnboardingFixtureV2MutationOptions(config, options),
               mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => createAIAgentFromOnboardingFixtureV2MutationOptions(config, options),

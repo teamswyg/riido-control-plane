@@ -7,6 +7,8 @@ import (
 
 func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapshot *AIAgentClientSnapshot) error {
 	switch name {
+	case dynamoDBAIAgentClientSnapshotPartOnboardingAgentCreates:
+		return json.Unmarshal(raw, &snapshot.OnboardingAgentCreates)
 	case dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts:
 		return json.Unmarshal(raw, &snapshot.TaskRequestReceipts)
 	case dynamoDBAIAgentClientSnapshotPartDevices:

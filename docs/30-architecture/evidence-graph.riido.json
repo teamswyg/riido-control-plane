@@ -24331,6 +24331,204 @@
       ],
       "decision": "Preserve existing authentication decisions, token precedence and HTTP status. Denied request logs gain only allowlisted enums; payload decoding has fixed byte/field bounds and unverified hints never prove expiry, authorize another token or trigger client recovery. Synthetic secret-bearing regression cases check output privacy. Historical 401 cause and client renewal behavior remain separate from this diagnostic-only server change.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "onboarding_fixture_creation_response_loss_5866",
+      "observation": "Client PR #994 identifies a fixture-create response-loss gap: after durable creation succeeds, a manual retry sends the same draft without any server key and creates a second Agent. Names are intentionally non-unique, so name/body deduplication would reject separate valid intents. Independent native-Dynamo tests additionally cover stale ordinary profile writes and a competing profile commit between trial preparation and save. A deleted Agent id may be reused for a new incarnation; JSON null is not an omitted retry key.",
+      "hypothesis": "Add only an optional stable fixture-create request_id, scoped to the authenticated principal/workspace/create operation and full fixture/configuration fingerprint. Commit the Agent and private bounded 24-hour receipt, including original Agent creation time, under the existing atomic CURRENT transaction before local publication. Force fresh loads and strict snapshot CAS for creation, merge receipt-owned records for ordinary cached writers, and recover uncertain writes only through exact committed readback. Preserve current authorization and deliberate separate Agent creation.",
+      "claims": [
+        "onboarding_completion_must_be_durable_and_idempotent"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_complete_onboarding_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_complete_onboarding_task.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion_guard.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion_publication.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_task_provenance.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_agent_delete.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_parts.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_seed_thread.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_onboarding_completion.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_delete.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/onboarding_agent_create.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/onboarding_agent_create_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_from_onboarding_fixture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_from_onboarding_fixture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_onboarding_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_encode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_unmarshal.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_json.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/onboarding_agent_create_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/onboarding_agent_create_identity.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/onboarding_agent_create_readback.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/onboarding_agent_create_receipt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_error.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_capacity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_dynamo_replicas_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_dynamo_stale_writer_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_dynamo_strict_cas_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_fault_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_http_helpers_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_http_key_validation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_http_response_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_incarnation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_persistent_rejected_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_persistent_restart_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_replay_runtime_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_scope_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/onboarding_agent_create_ttl_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The added regression suite checks lost HTTP responses, restart, rejected and uncertain commits, independent replicas, concurrent ordinary updates, stale writers, authorization/scope boundaries, key conflicts and malformed keys, runtime disappearance, deletion/incarnation reuse, and fail-closed receipt retention/capacity. No customer write, model call or execution is needed. Server rollout must fully converge before activating keyed frontend clients; frontend and desktop remain unmerged and undeployed. Existing intentional unkeyed/new-key creates remain independent. New private snapshot parts do not require a PostgreSQL migration.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {

@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 )
 
 // Ordinary snapshot writers preserve the committed relation. Only a scoped
 // publication/removal may apply its one task/Agent delta to the fresh map.
 func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.Context, requested AIAgentClientSnapshot, credentials AWSCredentials) (dynamoDBAIAgentClientSnapshotWriteStats, int64, error) {
 	mutation, scoped := taskAgentSnapshotMutation(ctx)
+	createMutation, _ := ctx.Value(onboardingAgentCreateMutationContextKey{}).(bool)
 	for attempt := 0; attempt < 3; attempt++ {
 		committed, err := s.readMembershipCommit(ctx, nil, credentials)
 		if err != nil {
@@ -17,10 +19,13 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		}
 		current := dynamoDBAIAgentClientSnapshotCurrentItem(committed)
 		oldMember := dynamoDBAIAgentClientSnapshotItemsByPart(committed)[dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships]
-		if scoped && current != nil {
+		if (scoped || createMutation) && current != nil {
 			var committedHashes map[string]string
 			if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
+			}
+			if createMutation && !maps.Equal(s.partHashes, committedHashes) {
+				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, errTaskAgentSnapshotChanged
 			}
 			for part, hash := range s.partHashes {
 				if committedHashes[part] != hash {
