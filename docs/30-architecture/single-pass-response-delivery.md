@@ -165,3 +165,22 @@ selection sends an agent ID; the authorized server reader loads the saved task
 document. Unsaved editor text is not part of that snapshot. Existing document
 size limits still explicitly mark truncation; no test claims unlimited context
 or proves the contents of an unobserved customer request.
+
+## Delivery latency attribution
+
+Successful partial/terminal timing logs separate durable assignment commit
+(`assignment_commit_ms`) from client projection (`client_projection_ms`). Their
+sum is `event_processing_ms`; authentication and request decoding occur before
+this interval. These durations are measured on the server clock, not client paint
+latency. No answer text, credentials or additional model calls are introduced.
+
+The 2026-10-17 paired local experiment injected 200 ms per daemon event HTTP
+acknowledgement. Daemon grouping reduced event requests from 87 to 25 and
+provider-completion-to-daemon-completion from 11.740 s to 0.577 s. Request-to-first
+SSE was 10.388 s / 8.098 s; request-to-terminal was 19.924 s / 9.729 s. The model
+itself took 5.918 s / 6.959 s. Server processing medians were 12.5 / 14 ms
+(commit 5.5 / 6 ms, client projection 6 / 7 ms). Each revision had one sample
+and one native Codex session, with runtime-default model configuration. These
+are controlled network-backpressure observations, not production or UI paint
+latency guarantees. This control-plane change adds attribution only; the
+network request reduction is implemented in the daemon.

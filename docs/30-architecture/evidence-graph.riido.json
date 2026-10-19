@@ -21,8 +21,8 @@
   "chains": [
     {
       "id": "single_pass_response_quality_and_delivery_5827",
-      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint.",
-      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages.",
+      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint. PR #1102 separates successful assignment commit and client projection timing, but independently truncating fractional milliseconds can make their logged sum differ from total processing time.",
+      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages. Measure all intervals on one server clock; derive logged projection milliseconds as total minus logged commit milliseconds so the additive invariant survives truncation without changing field names or units.",
       "claims": [
         "thread_history_must_keep_user_followups",
         "sse_reconnect_must_resume_after_last_event_id",
@@ -48,6 +48,10 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/task_conversation_context.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_event_handler.go"
         }
       ],
       "verifiers": [
@@ -70,6 +74,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/readable_empty_history_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_response_timing_fractional_test.go"
         }
       ],
       "evidence": [
@@ -79,7 +87,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn.",
+      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -24038,8 +24046,8 @@
     },
     {
       "id": "web_onboarding_desktop_presence_loop",
-      "observation": "RIID-5854 web onboarding must notice when the user opens the desktop app with the same account, but bootstrap has_live_my_device turns on only after runtime discovery, device records carry no creation time, and a reinstall keeps the same device ID. Local review of a reload-based read found that the one-minute snapshot reload hid connections saved by another instance, faster full reloads replaced unsaved daemon heartbeats, and loading the whole snapshot outside operationMu advanced DynamoDB part hashes used by concurrent save fences. Independent local native-Dynamo regression reproduced uncommitted memory winning over durable absence and stale ordinary profile writers erasing a saved connection. Failed connect/enroll grants also needed a scoped rollback and explicit modern empty-array restart semantics.",
-      "hypothesis": "A committed-only same-account grant query with fixed safe dependency failures, validated bounded single-part reads, cancellation-aware cached credentials, grant rollback and append-only CAS preservation keeps the polling endpoint fast without inventing online or credential-validity semantics.",
+      "observation": "RIID-5854 web onboarding must notice when the user opens the desktop app with the same account, but bootstrap has_live_my_device turns on only after runtime discovery, device records carry no creation time, and a reinstall keeps the same device ID. Local review of a reload-based read found that the one-minute snapshot reload hid connections saved by another instance, faster full reloads replaced unsaved daemon heartbeats, and loading the whole snapshot outside operationMu advanced DynamoDB part hashes used by concurrent save fences. Independent local native-Dynamo regression reproduced uncommitted memory winning over durable absence and stale ordinary profile writers erasing a saved connection. Failed connect/enroll grants also needed a scoped rollback and explicit modern empty-array restart semantics. The 2026-10-19 offline review reproduced failed same-machine enrollment replacing a committed credential in memory; grant-only rollback then let an unrelated save persist the unacknowledged replacement and disconnect the original daemon. A second native-Dynamo regression orders stale replica load, remote heartbeat inventory update, then re-enrollment with a later wall-clock timestamp: enrollment incorrectly promoted stale runtime inventory over the committed heartbeat, and local publication could make a later unrelated save repeat that loss.",
+      "hypothesis": "A committed-only same-account grant query with fixed safe dependency failures, validated bounded single-part reads, cancellation-aware cached credentials, grant rollback and append-only CAS preservation keeps the polling endpoint fast without inventing online or credential-validity semantics. Stage enrollment credential, device and grant changes in an isolated trial; publish enrollment-owned state only after durable acceptance. On an uncertain write, confirm the proposed credential through authoritative readback or require a fresh snapshot before later authentication or writes, without overwriting storage with an assumed rollback. Enrollment does not own existing-device runtime inventory or daemon heartbeat time: retain both committed fields during enrollment merge, and do not advance the local or file/memory existing-device heartbeat clock through enrollment upsert.",
       "claims": [
         "generated_endpoint_smoke_matrix_must_remain_contract_gate",
         "react_query_generator_must_preserve_generated_client_surface",
@@ -24141,6 +24149,42 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/deploy-ai-agent-testnet.yml"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_snapshot_mutation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_trial.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_publish.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_enrollment_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_enrollment_devices.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_device_upsert.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_machine_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_inventory_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_inventory_fixture_test.go"
         }
       ],
       "verifiers": [
@@ -24199,6 +24243,34 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_app_version_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_outcome_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_concurrent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_late_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_commit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_legacy_merge_test.go"
         }
       ],
       "evidence": [
@@ -24208,7 +24280,7 @@
           "redacted": true
         }
       ],
-      "decision": "Use the durable grants reader when available, with memory fallback only for unsupported stores. Keep a normal single strong GetItem because snapshot CURRENT and changed parts commit atomically. Validate part envelope/hash/JSON/identity, bound decoded data to 16MiB, inspect CURRENT only on part absence for inline legacy compatibility, and preserve read errors as 503/504/408. Preserve append-only grants under existing CURRENT CAS and restore grant-only memory state after a failed connect/enroll save. Explicit [] survives inline/file JSON; nil alone selects legacy credential backfill. Pre-grant split history, device/credential concurrency, historical revocation and server clock skew remain explicit limits. No bootstrap, SSE, web or desktop behavior is changed. The existing authenticated staging deployment smoke also checks desktop-presence response key allowlist and UTC timestamp shape without printing credentials or response bodies.",
+      "decision": "Use the durable grants reader when available, with memory fallback only for unsupported stores. Keep a normal single strong GetItem because snapshot CURRENT and changed parts commit atomically. Validate part envelope/hash/JSON/identity, bound decoded data to 16MiB, inspect CURRENT only on part absence for inline legacy compatibility, and preserve read errors as 503/504/408. Preserve append-only grants under existing CURRENT CAS and restore grant-only memory state after a failed connect save. Explicit [] survives inline/file JSON; nil alone selects legacy credential backfill. Pre-grant split history, historical revocation and server clock skew remain explicit limits. No bootstrap, SSE, web or desktop behavior is changed. The existing authenticated staging deployment smoke also checks desktop-presence response key allowlist and UTC timestamp shape without printing credentials or response bodies. Enrollment now uses copy-on-write publication: definite failure leaves the previous credential/device/grants untouched, a matching durable readback resolves a lost commit response, and unresolved readback fences stale cache use until a fresh snapshot succeeds. Publication merges only enrollment-owned fields so unrelated current heartbeat state remains intact. Tests cover new and existing device failure, later unrelated save/restart, successful rotation, commit-then-error readback, readback failure and concurrent heartbeat/grant preservation; no real credential or infrastructure operation is exercised. The native adapter atomically reads committed credentials/devices with CURRENT: ordinary writers retain those credentials, while an internal expected-credential delta authorizes only one enrolled device. A stale old-read/late-commit regression proves the following unrelated save preserves the late credential; disjoint device enrollment and other-principal grant fixtures preserve their independent facts. Existing-device enrollment preserves daemon-owned runtime inventory and heartbeat time regardless of the enrollment timestamp; new-device initialization is unchanged. Normal-time stale-load/remote-heartbeat/enroll and following ordinary-save regressions pin durable preservation while an ordinary heartbeat still updates the inventory.",
       "next_loop": "closed_loop_candidate"
     },
     {
