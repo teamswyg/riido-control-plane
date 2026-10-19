@@ -20,6 +20,63 @@
   ],
   "chains": [
     {
+      "id": "desktop_credential_account_connection_5828",
+      "observation": "A desktop with an existing device credential could connect the current account using a changed shared machine UUID, linking a device without running runtimes. PR 1104 also exposed unchecked test decoding, direct sentinel comparison and stale generated authorization, module and syntax evidence.",
+      "hypothesis": "Require current workspace authorization and proof of the actual stored device credential to append the account connection without rotating the device identity. Store the authorization explanation in its executable manifest and regenerate dependent evidence so CI validates the same implementation and documented contract.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "server_route_handlers_must_stay_semantically_split",
+        "module_decomposition_must_preserve_surface_area_ratchet"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_connect.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_desktop_http.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/desktop_device_connect_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_credential_connect_persistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/moduledecomposition/main_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Preserve legacy machine_id connection compatibility, device owner, secret and persistent prior account grants. Reject absent or invalid user/device proof rather than creating a replacement device. Check JSON errors and use errors.Is in regressions; regenerate docs and semantic hashes from the actual source without weakening lint, golden locks, impact checks or line-budget limits. Shared syntax evidence changes propagate to dependent claim hashes; this does not introduce additional runtime behavior.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "single_pass_response_quality_and_delivery_5827",
       "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint. PR #1102 separates successful assignment commit and client projection timing, but independently truncating fractional milliseconds can make their logged sum differ from total processing time.",
       "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages. Measure all intervals on one server clock; derive logged projection milliseconds as total minus logged commit milliseconds so the additive invariant survives truncation without changing field names or units.",

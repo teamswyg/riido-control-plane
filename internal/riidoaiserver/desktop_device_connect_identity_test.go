@@ -31,7 +31,10 @@ func TestDesktopConnectUsesCredentialDeviceAfterMachineIdentityDrift(t *testing.
 	if err := json.Unmarshal(enrolled.Body.Bytes(), &credential); err != nil {
 		t.Fatal(err)
 	}
-	payload, _ := json.Marshal(map[string]string{"device_id": credential.DeviceID, "machine_id": "changed-machine"})
+	payload, err := json.Marshal(map[string]string{"device_id": credential.DeviceID, "machine_id": "changed-machine"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, token := range []string{"guest-token", "owner-token", "guest-token"} {
 		connected := request("/v2/desktop/workspaces/shared-workspace/devices/connect", token, string(payload), credential.DeviceSecret)
 		if connected.Code != 200 {
@@ -40,7 +43,9 @@ func TestDesktopConnectUsesCredentialDeviceAfterMachineIdentityDrift(t *testing.
 		var got struct {
 			DeviceID string `json:"device_id"`
 		}
-		json.Unmarshal(connected.Body.Bytes(), &got)
+		if err := json.Unmarshal(connected.Body.Bytes(), &got); err != nil {
+			t.Fatal(err)
+		}
 		if got.DeviceID != credential.DeviceID {
 			t.Fatalf("connected ghost device %q; want running device %q", got.DeviceID, credential.DeviceID)
 		}

@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"errors"
 	"testing"
 )
 
@@ -18,7 +19,7 @@ func TestCredentialDeviceConnectPersistsAccountWithoutRotatingSecret(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err = store.ConnectAIAgentDeviceWithCredential(ctx, guest, credential.DeviceID, "wrong"); err != ErrAuthorizationUnauthenticated {
+	if _, err = store.ConnectAIAgentDeviceWithCredential(ctx, guest, credential.DeviceID, "wrong"); !errors.Is(err, ErrAuthorizationUnauthenticated) {
 		t.Fatalf("invalid proof=%v", err)
 	}
 	if _, err = store.ConnectAIAgentDeviceWithCredential(ctx, guest, credential.DeviceID, credential.DeviceSecret); err != nil {
