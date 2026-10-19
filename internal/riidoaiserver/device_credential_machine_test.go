@@ -42,6 +42,7 @@ func TestEnrollDeviceCredentialReEnrollPreservesRuntimes(t *testing.T) {
 
 	enroll := enrollTestDevice(t, ctx, store, principal, "workspace-a", machine, "MacBook Pro SK")
 	syncTestRuntime(t, ctx, store, principal, machine, enroll.DeviceID, runtimeID)
+	before, _ := store.deviceByIDLocked(enroll.DeviceID)
 	if _, err := store.EnrollDeviceCredential(ctx,
 		AuthorizationResult{PrincipalID: "user-1", WorkspaceID: "workspace-b"}, "workspace-b",
 		EnrollDeviceRequest{MachineID: machine, DisplayName: "MacBook Pro SK"}); err != nil {
@@ -56,6 +57,9 @@ func TestEnrollDeviceCredentialReEnrollPreservesRuntimes(t *testing.T) {
 		t.Fatalf("list devices: %v", err)
 	}
 	mine := requireDevice(t, devices.Devices, enroll.DeviceID)
+	if !mine.DaemonLastSeenAt.Equal(before.DaemonLastSeenAt) {
+		t.Fatal("re-enrollment advanced the existing daemon heartbeat clock")
+	}
 	if len(mine.Runtimes) != 1 || mine.Runtimes[0].RuntimeID != runtimeID {
 		t.Fatalf("re-enroll wiped detected runtimes: %+v", mine.Runtimes)
 	}

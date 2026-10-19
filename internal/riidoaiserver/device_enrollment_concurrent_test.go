@@ -47,7 +47,7 @@ func TestEnrollmentPublicationPreservesHeartbeatAndOtherPrincipalGrant(t *testin
 		done <- err
 	}()
 	<-blocking.entered
-	heartbeat := time.Now().Add(time.Minute)
+	heartbeat := time.Now().UTC()
 	store.mu.Lock()
 	for i := range store.devices {
 		if store.devices[i].DeviceID == first.DeviceID {

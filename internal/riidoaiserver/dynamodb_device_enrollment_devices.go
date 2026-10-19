@@ -1,8 +1,8 @@
 package riidoaiserver
 
 // Device ownership and installed desktop version belong to enrollment. Preserve
-// newer committed rows while allowing a fresh daemon heartbeat to update its
-// name/runtime data. Workspace connections are monotonic historical facts.
+// committed runtime/heartbeat data during enrollment, and newer committed rows
+// during ordinary saves. Workspace connections are monotonic historical facts.
 func mergeEnrollmentDevices(requested *AIAgentClientSnapshot, committed AIAgentClientSnapshot, deviceID string, enrolling bool) {
 	positions := make(map[string]int, len(requested.Devices))
 	for i, device := range requested.Devices {
@@ -21,7 +21,7 @@ func mergeEnrollmentDevices(requested *AIAgentClientSnapshot, committed AIAgentC
 				device.DisplayName = old.DisplayName
 			}
 		}
-		if old.DaemonLastSeenAt.After(device.DaemonLastSeenAt) {
+		if enrolling || old.DaemonLastSeenAt.After(device.DaemonLastSeenAt) {
 			device.DaemonLastSeenAt, device.Runtimes = old.DaemonLastSeenAt, old.Runtimes
 		}
 		for _, workspace := range old.ConnectedWorkspaceIDs {

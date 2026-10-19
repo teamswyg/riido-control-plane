@@ -27,11 +27,6 @@ func (s *PersistentAIAgentClientStore) publishDeviceEnrollment(trial *Developmen
 		if device.DeviceID != deviceID {
 			continue
 		}
-		for _, current := range s.devices {
-			if current.DeviceID == deviceID && current.DaemonLastSeenAt.After(device.DaemonLastSeenAt) {
-				device.DaemonLastSeenAt = current.DaemonLastSeenAt
-			}
-		}
 		s.upsertEnrolledDeviceLocked(device)
 	}
 	if s.deviceConnectionGrants[deviceID] == nil {

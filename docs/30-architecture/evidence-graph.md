@@ -12,7 +12,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `259`
 - claim refs: `363`
-- change refs: `2550`
+- change refs: `2554`
 - verifier refs: `1503`
 - evidence refs: `807`
 
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `167` | `207` | `1572` | `848` | `498` |
+| `closed_loop_candidate` | `167` | `207` | `1576` | `848` | `498` |
 | `control_plane_performance_harness` | `32` | `36` | `240` | `258` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `14` | `24` | `282` | `134` | `66` |
@@ -297,7 +297,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `onboarding_completion_replica_commit_5846` | `6` | `22` | `7` | `1` | `ai_thread_history` |
 | `private_task_context_split_graphql_endpoint_1099` | `1` | `3` | `3` | `1` | `closed_loop_candidate` |
 | `direct_assignment_without_keyword_gate_5827` | `2` | `3` | `3` | `3` | `closed_loop_candidate` |
-| `web_onboarding_desktop_presence_loop` | `3` | `29` | `21` | `1` | `closed_loop_candidate` |
+| `web_onboarding_desktop_presence_loop` | `3` | `33` | `21` | `1` | `closed_loop_candidate` |
 | `denied_request_finite_credential_diagnostics_loop` | `1` | `4` | `3` | `1` | `closed_loop_candidate` |
 
 ## Loop

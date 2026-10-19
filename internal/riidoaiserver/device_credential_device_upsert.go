@@ -11,9 +11,7 @@ func (s *DevelopmentAIAgentClientStore) upsertEnrolledDeviceLocked(device Device
 			if device.DesktopAppVersion != "" {
 				merged.DesktopAppVersion = device.DesktopAppVersion
 			}
-			if !device.DaemonLastSeenAt.IsZero() {
-				merged.DaemonLastSeenAt = device.DaemonLastSeenAt
-			}
+			// Enrollment does not own an existing daemon's heartbeat or runtimes.
 			for _, ws := range device.ConnectedWorkspaceIDs {
 				merged.ConnectedWorkspaceIDs = addConnectedWorkspace(merged.ConnectedWorkspaceIDs, ws)
 			}
