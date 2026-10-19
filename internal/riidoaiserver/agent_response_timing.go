@@ -24,5 +24,7 @@ func logAgentResponseDelivery(req AgentEventRequest, response AgentEventResponse
 	if response.Assignment != nil && !response.Assignment.CreatedAt.IsZero() && !projectedAt.Before(response.Assignment.CreatedAt) {
 		age = projectedAt.Sub(response.Assignment.CreatedAt).Milliseconds()
 	}
-	log.Printf("event=agent_response_delivery assignment_id=%q phase=%q event_seq=%d event_processing_ms=%d assignment_commit_ms=%d client_projection_ms=%d assignment_age_ms=%d", req.AssignmentID, phase, response.Event.Seq, projectedAt.Sub(receivedAt).Milliseconds(), committedAt.Sub(receivedAt).Milliseconds(), projectedAt.Sub(committedAt).Milliseconds(), age)
+	total := projectedAt.Sub(receivedAt).Milliseconds()
+	commit := committedAt.Sub(receivedAt).Milliseconds()
+	log.Printf("event=agent_response_delivery assignment_id=%q phase=%q event_seq=%d event_processing_ms=%d assignment_commit_ms=%d client_projection_ms=%d assignment_age_ms=%d", req.AssignmentID, phase, response.Event.Seq, total, commit, total-commit, age)
 }

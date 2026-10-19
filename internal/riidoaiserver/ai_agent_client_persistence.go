@@ -74,6 +74,7 @@ type PersistentAIAgentClientStore struct {
 	snapshotLastReloadAt          time.Time
 	snapshotLastSavedAt           time.Time
 	snapshotClock                 func() time.Time
+	snapshotReloadRequired        bool
 }
 
 func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAgentClientStore, snapshotStore AIAgentClientSnapshotStore) (*PersistentAIAgentClientStore, error) {
@@ -140,12 +141,15 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 		return nil
 	}
 	s.snapshotReloadMu.Lock()
-	if !s.shouldReloadSnapshotLocked() {
+	if !s.snapshotReloadRequired && !s.shouldReloadSnapshotLocked() {
 		s.snapshotReloadMu.Unlock()
 		return nil
 	}
 	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
 	if err != nil || !ok {
+		if err == nil && s.snapshotReloadRequired {
+			err = errAIAgentSnapshotConflict
+		}
 		s.snapshotReloadMu.Unlock()
 		return err
 	}
@@ -155,6 +159,7 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 		return err
 	}
 	repaired := s.repairStaleActiveTaskThreads(s.snapshotNow().UTC())
+	s.snapshotReloadRequired = false
 	s.snapshotLastReloadAt = s.snapshotNow()
 	s.snapshotReloadMu.Unlock()
 	if repaired {
@@ -166,6 +171,12 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
+	}
+	s.snapshotReloadMu.Lock()
+	required := s.snapshotReloadRequired
+	s.snapshotReloadMu.Unlock()
+	if required {
+		return errAIAgentSnapshotConflict
 	}
 	snapshot, err := s.snapshot(s.snapshotNow().UTC())
 	if err != nil {
