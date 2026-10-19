@@ -43,17 +43,3 @@ func (s *DevelopmentAIAgentClientStore) ConnectAIAgentDeviceWithCredential(ctx c
 	}
 	return DeviceRecord{}, ErrAuthorizationForbidden
 }
-
-func (s *PersistentAIAgentClientStore) ConnectAIAgentDeviceWithCredential(ctx context.Context, principal AuthorizationResult, deviceID, secret string) (DeviceRecord, error) {
-	s.operationMu.Lock()
-	defer s.operationMu.Unlock()
-	if err := s.reloadSnapshot(ctx); err != nil {
-		return DeviceRecord{}, err
-	}
-	before := s.desktopPresenceGrantCheckpoint()
-	device, err := s.DevelopmentAIAgentClientStore.ConnectAIAgentDeviceWithCredential(ctx, principal, deviceID, secret)
-	if err != nil {
-		return DeviceRecord{}, err
-	}
-	return device, s.commitDesktopPresenceGrants(ctx, before)
-}
