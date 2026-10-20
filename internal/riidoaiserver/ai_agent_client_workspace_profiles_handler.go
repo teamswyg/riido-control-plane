@@ -16,7 +16,7 @@ func (s Server) handleAIAgentClientWorkspaceAssignedAgentProfiles(w http.Respons
 		return
 	}
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	response, err := s.aiAgent.ListWorkspaceAssignedAgentProfiles(r.Context(), principal)

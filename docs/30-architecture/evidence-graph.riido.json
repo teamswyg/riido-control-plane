@@ -24823,6 +24823,142 @@
       ],
       "decision": "Use one cancellation-independent shared context retaining request values. Each caller can cancel its wait; the last waiter removes and cancels shared work. Provider-owned upstream timeout is unchanged. No automatic retry, TTL authorization cache or token/permission change. Identity-checked cleanup cannot remove a replacement call. Panic detail is suppressed and waiters are released with a fixed failure. HTTP and race regressions must pass. Refresh generated syntax/loop docs and their behavioral golden outputs only for the declared new ownership/rules/evidence chain; preserve all verifiers and gate criteria.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "legacy_client_projection_error_privacy_5821",
+      "observation": "After cancellation isolation rollout, natural staging bootstrap/subscription502 rows lacked projection-stage diagnostics. Code inspection and12RED HTTP cases show legacy reconciliation errors expose raw upstream messages and misclassify cancellation/deadline as502, while v3 already has a private typed response. The actual cause of the2observed502s is not retroactively established.",
+      "hypothesis": "Share the existing v3 mapping across every projection-reconcile handler and emit bounded stage diagnostics. Preserve authorization, successful payloads, task intent and SSE cursor semantics.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "sse_reconnect_must_resume_after_last_event_id",
+        "thread_history_v3_must_expose_stable_conversation_grouping",
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract",
+        "ambiguous_task_context_must_ask_before_work",
+        "loop_registry_evidence_must_expose_loop_surfaces",
+        "loop_registry_evidence_must_expose_architecture_index",
+        "loop_registry_impact_must_expose_target_verifier_plan",
+        "loop_coverage_dimensions_must_use_static_registry",
+        "loop_evidence_kinds_must_use_vocabulary",
+        "server_route_handlers_must_stay_semantically_split",
+        "api_client_delivery_must_preserve_generated_handoff_boundary",
+        "device_client_status_must_distinguish_install_update_and_ready",
+        "onboarding_completion_must_be_durable_and_idempotent",
+        "desktop_presence_must_observe_committed_account_connections"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/api-client-delivery.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_bootstrap_devices_error_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_bootstrap_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assign_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assignable_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_read_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_workspace_profiles_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_task_v3.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_projection_error_response.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_projection_error_privacy_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        },
+        {
+          "kind": "test",
+          "path": "tools/aiagentclientapi/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit/behavior_golden_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_projection_error_privacy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_v3_reconcile_status_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/aiagentclientapi"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/apiclientdelivery"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Reuse408 cancellation/504 deadline/502 dependency fixed messages for the8reconcile call sites, with safe finite stage logs. RED/green HTTP tests prove wrapped sentinel handling and absence of an upstream canary. Existing successful assignment/read/SSE behavior remains unchanged. Refresh generated docs and their changed golden outputs without relaxing gates. API evidence source checks grow70to71; strict counter/golden expectations are refreshed for the added verifier while endpoint counts and gates remain unchanged.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

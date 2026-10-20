@@ -44,7 +44,7 @@ func TestHTTPAIAgentClientBootstrapReconcileError(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer user-token")
 	resp := httptest.NewRecorder()
 	bootstrapDevicesErrorServer(t, store, assignment).ServeHTTP(resp, req)
-	if resp.Code != http.StatusBadGateway || !strings.Contains(resp.Body.String(), "projection reconcile failed") {
+	if resp.Code != http.StatusBadGateway || !strings.Contains(resp.Body.String(), "thread projection synchronization unavailable") {
 		t.Fatalf("status=%d body=%s", resp.Code, resp.Body.String())
 	}
 }
