@@ -184,3 +184,40 @@ and one native Codex session, with runtime-default model configuration. These
 are controlled network-backpressure observations, not production or UI paint
 latency guarantees. This control-plane change adds attribution only; the
 network request reduction is implemented in the daemon.
+
+
+## Recovery-only projection I/O · RIID-5821
+
+The authoritative assignment store accepts and journals recovery metadata before
+client projection. The development client projection intentionally performs no
+mutation for these events. Its persistent delegate must not reload and rewrite
+the full client snapshot for that no-op. Delegate directly to the same pure
+validation/cancellation path only when the committed TaskEvent metadata carries
+the existing sanitized recovery context. Recovery keys in the incoming request
+alone do not activate this path. Ordinary progress/status/terminal events retain
+the original operation lock, fresh reload, durable save and post-commit delivery.
+Authorization, assignment receipt/lease/CAS and recovery journals are unchanged.
+
+A deterministic 25-event regression observed 25 redundant saves (the memory snapshot fixture performed zero loads)
+before the fix; after it observes zero projection snapshot calls. Actual DynamoDB read/revision counts are not inferred from this memory fixture. This is a
+synthetic I/O-count result, not a new real-provider or production speedup claim.
+Staging observations of 624–811ms projection work and repeated authorization
+rejections are separate evidence; they do not establish that all projection time
+is caused by this no-op or explain the user's 92.285s provider observation.
+
+## Projection subphase diagnosis · RIID-5821
+
+The current staging sample contains 28 partial-delivery rows with median total
+716 ms and median client projection 676 ms. These are event observations after
+authorization/decode, not model or UI latency. The detailed cause is not established.
+Measure operation-lock wait, snapshot reload, development projection, and snapshot
+save separately at the persistent delegate. Emit bounded phase/outcome/timing
+fields and validated OTel correlation IDs; never include request bodies, task IDs,
+credentials or dependency error text. Failed phases still report time; unattempted
+phases are unknown (-1). Successful recovery-only no-ops do not acquire the
+operation lock or access the snapshot. Preserve journal acceptance before this
+delegate and keep ordinary projection save/retry behavior unchanged.
+
+The daemon adapter interval can include event backpressure and is not a native
+inference clock. Native-versus-daemon comparison requires matching task, model,
+reasoning, context and cold/resumed session; no fixed completion target is set.
