@@ -164,7 +164,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25→0 save-count regression and actual local HTTP recovery replay→wrong-lease403→terminal snapshot503→same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work.",
+      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25\u21920 save-count regression and actual local HTTP recovery replay\u2192wrong-lease403\u2192terminal snapshot503\u2192same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -2214,7 +2214,7 @@
     {
       "id": "external_authorizer_latency_evidence_loop",
       "observation": "Production AI Agent read requests could return 503 after the external authorization client timed out at two seconds, while the upstream authorization load balancer had a materially longer tail latency and existing traces did not identify the authorization boundary or its in-flight pressure. A later production sample separated88client401denials from2external-authorizer generic errors at2ms and matching client503responses. Generic error telemetry lacked enough structure to distinguish transport, unexpected upstream HTTP and invalid response; no actual root cause was established.",
-      "hypothesis": "One configured timeout budget shared by request context and the default HTTP client, plus redacted slow-or-unexpected-failure observations, can distinguish external authorization timeout, availability, and concurrency pressure without changing endpoint contracts or exposing bearer tokens and workspace identifiers. Private typed causes and fixed diagnostic allowlists can distinguish future failures without inspecting tokens, raw URLs, response bodies or schema values and without changing authorization policy, timeout or retry behavior.",
+      "hypothesis": "One configured timeout budget shared by request context and the default HTTP client, plus redacted slow-or-unexpected-failure observations, can distinguish external authorization timeout, availability, and concurrency pressure without changing endpoint contracts or exposing bearer tokens and workspace identifiers. Private typed causes and fixed diagnostic allowlists can distinguish future failures without inspecting tokens, raw URLs, response bodies or schema values and without changing authorization policy, timeout or retry behavior. Finite HTTP phase/milestone observations can distinguish future transport and body delays without inventing historical causes or changing the timeout/retry budget.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence",
         "request_authorization_must_preserve_security_boundary"
@@ -2263,6 +2263,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/authorization_dependency_response_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/external_authorizer_http_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/external_authorizer_http_trace.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/external_authorizer_outcome.go"
         }
       ],
       "verifiers": [
@@ -2289,6 +2301,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/authorization_dependency_response_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/external_authorizer_http_observation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/external_authorizer_http_reuse_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/external_authorizer_http_callbacks_test.go"
         }
       ],
       "evidence": [
@@ -2298,7 +2322,7 @@
           "redacted": true
         }
       ],
-      "decision": "External authorization remains fail-closed, but its finite production budget is raised to five seconds and is now shared by the HTTP client and request context. Client spans and slow-or-unexpected-failure logs carry only resource, action, duration, timeout, and in-flight counts; bearer tokens and workspace identifiers do not cross the evidence boundary. A narrow follow-up records failure_kind transport/upstream_http/invalid_response/internal/unclassified/none, response_error decode/schema/contract/none and bounded numeric upstream status. Typed Unwrap keeps exact denial sentinels and cancellation/deadline identity. Error text and generic503HTTPresponses are fixed so untrusted upstream details cannot be reflected. Canary tests cover transport URLs, body/schema/role markers, status/sentinel/retry preservation and malicious diagnostic values. Historical2ms failures remain unclassified retrospectively; this implementation alone does not prove operational root cause or eliminate the observed client401loop.",
+      "decision": "External authorization remains fail-closed, but its finite production budget is raised to five seconds and is now shared by the HTTP client and request context. Client spans and slow-or-unexpected-failure logs carry only resource, action, duration, timeout, and in-flight counts; bearer tokens and workspace identifiers do not cross the evidence boundary. A narrow follow-up records failure_kind transport/upstream_http/invalid_response/internal/unclassified/none, response_error decode/schema/contract/none and bounded numeric upstream status. Typed Unwrap keeps exact denial sentinels and cancellation/deadline identity. Error text and generic503HTTPresponses are fixed so untrusted upstream details cannot be reflected. Canary tests cover transport URLs, body/schema/role markers, status/sentinel/retry preservation and malicious diagnostic values. Historical2ms failures remain unclassified retrospectively; this implementation alone does not prove operational root cause or eliminate the observed client401loop. HTTP phase diagnostics now preserve the configured per-environment timeout and single attempt, distinguish unobserved custom transports and missing elapsed milestones, and ignore late losing-dial phase regression. Header/body deadline, reuse, concurrency and canary regressions verify this evidence boundary without claiming that historical timeouts have been reproduced or solved.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -5641,7 +5665,7 @@
     {
       "id": "thread_history_user_followup_retention_loop",
       "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, can lose the actual reply author when another workspace member writes inside the thread, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide. RIID-5820: execution evidence also disappeared in v3 cold history because only message fields were projected. RIID-5819 acceptance found that the first SaaS assignment persisted a native session but its same-thread HTTP follow-up omitted ResumeSessionID, creating another provider session/clone. Existing tests manually supplied resume IDs and missed the API boundary. RIID-5860 reproduced a false 403 after a connected account created its own Agent on another account physical runtime: native resume compared the Agent snapshot owner with the runtime owner even though account connection grants intentionally preserve the original device owner.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior. Carry the exact authorized selected terminal assignment native identity into a new explicit follow-up, preserving provider/model/worktree/current-owner guards and daemon-local retained binding; classify unavailable durable authority as retryable rather than a fresh-session success. Preserve the current authorized Agent profile owner through internal request composition and compare historical Agent ownership with that profile, independently of physical runtime ownership; retain existing callable-Agent policy and runtime/session scope checks.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent \ud2f0\ud0a4\ud0c0\uce74 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior. Carry the exact authorized selected terminal assignment native identity into a new explicit follow-up, preserving provider/model/worktree/current-owner guards and daemon-local retained binding; classify unavailable durable authority as retryable rather than a fresh-session success. Preserve the current authorized Agent profile owner through internal request composition and compare historical Agent ownership with that profile, independently of physical runtime ownership; retain existing callable-Agent policy and runtime/session scope checks.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -13134,7 +13158,7 @@
     },
     {
       "id": "notion_qa_intent_waiting_copy_loop",
-      "observation": "Notion QA feedback said the waiting_for_user copy '어떤 작업부터 진행할까요?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
+      "observation": "Notion QA feedback said the waiting_for_user copy '\uc5b4\ub5a4 \uc791\uc5c5\ubd80\ud130 \uc9c4\ud589\ud560\uae4c\uc694?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
       "hypothesis": "Keeping the same waiting_for_user state contract while changing the server-visible needs_input copy and prompt clarification example can preserve the intent gate but make the AI thread feel like it reviewed the task and is asking for desired output or direction.",
       "claims": [
         "ambiguous_task_context_must_ask_before_work",
@@ -13209,13 +13233,13 @@
           "redacted": true
         }
       ],
-      "decision": "The server now returns '작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
+      "decision": "The server now returns '\uc791\uc5c5 \ub0b4\uc6a9\uc744 \ud655\uc778\ud588\uc5b4\uc694. \uc6d0\ud558\ub294 \uacb0\uacfc\ubb3c\uc774\ub098 \ubc29\ud5a5\uc744 \ub313\uae00\ub85c \uc54c\ub824\uc8fc\uc138\uc694.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
       "id": "notion_p0_server_status_transfer_loop",
-      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][진행중]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
-      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][완료][전달요청] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
+      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][\uc9c4\ud589\uc911]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
+      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][\uc644\ub8cc][\uc804\ub2ec\uc694\uccad] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate"
@@ -16742,7 +16766,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile별 daemon list handoff without changing v3 thread history semantics.",
+      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile\ubcc4 daemon list handoff without changing v3 thread history semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {

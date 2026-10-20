@@ -99,7 +99,7 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 	if externalAuthorizerRequiresWorkspace(req) && strings.TrimSpace(req.WorkspaceID) == "" {
 		return AuthorizationResult{}, ErrAuthorizationForbidden
 	}
-	ctx, finishObservation := a.observation.start(ctx, req, a.timeout)
+	ctx, networkObservation, finishObservation := a.observation.start(ctx, req, a.timeout)
 	defer func() { finishObservation(err) }()
 	payload, err := json.Marshal(externalAuthorizerRequest{
 		SchemaVersion: ExternalAuthorizerRequestSchemaVersion,
@@ -134,6 +134,7 @@ func (a *ExternalHTTPAuthorizer) Authorize(ctx context.Context, bearerToken stri
 		return AuthorizationResult{}, externalAuthorizerFailed("transport", "none", 0, fmt.Errorf("riidoaiserver: external authorizer request failed: %w", err))
 	}
 	defer resp.Body.Close()
+	networkObservation.mark("response_body", "")
 	switch resp.StatusCode {
 	case http.StatusUnauthorized:
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 1024))
