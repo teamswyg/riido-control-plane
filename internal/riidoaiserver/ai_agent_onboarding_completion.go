@@ -35,16 +35,16 @@ type CompleteAIAgentOnboardingTaskRequest struct {
 // in riido-contracts verbatim.
 var onboardingCompletionCopy = map[AIAgentOnboardingTaskTemplateKey]map[AIAgentOnboardingLocale]string{
 	AIAgentOnboardingTemplateSchedule: {
-		AIAgentOnboardingLocaleKo: "단계 4개를 이 작업의 하위 작업으로 추가하고 마감일을 넣어 뒀어요. 참여자는 비워 뒀으니 팀원을 초대하면 바로 넣을 수 있어요.",
-		AIAgentOnboardingLocaleEn: "Added the 4 phases as subtasks of this task with due dates. Assignees are empty, so you can add them as soon as you invite teammates.",
+		AIAgentOnboardingLocaleKo: "단계 4개의 기간과 날짜, 산출물을 이 작업의 문서로 정리해 뒀어요. 팀원을 초대하면 단계마다 담당자를 정해 보세요.",
+		AIAgentOnboardingLocaleEn: "Laid out the 4 phases' durations, dates, and deliverables in this task's document. Once you invite teammates, pick an owner for each phase.",
 	},
 	AIAgentOnboardingTemplateInterview: {
 		AIAgentOnboardingLocaleKo: "질문지를 이 작업의 문서로 남겼어요. \"~라면 쓰시겠어요?\"처럼 답을 유도하는 질문은 뺐어요.",
 		AIAgentOnboardingLocaleEn: "Saved the questions as this task's document. Leading questions like \"Would you use it if…?\" were left out.",
 	},
 	AIAgentOnboardingTemplateLaunch: {
-		AIAgentOnboardingLocaleKo: "항목 9개를 이 작업의 하위 작업으로 추가하고 D-3, 당일, D+7 마감일을 넣어 뒀어요.",
-		AIAgentOnboardingLocaleEn: "Added the 9 items as subtasks of this task with D-3, launch-day, and D+7 due dates.",
+		AIAgentOnboardingLocaleKo: "출시 전·당일·후에 확인할 항목 9개를 이 작업의 문서로 정리해 뒀어요. 출시일은 오늘부터 7일 뒤로 잡았어요.",
+		AIAgentOnboardingLocaleEn: "Laid out 9 items to check before, on, and after launch in this task's document. The launch date is set 7 days from today.",
 	},
 }
 
