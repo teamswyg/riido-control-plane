@@ -24586,6 +24586,68 @@
       ],
       "decision": "The added regression suite checks lost HTTP responses, restart, rejected and uncertain commits, independent replicas, concurrent ordinary updates, stale writers, authorization/scope boundaries, key conflicts and malformed keys, runtime disappearance, deletion/incarnation reuse, and fail-closed receipt retention/capacity. No customer write, model call or execution is needed. Server rollout must fully converge before activating keyed frontend clients; frontend and desktop remain unmerged and undeployed. Existing intentional unkeyed/new-key creates remain independent. New private snapshot parts do not require a PostgreSQL migration.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "onboarding_first_task_document_only_copy_5866",
+      "observation": "Product owner decision (2026-10-20, RIID-5866): the onboarding first-task bundle no longer creates subtasks; schedule and launch results live only in the task document. The approved completion comments for schedule and launch still described subtasks, so the copy in onboardingCompletionCopy, the ai-agent-client contract mirror and the completion tests no longer matched the product.",
+      "hypothesis": "Replace only the four schedule/launch completion strings (ko/en) verbatim with riido-contracts ai_agent_onboarding_completion.v1 and align the mirror precondition and template descriptions. Interview copy, request/response shape, idempotency, authorization, persistence and the policy id stay unchanged, so completion durability and idempotency claims are unaffected; the mirror and loop-registry hash/doc changes are regenerated outputs of the copy edit.",
+      "claims": [
+        "generated_endpoint_smoke_matrix_must_remain_contract_gate",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract",
+        "loop_registry_evidence_must_expose_loop_surfaces",
+        "loop_registry_evidence_must_expose_architecture_index",
+        "loop_registry_impact_must_expose_target_verifier_plan",
+        "loop_coverage_dimensions_must_use_static_registry",
+        "loop_evidence_kinds_must_use_vocabulary",
+        "onboarding_completion_must_be_durable_and_idempotent",
+        "desktop_presence_must_observe_committed_account_connections"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_onboarding_completion_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/generated_files_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Copy-only change: go test ./internal/riidoaiserver, the aiagentclientapi/apiclientdelivery/reactquerygen/generatedclienthandoff tools and loopregistry pass after regenerating the claim hash and doc. No schema, enum, state transition, model call or customer write changes. Merge after riido-contracts#226 and riido-monolith-service#880 so the comment matches bundles without subtasks; already-created bundles are not migrated.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
