@@ -24668,6 +24668,161 @@
       ],
       "decision": "Copy-only change: go test ./internal/riidoaiserver, the aiagentclientapi/apiclientdelivery/reactquerygen/generatedclienthandoff tools and loopregistry pass after regenerating the claim hash and doc. No schema, enum, state transition, model call or customer write changes. Merge after riido-contracts#226 and riido-monolith-service#880 so the comment matches bundles without subtasks; already-created bundles are not migrated.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "shared_authorization_caller_cancellation_5821",
+      "observation": "Staging503 traces included cancelled authorization calls; isolated RED regression proves a cancelled coalescing owner also fails an otherwise live identical waiter. This does not prove the root cause of the historical2s upstream timeouts.",
+      "hypothesis": "Independent waiter cancellation plus reference-counted in-flight shared work can preserve one-hop deduplication without poisoning another live request or caching old decisions.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract",
+        "loop_registry_evidence_must_expose_loop_surfaces",
+        "loop_registry_evidence_must_expose_architecture_index",
+        "loop_registry_impact_must_expose_target_verifier_plan",
+        "loop_coverage_dimensions_must_use_static_registry",
+        "loop_evidence_kinds_must_use_vocabulary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_coalescing.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_http_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_coalescing_key.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_coalescing_lifecycle.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_lifecycle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_owner_cancel_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_coalescing_result.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_result_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_coalescing_run.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization_coalescing_test_helpers.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_timeout_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/request-authorization.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/20-domain/request-authorization.md"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/evidencegraph/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopclosureaudit/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_lifecycle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_owner_cancel_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_result_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/authorization_coalescing_timeout_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/requestauth"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Use one cancellation-independent shared context retaining request values. Each caller can cancel its wait; the last waiter removes and cancels shared work. Provider-owned upstream timeout is unchanged. No automatic retry, TTL authorization cache or token/permission change. Identity-checked cleanup cannot remove a replacement call. Panic detail is suppressed and waiters are released with a fixed failure. HTTP and race regressions must pass. Refresh generated syntax/loop docs and their behavioral golden outputs only for the declared new ownership/rules/evidence chain; preserve all verifiers and gate criteria.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
