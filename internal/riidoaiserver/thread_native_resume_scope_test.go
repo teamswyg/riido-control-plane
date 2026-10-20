@@ -55,7 +55,8 @@ func TestNativeFollowupSelectsOnlyAuthorizedPersistedSession(t *testing.T) {
 				source.projection.Assignment.ProviderSessionID = ""
 				source.projection.Assignment.ResumeSessionID = "selected-native"
 			}
-			err := s.applyThreadNativeResume(t.Context(), principal, thread, &req)
+			owner := s.aiAgent.(*DevelopmentAIAgentClientStore).agents[req.AgentID].OwnerPrincipalID
+			err := s.applyThreadNativeResume(t.Context(), principal, thread, &req, owner)
 			if wantErr {
 				if err == nil || req.ResumeSessionID != "" {
 					t.Fatal("invalid native scope was accepted")

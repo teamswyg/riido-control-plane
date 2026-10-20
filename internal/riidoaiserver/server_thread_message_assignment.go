@@ -30,13 +30,14 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	if err != nil {
 		return AssignRequest{}, err
 	}
-	assignmentReq, err := s.assignRequestFromAIAgentClientTask(ctx, principal, bearerToken, taskID, AssignAIAgentTaskRequest{
+	composed, err := s.assignRequestFromAIAgentClientTaskResult(ctx, principal, bearerToken, taskID, AssignAIAgentTaskRequest{
 		AgentID: selectedThread.AgentID,
 	})
 	if err != nil {
 		return AssignRequest{}, err
 	}
-	if err := s.applyThreadNativeResume(ctx, principal, selectedThread, &assignmentReq); err != nil {
+	assignmentReq := composed.Request
+	if err := s.applyThreadNativeResume(ctx, principal, selectedThread, &assignmentReq, composed.AgentOwnerPrincipalID); err != nil {
 		return AssignRequest{}, err
 	}
 	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req, history.Threads...)

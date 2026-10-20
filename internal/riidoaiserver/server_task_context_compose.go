@@ -3,8 +3,9 @@ package riidoaiserver
 import "strings"
 
 type composedAssignRequest struct {
-	Request            AssignRequest
-	IntentGateRequired bool
+	Request               AssignRequest
+	IntentGateRequired    bool
+	AgentOwnerPrincipalID string
 }
 
 func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignRequest, contextSnapshot AIAgentTaskContext) (AssignRequest, error) {

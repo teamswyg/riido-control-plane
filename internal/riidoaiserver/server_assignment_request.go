@@ -57,12 +57,17 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		AllowExperimentalRuntime: runtime.RequiresExperimentalOptIn,
 		CreatedBy:                strings.TrimSpace(principal.PrincipalID),
 	}
+	var composed composedAssignRequest
 	if req.VerifiedTaskContext != nil {
-		return composeAssignRequestWithTaskContextResult(taskID, taskID, assignmentReq, *req.VerifiedTaskContext)
+		composed, err = composeAssignRequestWithTaskContextResult(taskID, taskID, assignmentReq, *req.VerifiedTaskContext)
+	} else {
+		composed, err = s.assignRequestWithTaskContextPromptForClientResult(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
+			ComponentID: taskID,
+			WorkspaceID: principal.WorkspaceID,
+			BearerToken: bearerToken,
+		})
 	}
-	return s.assignRequestWithTaskContextPromptForClientResult(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
-		ComponentID: taskID,
-		WorkspaceID: principal.WorkspaceID,
-		BearerToken: bearerToken,
-	})
+	// Profile ownership is distinct from the connected physical runtime ownership.
+	composed.AgentOwnerPrincipalID = selected.OwnerPrincipalID
+	return composed, err
 }
