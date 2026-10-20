@@ -30,7 +30,7 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 	}
 	defer release()
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	response, found, lookupErr := s.findTaskRequestReceipt(r.Context(), principal, taskID, req)

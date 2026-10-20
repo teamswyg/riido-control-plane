@@ -10,7 +10,7 @@ func (s Server) handleAIAgentClientTaskAssignableAgents(w http.ResponseWriter, r
 		return
 	}
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, ""); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	response, err := s.aiAgent.ListAIAgentTaskAssignableAgents(r.Context(), principal, taskID)
