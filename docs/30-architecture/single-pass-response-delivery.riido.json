@@ -11,7 +11,9 @@
     "internal/riidoaiserver/task_conversation_messages.go",
     "internal/riidoaiserver/task_conversation_context.go",
     "internal/riidoaiserver/ai_agent_assignment_prompt_interpretation.go",
-    "internal/riidoaiserver/server_assignment_request.go"
+    "internal/riidoaiserver/server_assignment_request.go",
+    "internal/riidoaiserver/ai_agent_client_persistent_method_record_ai_agent_assignment_event.go",
+    "internal/riidoaiserver/agent_projection_timing.go"
   ],
   "invariants": [
     "No additional classifier, reviewer or quality-retry model turn on the default path.",
@@ -21,7 +23,9 @@
     "Answer-only intent signals require directive syntax; nominal requests are recognized only in the task title or explicit user instruction, not source-document prose.",
     "Messages that render empty, including empty editor HTML, are excluded before the recent-message budget; eligibility and prompt rendering use the same normalization.",
     "Keyword intent classification is advisory only; every new assignment reaches the existing provider turn, preserving task context and explicit instruction without an extra model request.",
-    "Separate successful assignment commit and client projection duration using one server clock; never log answer or credential content."
+    "Separate successful assignment commit and client projection duration using one server clock; never log answer or credential content.",
+    "Authoritative recovery-only client projection is a validated no-op with zero snapshot reload/save; request metadata alone cannot skip ordinary durable projection.",
+    "Projection timing distinguishes lock/reload/project/save with unknown unattempted phases and validated trace correlation; no raw bodies, IDs or dependency errors."
   ],
   "verification": {
     "tests": [
@@ -34,7 +38,13 @@
       "TestAnswerOnlyDirectiveSyntaxRemainsExecutable",
       "TestAnswerOnlyProseTitleRemainsAdvisoryBackground",
       "TestAcceptanceRenderedEmptyHistoryPreservesEarlierRequirement",
-      "TestAssignmentDirectExecutionPreservesRequest"
+      "TestAssignmentDirectExecutionPreservesRequest",
+      "TestRecoveryOnlyProjectionDoesNotLoadOrSaveSnapshot",
+      "TestRecoveryProjectionPreservesValidationAndCancellation",
+      "TestRecoveryInRequestCannotSkipOrdinaryProjection",
+      "TestProjectionTimingUnknownPhasesAndPrivacy",
+      "TestProjectionTimingMeasuresFailedPhase",
+      "TestRecoveryHTTPKeepsJournalReplayAndTerminal"
     ],
     "live_test_opt_in": "AGENTBRIDGE_INTEGRATION=1",
     "measurement_script": "riido-daemon/scripts/measure-single-pass-response.py"
