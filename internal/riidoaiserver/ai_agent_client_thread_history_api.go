@@ -15,6 +15,7 @@ const (
 )
 
 type AIAgentTaskThreadHistoryMessage struct {
+	DisplayMessage    string                       `json:"display_message,omitempty"`
 	MessageID         string                       `json:"message_id"`
 	Role              AIAgentTaskThreadMessageRole `json:"role"`
 	CommentKind       AgentTaskCommentKind         `json:"comment_kind,omitempty"`

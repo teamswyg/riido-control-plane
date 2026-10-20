@@ -378,7 +378,12 @@
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
-        "client: render task-thread progress from typed event payloads and never parse provider raw output"
+        "client: render task-thread progress from typed event payloads and never parse provider raw output",
+        "server: optional display_message projects only codes 1101/tool.collecting and 1103/tool.running description, or 1104/tool.completed summary; when message_key is present it must match the catalog code",
+        "server: display_message is plain single-line text limited to 180 Unicode characters; omit it for unknown progress, assistant partials, raw tool transcripts, and inapplicable queue status",
+        "server: preserve the same display_message in live progress lines and cold v3 history, without exposing message_code or message_args in the public response",
+        "client: prefer display_message for meaningful progress; treat missing summaries as absent information and never fabricate task-specific activity from raw message text",
+        "compatibility: existing message/body, execution lifecycle, stop behavior, and authorization are unchanged; display_message is optional response copy and not a command or state"
       ]
     },
     {
@@ -2692,6 +2697,14 @@
         {
           "name": "message_key",
           "type": "string"
+        },
+
+        {
+          "name": "display_message",
+          "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
+          "type": "string",
+          "max_length": 180,
+          "pattern": "^[^\\r\\n]*$"
         }
       ]
     },
@@ -3232,6 +3245,14 @@
           "name": "observed_at",
           "type": "string",
           "format": "date-time"
+        },
+
+        {
+          "name": "display_message",
+          "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
+          "type": "string",
+          "max_length": 180,
+          "pattern": "^[^\\r\\n]*$"
         }
       ]
     },

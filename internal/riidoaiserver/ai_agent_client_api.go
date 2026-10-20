@@ -579,15 +579,17 @@ type AgentWorkStatusChangedEvent struct {
 }
 
 type AgentThreadProgressLine struct {
-	Seq         int               `json:"seq"`
-	Message     string            `json:"message"`
-	MessageCode int               `json:"message_code,omitempty"`
-	MessageKey  string            `json:"message_key,omitempty"`
-	MessageArgs map[string]string `json:"message_args,omitempty"`
-	ObservedAt  time.Time         `json:"observed_at,omitempty"`
+	displayMessage string
+	Seq            int               `json:"seq"`
+	Message        string            `json:"message"`
+	MessageCode    int               `json:"message_code,omitempty"`
+	MessageKey     string            `json:"message_key,omitempty"`
+	MessageArgs    map[string]string `json:"message_args,omitempty"`
+	ObservedAt     time.Time         `json:"observed_at,omitempty"`
 }
 
 func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
+	line.displayMessage = ""
 	var wire struct {
 		Seq         int               `json:"seq"`
 		Message     string            `json:"message"`
@@ -610,14 +612,16 @@ func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
 
 func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
 	wire := struct {
-		MessageKey string    `json:"message_key,omitempty"`
-		Seq        int       `json:"seq"`
-		Message    string    `json:"message"`
-		ObservedAt time.Time `json:"observed_at,omitempty"`
+		DisplayMessage string    `json:"display_message,omitempty"`
+		MessageKey     string    `json:"message_key,omitempty"`
+		Seq            int       `json:"seq"`
+		Message        string    `json:"message"`
+		ObservedAt     time.Time `json:"observed_at,omitempty"`
 	}{
-		Seq:        line.Seq,
-		Message:    line.Message,
-		ObservedAt: line.ObservedAt,
+		DisplayMessage: taskProgressDisplayMessage(line),
+		Seq:            line.Seq,
+		Message:        line.Message,
+		ObservedAt:     line.ObservedAt,
 	}
 	if line.MessageKey == "assistant.partial" || line.MessageKey == "runtime.activity" {
 		wire.MessageKey = line.MessageKey

@@ -142,6 +142,10 @@ export interface AIAgentTaskThreadHistoryMessage {
   assignment_id?: string;
   body?: string;
   comment_kind?: AgentTaskCommentKind;
+  /**
+   * Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.
+   */
+  display_message?: string;
   message_id: string;
   observed_at?: string;
   result_message?: string;
@@ -584,6 +588,10 @@ export interface AgentThreadProgressEvent {
  * daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.
  */
 export interface AgentThreadProgressLine {
+  /**
+   * Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.
+   */
+  display_message?: string;
   message: string;
   message_key?: string;
   observed_at?: string;
