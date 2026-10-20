@@ -344,7 +344,7 @@
       },
       {
         "name": "queued-status-current-only",
-        "detail": "comment_kind=queued_by_busy_agent means the durable assignment is waiting behind busy work. Client-visible v2 projections must not render it as an Agent reply or thinking/progress row: hide queued work_status, assignment_state, comment_kind, message, result_message, queue diagnostics, and queued work-status SSE events. Preserve the existing identity fields and active stream so clients retain participant identity; v3 history and the durable scheduler continue to expose assignment_state=queued."
+        "detail": "comment_kind=queued_by_busy_agent is a legacy queued projection kind; queued/leased alone does not prove another task is running. Generic startup uses neutral copy. Ready/running discards exact prior queue status, and live/cold progress excludes exact queue-only lines while retaining provider output. Client-visible v2 projections must not render it as an Agent reply or thinking/progress row: hide queued work_status, assignment_state, comment_kind, message, result_message, queue diagnostics, and queued work-status SSE events. Preserve the existing identity fields and active stream so clients retain participant identity; v3 history and the durable scheduler continue to expose assignment_state=queued."
       },
       {
         "name": "queued-stream-current-only",

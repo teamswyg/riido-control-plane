@@ -30,8 +30,9 @@ func clientVisibleTaskThreadText(message string) string {
 
 func clientVisibleLocalizedTaskThreadText(message string) string {
 	switch strings.TrimSpace(message) {
-	case "agent assignment is queued",
-		"agent is busy; task assignment was queued",
+	case "agent assignment is queued":
+		return clientMessageTaskQueued
+	case "agent is busy; task assignment was queued",
 		"agent is busy; task comment was queued",
 		"agent is busy; task thread message was queued":
 		return clientMessageAgentBusyQueued
