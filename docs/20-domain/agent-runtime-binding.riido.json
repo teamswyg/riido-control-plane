@@ -28,6 +28,7 @@
     {"id": "connected-workspaces", "rule": "workspace connections are unioned across enroll/snapshot/connect paths"},
     {"id": "account-connection-grants", "rule": "each authenticated account and workspace connection is preserved as a device grant without replacing device ownership or credentials"},
     {"id": "cross-account-binding-routing", "rule": "an agent created by a connected account routes through the existing physical daemon by stable device and runtime ids"},
+    {"id": "cross-account-native-followup", "rule": "a follow-up validates the selected Agent snapshot owner against the authorized current Agent profile owner, separately from physical runtime ownership; assignment workspace/task/agent and runtime binding checks remain required"},
     {"id": "legacy-grant-backfill", "rule": "snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants"},
     {"id": "cross-workspace-bindings", "rule": "daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids"},
     {"id": "legacy-runtime-prune", "rule": "agentd-local runtimes are pruned from restored snapshots"},

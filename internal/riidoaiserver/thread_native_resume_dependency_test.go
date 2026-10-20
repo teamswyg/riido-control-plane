@@ -17,7 +17,7 @@ func TestNativeFollowupProjectionFailureRemainsRetryableAndPrivate(t *testing.T)
 		t.Run(tc.name, func(t *testing.T) {
 			server, source, thread, principal, req := nativeResumeScopeFixture(t)
 			source.loadErr = tc.err
-			err := server.applyThreadNativeResume(t.Context(), principal, thread, &req)
+			err := server.applyThreadNativeResume(t.Context(), principal, thread, &req, "user-1")
 			if err == nil || req.ResumeSessionID != "" {
 				t.Fatal("unavailable authority became a fresh-session approval")
 			}

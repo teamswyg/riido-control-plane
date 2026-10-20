@@ -11,6 +11,7 @@ import (
 type nativeResumeHTTPFixture struct {
 	handler http.Handler
 	store   *Store
+	client  *DevelopmentAIAgentClientStore
 	base    string
 	token   string
 }
@@ -30,7 +31,7 @@ func newNativeResumeHTTPFixture(t *testing.T) *nativeResumeHTTPFixture {
 		t.Fatal(err)
 	}
 	handler := NewServer(ServerConfig{Assignment: store, AIAgentClient: client, TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}, Authorizer: auth}).Handler()
-	return &nativeResumeHTTPFixture{handler: handler, store: store, base: "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent", token: "native-owner-token"}
+	return &nativeResumeHTTPFixture{handler: handler, store: store, client: client, base: "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent", token: "native-owner-token"}
 }
 
 func (f *nativeResumeHTTPFixture) post(t *testing.T, path string, body any, status int, destination any) {
