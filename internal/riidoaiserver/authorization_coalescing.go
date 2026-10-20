@@ -13,9 +13,13 @@ type CoalescingAuthorizer struct {
 }
 
 type coalescedAuthorizationCall struct {
-	done   chan struct{}
-	result AuthorizationResult
-	err    error
+	done     chan struct{}
+	result   AuthorizationResult
+	err      error
+	ctx      context.Context
+	cancel   context.CancelFunc
+	waiters  int
+	finished bool
 }
 
 func NewCoalescingAuthorizer(next RequestAuthorizer) (*CoalescingAuthorizer, error) {
@@ -36,11 +40,10 @@ func (a *CoalescingAuthorizer) Authorize(ctx context.Context, bearerToken string
 		return AuthorizationResult{}, ErrAuthorizationUnauthenticated
 	}
 	key := authorizationCoalescingKey(bearerToken, req)
-	call, owner := a.joinOrStart(key)
-	if !owner {
-		return waitForCoalescedAuthorization(ctx, call)
+	call, owner := a.joinOrStart(ctx, key)
+	defer a.release(key, call)
+	if owner {
+		go a.run(key, call, bearerToken, req)
 	}
-	call.result, call.err = a.next.Authorize(ctx, bearerToken, req)
-	a.finish(key, call)
-	return cloneAuthorizationResult(call.result), call.err
+	return waitForCoalescedAuthorization(ctx, call)
 }
