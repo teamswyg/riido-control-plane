@@ -6,14 +6,6 @@ import (
 	"strings"
 )
 
-func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principal AuthorizationResult, bearerToken, taskID string, req AssignAIAgentTaskRequest) (AssignRequest, error) {
-	composed, err := s.assignRequestFromAIAgentClientTaskResult(ctx, principal, bearerToken, taskID, req)
-	if err != nil {
-		return AssignRequest{}, err
-	}
-	return composed.Request, nil
-}
-
 func (s Server) assignRequestFromAIAgentClientTaskResult(
 	ctx context.Context,
 	principal AuthorizationResult,

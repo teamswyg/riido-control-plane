@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `264`
 - claim refs: `399`
-- change refs: `2633`
-- verifier refs: `1542`
+- change refs: `2635`
+- verifier refs: `1544`
 - evidence refs: `816`
 
 ## Compiled Chain Summary
@@ -28,7 +28,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `closed_loop_candidate` | `171` | `242` | `1624` | `870` | `505` |
 | `control_plane_performance_harness` | `32` | `36` | `240` | `258` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
-| `ai_thread_history` | `15` | `25` | `313` | `151` | `68` |
+| `ai_thread_history` | `15` | `25` | `315` | `153` | `68` |
 | `closed_loop_candidate_decision` | `10` | `35` | `190` | `95` | `48` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
@@ -86,7 +86,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `generated_endpoint_smoke_matrix_exclusion_loop` | `1` | `15` | `7` | `6` | `closed_loop_candidate` |
 | `ai_agent_device_daemon_list_surface_loop` | `3` | `26` | `14` | `9` | `closed_loop_candidate` |
 | `deleted_agent_thread_retention_loop` | `1` | `7` | `5` | `1` | `ai_thread_history` |
-| `thread_history_user_followup_retention_loop` | `1` | `27` | `11` | `1` | `ai_thread_history` |
+| `thread_history_user_followup_retention_loop` | `1` | `29` | `13` | `1` | `ai_thread_history` |
 | `control_plane_helper_package_coverage_loop` | `1` | `8` | `5` | `1` | `control_plane_performance_harness` |
 | `control_plane_helper_package_coverage_loop_2` | `1` | `11` | `12` | `1` | `control_plane_performance_harness` |
 | `control_plane_helper_package_coverage_loop_3` | `1` | `12` | `14` | `1` | `control_plane_performance_harness` |
