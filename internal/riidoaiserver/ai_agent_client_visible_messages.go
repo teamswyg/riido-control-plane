@@ -1,6 +1,7 @@
 package riidoaiserver
 
 const (
+	clientMessageTaskQueued              = "요청을 받았어요. 실행을 준비하고 있습니다."
 	clientMessageAgentBusyQueued         = "지금은 다른 작업을 처리 중이에요. 현재 작업이 끝나는 대로 바로 시작할게요."
 	clientMessageAgentDeleted            = "에이전트가 삭제되어 진행 중이던 작업이 중지됐어요."
 	clientMessageRecoveryBlocked         = "이전 실행 세션을 확인할 수 없어 작업을 다시 시작하지 않았어요."

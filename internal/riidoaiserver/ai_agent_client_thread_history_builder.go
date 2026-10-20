@@ -29,7 +29,7 @@ func appendTaskThreadProgressMessages(
 ) []AIAgentTaskThreadHistoryMessage {
 	for _, line := range thread.Lines {
 		body := clientVisibleTaskThreadText(line.Message)
-		if body == "" {
+		if body == "" || assignmentMessageIsQueueStatus(body) {
 			continue
 		}
 		out = append(out, AIAgentTaskThreadHistoryMessage{
