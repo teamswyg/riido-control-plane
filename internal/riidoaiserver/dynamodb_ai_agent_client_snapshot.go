@@ -33,6 +33,7 @@ type DynamoDBAIAgentClientSnapshot struct {
 	credentialsProvider AWSCredentialsProvider
 	metrics             *AIAgentClientPersistenceMetrics
 	partHashes          map[string]string
+	partEncodings       map[string]dynamoDBAIAgentClientSnapshotPart
 	onboardingBaseline  AIAgentClientSnapshot
 	// grantsReadCredentials caches credentials for presence polls that read
 	// connection grants outside the command loop.

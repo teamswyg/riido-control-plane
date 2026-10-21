@@ -33,7 +33,7 @@ func (s *PersistentAIAgentClientStore) commitDeviceEnrollment(ctx context.Contex
 	}
 	s.publishDeviceEnrollment(trial, response.DeviceID)
 	s.version = snapshot.Version
-	s.markSnapshotObserved(snapshot.SavedAt)
+	s.markSnapshotSaved(snapshot)
 	return response, nil
 }
 
@@ -53,6 +53,6 @@ func (s *PersistentAIAgentClientStore) resolveDeviceEnrollment(ctx context.Conte
 	s.snapshotReloadMu.Lock()
 	s.snapshotReloadRequired = false
 	s.snapshotReloadMu.Unlock()
-	s.markSnapshotObserved(committed.SavedAt)
+	s.markSnapshotObserved(committed)
 	return response, nil
 }

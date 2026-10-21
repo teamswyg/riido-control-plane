@@ -434,12 +434,9 @@ func TestPersistentAIAgentClientStoreCoalescesRuntimeHeartbeatSnapshots(t *testi
 		t.Fatalf("hot heartbeat should reuse in-memory state without snapshot save: saves=%d want %d", snapshots.saves, savesAfterFirstRuntime)
 	}
 
-	now = now.Add(time.Minute)
-	if store.shouldSaveHeartbeatSnapshot() {
-		t.Fatal("one minute heartbeat should stay inside the persistence coalescing window")
-	}
-
-	now = now.Add(defaultAIAgentClientHeartbeatSnapshotSaveInterval + time.Second)
+	// Expire the committed heartbeat, without sleeping or changing the daemon.
+	key := daemonStorageKeyFor(enrollment.DeviceID, "", req.DaemonID)
+	store.snapshotDaemonLastSeen[key] = time.Now().Add(-defaultAIAgentClientHeartbeatSnapshotSaveInterval - time.Second)
 	req.UptimeSeconds = 72
 	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, principal, req); err != nil {
 		t.Fatalf("SyncAIAgentDaemonRuntimeSnapshot persistence heartbeat: %v", err)

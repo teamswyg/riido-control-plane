@@ -73,7 +73,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 			}
 		}
-		items, hashes, encoded, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, committedHashes)
+		items, hashes, encoded, err := s.encodeSnapshot(snapshot, committedHashes)
 		if err != nil {
 			return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 		}
