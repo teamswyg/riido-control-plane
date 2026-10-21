@@ -17,6 +17,9 @@ type AIAgentTaskDocumentSnapshot struct {
 }
 
 func (s *AIAgentTaskDocumentSnapshot) UnmarshalJSON(data []byte) error {
+	if !utf8.Valid(data) {
+		return errors.New("document_snapshot must contain valid UTF-8")
+	}
 	var raw struct {
 		Content       *string `json:"content"`
 		ContentFormat *string `json:"content_format"`
