@@ -18131,8 +18131,8 @@
     },
     {
       "id": "react_query_generated_client_syntax_hash_loop",
-      "observation": "The React Query generated client generator owns the OpenAPI-to-TypeScript core client and hook wrapper, but its Go package shape was not syntax-hash tracked even though generated client delivery and Figma handoff evidence depend on it.",
-      "hypothesis": "Hash-locking the generated TypeScript output before adding syntax coverage preserves public generated client behavior while connecting generator syntax patterns to the generated-client semantic claim.",
+      "observation": "The React Query generated client generator owns the OpenAPI-to-TypeScript core client and hook wrapper, but its Go package shape was not syntax-hash tracked even though generated client delivery and Figma handoff evidence depend on it. RIID-5804 QA 57 found that direct creation rejected the preview profile_color and selected a different stored gradient; adding the optional create field changed the generated API and handoff digests.",
+      "hypothesis": "Hash-locking the generated TypeScript output before adding syntax coverage preserves public generated client behavior while connecting generator syntax patterns to the generated-client semantic claim. A creation-only validated profile_color can preserve the preview through snapshot reload while omitted colors keep legacy selection, onboarding remains blue, and updates remain immutable.",
       "claims": [
         "react_query_generator_must_preserve_generated_client_surface"
       ],
@@ -18168,6 +18168,18 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/syntax-hash.yml"
+        },
+        {
+          "kind": "code",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_2.go"
         }
       ],
       "verifiers": [
@@ -18190,6 +18202,18 @@
         {
           "kind": "tool",
           "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_profile_color_create_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_profile_color_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/generated_files_test.go"
         }
       ],
       "evidence": [
@@ -18209,7 +18233,7 @@
           "redacted": true
         }
       ],
-      "decision": "React Query generator syntax coverage may expand only after TestReactQueryGenBehaviorGolden preserves the current core and react generated output hashes, operation count, schema count, and output byte sizes; this slice adds graph coverage without changing the generated client output contract.",
+      "decision": "React Query generator syntax coverage may expand only after TestReactQueryGenBehaviorGolden preserves the current core and react generated output hashes, operation count, schema count, and output byte sizes; this slice adds graph coverage without changing the generated client output contract. QA 57 accepts the four existing profile colors only on direct creation and persists that choice. HTTP v1/v2 color preservation, invalid input rejection, restart retention, omitted-color selection, onboarding blue and update immutability passed focused regression tests. Regenerate IR/OpenAPI/client and handoff golden digests plus module/syntax readers and dependent semantic hashes from source; no verification threshold or unrelated runtime contract changes.",
       "next_loop": "closed_loop_candidate"
     },
     {

@@ -451,9 +451,9 @@
         "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image upload uses createAIAgentProfileThumbnailUpload before saving profile_thumbnail_url",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
         "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1",
-        "profile_color: one of blue, orange, green, purple; set once at creation and never changed by create, update, or PATCH-style requests",
+        "profile_color: one of blue, orange, green, purple; direct create may provide its preview color, which is set once at creation and never changed by update or PATCH-style requests",
         "profile_color_onboarding: Agents created through the onboarding fixture create path use blue",
-        "profile_color_other: other Agents created in a workspace take a color chosen at random among the least-used profile_color values in that workspace",
+        "profile_color_other: direct create preserves a provided valid profile_color; omitted or empty color keeps random selection among the least-used profile_color values in that workspace; unknown nonempty values are rejected",
         "profile_color_backfill: Agents loaded from a snapshot without profile_color receive one deterministically from the snapshot (fixture-created agents with tmp_color get blue; the rest take the least-used color in created_at and agent_id order, and any tie among least-used colors is broken by the fixed order blue, orange, green, purple, taking the first) and keep it",
         "profile_color_projection: profile_color is projected to agent records, task_agent_participants, assigned_agent_profiles, and thread agent snapshots; clients must not derive it from tmp_color",
         "profile_color_update: update requests accept profile_color for compatibility and ignore it; the stored color never changes"
@@ -479,7 +479,7 @@
         "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
         "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout",
         "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateOnboardingAgentRequest body and creates a normal owned agent",
-        "fixture_request: only fixture create v1/v2 uses CreateOnboardingAgentRequest, which adds optional request_id to the unchanged seven CreateAgentConfigurationRequest fields; direct create does not accept this deduplication contract",
+        "fixture_request: only fixture create v1/v2 uses CreateOnboardingAgentRequest, which adds optional request_id to the fixture configuration fields; direct create does not accept this deduplication contract",
         "fixture_request_id: when present, request_id is 1..128 ASCII bytes matching ^[A-Za-z0-9._:-]{1,128}$; empty, whitespace, non-ASCII, or oversized values are invalid requests",
         "fixture_idempotency_scope: scope request_id by the authorized principal, resolved workspace, and fixture-create operation; v1/v2 projection aliases of that operation share the same scope, while assignment and onboarding task completion use separate receipts",
         "fixture_idempotency_payload: within the retained receipt window the same key plus the same fixture_id and full submitted creation payload returns the original agent_id with HTTP 201, including response loss and server restart; any changed field or fixture_id returns HTTP 409 without creation",
@@ -2191,6 +2191,11 @@
             "name": "model_id",
             "type": "string",
             "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+          },
+          {
+            "name": "profile_color",
+            "description": "생성 화면에서 미리 선택한 기본 프로필 그라데이션 색상입니다. 유효한 값을 보내면 그대로 저장하고, 생략하면 서버가 워크스페이스에서 가장 적게 사용한 색상 중 하나를 선택합니다. 생성 후에는 변경되지 않습니다.",
+            "ref": "AgentProfileColor"
           }
         ]
       }

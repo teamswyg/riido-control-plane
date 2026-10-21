@@ -785,6 +785,10 @@ export interface CreateAgentConfigurationRequest {
    */
   name: string;
   /**
+   * 생성 화면에서 미리 선택한 기본 프로필 그라데이션 색상입니다. 유효한 값을 보내면 그대로 저장하고, 생략하면 서버가 워크스페이스에서 가장 적게 사용한 색상 중 하나를 선택합니다. 생성 후에는 변경되지 않습니다.
+   */
+  profile_color?: AgentProfileColor;
+  /**
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
