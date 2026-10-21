@@ -32,6 +32,10 @@ func writeProviderDocumentContextFixture(t *testing.T, w http.ResponseWriter, r 
 	case "/teams/team-a/components/component-a":
 		writeProviderDocumentComponent(w)
 	case "/documents/providers/team-a/component-a":
+		if r.URL.Query().Get("format") == "json" {
+			_ = json.NewEncoder(w).Encode(map[string]any{"tiptapJson": nil})
+			return
+		}
 		if got := r.URL.Query().Get("format"); got != "html" {
 			t.Fatalf("format = %q", got)
 		}

@@ -23,6 +23,14 @@ func TestTaskContextEnrichmentUsesAuthorizedParentsAndResourceMetadataOnly(t *te
 		mu.Lock()
 		reads[r.URL.Path]++
 		mu.Unlock()
+		if r.URL.Path == "/documents/providers/team/task" {
+			if r.URL.Query().Get("format") == "json" {
+				writeTaskContextFixture(t, w, map[string]any{"tiptapJson": nil})
+				return
+			}
+			writeTaskContextFixture(t, w, map[string]any{"html": "<p>Task criteria</p>"})
+			return
+		}
 		if r.URL.Path == "/public/components/task/workspace" {
 			writeTaskContextFixture(t, w, map[string]any{"id": "task", "team": map[string]any{"id": "team", "workspace": map[string]any{"id": "workspace"}}})
 			return

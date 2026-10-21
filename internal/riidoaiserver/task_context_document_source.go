@@ -4,6 +4,8 @@ import "strings"
 
 func writeTaskContextDocumentSource(out *strings.Builder, document AIAgentTaskContextDocument) {
 	switch document.Source {
+	case "editor_snapshot", "provider_document_json":
+		writePromptLine(out, "content_source", document.Source)
 	case "provider_document":
 		writePromptLine(out, "content_source", "provider_document")
 	case "component_snapshot":

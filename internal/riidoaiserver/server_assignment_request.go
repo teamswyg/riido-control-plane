@@ -14,6 +14,9 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 ) (composedAssignRequest, error) {
 	taskID = strings.TrimSpace(taskID)
 	req.AgentID = strings.TrimSpace(req.AgentID)
+	if err := req.DocumentSnapshot.validate(); err != nil {
+		return composedAssignRequest{}, err
+	}
 	if taskID == "" {
 		return composedAssignRequest{}, errors.New("task_id is required")
 	}
@@ -54,9 +57,10 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		composed, err = composeAssignRequestWithTaskContextResult(taskID, taskID, assignmentReq, *req.VerifiedTaskContext)
 	} else {
 		composed, err = s.assignRequestWithTaskContextPromptForClientResult(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
-			ComponentID: taskID,
-			WorkspaceID: principal.WorkspaceID,
-			BearerToken: bearerToken,
+			ComponentID:      taskID,
+			WorkspaceID:      principal.WorkspaceID,
+			BearerToken:      bearerToken,
+			DocumentSnapshot: req.DocumentSnapshot,
 		})
 	}
 	// Profile ownership is distinct from the connected physical runtime ownership.

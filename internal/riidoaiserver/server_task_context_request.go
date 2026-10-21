@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"errors"
 	"strings"
 )
 
@@ -23,6 +24,9 @@ func (s Server) assignRequestWithTaskContextPromptForClientResult(
 	req AssignRequest,
 	contextReq AIAgentTaskContextRequest,
 ) (composedAssignRequest, error) {
+	if err := contextReq.DocumentSnapshot.validate(); err != nil {
+		return composedAssignRequest{}, err
+	}
 	componentID := strings.TrimSpace(req.ComponentID)
 	if componentID == "" {
 		componentID = strings.TrimSpace(taskID)
@@ -33,11 +37,27 @@ func (s Server) assignRequestWithTaskContextPromptForClientResult(
 	}
 	contextSnapshot, err := s.getAIAgentTaskContextForRequestWithTrace(ctx, contextReq)
 	if err != nil {
+		var latest latestTaskDocumentError
+		if contextReq.DocumentSnapshot != nil {
+			return composedAssignRequest{}, latestTaskDocumentError{err}
+		}
+		if errors.As(err, &latest) {
+			return composedAssignRequest{}, err
+		}
 		request, composeErr := composeAssignRequestWithoutTaskContext(taskID, componentID, req)
 		return composedAssignRequest{Request: request}, composeErr
 	}
+	if contextReq.DocumentSnapshot != nil {
+		if contextSnapshot.Component.ID != contextReq.ComponentID {
+			return composedAssignRequest{}, errors.New("task context component identity mismatch")
+		}
+		contextReq.DocumentSnapshot.apply(&contextSnapshot.Document)
+	}
 	composedReq, err := composeAssignRequestWithTaskContextResult(taskID, componentID, req, contextSnapshot)
 	if err != nil {
+		if contextReq.DocumentSnapshot != nil {
+			return composedAssignRequest{}, err
+		}
 		request, composeErr := composeAssignRequestWithoutTaskContext(taskID, componentID, req)
 		return composedAssignRequest{Request: request}, composeErr
 	}

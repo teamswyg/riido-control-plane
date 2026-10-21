@@ -48,7 +48,7 @@ func TestAgentDashboardUsesSeparateGraphQLEndpoint(t *testing.T) {
 		t.Fatalf("dashboard task=%+v error=%v", task, err)
 	}
 	normal, err := client.GetAIAgentTaskContextForRequest(context.Background(), privateTaskContextRequest())
-	if err != nil || normal.Document.Content != "<p>Provider document from Mongo.</p>" {
+	if err != nil || normal.Document.Content != "<p>Provider document from PostgreSQL.</p>" {
 		t.Fatalf("legacy task context must remain available: %+v, %v", normal, err)
 	}
 }

@@ -22,9 +22,10 @@ type AIAgentTaskContextReader interface {
 }
 
 type AIAgentTaskContextRequest struct {
-	ComponentID string
-	WorkspaceID string
-	BearerToken string
+	ComponentID      string
+	WorkspaceID      string
+	BearerToken      string
+	DocumentSnapshot *AIAgentTaskDocumentSnapshot
 }
 
 type AIAgentTaskContextRequestReader interface {
@@ -211,7 +212,12 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	}
 	contextSnapshot := detail.toAIAgentTaskContext()
 	contextSnapshot.TeamID = location.Team.ID
-	c.enrichTaskContext(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot)
+	if err := req.DocumentSnapshot.validate(); err != nil {
+		return AIAgentTaskContext{}, err
+	}
+	if err := c.enrichTaskContext(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req.DocumentSnapshot); err != nil {
+		return AIAgentTaskContext{}, err
+	}
 	return contextSnapshot, nil
 }
 

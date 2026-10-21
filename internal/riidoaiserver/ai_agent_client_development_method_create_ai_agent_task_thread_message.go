@@ -32,6 +32,14 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
+	receiptKey := taskThreadMessageReceiptKey(principal, taskID, threadID, thread.AgentID, req)
+	if response, found := s.taskRequestReceipts[receiptKey]; receiptKey != "" && found {
+		return response, nil
+	}
+	if req.SourceMessageID == "" && receiptKey != "" {
+		req.SourceMessageID = "thread-message:" + receiptKey
+	}
+
 	response := taskThreadMessageInitialResponse(taskID, threadID, thread, agent)
 	threadWasActive := taskThreadHasActiveStream(thread)
 	conversationID := taskThreadConversationID(thread)
@@ -63,5 +71,5 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		s.assignTaskAgentMemberLocked(taskID, agent)
 	}
 	s.appendAgentTaskActionEvent(response)
-	return clientVisibleQueuedActionResponse(response), nil
+	return s.rememberTaskRequestReceiptLocked(receiptKey, clientVisibleQueuedActionResponse(response)), nil
 }

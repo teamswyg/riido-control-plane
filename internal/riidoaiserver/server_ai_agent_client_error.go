@@ -9,7 +9,10 @@ import (
 func writeAIAgentClientError(w http.ResponseWriter, err error) {
 	var dependency assignmentDependencyError
 	var onboardingDependency onboardingAgentCreateDependencyError
+	var latest latestTaskDocumentError
 	switch {
+	case errors.As(err, &latest):
+		writeError(w, http.StatusServiceUnavailable, latest.Error())
 	case errors.As(err, &onboardingDependency):
 		status := http.StatusServiceUnavailable
 		if errors.Is(err, context.DeadlineExceeded) {

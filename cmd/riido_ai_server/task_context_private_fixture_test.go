@@ -36,8 +36,12 @@ func writePrivateTaskContextResponse(w http.ResponseWriter, r *http.Request) {
 			},
 		})
 	case "/documents/providers/team-a/component-a":
+		if r.URL.Query().Get("format") == "json" {
+			_ = json.NewEncoder(w).Encode(map[string]any{"tiptapJson": nil})
+			return
+		}
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"html": "<p>Provider document from Mongo.</p>",
+			"html": "<p>Provider document from PostgreSQL.</p>",
 		})
 	default:
 		http.NotFound(w, r)
