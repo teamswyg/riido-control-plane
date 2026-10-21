@@ -364,13 +364,14 @@ type AgentProfileThumbnailUploadResponse struct {
 }
 
 type CreateAgentConfigurationRequest struct {
-	Name                string          `json:"name"`
-	ProfileThumbnailURL *string         `json:"profile_thumbnail_url,omitempty"`
-	Description         *string         `json:"description,omitempty"`
-	Instruction         *string         `json:"instruction,omitempty"`
-	Visibility          AgentVisibility `json:"visibility"`
-	RuntimeID           string          `json:"runtime_id"`
-	ModelID             *string         `json:"model_id,omitempty"`
+	ProfileColor        AgentProfileColor `json:"profile_color,omitempty"`
+	Name                string            `json:"name"`
+	ProfileThumbnailURL *string           `json:"profile_thumbnail_url,omitempty"`
+	Description         *string           `json:"description,omitempty"`
+	Instruction         *string           `json:"instruction,omitempty"`
+	Visibility          AgentVisibility   `json:"visibility"`
+	RuntimeID           string            `json:"runtime_id"`
+	ModelID             *string           `json:"model_id,omitempty"`
 }
 
 type UpdateAgentConfigurationRequest struct {
