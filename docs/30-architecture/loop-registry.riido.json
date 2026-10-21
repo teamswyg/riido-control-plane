@@ -1127,7 +1127,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0b3958ff9c361ddc2a3df8f04e530b03d4f06a014688ca251e8fa1d02ee025c8"
+      "semantic_hash": "01c6419ee2fabe4ebaec1841120d77ed43ad13a877c03f8c18e0b12ddd1308ed"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",

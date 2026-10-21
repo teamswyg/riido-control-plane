@@ -24,7 +24,8 @@ func TestHTTPAIAgentClientDeniedDeleteDoesNotCancelAssignments(t *testing.T) {
 			}
 			assignments := NewStoreWithConfig(StoreConfig{AgentRegistry: store})
 			t.Cleanup(assignments.Close)
-			server := NewServer(ServerConfig{AIAgentClient: store, Assignment: assignments, Authorizer: authorizer,
+			server := NewServer(ServerConfig{
+				AIAgentClient: store, Assignment: assignments, Authorizer: authorizer,
 				TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()},
 			}).Handler()
 			request := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-delete-authorization/assignment", strings.NewReader(`{"agent_id":"agent-owned-codex"}`))
