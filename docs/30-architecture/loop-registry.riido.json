@@ -6137,7 +6137,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "9eb0341efc99a22c30fa2e013d92ff07c08fedbb2dd19e37861d7d180c9a847a"
+      "semantic_hash": "5308aed096eaaa60d04d6e3de145672dafdf28e46ba697b13779529276899161"
     },
     {
       "id": "store_safe_routing_must_preserve_provider_status_decisions",

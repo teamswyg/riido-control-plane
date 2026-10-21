@@ -271,7 +271,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `assignment_operation_journal_must_preserve_replay_and_claim_ports` | `closed_loop_candidate` | `65` | `27` | `723d604d6594` |
 | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` | `closed_loop_candidate` | `24` | `9` | `955c7f15e360` |
 | `saas_control_plane_boundaries_must_remain_executable` | `closed_loop_candidate` | `18` | `4` | `1f5845ddc0cf` |
-| `snapshot_cqrs_gate_must_scope_store_split_decisions` | `closed_loop_candidate` | `14` | `1` | `9eb0341efc99` |
+| `snapshot_cqrs_gate_must_scope_store_split_decisions` | `closed_loop_candidate` | `14` | `1` | `5308aed096ea` |
 | `store_safe_routing_must_preserve_provider_status_decisions` | `closed_loop_candidate` | `33` | `21` | `6999e69e0438` |
 | `go_ci_baseline_must_preserve_broad_ci_contract` | `closed_loop_candidate` | `19` | `2` | `567846d81091` |
 | `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `328442873fcd` |
