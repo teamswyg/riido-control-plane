@@ -26,7 +26,9 @@ func TestAIAgentProfileColorOnboardingCreateIsBlueAndKeepsFixtureColor(t *testin
 	ctx := context.Background()
 	store := NewDevelopmentAIAgentClientStore()
 
-	created, err := store.CreateAIAgentFromOnboardingFixture(ctx, profileColorTestPrincipal(), "riido_pm", profileColorTestRequest("온보딩 에이전트"))
+	req := profileColorTestRequest("온보딩 에이전트")
+	req.ProfileColor = AgentProfileColorPurple
+	created, err := store.CreateAIAgentFromOnboardingFixture(ctx, profileColorTestPrincipal(), "riido_pm", req)
 	if err != nil {
 		t.Fatalf("CreateAIAgentFromOnboardingFixture: %v", err)
 	}

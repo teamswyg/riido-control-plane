@@ -6,10 +6,13 @@ import (
 	"time"
 )
 
-// createAIAgent creates a directly configured agent. Its profile color is chosen
-// from the least-used colors in the workspace.
+// createAIAgent preserves the creation preview color when provided. Older clients
+// keep the least-used color selection by omitting profile_color.
 func (s *DevelopmentAIAgentClientStore) createAIAgent(ctx context.Context, principal AuthorizationResult, req CreateAgentConfigurationRequest, tmpColor string) (AgentClientRecordResponse, error) {
-	return s.createAIAgentWithProfileColor(ctx, principal, req, tmpColor, "", false)
+	if req.ProfileColor != "" && !isAgentProfileColor(req.ProfileColor) {
+		return AgentClientRecordResponse{}, errors.New("profile_color must be blue, orange, green, or purple")
+	}
+	return s.createAIAgentWithProfileColor(ctx, principal, req, tmpColor, req.ProfileColor, false)
 }
 
 // createAIAgentWithProfileColor creates an agent with a fixed profile color. An empty
