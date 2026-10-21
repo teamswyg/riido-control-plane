@@ -8265,8 +8265,8 @@
     },
     {
       "id": "stop_reassign_thread_consistency_loop",
-      "observation": "On staging, stopping an AI Agent task and immediately assigning again could make the just-stopped agent appear to keep working, a stop call without an active assignment could create a synthetic stopped thread with no assignment_id, and deleting an agent while it had an active durable assignment could leave the daemon without a cancellable poll target because the agent registry entry disappeared first.",
-      "hypothesis": "Separating stop target selection from unassign target selection keeps user stop strongly scoped to active assignment threads, while preserving participant-removal history semantics for unassign; deleting an agent must cancel active durable assignments before removing the visible agent and must let only the original daemon-shaped poll recover PollCancel from the historical thread snapshot instead of reviving the deleted agent catalog entry.",
+      "observation": "On staging, stopping an AI Agent task and immediately assigning again could make the just-stopped agent appear to keep working, a stop call without an active assignment could create a synthetic stopped thread with no assignment_id, and deleting an agent while it had an active durable assignment could leave the daemon without a cancellable poll target because the agent registry entry disappeared first. RIID-5804 QA89 found that a non-owner DELETE of a public agent returned 404 only after its durable assignment had changed from leased to cancelling; private visibility already hid foreign agents from normal users.",
+      "hypothesis": "Separating stop target selection from unassign target selection keeps user stop strongly scoped to active assignment threads, while preserving participant-removal history semantics for unassign; deleting an agent must cancel active durable assignments before removing the visible agent and must let only the original daemon-shaped poll recover PollCancel from the historical thread snapshot instead of reviving the deleted agent catalog entry. A mutation-authorized deletion preflight, using fresh persistent membership state, can reject the request before durable cancellation while preserving the existing owner/admin and public-read rules.",
       "claims": [
         "stop_reassign_must_not_revive_or_mutate_inactive_threads"
       ],
@@ -8330,6 +8330,26 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_delete_authorization.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_type_ai_agent_client_store.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_delete_authorization_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_delete_authorization_persistent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_authorization_boundary_test.go"
         }
       ],
       "verifiers": [
@@ -8368,6 +8388,18 @@
         {
           "kind": "workflow",
           "path": ".github/workflows/loop-registry.yml"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_delete_authorization_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_delete_authorization_persistent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_authorization_boundary_test.go"
         }
       ],
       "evidence": [
@@ -8382,7 +8414,7 @@
           "redacted": true
         }
       ],
-      "decision": "Stop/reassign consistency is now a closed-loop invariant: stop cannot invent synthetic thread history or rewrite completed history when no active assignment exists, unassign keeps the separate participant-removal behavior, and agent deletion first cancels durable active assignments while historical thread snapshots keep stop/delete assignment actions possible without resurrecting deleted agents.",
+      "decision": "Stop/reassign consistency is now a closed-loop invariant: stop cannot invent synthetic thread history or rewrite completed history when no active assignment exists, unassign keeps the separate participant-removal behavior, and agent deletion first cancels durable active assignments while historical thread snapshots keep stop/delete assignment actions possible without resurrecting deleted agents. Deletion now checks the same store mutation predicate before any cancellation. Focused HTTP tests cover rejected public/private deletion without assignment mutation, owner cancellation, external-authorizer identity and role propagation, spoofed identity fields, workspace isolation, and persistent ownership refresh. Existing administrator policy remains unchanged.",
       "next_loop": "ai_thread_history"
     },
     {
