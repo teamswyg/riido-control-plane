@@ -37,7 +37,7 @@ func writePrivateTaskContextResponse(w http.ResponseWriter, r *http.Request) {
 		})
 	case "/documents/providers/team-a/component-a":
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"html": "<p>Provider document from Mongo.</p>",
+			"tiptapJson": `{"default":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Provider projection from existing document API."}]}]}}`,
 		})
 	default:
 		http.NotFound(w, r)

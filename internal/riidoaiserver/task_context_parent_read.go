@@ -30,18 +30,13 @@ func (c *AIAgentPrivateTaskContextClient) enrichParentTaskContext(ctx context.Co
 				return
 			}
 			parent := detail.toAIAgentTaskContext()
-			parent.Document.Source = "component_snapshot"
-			if document, ok := c.getProviderDocumentHTML(ctx, teamID, id, bearer); ok {
-				parent.Document.Content = document.HTML
-				parent.Document.ContentFormat = "html"
-				parent.Document.Source = "provider_document"
-			}
+			parent.Document = selectTaskContextDocument(parent.Document, c.readProviderProjection(ctx, teamID, id, bearer))
 			resources, status := c.readTaskContextResources(ctx, teamID, id, bearer)
 			for _, ref := range refs {
-				if parent.Document.Content != "" {
+				if parent.Document.Status != "unavailable" {
 					document := parent.Document
 					ref.Document = &document
-					ref.DocumentStatus = "available"
+					ref.DocumentStatus = parent.Document.Status
 				}
 				ref.Resources, ref.ResourceStatus = resources, status
 			}

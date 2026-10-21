@@ -28,10 +28,25 @@
     "internal/riidoaiserver/agent_dashboard_task_context.go",
     "internal/riidoaiserver/ai_agent_onboarding_task_provenance.go",
     "cmd/riido_ai_server/task_context_config.go",
-    "cmd/riido_ai_server/task_context_private.go"
+    "cmd/riido_ai_server/task_context_private.go",
+    "internal/riidoaiserver/task_context_json.go",
+    "internal/riidoaiserver/task_context_graphql_read.go",
+    "internal/riidoaiserver/task_context_document_body.go",
+    "internal/riidoaiserver/task_context_projection.go",
+    "internal/riidoaiserver/task_context_tracing.go",
+    "internal/riidoaiserver/task_context_read_failure.go",
+    "internal/riidoaiserver/task_context_projection_read.go",
+    "internal/riidoaiserver/task_context_resource_bundle.go",
+    "internal/riidoaiserver/task_context_json_format.go",
+    "internal/riidoaiserver/task_context_read_observation.go",
+    "internal/riidoaiserver/task_context_json_walk.go",
+    "internal/riidoaiserver/ai_agent_assignment_prompt_fallback.go",
+    "internal/riidoaiserver/server_task_context_compose.go",
+    "internal/riidoaiserver/ai_agent_task_context_provider_document.go",
+    "internal/riidoaiserver/task_context_component_read.go"
   ],
   "policy": {
-    "identity": "same task/agent/conversation; latest directive authoritative",
+    "identity": "same task/agent/conversation; preserve explicit initial and latest follow-up directives even when context reads fail",
     "parent_scope": "only authorized hierarchy references, same bearer/team, shared request deadline; no recursive project sweep",
     "source_budget": {
       "parents": 3,
@@ -42,12 +57,13 @@
       "resource_items_per_kind": 8
     },
     "resource_semantics": "metadata only, contents not downloaded; unsafe URL credentials omitted; unavailable/incomplete marked",
-    "format": "readable HTML-to-text; valid Unicode; head/tail truncation marked",
+    "format": "bounded readable HTML and supported Tiptap JSON projections; valid Unicode; preserve explicit empty versus unavailable documents",
     "followup_reads": "one canonical history read, no additional legacy thread-list read",
     "permissions": "no caller permission widening or anonymous fallback",
-    "freshness": "fresh provider document when available; component fallback explicitly unconfirmed; no atomic cross-document claim",
+    "freshness": "legacy provider JSON/HTML and component snapshots have unconfirmed freshness; never claim Yjs revision or cross-document atomicity; do not overwrite a nonempty component snapshot with unversioned provider HTML",
     "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed.",
-    "graphql_metadata_endpoint": "Private viewer-authorized GraphQL metadata and onboarding provenance may use a separate monolith endpoint. When omitted, the previous REST base plus /graphql remains. REST component/document reads and shared client timeout/redirect policy are unchanged; endpoint userinfo/query/fragment are rejected by the existing URL validator."
+    "graphql_metadata_endpoint": "When a separate GraphQL endpoint is configured, bundle provider JSON/HTML in one viewer-bearer GraphQL request and file/link metadata in another per authorized component; an optional resource root error cannot discard a document read. Keep workspace/detail REST checks and shared deadline. No cross-principal cache, anonymous fallback, attachment download, or replay on GraphQL denial. REST-only deployments retain bounded JSON/HTML fallback.",
+    "failure_observation": "Finite operation/outcome/source/duration trace fields distinguish missing/null/empty/invalid/budget/denied/unavailable; no upstream original, document identity, body, URL or token in observations."
   },
   "verification": {
     "synthetic_only": true,
@@ -67,7 +83,16 @@
       "TestEmptyRecentMessagesDoNotDisplaceUserRequirements",
       "TestAgentDashboardUsesSeparateGraphQLEndpoint",
       "TestOnboardingProvenanceUsesSeparateGraphQLEndpoint",
-      "TestPrivateTaskContextGraphQLEndpointValidation"
+      "TestPrivateTaskContextGraphQLEndpointValidation",
+      "TestHTTPAIAgentClientAssignFallsBackWhenTaskContextUnavailable",
+      "TestTaskContextBundlesReduceHTTPReadsWithoutCrossTaskReuse",
+      "TestTaskContextBundlesNeverReplayDenialAgainstREST",
+      "TestTaskContextBundleGraphQLDenialsHaveSafeTrace",
+      "TestTaskContextProjectionDoesNotResurrectEmptyDocument",
+      "TestTaskContextProjectionJSONOnlyAndConflictsRetainEvidence",
+      "TestTaskContextJSONInvalidIsNeverAnEmptyDocument",
+      "TestTaskContextBundleDeadlineKeepsSnapshotAndCancelsReads",
+      "TestTaskContextProjectionAlternatesShareCurrentAndParentBudgets"
     ]
   },
   "limits": [

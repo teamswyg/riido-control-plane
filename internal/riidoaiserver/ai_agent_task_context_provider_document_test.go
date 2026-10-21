@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T) {
+func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentJSON(t *testing.T) {
 	gotPaths := []string{}
 	var mu sync.Mutex
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,15 +24,15 @@ func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T
 	defer server.Close()
 
 	contextSnapshot := readProviderDocumentContextFixture(t, server.URL)
-	if contextSnapshot.Document.Content != "<p>fresh provider document says Bye World.</p>" ||
-		contextSnapshot.Document.ContentFormat != "html" ||
+	if contextSnapshot.Document.Content != "fresh provider document says Bye World." ||
+		contextSnapshot.Document.ContentFormat != "markdown" ||
 		contextSnapshot.Document.TiptapDocumentID != "doc-a" {
 		t.Fatalf("context snapshot document = %+v", contextSnapshot.Document)
 	}
 	wantPaths := []string{
 		"/public/components/component-a/workspace",
 		"/teams/team-a/components/component-a?getDocument=true",
-		"/documents/providers/team-a/component-a?format=html",
+		"/documents/providers/team-a/component-a?format=json",
 		"/teams/team-a/components/component-a/files",
 		"/teams/team-a/components/component-a/web-links",
 	}

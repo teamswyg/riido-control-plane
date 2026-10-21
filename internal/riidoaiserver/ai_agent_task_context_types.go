@@ -25,6 +25,10 @@ type AIAgentTaskContextDocument struct {
 	Content          string `json:"content"`
 	ContentFormat    string `json:"contentFormat,omitempty"`
 	Source           string `json:"source,omitempty"`
+	Status           string `json:"status,omitempty"`
+	AlternateContent string `json:"alternate_content,omitempty"`
+	AlternateSource  string `json:"alternate_source,omitempty"`
+	AlternateFormat  string `json:"alternate_format,omitempty"`
 }
 
 type AIAgentTaskContextHierarchy struct {

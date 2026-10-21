@@ -29,7 +29,7 @@ func TestHTTPAIAgentClientAssignFallsBackWhenTaskContextUnavailable(t *testing.T
 		Authorizer:    authorizer,
 	}).Handler()
 
-	assignReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-smoke/assignment", strings.NewReader(`{"agent_id":"agent-owned-codex"}`))
+	assignReq := httptest.NewRequest(http.MethodPost, "/v1/client/ai-agent/tasks/task-smoke/assignment", strings.NewReader(`{"agent_id":"agent-owned-codex","instruction":"SYNTHETIC_EXPLICIT_FIX_DIRECTIVE"}`))
 	assignReq.Header.Set(aiAgentTokenHeader, "user-token")
 	assignResp := httptest.NewRecorder()
 	server.ServeHTTP(assignResp, assignReq)
@@ -57,6 +57,9 @@ func TestHTTPAIAgentClientAssignFallsBackWhenTaskContextUnavailable(t *testing.T
 	if !strings.Contains(pollOut.Assignment.Prompt, "Task context was not available when this assignment was created.") ||
 		!strings.Contains(pollOut.Assignment.Prompt, "- task_id: task-smoke") {
 		t.Fatalf("assignment prompt = %s", pollOut.Assignment.Prompt)
+	}
+	if !strings.Contains(pollOut.Assignment.Prompt, "SYNTHETIC_EXPLICIT_FIX_DIRECTIVE") {
+		t.Fatal("explicit assignment instruction was lost")
 	}
 	if strings.Contains(pollOut.Assignment.Prompt, "private task context returned HTTP 401") {
 		t.Fatalf("assignment prompt leaked task context error: %s", pollOut.Assignment.Prompt)

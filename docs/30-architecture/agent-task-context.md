@@ -8,9 +8,12 @@ Only project, milestone and parent-task IDs already returned by the authorized
 task detail may be followed. Parent reads are deduplicated, at most three in
 parallel, and share the original request deadline. A failed, mismatched or
 inaccessible parent is marked unavailable; its content is never substituted
-from another component. Provider document content takes precedence over stored
-HTML when available. A fallback component snapshot is explicitly marked as having
-unconfirmed freshness. Independent document reads are not an atomic cross-document
+from another component. Supported provider JSON is read as a bounded structured projection. An explicit
+empty projection remains empty. Unversioned provider HTML never replaces an
+existing nonempty component snapshot. Every legacy representation is explicitly
+marked with unconfirmed freshness; none proves the latest Yjs revision.
+Conflicting nonempty projections retain a bounded alternate as reference evidence
+with unknown chronology instead of silently asserting which one is newer. Independent document reads are not an atomic cross-document
 snapshot. Link/attachment metadata uses the same authenticated component routes;
 arbitrary link or attachment contents are never fetched by the server.
 
@@ -55,3 +58,28 @@ Provided context is reused; additional document reads require a concrete need.
 Empty retained history falls back to the previous final answer. Requested changes
 must be reported with observed evidence; this prompt policy is not a semantic
 completion guarantee. See [delivery and measurements](single-pass-response-delivery.md).
+
+## Document delivery repair · RIID-5818
+
+Initial explicit instructions survive missing, denied, timed-out or invalid task
+context. Context loss must not replace an already authorized directive with a
+generic request to repeat it. Follow-up instruction and task ownership rules stay
+unchanged.
+
+With an explicitly configured GraphQL metadata endpoint, document JSON/HTML and
+file/link metadata use two independent viewer-authorized queries per checked
+component (one document, one resources), so optional resource failure cannot
+discard the document. Workspace and component identity checks still run first; parent IDs
+still come only from the checked hierarchy. There is no permission widening,
+cross-principal cache or fallback to another server after GraphQL denial. A
+REST-only client retains bounded JSON-first and HTML-fallback compatibility.
+Supported Tiptap projections are rendered without evaluating raw HTML or fetching
+embedded resources. Null, missing, malformed and unsupported data are unavailable;
+a valid empty document is distinct and cannot resurrect older content.
+
+Legacy projections have no common revision witness. JSON availability is useful
+context, not proof of current Yjs parity; HTML and component snapshots are also
+marked unconfirmed. Finite read outcome/operation/source and duration attributes
+expose degradation without document IDs, content, tokens or upstream error text.
+The overall timeout remains configured by the operator; synthetic call-count and
+deadline checks are not production latency or model-comprehension guarantees.

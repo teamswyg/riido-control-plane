@@ -164,7 +164,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25\u21920 save-count regression and actual local HTTP recovery replay\u2192wrong-lease403\u2192terminal snapshot503\u2192same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work.",
+      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25→0 save-count regression and actual local HTTP recovery replay→wrong-lease403→terminal snapshot503→same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -380,8 +380,8 @@
     },
     {
       "id": "assigned_task_context_delivery_5818",
-      "observation": "Assignments delivered only the current task body and parent titles; follow-ups supplied one response, so existing related documents and same-conversation messages were absent from the prompt.",
-      "hypothesis": "The existing authorized component routes and persisted thread-history projection can supply bounded reference context under the original deadline without additional task permissions or arbitrary content downloads.",
+      "observation": "Assignments delivered only the current task body and parent titles; follow-ups supplied one response, so existing related documents and same-conversation messages were absent from the prompt. Independent editor audit reproduced explicit instruction loss on context failure, JSON-only bodies missed by HTML reads, empty projections restoring old snapshots and unconditional unversioned HTML overwrite.",
+      "hypothesis": "The existing authorized component routes and persisted thread-history projection can supply bounded reference context under the original deadline without additional task permissions or arbitrary content downloads. Preserve initial directives independently of reads, render bounded supported JSON, distinguish empty/missing and retain conflicting representations with unknown chronology. Two independent viewer GraphQL bundles per checked component reduce HTTP fanout while preserving body availability on optional metadata failure.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence",
         "ambiguous_task_context_must_ask_before_work"
@@ -394,6 +394,26 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/server_thread_message_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_task_context_compose.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_projection_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_read_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_json.go"
         }
       ],
       "verifiers": [
@@ -408,6 +428,22 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/task_context_text_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_http_assign_context_fallback_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_bundle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_projection_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_bundle_boundaries_test.go"
         }
       ],
       "evidence": [
@@ -417,7 +453,7 @@
           "redacted": true
         }
       ],
-      "decision": "Reuse a single existing history projection for follow-up selection and context; limit prompt history to eight relevant messages and 6000 runes, deduplicate at most three parent document reads and retain the original request deadline. Synthetic identity/permission/deadline/isolation tests pass; no measured production latency or provider comprehension improvement is claimed.",
+      "decision": "Synthetic regressions reproduce instruction loss before the fix and pass afterward; the prior four independent editor boundary cases pass. Valid JSON-only and empty documents remain distinct, conflicts share existing context rune budgets, denied/invalid/timeout traces are finite and sanitized, and configured HTTP call counts fall from5/17 to4/13. These results do not prove current Yjs parity, customer execution, all model adherence or production latency improvement.",
       "next_loop": "control_plane_performance_harness"
     },
     {
@@ -5665,7 +5701,7 @@
     {
       "id": "thread_history_user_followup_retention_loop",
       "observation": "A user reply inside an AI Agent thread can disappear after refresh if v3 history only projects the latest agent status, can lose the actual reply author when another workspace member writes inside the thread, and conversational execution-approval replies such as go command requests can accidentally create new work when there is no pending tool approval to decide. RIID-5820: execution evidence also disappeared in v3 cold history because only message fields were projected. RIID-5819 acceptance found that the first SaaS assignment persisted a native session but its same-thread HTTP follow-up omitted ResumeSessionID, creating another provider session/clone. Existing tests manually supplied resume IDs and missed the API boundary. RIID-5860 reproduced a false 403 after a connected account created its own Agent on another account physical runtime: native resume compared the Agent snapshot owner with the runtime owner even though account connection grants intentionally preserve the original device owner. A single unblocked terminal-thread follow-up also inherited the busy-queue fallback when its hidden queued message was copied internally, then preserved that status through Ready/Running into v3 runtime_progress history. RIID-5860 contextual progress adds an optional public display_message from classified description/summary arguments. Raw runtime logs, cached history, persisted thread records, and replayed SSE can otherwise produce inconsistent or stale progress copy after refresh even while authored user follow-ups remain intact.",
-      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent \ud2f0\ud0a4\ud0c0\uce74 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior. Carry the exact authorized selected terminal assignment native identity into a new explicit follow-up, preserving provider/model/worktree/current-owner guards and daemon-local retained binding; classify unavailable durable authority as retryable rather than a fresh-session success. Preserve the current authorized Agent profile owner through internal request composition and compare historical Agent ownership with that profile, independently of physical runtime ownership; retain existing callable-Agent policy and runtime/session scope checks. Treat generic queued/leased states as startup without inferring another task, replace exact queue status on Ready/Running, and omit exact queue-only lines from live and cold progress while retaining provider output. Keep the optional contextual display projection separate from stored raw message/body and private arguments; restore only saved server projections for cold thread/event JSON, recompute newly ingested batches from known codes, and include the summary in history-cache identity. This preserves existing author/follow-up/run ordering while keeping live and refreshed presentation consistent.",
+      "hypothesis": "Persisting user follow-up messages as thread history rows with author_principal_id, replaying them into v3 history, routing affirmative execution replies only to same-assignment pending tool approvals, and fail-closing stale approval replies preserves human-agent 티키타카 after reload without turning approval chat into replacement assignment history or attributing replies to the wrong viewer. Copying bounded run-scoped execution context through cold history and SSE preserves diagnostics while legacy events and new runs require different reset behavior. Carry the exact authorized selected terminal assignment native identity into a new explicit follow-up, preserving provider/model/worktree/current-owner guards and daemon-local retained binding; classify unavailable durable authority as retryable rather than a fresh-session success. Preserve the current authorized Agent profile owner through internal request composition and compare historical Agent ownership with that profile, independently of physical runtime ownership; retain existing callable-Agent policy and runtime/session scope checks. Treat generic queued/leased states as startup without inferring another task, replace exact queue status on Ready/Running, and omit exact queue-only lines from live and cold progress while retaining provider output. Keep the optional contextual display projection separate from stored raw message/body and private arguments; restore only saved server projections for cold thread/event JSON, recompute newly ingested batches from known codes, and include the summary in history-cache identity. This preserves existing author/follow-up/run ordering while keeping live and refreshed presentation consistent.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -13270,7 +13306,7 @@
     },
     {
       "id": "notion_qa_intent_waiting_copy_loop",
-      "observation": "Notion QA feedback said the waiting_for_user copy '\uc5b4\ub5a4 \uc791\uc5c5\ubd80\ud130 \uc9c4\ud589\ud560\uae4c\uc694?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
+      "observation": "Notion QA feedback said the waiting_for_user copy '어떤 작업부터 진행할까요?' felt like the agent was simply asking the user what to do instead of showing that it had inspected the task context.",
       "hypothesis": "Keeping the same waiting_for_user state contract while changing the server-visible needs_input copy and prompt clarification example can preserve the intent gate but make the AI thread feel like it reviewed the task and is asking for desired output or direction.",
       "claims": [
         "ambiguous_task_context_must_ask_before_work",
@@ -13345,13 +13381,13 @@
           "redacted": true
         }
       ],
-      "decision": "The server now returns '\uc791\uc5c5 \ub0b4\uc6a9\uc744 \ud655\uc778\ud588\uc5b4\uc694. \uc6d0\ud558\ub294 \uacb0\uacfc\ubb3c\uc774\ub098 \ubc29\ud5a5\uc744 \ub313\uae00\ub85c \uc54c\ub824\uc8fc\uc138\uc694.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
+      "decision": "The server now returns '작업 내용을 확인했어요. 원하는 결과물이나 방향을 댓글로 알려주세요.' for needs_input/waiting_for_user while preserving the v2/v3 status fields, comment_kind, and daemon gating behavior. Regression tests assert the new copy in prompt interpretation and v3 thread history so the product tone does not drift back to the old ambiguous question.",
       "next_loop": "operational_readiness_release_harness"
     },
     {
       "id": "notion_p0_server_status_transfer_loop",
-      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][\uc9c4\ud589\uc911]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
-      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][\uc644\ub8cc][\uc804\ub2ec\uc694\uccad] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
+      "observation": "After the server fixes for queued_by_busy_agent and instruction intent dialogue were merged and deployed, the executable operational readiness backfill still showed both Notion P0 cycles as [codex][진행중]. That made backend-complete work look indistinguishable from open implementation work, even though product readiness must remain partial until visual screenshot evidence exists.",
+      "hypothesis": "If operational readiness marks server-complete P0 cycles as [codex][완료][전달요청] while keeping their status partial and next artifact as staging_client_p0_visual_screenshot_evidence, agents and humans can distinguish closed backend work from the remaining client visual acceptance gate without changing endpoint contracts.",
       "claims": [
         "operational_readiness_checks_must_bind_release_items_to_evidence",
         "generated_endpoint_smoke_matrix_must_remain_contract_gate"
@@ -16878,7 +16914,7 @@
           "redacted": true
         }
       ],
-      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile\ubcc4 daemon list handoff without changing v3 thread history semantics.",
+      "decision": "AI Agent client API syntax coverage may expand only after TestRunWritesEvidence preserves the generated evidence shape; helper adapters are syntax-tracked separately while the semantic claim keeps generated-client, thread history v3, and frontend handoff ownership bound to the executable SSOT. The device daemon plural API increases the executable contract to 57 operations and adds aiAgent.devices.daemons.list plus v2.aiAgent.devices.daemons.list to required generated paths, so the claim now covers profile별 daemon list handoff without changing v3 thread history semantics.",
       "next_loop": "closed_loop_candidate"
     },
     {

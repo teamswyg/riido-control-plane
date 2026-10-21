@@ -22,6 +22,9 @@ type privateContextResource struct {
 }
 
 func decodePrivateContextResources(data json.RawMessage, kind string) ([]AIAgentTaskContextResource, bool) {
+	if len(data) == 0 || string(data) == "null" {
+		return nil, false
+	}
 	var entries []privateContextResource
 	if json.Unmarshal(data, &entries) != nil {
 		var wrapper map[string]json.RawMessage
