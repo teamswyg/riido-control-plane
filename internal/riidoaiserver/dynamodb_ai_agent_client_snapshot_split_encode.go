@@ -1,12 +1,11 @@
 package riidoaiserver
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 func encodeSplitDynamoDBAIAgentClientSnapshot(snapshot AIAgentClientSnapshot, previousHashes map[string]string) ([]map[string]map[string]string, map[string]string, int64, error) {
-	parts, err := encodeDynamoDBAIAgentClientSnapshotParts(snapshot)
+	return encodeCachedSplitDynamoDBAIAgentClientSnapshot(snapshot, previousHashes, nil)
+}
+
+func encodeCachedSplitDynamoDBAIAgentClientSnapshot(snapshot AIAgentClientSnapshot, previousHashes map[string]string, cache map[string]dynamoDBAIAgentClientSnapshotPart) ([]map[string]map[string]string, map[string]string, int64, error) {
+	parts, err := encodeDynamoDBAIAgentClientSnapshotParts(snapshot, cache)
 	if err != nil {
 		return nil, nil, 0, err
 	}
@@ -27,7 +26,7 @@ func encodeSplitDynamoDBAIAgentClientSnapshot(snapshot AIAgentClientSnapshot, pr
 	return items, hashes, encodedBytes, nil
 }
 
-func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([]dynamoDBAIAgentClientSnapshotPart, error) {
+func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot, cache map[string]dynamoDBAIAgentClientSnapshotPart) ([]dynamoDBAIAgentClientSnapshotPart, error) {
 	values := []struct {
 		name  string
 		value any
@@ -50,27 +49,11 @@ func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([
 	}
 	parts := make([]dynamoDBAIAgentClientSnapshotPart, 0, len(values))
 	for _, value := range values {
-		part, err := encodeDynamoDBAIAgentClientSnapshotPart(value.name, value.value)
+		part, err := encodeDynamoDBAIAgentClientSnapshotPart(value.name, value.value, cache)
 		if err != nil {
 			return nil, err
 		}
 		parts = append(parts, part)
 	}
 	return parts, nil
-}
-
-func encodeDynamoDBAIAgentClientSnapshotPart(name string, value any) (dynamoDBAIAgentClientSnapshotPart, error) {
-	jsonBytes, err := json.Marshal(value)
-	if err != nil {
-		return dynamoDBAIAgentClientSnapshotPart{}, fmt.Errorf("encode AI Agent client snapshot part %s: %w", name, err)
-	}
-	gzipped, err := gzipBase64(jsonBytes)
-	if err != nil {
-		return dynamoDBAIAgentClientSnapshotPart{}, fmt.Errorf("gzip AI Agent client snapshot part %s: %w", name, err)
-	}
-	return dynamoDBAIAgentClientSnapshotPart{
-		name: name,
-		gzip: gzipped,
-		hash: sha256Hex(jsonBytes),
-	}, nil
 }

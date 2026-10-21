@@ -64,8 +64,10 @@ func TestRuntimeHeartbeatNotStarvedByWorkspaceProfileReads(t *testing.T) {
 	defer cancel()
 	_, err = store.SyncAIAgentDaemonRuntimeSnapshot(heartbeatCtx, owner, DeviceRuntimeSnapshotSyncRequest{
 		DeviceID: enrollment.DeviceID, DaemonID: "machine",
-		Runtimes: []RuntimeSnapshotRecord{{RuntimeID: "machine:claude", Kind: RuntimeKindClaudeCode,
-			Availability: RuntimeAvailabilityOnline, DetectionState: RuntimeDetectionStateDetected}},
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: "machine:claude", Kind: RuntimeKindClaudeCode,
+			Availability: RuntimeAvailabilityOnline, DetectionState: RuntimeDetectionStateDetected,
+		}},
 	})
 	if err != nil {
 		t.Fatalf("healthy runtime heartbeat starved behind repeated profile reads: %v", err)

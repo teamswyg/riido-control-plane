@@ -58,8 +58,10 @@ func TestRuntimeHeartbeatFailedSaveRemainsDue(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	req := DeviceRuntimeSnapshotSyncRequest{DeviceID: "retry-device", DaemonID: "retry-daemon",
-		Runtimes: []RuntimeSnapshotRecord{{RuntimeID: "retry-runtime", Kind: RuntimeKindCodex}}}
+	req := DeviceRuntimeSnapshotSyncRequest{
+		DeviceID: "retry-device", DaemonID: "retry-daemon",
+		Runtimes: []RuntimeSnapshotRecord{{RuntimeID: "retry-runtime", Kind: RuntimeKindCodex}},
+	}
 	if _, err := store.SyncAIAgentDaemonRuntimeSnapshot(ctx, profileColorTestPrincipal(), req); err != nil {
 		t.Fatal(err)
 	}

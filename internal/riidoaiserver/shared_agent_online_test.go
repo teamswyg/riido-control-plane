@@ -112,8 +112,10 @@ func testSharedAgentHeartbeatAcrossServers(t *testing.T, recentSnapshot, cachedR
 	}
 	if _, err := writer.SyncAIAgentDaemonRuntimeSnapshot(ctx, owner, DeviceRuntimeSnapshotSyncRequest{
 		DaemonID: "shared-machine", DeviceID: enrollment.DeviceID,
-		Runtimes: []RuntimeSnapshotRecord{{RuntimeID: runtimeID, Kind: RuntimeKindClaudeCode,
-			Availability: RuntimeAvailabilityOnline, DetectionState: RuntimeDetectionStateDetected}},
+		Runtimes: []RuntimeSnapshotRecord{{
+			RuntimeID: runtimeID, Kind: RuntimeKindClaudeCode,
+			Availability: RuntimeAvailabilityOnline, DetectionState: RuntimeDetectionStateDetected,
+		}},
 	}); err != nil {
 		t.Fatal(err)
 	}

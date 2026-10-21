@@ -35,7 +35,7 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 		stats, snapshotBytes, err = s.saveMembershipOwnedSnapshot(ctx, snapshot, credentials)
 		return err
 	}
-	items, hashes, encodedBytes, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, s.partHashes)
+	items, hashes, encodedBytes, err := s.encodeSnapshot(snapshot, s.partHashes)
 	if err != nil {
 		return err
 	}
