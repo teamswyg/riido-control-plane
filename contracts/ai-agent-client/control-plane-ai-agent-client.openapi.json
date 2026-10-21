@@ -189,6 +189,33 @@
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
         }
       ]
+    },
+    {
+      "module": "v3",
+      "description": "v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.",
+      "namespaces": [
+        {
+          "path": [
+            "aiAgent"
+          ],
+          "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks"
+          ],
+          "description": "선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "description": "agent/user/progress message history와 deduplicated agent snapshot map을 함께 읽는 v3 thread history namespace입니다."
+        }
+      ]
     }
   ],
   "paths": {
@@ -712,6 +739,76 @@
         "x-riido-scenarios": [
           "stopAIAgentDaemon.figma-runtime-settings-daemon-stop"
         ]
+      }
+    },
+    "/v1/client/ai-agent/agents/{agent_id}/dashboard": {
+      "get": {
+        "operationId": "getAgentDashboard",
+        "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDashboardResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ],
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "agents",
+            "dashboard"
+          ],
+          "generated_path": "aiAgent.agents.dashboard",
+          "cache_tag": "aiAgent.agents.dashboard"
+        }
       }
     },
     "/v1/client/ai-agent/agents/{agent_id}/editability": {
@@ -1385,7 +1482,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+                "$ref": "#/components/schemas/CreateOnboardingAgentRequest"
               }
             }
           }
@@ -1440,7 +1537,11 @@
         "x-riido-scenarios": [
           "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
           "createAIAgentFromOnboardingFixture.fixture-created-duplicate-name-stays-normal",
-          "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model"
+          "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model",
+          "createAIAgentFromOnboardingFixture.lost-response-retries-same-creation",
+          "createAIAgentFromOnboardingFixture.changed-creation-intent-conflicts",
+          "createAIAgentFromOnboardingFixture.unkeyed-create-preserves-duplicate-names",
+          "createAIAgentFromOnboardingFixture.receipt-capacity-fails-closed"
         ]
       }
     },
@@ -1650,7 +1751,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "unassignAIAgentTask.participant-removal-stops-agent-work"
+          "unassignAIAgentTask.participant-removal-stops-agent-work",
+          "unassignAIAgentTask.interleaved-execution-prevents-participant-removal"
         ]
       },
       "post": {
@@ -2605,6 +2707,85 @@
         }
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard": {
+      "get": {
+        "operationId": "getAgentDashboardV2",
+        "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDashboardResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ],
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "agents",
+            "dashboard"
+          ],
+          "generated_path": "v2.aiAgent.agents.dashboard",
+          "cache_tag": "v2.agents.dashboard"
+        }
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/editability": {
       "get": {
         "operationId": "getAIAgentEditabilityV2",
@@ -2733,6 +2914,71 @@
           "generated_path": "v2.aiAgent.bootstrap",
           "cache_tag": "v2.aiAgent.bootstrap"
         }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence": {
+      "get": {
+        "operationId": "getAIAgentDesktopPresenceV2",
+        "summary": "같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentDesktopPresenceResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:device:read"
+        ],
+        "x-riido-rbac-policy": "desktop_presence.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "desktopPresence"
+          ],
+          "generated_path": "v2.aiAgent.desktopPresence",
+          "cache_tag": "v2.aiAgent.desktopPresence"
+        },
+        "x-riido-scenarios": [
+          "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",
+          "getAIAgentDesktopPresenceV2.no-desktop-connection-yet",
+          "getAIAgentDesktopPresenceV2.other-account-does-not-count"
+        ]
       }
     },
     "/v2/client/workspaces/{workspace_id}/ai-agent/devices": {
@@ -3339,7 +3585,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAgentConfigurationRequest"
+                "$ref": "#/components/schemas/CreateOnboardingAgentRequest"
               }
             }
           }
@@ -3395,7 +3641,11 @@
         "x-riido-scenarios": [
           "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
           "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal",
-          "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope"
+          "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope",
+          "createAIAgentFromOnboardingFixtureV2.lost-response-retries-same-creation",
+          "createAIAgentFromOnboardingFixtureV2.changed-creation-intent-conflicts",
+          "createAIAgentFromOnboardingFixtureV2.unkeyed-create-preserves-duplicate-names",
+          "createAIAgentFromOnboardingFixtureV2.receipt-capacity-fails-closed"
         ]
       }
     },
@@ -3536,7 +3786,8 @@
         "x-riido-scenarios": [
           "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
           "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
-          "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history"
+          "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+          "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state"
         ]
       }
     },
@@ -3634,7 +3885,7 @@
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/agent-assignments/{agent_id}": {
       "delete": {
         "operationId": "deleteAIAgentTaskAgentAssignmentV2",
-        "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+        "summary": "task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)",
         "tags": [
           "ai_agent_client"
         ],
@@ -3664,6 +3915,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAIAgentTaskAgentAssignmentRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Accepted",
@@ -3716,7 +3976,8 @@
           ]
         },
         "x-riido-scenarios": [
-          "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
+          "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
+          "deleteAIAgentTaskAgentAssignmentV2.interleaved-execution-prevents-participant-removal"
         ]
       }
     },
@@ -3962,7 +4223,10 @@
             "v2.aiAgent.tasks.threads",
             "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
-        }
+        },
+        "x-riido-scenarios": [
+          "unassignAIAgentTaskV2.interleaved-execution-prevents-participant-removal"
+        ]
       },
       "post": {
         "operationId": "assignAIAgentTaskV2",
@@ -4135,6 +4399,102 @@
             "v2.aiAgent.tasks.assignedAgentProfiles"
           ]
         }
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/onboarding-completion": {
+      "post": {
+        "operationId": "completeAIAgentOnboardingTaskV2",
+        "summary": "온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteAIAgentOnboardingTaskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskActionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ],
+        "x-riido-rbac-policy": "ai_agent_onboarding_completion.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "onboardingCompletion",
+            "create"
+          ],
+          "generated_path": "v2.aiAgent.tasks.onboardingCompletion.create",
+          "invalidates": [
+            "v2.aiAgent.bootstrap",
+            "v2.aiAgent.tasks.assignableAgents",
+            "v2.aiAgent.tasks.threads",
+            "v2.aiAgent.tasks.assignedAgentProfiles",
+            "v2.aiAgent.tasks.threadStreamSubscription",
+            "v3.aiAgent.tasks.threads"
+          ]
+        },
+        "x-riido-scenarios": [
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-records-a-participant-and-a-completed-agent-comment-without-execution",
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent",
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-requires-an-onboarding-created-owned-agent",
+          "completeAIAgentOnboardingTaskV2.onboarding-completion-is-one-time-per-agent",
+          "completeAIAgentOnboardingTaskV2.onboarding-request-id-rejects-reuse-for-another-target"
+        ]
       }
     },
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/stop": {
@@ -4459,10 +4819,182 @@
           ]
         }
       }
+    },
+    "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads": {
+      "get": {
+        "operationId": "listAIAgentTaskThreadHistoryV3",
+        "summary": "AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadHistoryCollectionResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "riidoAIAgentToken": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ],
+        "x-riido-rbac-policy": "task_thread_history_collection.v1",
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v3",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "generated_path": "v3.aiAgent.tasks.threads",
+          "cache_tag": "v3.aiAgent.tasks.threads"
+        },
+        "x-riido-scenarios": [
+          "listAIAgentTaskThreadHistoryV3.user-follow-up-survives-refresh",
+          "listAIAgentTaskThreadHistoryV3.agent-snapshot-is-referenced-once",
+          "listAIAgentTaskThreadHistoryV3.follow-up-and-reassignment-keep-separate-conversations"
+        ]
+      }
     }
   },
   "components": {
     "schemas": {
+      "AIAgentDesktopPresenceResponse": {
+        "description": "같은 계정의 데스크톱 앱 마지막 접속 시각과 서버 응답 시각입니다. 웹 온보딩이 앱 연결을 확인할 때 씁니다.",
+        "properties": {
+          "checked_at": {
+            "description": "서버가 이 응답을 만든 시각입니다. 클라이언트는 브라우저 시계 대신 이 값으로 비교합니다.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "description": "같은 계정이 데스크톱 앱에 마지막으로 접속한 서버 시각입니다. 접속 기록이 없으면 생략합니다.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "checked_at"
+        ],
+        "type": "object"
+      },
+      "AIAgentExecutionContext": {
+        "description": "RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.",
+        "properties": {
+          "diagnostic_code": {
+            "enum": [
+              "none",
+              "user_cancelled",
+              "run_cancelled",
+              "run_timeout",
+              "workspace_preparation_failed",
+              "session_scope_conflict",
+              "host_verification_failed",
+              "provider_blocked",
+              "provider_failed",
+              "process_aborted",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "next_action": {
+            "enum": [
+              "none",
+              "check_workspace",
+              "review_session",
+              "review_result",
+              "check_provider",
+              "review_permissions"
+            ],
+            "type": "string"
+          },
+          "verification_status": {
+            "enum": [
+              "not_configured",
+              "not_run",
+              "pending",
+              "passed",
+              "failed",
+              "cancelled",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "workspace_kind": {
+            "enum": [
+              "unknown",
+              "isolated",
+              "repository_clone",
+              "assignment_worktree",
+              "native_resume"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_kind",
+          "verification_status",
+          "diagnostic_code",
+          "next_action"
+        ],
+        "type": "object"
+      },
+      "AIAgentOnboardingLocale": {
+        "description": "온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.",
+        "enum": [
+          "ko",
+          "en"
+        ],
+        "type": "string"
+      },
+      "AIAgentOnboardingTaskTemplateKey": {
+        "description": "앱 온보딩 첫 작업 결과 템플릿 3종입니다. 결과 본문은 서버가 가진 승인된 문구를 사용합니다.",
+        "enum": [
+          "schedule",
+          "interview",
+          "launch"
+        ],
+        "type": "string"
+      },
       "AIAgentTaskActionResponse": {
         "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",
         "properties": {
@@ -4480,6 +5012,16 @@
           },
           "comment_kind": {
             "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/AIAgentExecutionContext"
           },
           "failure_diagnostics": {
             "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
@@ -4568,6 +5110,10 @@
           "owner_principal_id": {
             "type": "string"
           },
+          "profile_color": {
+            "$ref": "#/components/schemas/AgentProfileColor",
+            "description": "thread snapshot 시점의 profile 색상입니다."
+          },
           "profile_thumbnail_url": {
             "type": "string"
           },
@@ -4595,6 +5141,12 @@
           "active_stream": {
             "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
           },
+          "assigned_agent_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "schema_version": {
             "type": "string"
           },
@@ -4611,7 +5163,8 @@
         "required": [
           "schema_version",
           "task_id",
-          "threads"
+          "threads",
+          "assigned_agent_ids"
         ],
         "type": "object"
       },
@@ -4632,6 +5185,174 @@
           }
         },
         "type": "object"
+      },
+      "AIAgentTaskThreadHistoryCollectionResponse": {
+        "description": "v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.",
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "agent_snapshots": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadAgentSnapshot"
+            },
+            "description": "agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.",
+            "type": "object"
+          },
+          "assigned_agent_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "threads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadHistoryRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads",
+          "assigned_agent_ids"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadHistoryMessage": {
+        "description": "v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.",
+        "properties": {
+          "assignment_id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "comment_kind": {
+            "$ref": "#/components/schemas/AgentTaskCommentKind"
+          },
+          "display_message": {
+            "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
+            "maxLength": 180,
+            "pattern": "^[^\\r\\n]*$",
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "result_message": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadMessageRole"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer"
+          },
+          "source_message_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_id",
+          "role"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadHistoryRecord": {
+        "description": "v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.",
+        "properties": {
+          "active_stream": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadStreamLink"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "agent_snapshot_id": {
+            "description": "agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다.",
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "completed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "conversation_id": {
+            "description": "같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다.",
+            "type": "string"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/AIAgentExecutionContext"
+          },
+          "failure_diagnostics": {
+            "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentTaskThreadHistoryMessage"
+            },
+            "type": "array"
+          },
+          "parent_thread_id": {
+            "description": "후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다.",
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          }
+        },
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "conversation_id",
+          "messages"
+        ],
+        "type": "object"
+      },
+      "AIAgentTaskThreadMessageRole": {
+        "description": "v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.",
+        "enum": [
+          "user",
+          "agent",
+          "progress"
+        ],
+        "type": "string"
       },
       "AIAgentTaskThreadRecord": {
         "description": "task 화면에 표시할 AI Agent thread의 cold record입니다.",
@@ -4654,6 +5375,16 @@
           "completed_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/AIAgentExecutionContext"
           },
           "failure_diagnostics": {
             "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
@@ -4885,6 +5616,10 @@
           "owner_principal_id": {
             "type": "string"
           },
+          "profile_color": {
+            "$ref": "#/components/schemas/AgentProfileColor",
+            "description": "agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다."
+          },
           "profile_thumbnail_url": {
             "format": "uri",
             "type": "string"
@@ -4996,6 +5731,10 @@
           "owner_principal_id": {
             "type": "string"
           },
+          "profile_color": {
+            "$ref": "#/components/schemas/AgentProfileColor",
+            "description": "agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다."
+          },
           "profile_thumbnail_url": {
             "format": "uri",
             "type": "string"
@@ -5036,7 +5775,191 @@
           "editability",
           "assigned_task_count",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "profile_color"
+        ],
+        "type": "object"
+      },
+      "AgentDashboardDay": {
+        "properties": {
+          "completed": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "completed"
+        ],
+        "type": "object"
+      },
+      "AgentDashboardResponse": {
+        "properties": {
+          "active_days": {
+            "type": "integer"
+          },
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDashboardDay"
+            },
+            "type": "array"
+          },
+          "activity_completed": {
+            "type": "integer"
+          },
+          "activity_end": {
+            "type": "string"
+          },
+          "activity_start": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "completed_runs": {
+            "type": "integer"
+          },
+          "confirmation_count": {
+            "type": "integer"
+          },
+          "current": {
+            "$ref": "#/components/schemas/AgentDashboardTask"
+          },
+          "has_next_page": {
+            "type": "boolean"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDashboardTask"
+            },
+            "type": "array"
+          },
+          "history_durable": {
+            "type": "boolean"
+          },
+          "observed_since": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          },
+          "queue": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDashboardTask"
+            },
+            "type": "array"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "time_zone": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "waiting_count": {
+            "type": "integer"
+          },
+          "work_status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "agent_id",
+          "work_status",
+          "queue",
+          "waiting_count",
+          "confirmation_count",
+          "completed_runs",
+          "history",
+          "page",
+          "page_size",
+          "total",
+          "has_next_page",
+          "activity",
+          "activity_start",
+          "activity_end",
+          "activity_completed",
+          "active_days",
+          "time_zone",
+          "history_durable",
+          "scope"
+        ],
+        "type": "object"
+      },
+      "AgentDashboardTask": {
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "confirmation_reason": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "duration_seconds": {
+            "type": "integer"
+          },
+          "ended_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "key_number": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "queue_position": {
+            "type": "integer"
+          },
+          "queued_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id",
+          "task_id",
+          "assignment_id",
+          "run_id",
+          "title",
+          "key_number",
+          "state",
+          "message",
+          "queue_position",
+          "queued_at"
         ],
         "type": "object"
       },
@@ -5176,6 +6099,16 @@
         ],
         "type": "object"
       },
+      "AgentProfileColor": {
+        "description": "AI Agent profile 색상 4종입니다.",
+        "enum": [
+          "blue",
+          "orange",
+          "green",
+          "purple"
+        ],
+        "type": "string"
+      },
       "AgentProfileThumbnailUploadFormField": {
         "description": "브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.",
         "properties": {
@@ -5255,6 +6188,89 @@
         ],
         "type": "string"
       },
+      "AgentTaskNotificationEvent": {
+        "description": "배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "assignment_state": {
+            "$ref": "#/components/schemas/AgentAssignmentState"
+          },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "agent_task_notification"
+            ],
+            "type": "string"
+          },
+          "notification_type": {
+            "enum": [
+              "result_ready",
+              "answer_required",
+              "approval_required",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "occurred_at": {
+            "type": "string"
+          },
+          "recipient_principal_id": {
+            "type": "string"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "string"
+          },
+          "work_status": {
+            "$ref": "#/components/schemas/AgentWorkStatus"
+          },
+          "workspace_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_type",
+          "schema_version",
+          "event_id",
+          "occurred_at",
+          "workspace_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "created_by",
+          "recipient_principal_id",
+          "notification_type",
+          "work_status",
+          "assignment_state"
+        ],
+        "type": "object"
+      },
       "AgentThreadProgressEvent": {
         "description": "활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.",
         "properties": {
@@ -5323,6 +6339,12 @@
       "AgentThreadProgressLine": {
         "description": "daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.",
         "properties": {
+          "display_message": {
+            "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
+            "maxLength": 180,
+            "pattern": "^[^\\r\\n]*$",
+            "type": "string"
+          },
           "message": {
             "type": "string"
           },
@@ -5379,11 +6401,21 @@
           "comment_kind": {
             "$ref": "#/components/schemas/AgentTaskCommentKind"
           },
+          "confirmation_reason": {
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ],
+            "type": "string"
+          },
           "event_type": {
             "enum": [
               "agent_work_status_changed"
             ],
             "type": "string"
+          },
+          "execution_context": {
+            "$ref": "#/components/schemas/AIAgentExecutionContext"
           },
           "failure_diagnostics": {
             "$ref": "#/components/schemas/AIAgentTaskThreadFailureDiagnostics"
@@ -5417,9 +6449,18 @@
         "type": "object"
       },
       "AssignAIAgentTaskRequest": {
-        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
+        "description": "작업 배정 요청. recovery_policy는 실행 전 검증에 한정된 유한 복구 예산이며 명시적 fallback은 서버가 같은 소유자의 같은 device/model inventory 및 권한을 검증한 경우에만 허용한다.",
         "properties": {
           "agent_id": {
+            "type": "string"
+          },
+          "instruction": {
+            "type": "string"
+          },
+          "recovery_policy": {
+            "$ref": "#/components/schemas/ProviderRecoveryPolicy"
+          },
+          "request_id": {
             "type": "string"
           }
         },
@@ -5436,11 +6477,18 @@
             "format": "uri",
             "type": "string"
           },
+          "profile_color": {
+            "$ref": "#/components/schemas/AgentProfileColor",
+            "description": "배정된 Agent의 고정 profile 색상입니다. tmp_color와 독립적으로 항상 내려갑니다."
+          },
           "tmp_color": {
             "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452.",
             "type": "string"
           }
         },
+        "required": [
+          "profile_color"
+        ],
         "type": "object"
       },
       "AssignedAgentProfileMapResponse": {
@@ -5557,6 +6605,7 @@
         "discriminator": {
           "mapping": {
             "agent_editability_changed": "#/components/schemas/AgentEditabilityChangedEvent",
+            "agent_task_notification": "#/components/schemas/AgentTaskNotificationEvent",
             "agent_thread_progress": "#/components/schemas/AgentThreadProgressEvent",
             "agent_work_status_changed": "#/components/schemas/AgentWorkStatusChangedEvent",
             "device_daemon_status_changed": "#/components/schemas/DeviceDaemonStatusEvent",
@@ -5579,8 +6628,37 @@
           },
           {
             "$ref": "#/components/schemas/AgentThreadProgressEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AgentTaskNotificationEvent"
           }
         ]
+      },
+      "CompleteAIAgentOnboardingTaskRequest": {
+        "description": "앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.",
+        "properties": {
+          "agent_id": {
+            "description": "온보딩으로 깨운 agent의 안정 식별자입니다.",
+            "type": "string"
+          },
+          "locale": {
+            "$ref": "#/components/schemas/AIAgentOnboardingLocale",
+            "description": "완료 문구 언어입니다. 생략하면 ko입니다."
+          },
+          "request_id": {
+            "description": "같은 완료 요청을 다시 보낼 때 쓰는 idempotency key입니다. 같은 값이면 기존 결과를 돌려줍니다.",
+            "type": "string"
+          },
+          "template_key": {
+            "$ref": "#/components/schemas/AIAgentOnboardingTaskTemplateKey",
+            "description": "완료 결과 템플릿입니다."
+          }
+        },
+        "required": [
+          "agent_id",
+          "template_key"
+        ],
+        "type": "object"
       },
       "ControlDeviceDaemonRequest": {
         "description": "agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.",
@@ -5670,6 +6748,55 @@
         ],
         "type": "object"
       },
+      "CreateOnboardingAgentRequest": {
+        "description": "Fixture 전용 agent 생성 요청입니다. 기존 agent 설정 7개 필드를 그대로 사용하고, 응답 유실에 대비한 optional request_id만 추가합니다. 같은 소유자·workspace·operation 범위에서 같은 request_id와 전체 payload/fixture를 서버의 최초 생성 시도 timestamp부터 24시간 동안 재전송하면 같은 agent_id를 HTTP 201로 반환합니다. 일반 생성 요청에는 request_id를 추가하지 않습니다.",
+        "properties": {
+          "description": {
+            "description": "agent 추가 화면의 설명 입력값입니다.",
+            "maxLength": 160,
+            "type": "string"
+          },
+          "instruction": {
+            "description": "agent 추가 화면의 지침 textarea 입력값입니다.",
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "model_id": {
+            "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다.",
+            "type": "string"
+          },
+          "name": {
+            "description": "agent 추가 화면의 이름 입력값입니다.",
+            "type": "string"
+          },
+          "profile_thumbnail_url": {
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
+            "format": "uri",
+            "type": "string"
+          },
+          "request_id": {
+            "description": "선택적인 생성 재시도 식별자입니다. ASCII 영숫자와 . _ : - 만 1~128바이트 허용합니다. 클라이언트는 동일 생성 의도와 전체 payload에 같은 값을 유지하며 최초 생성 요청을 시작한 시점부터 24시간 이내에만 재시도 보장을 사용합니다. 생략 시 기존처럼 각 요청이 별도의 agent를 생성합니다.",
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+            "type": "string"
+          },
+          "runtime_id": {
+            "description": "agent가 사용할 런타임 dropdown 선택값입니다.",
+            "type": "string"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/AgentVisibility",
+            "description": "agent 공개 범위 radio 입력값입니다."
+          }
+        },
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "type": "object"
+      },
       "DaemonAvailability": {
         "description": "runtime 설정 화면에서 표시하는 desktop local daemon online/offline 상태입니다.",
         "enum": [
@@ -5697,6 +6824,19 @@
           "failed"
         ],
         "type": "string"
+      },
+      "DeleteAIAgentTaskAgentAssignmentRequest": {
+        "description": "Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.",
+        "properties": {
+          "assignment_id": {
+            "description": "Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained.",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "DeleteAgentResponse": {
         "description": "agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.",
@@ -5999,6 +7139,47 @@
         ],
         "type": "string"
       },
+      "ProviderRecoveryCandidate": {
+        "properties": {
+          "model_id": {
+            "description": "Explicit model present in target runtime inventory; max 128 bytes; no whitespace/control.",
+            "type": "string"
+          },
+          "provider": {
+            "description": "claude/codex/cursor/openclaw; validated against same owner and device inventory.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "model_id"
+        ],
+        "type": "object"
+      },
+      "ProviderRecoveryPolicy": {
+        "properties": {
+          "fallbacks": {
+            "description": "At most3 distinct providers, ordered; requires max_switches1.",
+            "items": {
+              "$ref": "#/components/schemas/ProviderRecoveryCandidate"
+            },
+            "type": "array"
+          },
+          "max_attempts": {
+            "description": "Including initial attempt; default3, bounds1..3.",
+            "type": "integer"
+          },
+          "max_elapsed_seconds": {
+            "description": "Pre-dispatch recovery only; default30, bounds1..60.",
+            "type": "integer"
+          },
+          "max_switches": {
+            "description": "0 by default; max1; explicit nonempty fallbacks required for1.",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "RuntimeAvailability": {
         "description": "client에 노출되는 runtime online/offline 상태입니다.",
         "enum": [
@@ -6166,11 +7347,19 @@
             "type": "boolean"
           },
           "is_stop_required": {
-            "description": "At least one active execution for this participant requires stopping before removal.",
+            "description": "At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID.",
             "type": "boolean"
+          },
+          "latest_assignment_id": {
+            "description": "Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained.",
+            "type": "string"
           },
           "name": {
             "type": "string"
+          },
+          "profile_color": {
+            "$ref": "#/components/schemas/AgentProfileColor",
+            "description": "참여자 Agent의 고정 profile 색상입니다."
           },
           "profile_thumbnail_url": {
             "format": "uri",
@@ -6181,7 +7370,8 @@
           "agent_id",
           "name",
           "is_owned_by_viewer",
-          "is_stop_required"
+          "is_stop_required",
+          "profile_color"
         ],
         "type": "object"
       },
@@ -6189,6 +7379,10 @@
         "description": "task participant에서 agent를 제거하며 active/queued 작업을 중단하기 위한 요청입니다.",
         "properties": {
           "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "description": "Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership.",
             "type": "string"
           },
           "reason": {
@@ -6220,6 +7414,10 @@
           "name": {
             "description": "agent 설정 화면의 이름 입력값입니다.",
             "type": "string"
+          },
+          "profile_color": {
+            "$ref": "#/components/schemas/AgentProfileColor",
+            "description": "호환을 위해 받을 수 있는 무시되는 입력입니다. 생성 시 정해진 profile 색상은 이 요청으로 바뀌지 않습니다."
           },
           "profile_thumbnail_url": {
             "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",

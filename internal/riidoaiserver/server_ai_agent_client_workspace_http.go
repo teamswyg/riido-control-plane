@@ -21,6 +21,8 @@ func (s Server) handleAIAgentClientWorkspaceRoutes(w http.ResponseWriter, r *htt
 		s.handleAIAgentClientDevices(w, r)
 	case strings.HasPrefix(v1Path, "/v1/client/ai-agent/devices/"):
 		s.handleAIAgentClientDeviceRoutes(w, r)
+	case v1Path == "/v1/client/ai-agent/desktop-presence":
+		s.handleAIAgentClientDesktopPresence(w, r)
 	case v1Path == "/v1/client/ai-agent/onboarding/fixtures" || strings.HasPrefix(v1Path, "/v1/client/ai-agent/onboarding/fixtures/"):
 		s.handleAIAgentClientOnboardingFixtures(w, r)
 	case v1Path == "/v1/client/ai-agent/profile-thumbnails/uploads":

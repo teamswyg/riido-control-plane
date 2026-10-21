@@ -15,7 +15,7 @@ func aiAgentClientTaskHTTPRoute(base string, segments []string) string {
 		return aiAgentClientTaskThreadsRoute(taskBase, segments)
 	case "agent-assignments":
 		return aiAgentClientTaskAssignmentRoute(taskBase, segments)
-	case "thread-stream-subscription", "comments", "stop":
+	case "thread-stream-subscription", "comments", "stop", "onboarding-completion":
 		return aiAgentClientTaskLeafRoute(taskBase, segments)
 	default:
 		return aiAgentClientTaskThreadMessageRoute(taskBase, segments)

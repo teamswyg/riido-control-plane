@@ -6,14 +6,6 @@ import (
 	"strings"
 )
 
-func (s Server) assignRequestFromAIAgentClientTask(ctx context.Context, principal AuthorizationResult, bearerToken, taskID string, req AssignAIAgentTaskRequest) (AssignRequest, error) {
-	composed, err := s.assignRequestFromAIAgentClientTaskResult(ctx, principal, bearerToken, taskID, req)
-	if err != nil {
-		return AssignRequest{}, err
-	}
-	return composed.Request, nil
-}
-
 func (s Server) assignRequestFromAIAgentClientTaskResult(
 	ctx context.Context,
 	principal AuthorizationResult,
@@ -40,8 +32,15 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 	if err != nil {
 		return composedAssignRequest{}, err
 	}
+	policy, err := s.authorizeRecoveryPolicy(ctx, principal, selected, binding, runtime.RequiresExperimentalOptIn, req.RecoveryPolicy)
+	if err != nil {
+		return composedAssignRequest{}, err
+	}
 	assignmentReq := AssignRequest{
-		WorkspaceID:              strings.TrimSpace(principal.WorkspaceID),
+		RecoveryPolicy: policy,
+
+		RequestID: req.RequestID, WorkspaceID: principal.WorkspaceID, Prompt: strings.TrimSpace(req.Instruction),
+
 		ComponentID:              taskID,
 		AgentID:                  selected.AgentID,
 		RuntimeProvider:          binding.RuntimeProvider,
@@ -50,9 +49,17 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		AllowExperimentalRuntime: runtime.RequiresExperimentalOptIn,
 		CreatedBy:                strings.TrimSpace(principal.PrincipalID),
 	}
-	return s.assignRequestWithTaskContextPromptForClientResult(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
-		ComponentID: taskID,
-		WorkspaceID: principal.WorkspaceID,
-		BearerToken: bearerToken,
-	})
+	var composed composedAssignRequest
+	if req.VerifiedTaskContext != nil {
+		composed, err = composeAssignRequestWithTaskContextResult(taskID, taskID, assignmentReq, *req.VerifiedTaskContext)
+	} else {
+		composed, err = s.assignRequestWithTaskContextPromptForClientResult(ctx, taskID, assignmentReq, AIAgentTaskContextRequest{
+			ComponentID: taskID,
+			WorkspaceID: principal.WorkspaceID,
+			BearerToken: bearerToken,
+		})
+	}
+	// Profile ownership is distinct from the connected physical runtime ownership.
+	composed.AgentOwnerPrincipalID = selected.OwnerPrincipalID
+	return composed, err
 }

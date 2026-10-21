@@ -26,6 +26,7 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 			}
 			route := httpMetricRoute(r.Method, r.URL.Path, r.Pattern, statusCode)
 			metrics.ObserveHTTPTransaction(HTTPTransactionObservation{
+				Stream:        strings.HasPrefix(recorder.Header().Get("Content-Type"), "text/event-stream"),
 				Method:        r.Method,
 				Route:         route,
 				ClientSurface: traceHTTPClientSurface(route, r.URL.Path, r.UserAgent()),
@@ -34,9 +35,9 @@ func withHTTPTransactionMetrics(next http.Handler, metrics *HTTPTransactionMetri
 			})
 			if statusCode >= http.StatusInternalServerError {
 				log.Printf(
-					"event=http_request_failed method=%q route=%q client_surface=%q status_code=%d duration_ms=%d",
+					"event=http_request_failed method=%q route=%q client_surface=%q status_code=%d duration_ms=%d trace_id=%q span_id=%q",
 					r.Method, route, traceHTTPClientSurface(route, r.URL.Path, r.UserAgent()),
-					statusCode, time.Since(startedAt).Milliseconds(),
+					statusCode, time.Since(startedAt).Milliseconds(), requestTraceID(r), requestSpanID(r),
 				)
 			}
 			if recovered != nil {

@@ -7,62 +7,691 @@
   "workflow": ".github/workflows/external-authorizer.yml",
   "evidence_artifact": "request-authorization-evidence",
   "owner_package": "internal/riidoaiserver",
-  "surfaces": [{"name":"RequestAuthorizer","role":"authorization decision port"},{"name":"AuthorizationRequest","role":"resource/action request model"},{"name":"AuthorizationResult","role":"server-owned principal projection"},{"name":"StaticTokenAuthorizer","role":"static request-token evaluator"},{"name":"FallbackAuthorizer","role":"unauthenticated-only chain inside one scheme"},{"name":"AuthorizationScheme","role":"explicit legacy_v1 and auth_service_v2 ownership coordinate"},{"name":"AuthorizationSchemeSelector","role":"credential classification port without authentication authority"},{"name":"AuthorizationSchemeRouter","role":"fail-closed provider boundary router"},{"name":"JWTAccessTokenAuthorizer","role":"resource/profile-bound Auth token PEP"},{"name":"IssuerAuthorizationSchemeSelector","role":"Auth issuer ownership classifier"},{"name":"JWTVerificationKeyProvider","role":"public verification key port"},{"name":"AccessTokenStatusResolver","role":"Auth introspection status port"},{"name":"HTTPIntrospectionStatusResolver","role":"consumer-owned Auth HTTP introspection anti-corruption adapter"},{"name":"HTTPJWKSProvider","role":"exact issuer JWKS cache adapter"},{"name":"ExternalHTTPAuthorizer","role":"consumer-owned tenant and domain PDP adapter"},{"name":"ExternalHTTPAuthorizerConfig","role":"external adapter runtime config"},{"name":"CoalescingAuthorizer","role":"in-flight duplicate authorization collapse without TTL caching"}],
-  "resources": ["agent", "ai_agent_client", "agent_catalog", "component_task", "component_task_events", "metrics"],
-  "token_transports": [{"id":"generated-client-token","value":"X-Riido-AI-Agent-Token"},{"id":"compat-bearer-token","value":"Authorization: Bearer"},{"id":"device-id","value":"X-Riido-Device-ID"},{"id":"device-secret","value":"X-Riido-Device-Secret"},{"id":"external-api-key","value":"X-Riido-Control-Plane-Authorizer-Key"}],
-  "runtime_config_keys": ["RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS", "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS", "RIIDO_AI_SERVER_AUTH_ISSUER", "RIIDO_AI_SERVER_AUTH_RESOURCE", "RIIDO_AI_SERVER_AUTH_AUTHORIZATION_PROFILE", "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_ID", "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET", "RIIDO_AI_SERVER_AUTH_HTTP_TIMEOUT_SECONDS"],
-  "external_contract_versions": ["riido-external-authorizer-request.v1", "riido-external-authorizer-response.v1"],
+  "surfaces": [
+    {
+      "name": "RequestAuthorizer",
+      "role": "authorization decision port"
+    },
+    {
+      "name": "AuthorizationRequest",
+      "role": "resource/action request model"
+    },
+    {
+      "name": "AuthorizationResult",
+      "role": "server-owned principal projection"
+    },
+    {
+      "name": "StaticTokenAuthorizer",
+      "role": "static request-token evaluator"
+    },
+    {
+      "name": "FallbackAuthorizer",
+      "role": "unauthenticated-only chain inside one scheme"
+    },
+    {
+      "name": "AuthorizationScheme",
+      "role": "explicit legacy_v1 and auth_service_v2 ownership coordinate"
+    },
+    {
+      "name": "AuthorizationSchemeSelector",
+      "role": "credential classification port without authentication authority"
+    },
+    {
+      "name": "AuthorizationSchemeRouter",
+      "role": "fail-closed provider boundary router"
+    },
+    {
+      "name": "JWTAccessTokenAuthorizer",
+      "role": "resource/profile-bound Auth token PEP"
+    },
+    {
+      "name": "IssuerAuthorizationSchemeSelector",
+      "role": "Auth issuer ownership classifier"
+    },
+    {
+      "name": "JWTVerificationKeyProvider",
+      "role": "public verification key port"
+    },
+    {
+      "name": "AccessTokenStatusResolver",
+      "role": "Auth introspection status port"
+    },
+    {
+      "name": "HTTPIntrospectionStatusResolver",
+      "role": "consumer-owned Auth HTTP introspection anti-corruption adapter"
+    },
+    {
+      "name": "HTTPJWKSProvider",
+      "role": "exact issuer JWKS cache adapter"
+    },
+    {
+      "name": "ExternalHTTPAuthorizer",
+      "role": "consumer-owned tenant and domain PDP adapter"
+    },
+    {
+      "name": "ExternalHTTPAuthorizerConfig",
+      "role": "external adapter runtime config"
+    },
+    {
+      "name": "CoalescingAuthorizer",
+      "role": "in-flight duplicate authorization collapse without TTL caching"
+    }
+  ],
+  "resources": [
+    "agent",
+    "ai_agent_client",
+    "agent_catalog",
+    "component_task",
+    "component_task_events",
+    "metrics"
+  ],
+  "token_transports": [
+    {
+      "id": "generated-client-token",
+      "value": "X-Riido-AI-Agent-Token"
+    },
+    {
+      "id": "compat-bearer-token",
+      "value": "Authorization: Bearer"
+    },
+    {
+      "id": "device-id",
+      "value": "X-Riido-Device-ID"
+    },
+    {
+      "id": "device-secret",
+      "value": "X-Riido-Device-Secret"
+    },
+    {
+      "id": "external-api-key",
+      "value": "X-Riido-Control-Plane-Authorizer-Key"
+    }
+  ],
+  "runtime_config_keys": [
+    "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS",
+    "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS",
+    "RIIDO_AI_SERVER_AUTH_ISSUER",
+    "RIIDO_AI_SERVER_AUTH_RESOURCE",
+    "RIIDO_AI_SERVER_AUTH_AUTHORIZATION_PROFILE",
+    "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_ID",
+    "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET",
+    "RIIDO_AI_SERVER_AUTH_HTTP_TIMEOUT_SECONDS"
+  ],
+  "external_contract_versions": [
+    "riido-external-authorizer-request.v1",
+    "riido-external-authorizer-response.v1"
+  ],
   "rule_groups": [
-    {"id":"static-token","rules":["principal-required","exactly-one-token-material","sha256-hash-supported","duplicate-token-rejected","scopes-required","constant-time-compare","scoped-deny-forbidden"]},
-    {"id":"external-authorizer","rules":["request-schema-v1","response-schema-v1","opaque-bearer-token","ai-agent-client-workspace-required","api-key-header-server-only","response-disallow-unknown-fields","response-size-limit","allowed-principal-required","admin-role-only","configured-timeout-budget","slow-or-failed-authorization-observed","bounded-retryability-observed","trace-span-without-token-or-workspace"]},
-    {"id":"fail-closed","rules":["http-401-unauthenticated","http-403-forbidden","allowed-false-forbidden","non-2xx-service-error","malformed-json-service-error","unsupported-schema-service-error","invalid-role-service-error","network-error-service-error"]},
-    {"id":"fallback","rules":["next-only-unauthenticated","forbidden-stops-chain","empty-chain-unauthenticated"]},
-    {"id":"authorization-scheme-routing","rules":["explicit-legacy-v1-and-auth-service-v2","selector-classifies-but-does-not-authenticate","legacy-v1-behavior-preserved","v2-failure-never-downgrades","v2-unavailable-fails-closed","unknown-scheme-fails-closed"]},
-    {"id":"auth-jwt-pep","rules":["exact-https-issuer-and-resource","typ-at-jwt-only","es256-p256-only","known-kid-only","jwks-etag-max-age-60","expired-jwks-fails-closed","unknown-kid-one-refresh","exact-authorization-profile","canonical-non-wildcard-scopes","auth-introspection-required","consumer-owned-http-spi","private-module-independent","confidential-client-body-binding","introspection-redirect-refused","claim-equivalence-required","issuer-routed-dual-authentication","auth-issuer-invalid-stops-fallback","foreign-issuer-legacy-fallback","duplicate-jwt-claim-rejected","consumer-domain-pdp-required","domain-subject-and-workspace-equivalence"]},
-    {"id":"coalescing","rules":["in-flight-only","no-ttl-auth-cache","bearer-token-hashed-in-key","request-scope-separated","concurrent-identical-requests-share-one-hop"]},
-    {"id":"cors","rules":["exact-origin-allowlist","method-allowlist","header-allowlist","no-browser-credentials","unsupported-header-rejected"]},
-    {"id":"device-principal","rules":["device-headers-server-only","both-device-fields-required","device-auth-before-token-auth","browser-jwt-not-daemon-auth"]}
+    {
+      "id": "static-token",
+      "rules": [
+        "principal-required",
+        "exactly-one-token-material",
+        "sha256-hash-supported",
+        "duplicate-token-rejected",
+        "scopes-required",
+        "constant-time-compare",
+        "scoped-deny-forbidden"
+      ]
+    },
+    {
+      "id": "external-authorizer",
+      "rules": [
+        "request-schema-v1",
+        "response-schema-v1",
+        "opaque-bearer-token",
+        "ai-agent-client-workspace-required",
+        "api-key-header-server-only",
+        "response-disallow-unknown-fields",
+        "response-size-limit",
+        "allowed-principal-required",
+        "admin-role-only",
+        "configured-timeout-budget",
+        "slow-or-failed-authorization-observed",
+        "bounded-retryability-observed",
+        "trace-span-without-token-or-workspace",
+        "typed-failure-kind-and-upstream-status-only",
+        "response-error-decode-schema-contract",
+        "typed-cause-identity-preserved",
+        "http-network-phase-timings-without-addresses",
+        "body-read-and-unobserved-transport-distinguished",
+        "unknown-timing-is-not-zero-latency",
+        "configured-timeout-and-no-retry-preserved"
+      ]
+    },
+    {
+      "id": "fail-closed",
+      "rules": [
+        "http-401-unauthenticated",
+        "http-403-forbidden",
+        "allowed-false-forbidden",
+        "non-2xx-service-error",
+        "malformed-json-service-error",
+        "unsupported-schema-service-error",
+        "invalid-role-service-error",
+        "network-error-service-error",
+        "fixed-503-dependency-message"
+      ]
+    },
+    {
+      "id": "fallback",
+      "rules": [
+        "next-only-unauthenticated",
+        "forbidden-stops-chain",
+        "empty-chain-unauthenticated"
+      ]
+    },
+    {
+      "id": "authorization-scheme-routing",
+      "rules": [
+        "explicit-legacy-v1-and-auth-service-v2",
+        "selector-classifies-but-does-not-authenticate",
+        "legacy-v1-behavior-preserved",
+        "v2-failure-never-downgrades",
+        "v2-unavailable-fails-closed",
+        "unknown-scheme-fails-closed"
+      ]
+    },
+    {
+      "id": "auth-jwt-pep",
+      "rules": [
+        "exact-https-issuer-and-resource",
+        "typ-at-jwt-only",
+        "es256-p256-only",
+        "known-kid-only",
+        "jwks-etag-max-age-60",
+        "expired-jwks-fails-closed",
+        "unknown-kid-one-refresh",
+        "exact-authorization-profile",
+        "canonical-non-wildcard-scopes",
+        "auth-introspection-required",
+        "consumer-owned-http-spi",
+        "private-module-independent",
+        "confidential-client-body-binding",
+        "introspection-redirect-refused",
+        "claim-equivalence-required",
+        "issuer-routed-dual-authentication",
+        "auth-issuer-invalid-stops-fallback",
+        "foreign-issuer-legacy-fallback",
+        "duplicate-jwt-claim-rejected",
+        "consumer-domain-pdp-required",
+        "domain-subject-and-workspace-equivalence"
+      ]
+    },
+    {
+      "id": "denied-token-observation",
+      "rules": [
+        "finite-token-source-format-and-header-relation",
+        "bounded-unverified-expiry-hint-only",
+        "no-raw-token-claims-or-expiry-time",
+        "diagnostics-never-authorize-renew-or-downgrade"
+      ]
+    },
+    {
+      "id": "coalescing",
+      "rules": [
+        "in-flight-only",
+        "no-ttl-auth-cache",
+        "bearer-token-hashed-in-key",
+        "request-scope-separated",
+        "concurrent-identical-requests-share-one-hop",
+        "caller-cancellation-isolated-from-other-waiters",
+        "last-waiter-cancels-shared-hop",
+        "provider-owned-timeout-unchanged",
+        "finished-or-abandoned-result-not-cached",
+        "old-finish-cannot-delete-new-call",
+        "shared-panic-fails-closed-with-fixed-message"
+      ]
+    },
+    {
+      "id": "cors",
+      "rules": [
+        "exact-origin-allowlist",
+        "method-allowlist",
+        "header-allowlist",
+        "no-browser-credentials",
+        "unsupported-header-rejected"
+      ]
+    },
+    {
+      "id": "device-principal",
+      "rules": [
+        "device-headers-server-only",
+        "both-device-fields-required",
+        "device-auth-before-token-auth",
+        "browser-jwt-not-daemon-auth"
+      ]
+    }
   ],
   "source_checks": [
-    {"name":"surfaces","file":"internal/riidoaiserver/authorization.go","contains":["type RequestAuthorizer interface","type AuthorizationRequest struct","type StaticTokenCredential struct","type FallbackAuthorizer struct"]},
-    {"name":"resources","file":"internal/riidoaiserver/authorization.go","contains":["AuthorizationResourceAIAgentClient","AuthorizationResourceAgentCatalog","AuthorizationResourceComponentTaskEvents","AuthorizationResourceMetrics"]},
-    {"name":"static-token-safety","file":"internal/riidoaiserver/authorization.go","contains":["TokenSHA256","exactly one of token or token_sha256","subtle.ConstantTimeCompare","at least one scope is required"]},
-    {"name":"scope-candidates","file":"internal/riidoaiserver/authorization.go","contains":["ai-agent:*","task:\"+req.TaskID+\":stop","agent:\" + req.AgentID + \":\" + string(req.Action)"]},
-    {"name":"fallback","file":"internal/riidoaiserver/authorization.go","contains":["ErrAuthorizationUnauthenticated","continue","return AuthorizationResult{}, err"]},
-    {"name":"authorization-scheme-router","file":"internal/riidoaiserver/authorization_scheme.go","contains":["AuthorizationSchemeLegacyV1","AuthorizationSchemeAuthServiceV2","type AuthorizationSchemeSelector interface","type AuthorizationSchemeRouter struct","ErrAuthorizationSchemeUnavailable"]},
-    {"name":"authorization-scheme-counterexamples","file":"internal/riidoaiserver/authorization_scheme_test.go","contains":["TestAuthorizationSchemeRouterNeverDowngradesV2Failure","TestAuthorizationSchemeRouterPreservesLegacyV1","TestAuthorizationSchemeRouterFailsClosedWhenV2Unavailable","TestAuthorizationSchemeRouterFailsClosedForUnknownScheme"]},
-    {"name":"auth-issuer-scheme-selector","file":"internal/authpep/authorization_scheme_selector.go","contains":["type IssuerAuthorizationSchemeSelector struct","claimsConfiguredIssuer","AuthorizationSchemeAuthServiceV2","AuthorizationSchemeLegacyV1"]},
-    {"name":"auth-issuer-scheme-counterexamples","file":"internal/authpep/authorization_scheme_selector_test.go","contains":["TestIssuerAuthorizationSchemeSelectorOwnsConfiguredIssuer","duplicate issuer","TestIssuerAuthorizationSchemeSelectorLeavesOtherCredentialsToLegacy","foreign"]},
-    {"name":"jwt-pep","file":"internal/authpep/authorization_jwt.go","contains":["type JWTAccessTokenAuthorizer struct","ErrAuthorizationInvalidCredential","statusMatchesClaims","exactJWTAuthorizationScope","a.domain.Authorize"]},
-    {"name":"jwt-pep-counterexamples","file":"internal/authpep/authorization_jwt_test.go","contains":["TestJWTAccessTokenAuthorizerRejectsSubstitutionAndStopsFallback","TestJWTAccessTokenAuthorizerKeepsLegacyOpaqueAndForeignIssuerJWTPaths","TestJWTAccessTokenAuthorizerRejectsDomainPrincipalOrWorkspaceSubstitution","wildcard scope","introspection mismatch","foreign issuer"]},
-    {"name":"jwt-routing-counterexamples","file":"internal/authpep/authorization_jwt_routing_test.go","contains":["TestJWTAccessTokenAuthorizerNeverDowngradesConfiguredIssuer","TestDecodeExactJWTJSONRejectsDuplicateKeys","duplicate issuer","claims audience"]},
-    {"name":"jwks-adapter","file":"internal/authpep/authorization_jwks_http.go","contains":["type HTTPJWKSProvider struct","If-None-Match","application/jwk-set+json","max-age must be between 1 and 60 seconds"]},
-    {"name":"jwks-counterexamples","file":"internal/authpep/authorization_jwks_http_test.go","contains":["TestHTTPJWKSProviderCachesByETagAndRefreshesUnknownKID","TestHTTPJWKSProviderRejectsAlgorithmCoordinateAndCacheDrift"]},
-    {"name":"auth-introspection-adapter","file":"internal/authpep/introspection_http.go","contains":["type HTTPIntrospectionStatusResolver struct","signAuthClientRequest","auth introspection redirect refused","DisallowUnknownFields"]},
-    {"name":"auth-introspection-counterexamples","file":"internal/authpep/introspection_http_test.go","contains":["TestHTTPIntrospectionStatusResolverBindsClientPathBodyAndProfile","TestHTTPIntrospectionStatusResolverFailsClosedOnUntrustedResponse","TestHTTPIntrospectionStatusResolverRejectsRedirectAndDoesNotLeakSecrets"]},
-    {"name":"auth-client-composition","file":"cmd/riido_ai_server/authorizer_auth.go","contains":["NewHTTPIntrospectionStatusResolver","NewHTTPJWKSProvider","NewJWTAccessTokenAuthorizer","requires %s as the consumer-owned domain PDP"]},
-    {"name":"auth-scheme-composition","file":"cmd/riido_ai_server/authorizer_scheme.go","contains":["auth_service_v2 requires the legacy_v1 boundary","NewIssuerAuthorizationSchemeSelector","NewAuthorizationSchemeRouter"]},
-    {"name":"coalescing","file":"internal/riidoaiserver/authorization_coalescing.go","contains":["type CoalescingAuthorizer struct","joinOrStart","waitForCoalescedAuthorization"]},
-    {"name":"coalescing-tests","file":"internal/riidoaiserver/authorization_coalescing_test.go","contains":["TestCoalescingAuthorizerCollapsesConcurrentIdenticalRequests","TestCoalescingAuthorizerKeepsDifferentRequestsSeparate","TestCoalescingAuthorizerDoesNotExposeBearerTokenInKey"]},
-    {"name":"external-contract","file":"internal/riidoaiserver/external_authorizer.go","contains":["ExternalAuthorizerRequestSchemaVersion","ExternalAuthorizerResponseSchemaVersion","ExternalAuthorizerAPIKeyHeader","DisallowUnknownFields","io.LimitReader(resp.Body, 1<<20)"]},
-    {"name":"external-timeout-client","file":"internal/riidoaiserver/external_authorizer_client.go","contains":["externalAuthorizerHTTPClient","http.Client{Timeout: timeout}"]},
-    {"name":"external-observation","file":"internal/riidoaiserver/external_authorizer_observation.go","contains":["external_authorizer.authorize","event=external_authorizer_request","failure_stage","externalAuthorizerRetryable","Int64TraceAttribute"]},
-    {"name":"external-observation-tests","file":"internal/riidoaiserver/external_authorizer_observation_test.go","contains":["TestExternalHTTPAuthorizerUsesConfiguredTimeoutForDefaultClient","TestExternalHTTPAuthorizerTracesOutcomeWithoutRequestSecrets","TestExternalAuthorizerRetryabilityIsBounded"]},
-    {"name":"external-fail-closed-tests","file":"internal/riidoaiserver/external_authorizer_test.go","contains":["TestExternalHTTPAuthorizerMapsDeniedResponses","TestExternalHTTPAuthorizerFailsClosedOnProviderError","TestFallbackAuthorizerUsesNextOnlyForUnauthenticated"]},
-    {"name":"runtime-env","file":"cmd/riido_ai_server/env_names.go","contains":["envWebAllowedOrigins","RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS","envExternalAuthzTimeout","RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS","RIIDO_AI_SERVER_AUTH_ISSUER","RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET"]},
-    {"name":"runtime-origin-parser","file":"cmd/riido_ai_server/web_origin_config.go","contains":["parseWebAllowedOrigins","normalizeWebOrigin"]},
-    {"name":"token-header","file":"internal/riidoaiserver/server.go","contains":["aiAgentTokenHeader = \"X-Riido-Ai-Agent-Token\""]},
-    {"name":"token-transport","file":"internal/riidoaiserver/server_request_token.go","contains":["Header.Get(\"Authorization\")","strings.HasPrefix(got, \"Bearer \")"]},
-    {"name":"device-credential-transport","file":"internal/riidoaiserver/server_device_credential_auth.go","contains":["authorizeDeviceCredential","deviceIDHeader","deviceSecretHeader"]},
-    {"name":"cors","file":"internal/riidoaiserver/web_frontend_cors.go","contains":["webCORSAllowedMethods","webCORSAllowedHeaders","x-riido-ai-agent-token","webCORSHeadersAllowed"]},
-    {"name":"cors-tests","file":"internal/riidoaiserver/web_frontend_cors_test.go","contains":["Access-Control-Allow-Credentials","TestHTTPWebFrontendCORSRejectsUnsupportedPreflightHeader"]}
+    {
+      "name": "surfaces",
+      "file": "internal/riidoaiserver/authorization.go",
+      "contains": [
+        "type RequestAuthorizer interface",
+        "type AuthorizationRequest struct",
+        "type StaticTokenCredential struct",
+        "type FallbackAuthorizer struct"
+      ]
+    },
+    {
+      "name": "resources",
+      "file": "internal/riidoaiserver/authorization.go",
+      "contains": [
+        "AuthorizationResourceAIAgentClient",
+        "AuthorizationResourceAgentCatalog",
+        "AuthorizationResourceComponentTaskEvents",
+        "AuthorizationResourceMetrics"
+      ]
+    },
+    {
+      "name": "static-token-safety",
+      "file": "internal/riidoaiserver/authorization.go",
+      "contains": [
+        "TokenSHA256",
+        "exactly one of token or token_sha256",
+        "subtle.ConstantTimeCompare",
+        "at least one scope is required"
+      ]
+    },
+    {
+      "name": "scope-candidates",
+      "file": "internal/riidoaiserver/authorization.go",
+      "contains": [
+        "ai-agent:*",
+        "task:\"+req.TaskID+\":stop",
+        "agent:\" + req.AgentID + \":\" + string(req.Action)"
+      ]
+    },
+    {
+      "name": "fallback",
+      "file": "internal/riidoaiserver/authorization.go",
+      "contains": [
+        "ErrAuthorizationUnauthenticated",
+        "continue",
+        "return AuthorizationResult{}, err"
+      ]
+    },
+    {
+      "name": "authorization-scheme-router",
+      "file": "internal/riidoaiserver/authorization_scheme.go",
+      "contains": [
+        "AuthorizationSchemeLegacyV1",
+        "AuthorizationSchemeAuthServiceV2",
+        "type AuthorizationSchemeSelector interface",
+        "type AuthorizationSchemeRouter struct",
+        "ErrAuthorizationSchemeUnavailable"
+      ]
+    },
+    {
+      "name": "authorization-scheme-counterexamples",
+      "file": "internal/riidoaiserver/authorization_scheme_test.go",
+      "contains": [
+        "TestAuthorizationSchemeRouterNeverDowngradesV2Failure",
+        "TestAuthorizationSchemeRouterPreservesLegacyV1",
+        "TestAuthorizationSchemeRouterFailsClosedWhenV2Unavailable",
+        "TestAuthorizationSchemeRouterFailsClosedForUnknownScheme"
+      ]
+    },
+    {
+      "name": "auth-issuer-scheme-selector",
+      "file": "internal/authpep/authorization_scheme_selector.go",
+      "contains": [
+        "type IssuerAuthorizationSchemeSelector struct",
+        "claimsConfiguredIssuer",
+        "AuthorizationSchemeAuthServiceV2",
+        "AuthorizationSchemeLegacyV1"
+      ]
+    },
+    {
+      "name": "auth-issuer-scheme-counterexamples",
+      "file": "internal/authpep/authorization_scheme_selector_test.go",
+      "contains": [
+        "TestIssuerAuthorizationSchemeSelectorOwnsConfiguredIssuer",
+        "duplicate issuer",
+        "TestIssuerAuthorizationSchemeSelectorLeavesOtherCredentialsToLegacy",
+        "foreign"
+      ]
+    },
+    {
+      "name": "jwt-pep",
+      "file": "internal/authpep/authorization_jwt.go",
+      "contains": [
+        "type JWTAccessTokenAuthorizer struct",
+        "ErrAuthorizationInvalidCredential",
+        "statusMatchesClaims",
+        "exactJWTAuthorizationScope",
+        "a.domain.Authorize"
+      ]
+    },
+    {
+      "name": "jwt-pep-counterexamples",
+      "file": "internal/authpep/authorization_jwt_test.go",
+      "contains": [
+        "TestJWTAccessTokenAuthorizerRejectsSubstitutionAndStopsFallback",
+        "TestJWTAccessTokenAuthorizerKeepsLegacyOpaqueAndForeignIssuerJWTPaths",
+        "TestJWTAccessTokenAuthorizerRejectsDomainPrincipalOrWorkspaceSubstitution",
+        "wildcard scope",
+        "introspection mismatch",
+        "foreign issuer"
+      ]
+    },
+    {
+      "name": "jwt-routing-counterexamples",
+      "file": "internal/authpep/authorization_jwt_routing_test.go",
+      "contains": [
+        "TestJWTAccessTokenAuthorizerNeverDowngradesConfiguredIssuer",
+        "TestDecodeExactJWTJSONRejectsDuplicateKeys",
+        "duplicate issuer",
+        "claims audience"
+      ]
+    },
+    {
+      "name": "jwks-adapter",
+      "file": "internal/authpep/authorization_jwks_http.go",
+      "contains": [
+        "type HTTPJWKSProvider struct",
+        "If-None-Match",
+        "application/jwk-set+json",
+        "max-age must be between 1 and 60 seconds"
+      ]
+    },
+    {
+      "name": "jwks-counterexamples",
+      "file": "internal/authpep/authorization_jwks_http_test.go",
+      "contains": [
+        "TestHTTPJWKSProviderCachesByETagAndRefreshesUnknownKID",
+        "TestHTTPJWKSProviderRejectsAlgorithmCoordinateAndCacheDrift"
+      ]
+    },
+    {
+      "name": "auth-introspection-adapter",
+      "file": "internal/authpep/introspection_http.go",
+      "contains": [
+        "type HTTPIntrospectionStatusResolver struct",
+        "signAuthClientRequest",
+        "auth introspection redirect refused",
+        "DisallowUnknownFields"
+      ]
+    },
+    {
+      "name": "auth-introspection-counterexamples",
+      "file": "internal/authpep/introspection_http_test.go",
+      "contains": [
+        "TestHTTPIntrospectionStatusResolverBindsClientPathBodyAndProfile",
+        "TestHTTPIntrospectionStatusResolverFailsClosedOnUntrustedResponse",
+        "TestHTTPIntrospectionStatusResolverRejectsRedirectAndDoesNotLeakSecrets"
+      ]
+    },
+    {
+      "name": "auth-client-composition",
+      "file": "cmd/riido_ai_server/authorizer_auth.go",
+      "contains": [
+        "NewHTTPIntrospectionStatusResolver",
+        "NewHTTPJWKSProvider",
+        "NewJWTAccessTokenAuthorizer",
+        "requires %s as the consumer-owned domain PDP"
+      ]
+    },
+    {
+      "name": "auth-scheme-composition",
+      "file": "cmd/riido_ai_server/authorizer_scheme.go",
+      "contains": [
+        "auth_service_v2 requires the legacy_v1 boundary",
+        "NewIssuerAuthorizationSchemeSelector",
+        "NewAuthorizationSchemeRouter"
+      ]
+    },
+    {
+      "name": "coalescing",
+      "file": "internal/riidoaiserver/authorization_coalescing.go",
+      "contains": [
+        "type CoalescingAuthorizer struct",
+        "joinOrStart",
+        "waitForCoalescedAuthorization"
+      ]
+    },
+    {
+      "name": "coalescing-tests",
+      "file": "internal/riidoaiserver/authorization_coalescing_test.go",
+      "contains": [
+        "TestCoalescingAuthorizerCollapsesConcurrentIdenticalRequests",
+        "TestCoalescingAuthorizerKeepsDifferentRequestsSeparate",
+        "TestCoalescingAuthorizerDoesNotExposeBearerTokenInKey"
+      ]
+    },
+    {
+      "name": "external-contract",
+      "file": "internal/riidoaiserver/external_authorizer.go",
+      "contains": [
+        "ExternalAuthorizerRequestSchemaVersion",
+        "ExternalAuthorizerResponseSchemaVersion",
+        "ExternalAuthorizerAPIKeyHeader",
+        "DisallowUnknownFields",
+        "io.LimitReader(resp.Body, 1<<20)"
+      ]
+    },
+    {
+      "name": "external-timeout-client",
+      "file": "internal/riidoaiserver/external_authorizer_client.go",
+      "contains": [
+        "externalAuthorizerHTTPClient",
+        "http.Client{Timeout: timeout}"
+      ]
+    },
+    {
+      "name": "external-observation",
+      "file": "internal/riidoaiserver/external_authorizer_observation.go",
+      "contains": [
+        "external_authorizer.authorize",
+        "event=external_authorizer_request",
+        "failure_stage",
+        "externalAuthorizerRetryable",
+        "Int64TraceAttribute",
+        "failure_kind",
+        "response_error",
+        "upstream_http_status"
+      ]
+    },
+    {
+      "name": "external-observation-tests",
+      "file": "internal/riidoaiserver/external_authorizer_observation_test.go",
+      "contains": [
+        "TestExternalHTTPAuthorizerUsesConfiguredTimeoutForDefaultClient",
+        "TestExternalHTTPAuthorizerTracesOutcomeWithoutRequestSecrets",
+        "TestExternalAuthorizerRetryabilityIsBounded"
+      ]
+    },
+    {
+      "name": "external-fail-closed-tests",
+      "file": "internal/riidoaiserver/external_authorizer_test.go",
+      "contains": [
+        "TestExternalHTTPAuthorizerMapsDeniedResponses",
+        "TestExternalHTTPAuthorizerFailsClosedOnProviderError",
+        "TestFallbackAuthorizerUsesNextOnlyForUnauthenticated"
+      ]
+    },
+    {
+      "name": "external-failure-private-types",
+      "file": "internal/riidoaiserver/external_authorizer_failure.go",
+      "contains": [
+        "type externalAuthorizerFailure struct",
+        "Unwrap() error",
+        "externalAuthorizerFailureFields",
+        "upstream_http",
+        "invalid_response"
+      ]
+    },
+    {
+      "name": "external-failure-private-counterexamples",
+      "file": "internal/riidoaiserver/external_authorizer_failure_privacy_test.go",
+      "contains": [
+        "TestExternalAuthorizerFailureDiagnosticsAreTypedBoundedAndPrivate",
+        "externalAuthCanary",
+        "upstream_http_status"
+      ]
+    },
+    {
+      "name": "external-failure-semantics-counterexamples",
+      "file": "internal/riidoaiserver/external_authorizer_failure_semantics_test.go",
+      "contains": [
+        "TestExternalAuthorizerTypedFailurePreservesCancellationDeadlineAndDenial",
+        "TestExternalAuthorizerDiagnosticAllowlistRejectsInjectedValues"
+      ]
+    },
+    {
+      "name": "private-dependency-http-counterexample",
+      "file": "internal/riidoaiserver/authorization_dependency_response_test.go",
+      "contains": [
+        "TestAuthorizationDependencyResponseIsPrivateAndPreservesStatus",
+        "authorization dependency unavailable"
+      ]
+    },
+    {
+      "name": "runtime-env",
+      "file": "cmd/riido_ai_server/env_names.go",
+      "contains": [
+        "envWebAllowedOrigins",
+        "RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS",
+        "envExternalAuthzTimeout",
+        "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_TIMEOUT_SECONDS",
+        "RIIDO_AI_SERVER_AUTH_ISSUER",
+        "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET"
+      ]
+    },
+    {
+      "name": "runtime-origin-parser",
+      "file": "cmd/riido_ai_server/web_origin_config.go",
+      "contains": [
+        "parseWebAllowedOrigins",
+        "normalizeWebOrigin"
+      ]
+    },
+    {
+      "name": "denied-token-diagnostic-counterexamples",
+      "file": "internal/riidoaiserver/authorization_token_observation_test.go",
+      "contains": [
+        "TestAuthorizationDenialLogsFiniteTokenHintsWithoutChangingDecision"
+      ]
+    },
+    {
+      "name": "token-header",
+      "file": "internal/riidoaiserver/server.go",
+      "contains": [
+        "aiAgentTokenHeader = \"X-Riido-Ai-Agent-Token\""
+      ]
+    },
+    {
+      "name": "token-transport",
+      "file": "internal/riidoaiserver/server_request_token.go",
+      "contains": [
+        "Header.Get(\"Authorization\")",
+        "strings.HasPrefix(got, \"Bearer \")"
+      ]
+    },
+    {
+      "name": "device-credential-transport",
+      "file": "internal/riidoaiserver/server_device_credential_auth.go",
+      "contains": [
+        "authorizeDeviceCredential",
+        "deviceIDHeader",
+        "deviceSecretHeader"
+      ]
+    },
+    {
+      "name": "cors",
+      "file": "internal/riidoaiserver/web_frontend_cors.go",
+      "contains": [
+        "webCORSAllowedMethods",
+        "webCORSAllowedHeaders",
+        "x-riido-ai-agent-token",
+        "webCORSHeadersAllowed"
+      ]
+    },
+    {
+      "name": "cors-tests",
+      "file": "internal/riidoaiserver/web_frontend_cors_test.go",
+      "contains": [
+        "Access-Control-Allow-Credentials",
+        "TestHTTPWebFrontendCORSRejectsUnsupportedPreflightHeader"
+      ]
+    },
+    {
+      "name": "denied-token-diagnostic-untrusted-bounds",
+      "file": "internal/riidoaiserver/authorization_token_observation_bounds_test.go",
+      "contains": [
+        "TestAuthorizationTokenDiagnosticsBoundUntrustedInput"
+      ]
+    },
+    {
+      "name": "coalescing-cancellation-owner",
+      "file": "internal/riidoaiserver/authorization_coalescing_owner_cancel_test.go",
+      "contains": [
+        "TestCoalescingAuthorizerOwnerCancelDoesNotCancelLiveWaiter"
+      ]
+    },
+    {
+      "name": "coalescing-cancellation-lifecycle",
+      "file": "internal/riidoaiserver/authorization_coalescing_lifecycle_test.go",
+      "contains": [
+        "TestCoalescingAuthorizerLastWaiterCancelsAndLateFinishCannotEvictNewCall",
+        "TestCoalescingAuthorizerPanicReleasesWaitersWithoutDetails"
+      ]
+    },
+    {
+      "name": "external-http-phase-observation",
+      "file": "internal/riidoaiserver/external_authorizer_http_observation.go",
+      "contains": [
+        "connection_wait",
+        "response_headers",
+        "first_byte_elapsed_ms",
+        "value = -1"
+      ]
+    },
+    {
+      "name": "external-http-phase-regressions",
+      "file": "internal/riidoaiserver/external_authorizer_http_observation_test.go",
+      "contains": [
+        "TestExternalHTTPAuthorizerDistinguishesHeaderAndBodyDeadline"
+      ]
+    },
+    {
+      "name": "external-http-phase-callbacks",
+      "file": "internal/riidoaiserver/external_authorizer_http_trace.go",
+      "contains": [
+        "httptrace.ClientTrace",
+        "GotFirstResponseByte",
+        "TLSHandshakeDone"
+      ]
+    },
+    {
+      "name": "external-http-reuse-regression",
+      "file": "internal/riidoaiserver/external_authorizer_http_reuse_test.go",
+      "contains": [
+        "TestExternalHTTPAuthorizerObservesReusedConnection"
+      ]
+    },
+    {
+      "name": "external-http-concurrency-regression",
+      "file": "internal/riidoaiserver/external_authorizer_http_callbacks_test.go",
+      "contains": [
+        "TestExternalAuthorizerHTTPCallbacksArePrivateAndConcurrent"
+      ]
+    }
   ],
   "loop": {
-    "observation": "Production JWT verification existed, but provider ownership was implicit across the JWT authorizer and a shared fallback chain, making the legacy_v1 versus auth_service_v2 assembly boundary harder for agents and operators to discover.",
+    "observation": "Production JWT verification existed, but provider ownership was implicit across the JWT authorizer and a shared fallback chain, making the legacy_v1 versus auth_service_v2 assembly boundary harder for agents and operators to discover. Production also observed two external-authorizer failures completing in 2ms with outcome=error; current logs could not distinguish transport, upstream status and invalid response. Production observed repeated client task subscription401s whose selected credential transport and unverified expiry shape were unavailable. Staging HTTP503 traces included request cancellation and external-authorizer2s timeouts. An isolated regression reproduces a cancelled first request poisoning another live identical waiter. Historical 2s timeout spans do not identify DNS, connection, TLS, headers or body delay; controlled synthetic authorization probes currently complete in 7-83ms, and historical upstream root cause remains unconfirmed.",
     "hypothesis": "An explicit scheme selector port and router can preserve legacy behavior while making Auth issuer ownership and no-downgrade semantics independently testable without granting trust to unverified claims.",
-    "execute": "Add the legacy_v1/auth_service_v2 scheme coordinate, issuer classifier adapter and fail-closed router; compose legacy fallback only inside legacy_v1 and keep the existing JWT/JWKS/introspection/domain PEP inside auth_service_v2.",
-    "evaluate": "Counterexamples prove legacy requests are unchanged, configured Auth issuer and duplicate-issuer tokens select v2, foreign or opaque credentials select v1, v2 denial never invokes v1, and missing or unknown v2 providers fail closed. Existing algorithm, kid, claim, JWKS, introspection and domain-substitution tests remain in the same evidence chain.",
-    "retrospective": "Control-plane now expresses provider ownership at the composition root while retaining Riido 1.0 authentication. Production gate activation remains a separate live valid-token and revoked-replay evidence decision."
+    "execute": "Add the legacy_v1/auth_service_v2 scheme coordinate, issuer classifier adapter and fail-closed router; compose legacy fallback only inside legacy_v1 and keep the existing JWT/JWKS/introspection/domain PEP inside auth_service_v2. Add private typed failures with Unwrap and fixed error text, failure_kind=transport/upstream_http/invalid_response/internal/unclassified/none, response_error=decode/schema/contract/none and numeric upstream_http_status100..599 or0 when absent. Log/span attributes use only these values; generic HTTP503 authorization responses use the fixed authorization dependency unavailable message. Add finite token_source/token_format/expiry_hint/token_header_relation only to authorization-failure logs. Decode at most4096 payload characters from tokens bounded to8192 bytes; no token, raw claim, exp timestamp, issuer or subject is emitted. Desktop account connection: POST /v2/desktop/workspaces/{workspace_id}/devices/connect accepts an existing device_id with X-Riido-Device-Secret in addition to the current user's X-Riido-AI-Agent-Token. Both user workspace authorization and device possession must pass; device proof never replaces user authorization. This connects the actual running device even if the shared machine UUID changed, preserving the device ID, owner, secret, runtime snapshots and existing account grants. Missing or invalid proof is rejected without falling back to machine-ID creation. Legacy machine_id requests remain supported. Desktop logout retires pending session work without revoking durable connection grants. RIID-5821: use an in-flight shared context retaining request values but independent of individual caller cancellation; reference-count waiters and cancel/remove on last departure. Keep provider-owned timeout, no new retry or TTL cache. Finish conditionally by call identity and release panicking shared work with a fixed private failure. Add finite HTTP network phase and nonnegative observed timing fields only. Missing timing is -1, not zero. Do not record addresses, hosts, headers, tokens, payloads or arbitrary errors; preserve configured timeout, single attempt and authorization decisions.",
+    "evaluate": "Counterexamples prove legacy requests are unchanged, configured Auth issuer and duplicate-issuer tokens select v2, foreign or opaque credentials select v1, v2 denial never invokes v1, and missing or unknown v2 providers fail closed. Existing algorithm, kid, claim, JWKS, introspection and domain-substitution tests remain in the same evidence chain. Secret-bearing fake URL/body/schema/role/credential counterexamples must stay absent from logs, span errors/attributes and HTTP503 responses. Exact401/403 sentinels, cancellation/deadline identity, existing status decisions, timeout and retryability remain unchanged. Denied synthetic expired/future/malformed/opaque/oversized and conflicting-header fixtures preserve401 and existing explicit-header precedence while canaries stay absent. Expiry hints are unverified shape hints, never verification or authorization facts. Desktop HTTP regression tests exercise owner/guest account round trips after machine identity drift and reject missing or invalid user/device proof. Persistent-store regression tests verify account grants survive reopening without rotating the credential or changing the original owner. Cancelled owners must return cancellation while live followers succeed from one upstream call; last-waiter cancellation reaches upstream, late abandoned completion cannot evict a newer call, caller deadline wins a ready result, and panic text must never escape. This fixes a reproducible concurrency defect without proving the historical upstream timeout root cause. Exercise actual HTTP header/body deadlines, reused connections, missing custom-transport hooks, concurrent callbacks, and privacy canaries. The final finite phase is diagnostic evidence, not proof that a historical failure had the same cause.",
+    "retrospective": "Control-plane now expresses provider ownership at the composition root while retaining Riido 1.0 authentication. Production gate activation remains a separate live valid-token and revoked-replay evidence decision. New diagnostics distinguish future failures without establishing the root cause of the historical2ms503 observations;401client denials remain separate from dependency503s. A client renewal/reconnect defect can be reproduced separately; historical401s are not called expired-token failures without fresh observations, and diagnostics alone do not resolve the frontend defect."
   },
-  "non_goals": ["automatic production activation", "centralizing tenant/resource policy in Auth", "Terraform state", "secret values", "production token values", "generated frontend implementation"]
+  "non_goals": [
+    "automatic production activation",
+    "centralizing tenant/resource policy in Auth",
+    "Terraform state",
+    "secret values",
+    "production token values",
+    "generated frontend implementation"
+  ]
 }

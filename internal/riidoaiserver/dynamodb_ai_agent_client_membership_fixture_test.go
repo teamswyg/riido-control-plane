@@ -10,7 +10,11 @@ func (f *snapshotDynamoDBFixture) membershipCommit(t *testing.T, body []byte, w 
 	t.Helper()
 	var payload struct {
 		TransactItems []struct {
-			Put struct{ Item map[string]map[string]string }
+			Put struct {
+				Item                      map[string]map[string]string
+				ConditionExpression       string
+				ExpressionAttributeValues map[string]map[string]string
+			}
 		}
 	}
 	if err := json.Unmarshal(body, &payload); err != nil {
@@ -21,6 +25,17 @@ func (f *snapshotDynamoDBFixture) membershipCommit(t *testing.T, body []byte, w 
 	if f.failMembershipCommit {
 		http.Error(w, `{"__type":"TransactionCanceledException"}`, http.StatusBadRequest)
 		return
+	}
+	for _, action := range payload.TransactItems {
+		put := action.Put
+		if put.ConditionExpression == "version = :expected" || put.ConditionExpression == "attribute_not_exists(version) OR version = :expected" {
+			expected := put.ExpressionAttributeValues[":expected"]["N"]
+			current := f.items[dynamoDBAIAgentClientSnapshotSK]["version"]["N"]
+			if (current == "" && expected != "0") || (current != "" && current != expected) {
+				http.Error(w, `{"__type":"TransactionCanceledException"}`, http.StatusBadRequest)
+				return
+			}
+		}
 	}
 	for _, action := range payload.TransactItems {
 		f.items[dynamoDBStringValue(action.Put.Item, "sk")] = action.Put.Item

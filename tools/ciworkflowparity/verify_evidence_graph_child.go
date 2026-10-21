@@ -24,7 +24,7 @@ func verifyEvidenceGraphWorkflow(repoRoot string, child boundedChild) bool {
 	}
 	return err == nil && value.SourceRevision == "cbcbbe9e9e612011836c622c300a3b6cafa0f638" &&
 		value.Workflow == ".github/workflows/evidence-graph.yml" &&
-		value.WorkflowSHA256 == "518ada12cd1754f1550ab008d1782192b30da2d2c3674427c20e3b63f1ba6710" &&
+		value.WorkflowSHA256 == "627d9e35de54267a0f38f42a1d97f7fc5900167a6cdd3eb99aa605cf1abab158" &&
 		digest(raw) == value.WorkflowSHA256 && value.WorkflowName == "Evidence Graph" &&
 		value.Job == "evidence-graph" && value.TrackedWorkflowCount == 56 &&
 		containsAll(string(raw), required)

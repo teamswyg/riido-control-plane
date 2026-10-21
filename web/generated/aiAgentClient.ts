@@ -4,6 +4,40 @@
 import type { QueryClient, UseMutationOptions, UseQueryOptions } from '@/lib/react-query';
 
 /**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각과 서버 응답 시각입니다. 웹 온보딩이 앱 연결을 확인할 때 씁니다.
+ */
+export interface AIAgentDesktopPresenceResponse {
+  /**
+   * 서버가 이 응답을 만든 시각입니다. 클라이언트는 브라우저 시계 대신 이 값으로 비교합니다.
+   */
+  checked_at: string;
+  /**
+   * 같은 계정이 데스크톱 앱에 마지막으로 접속한 서버 시각입니다. 접속 기록이 없으면 생략합니다.
+   */
+  last_seen_at?: string;
+}
+
+/**
+ * RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.
+ */
+export interface AIAgentExecutionContext {
+  diagnostic_code: "none" | "user_cancelled" | "run_cancelled" | "run_timeout" | "workspace_preparation_failed" | "session_scope_conflict" | "host_verification_failed" | "provider_blocked" | "provider_failed" | "process_aborted" | "unknown";
+  next_action: "none" | "check_workspace" | "review_session" | "review_result" | "check_provider" | "review_permissions";
+  verification_status: "not_configured" | "not_run" | "pending" | "passed" | "failed" | "cancelled" | "unknown";
+  workspace_kind: "unknown" | "isolated" | "repository_clone" | "assignment_worktree" | "native_resume";
+}
+
+/**
+ * 온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.
+ */
+export type AIAgentOnboardingLocale = "ko" | "en";
+
+/**
+ * 앱 온보딩 첫 작업 결과 템플릿 3종입니다. 결과 본문은 서버가 가진 승인된 문구를 사용합니다.
+ */
+export type AIAgentOnboardingTaskTemplateKey = "schedule" | "interview" | "launch";
+
+/**
  * task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.
  */
 export interface AIAgentTaskActionResponse {
@@ -12,6 +46,8 @@ export interface AIAgentTaskActionResponse {
   assignment_id?: string;
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
+  confirmation_reason?: "answer_required" | "approval_required";
+  execution_context?: AIAgentExecutionContext;
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   message: string;
   /**
@@ -44,6 +80,10 @@ export interface AIAgentTaskThreadAgentSnapshot {
   model_label?: string;
   name?: string;
   owner_principal_id?: string;
+  /**
+   * thread snapshot 시점의 profile 색상입니다.
+   */
+  profile_color?: AgentProfileColor;
   profile_thumbnail_url?: string;
   runtime_kind?: RuntimeKind;
   tmp_color?: string;
@@ -56,6 +96,7 @@ export interface AIAgentTaskThreadAgentSnapshot {
  */
 export interface AIAgentTaskThreadCollectionResponse {
   active_stream?: AIAgentTaskThreadStreamLink;
+  assigned_agent_ids: string[];
   schema_version: string;
   task_id: string;
   threads: AIAgentTaskThreadRecord[];
@@ -80,6 +121,77 @@ export interface AIAgentTaskThreadFailureDiagnostics {
 }
 
 /**
+ * v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.
+ */
+export interface AIAgentTaskThreadHistoryCollectionResponse {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  /**
+   * agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.
+   */
+  agent_snapshots?: Record<string, AIAgentTaskThreadAgentSnapshot>;
+  assigned_agent_ids: string[];
+  schema_version: string;
+  task_id: string;
+  threads: AIAgentTaskThreadHistoryRecord[];
+}
+
+/**
+ * v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.
+ */
+export interface AIAgentTaskThreadHistoryMessage {
+  assignment_id?: string;
+  body?: string;
+  comment_kind?: AgentTaskCommentKind;
+  /**
+   * Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.
+   */
+  display_message?: string;
+  message_id: string;
+  observed_at?: string;
+  result_message?: string;
+  role: AIAgentTaskThreadMessageRole;
+  run_id?: string;
+  seq?: number;
+  source_message_id?: string;
+}
+
+/**
+ * v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.
+ */
+export interface AIAgentTaskThreadHistoryRecord {
+  active_stream?: AIAgentTaskThreadStreamLink;
+  agent_id: string;
+  /**
+   * agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다.
+   */
+  agent_snapshot_id?: string;
+  assignment_id?: string;
+  assignment_state: AgentAssignmentState;
+  completed_at?: string;
+  /**
+   * 같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다.
+   */
+  conversation_id: string;
+  execution_context?: AIAgentExecutionContext;
+  failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
+  messages: AIAgentTaskThreadHistoryMessage[];
+  /**
+   * 후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다.
+   */
+  parent_thread_id?: string;
+  run_id: string;
+  started_at?: string;
+  task_id: string;
+  thread_id: string;
+  work_status: AgentWorkStatus;
+}
+
+/**
+ * v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.
+ */
+export type AIAgentTaskThreadMessageRole = "user" | "agent" | "progress";
+
+/**
  * task 화면에 표시할 AI Agent thread의 cold record입니다.
  */
 export interface AIAgentTaskThreadRecord {
@@ -89,6 +201,8 @@ export interface AIAgentTaskThreadRecord {
   assignment_state: AgentAssignmentState;
   comment_kind: AgentTaskCommentKind;
   completed_at?: string;
+  confirmation_reason?: "answer_required" | "approval_required";
+  execution_context?: AIAgentExecutionContext;
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   lines: AgentThreadProgressLine[];
   message: string;
@@ -181,6 +295,10 @@ export interface AgentClientRecord {
   model_label?: string;
   name: string;
   owner_principal_id: string;
+  /**
+   * agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다.
+   */
+  profile_color?: AgentProfileColor;
   profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
@@ -227,6 +345,10 @@ export interface AgentClientRecordV2 {
   model_label?: string;
   name: string;
   owner_principal_id: string;
+  /**
+   * agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다.
+   */
+  profile_color: AgentProfileColor;
   profile_thumbnail_url?: string;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
@@ -241,6 +363,63 @@ export interface AgentClientRecordV2 {
    * agent가 소속된 workspace id입니다. v2에서는 URL path의 workspace_id로 서버가 stamp합니다.
    */
   workspace_id: string;
+}
+
+/**
+ * AgentDashboardDay 타입입니다.
+ */
+export interface AgentDashboardDay {
+  completed: number;
+  date: string;
+}
+
+/**
+ * AgentDashboardResponse 타입입니다.
+ */
+export interface AgentDashboardResponse {
+  active_days: number;
+  activity: AgentDashboardDay[];
+  activity_completed: number;
+  activity_end: string;
+  activity_start: string;
+  agent_id: string;
+  completed_runs: number;
+  confirmation_count: number;
+  current?: AgentDashboardTask;
+  has_next_page: boolean;
+  history: AgentDashboardTask[];
+  history_durable: boolean;
+  observed_since?: string;
+  page: number;
+  page_size: number;
+  queue: AgentDashboardTask[];
+  schema_version: string;
+  scope: string;
+  time_zone: string;
+  total: number;
+  waiting_count: number;
+  work_status: string;
+}
+
+/**
+ * AgentDashboardTask 타입입니다.
+ */
+export interface AgentDashboardTask {
+  agent_id: string;
+  assignment_id: string;
+  confirmation_reason?: string;
+  created_by?: string;
+  duration_seconds?: number;
+  ended_at?: string;
+  key_number: string;
+  message: string;
+  queue_position: number;
+  queued_at: string;
+  run_id: string;
+  started_at?: string;
+  state: string;
+  task_id: string;
+  title: string;
 }
 
 /**
@@ -321,6 +500,11 @@ export interface AgentOnboardingFixtureListResponse {
 }
 
 /**
+ * AI Agent profile 색상 4종입니다.
+ */
+export type AgentProfileColor = "blue" | "orange" | "green" | "purple";
+
+/**
  * 브라우저가 S3 POST upload form에 그대로 포함해야 하는 name/value field입니다.
  */
 export interface AgentProfileThumbnailUploadFormField {
@@ -360,6 +544,28 @@ export interface AgentProfileThumbnailUploadResponse {
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
 
 /**
+ * 배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.
+ */
+export interface AgentTaskNotificationEvent {
+  agent_id: string;
+  assignment_id: string;
+  assignment_state: AgentAssignmentState;
+  confirmation_reason?: "answer_required" | "approval_required";
+  created_by: string;
+  event_id: string;
+  event_type: "agent_task_notification";
+  notification_type: "result_ready" | "answer_required" | "approval_required" | "failed";
+  occurred_at: string;
+  recipient_principal_id: string;
+  run_id: string;
+  schema_version: string;
+  task_id: string;
+  team_id?: string;
+  work_status: AgentWorkStatus;
+  workspace_id: string;
+}
+
+/**
  * 활성 task thread에 추가된 AI Agent 진행 상태를 client SSE로 전달하는 event입니다.
  */
 export interface AgentThreadProgressEvent {
@@ -382,6 +588,10 @@ export interface AgentThreadProgressEvent {
  * daemon이 batch로 보고한 runtime 진행 메시지 한 줄입니다.
  */
 export interface AgentThreadProgressLine {
+  /**
+   * Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.
+   */
+  display_message?: string;
   message: string;
   message_key?: string;
   observed_at?: string;
@@ -406,7 +616,9 @@ export interface AgentWorkStatusChangedEvent {
   assignment_id?: string;
   assignment_state?: AgentAssignmentState;
   comment_kind?: AgentTaskCommentKind;
+  confirmation_reason?: "answer_required" | "approval_required";
   event_type: "agent_work_status_changed";
+  execution_context?: AIAgentExecutionContext;
   failure_diagnostics?: AIAgentTaskThreadFailureDiagnostics;
   /**
    * terminal 작업 상태 변경 시 전달되는 최종 결과 본문입니다. 진행 로그 SSE와 분리해 결과 영역 갱신에 사용합니다.
@@ -420,10 +632,13 @@ export interface AgentWorkStatusChangedEvent {
 }
 
 /**
- * task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.
+ * 작업 배정 요청. recovery_policy는 실행 전 검증에 한정된 유한 복구 예산이며 명시적 fallback은 서버가 같은 소유자의 같은 device/model inventory 및 권한을 검증한 경우에만 허용한다.
  */
 export interface AssignAIAgentTaskRequest {
   agent_id: string;
+  instruction?: string;
+  recovery_policy?: ProviderRecoveryPolicy;
+  request_id?: string;
 }
 
 /**
@@ -434,6 +649,10 @@ export interface AssignedAgentProfile {
    * agent profile_thumbnail_url에서 파생된 표시용 이미지 URL입니다.
    */
   avatar_url?: string;
+  /**
+   * 배정된 Agent의 고정 profile 색상입니다. tmp_color와 독립적으로 항상 내려갑니다.
+   */
+  profile_color: AgentProfileColor;
   /**
    * fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452.
    */
@@ -492,7 +711,29 @@ export type ClientKind = "web" | "desktop_webview";
 /**
  * web과 desktop webview client가 소비하는 SSE event union입니다.
  */
-export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent;
+export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent;
+
+/**
+ * 앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.
+ */
+export interface CompleteAIAgentOnboardingTaskRequest {
+  /**
+   * 온보딩으로 깨운 agent의 안정 식별자입니다.
+   */
+  agent_id: string;
+  /**
+   * 완료 문구 언어입니다. 생략하면 ko입니다.
+   */
+  locale?: AIAgentOnboardingLocale;
+  /**
+   * 같은 완료 요청을 다시 보낼 때 쓰는 idempotency key입니다. 같은 값이면 기존 결과를 돌려줍니다.
+   */
+  request_id?: string;
+  /**
+   * 완료 결과 템플릿입니다.
+   */
+  template_key: AIAgentOnboardingTaskTemplateKey;
+}
 
 /**
  * agent 권한으로 접근 가능한 daemon start/restart/stop command 요청입니다. reason은 audit 표시용이며 화면 표시 정책은 client가 결정합니다.
@@ -562,6 +803,44 @@ export interface CreateAgentProfileThumbnailUploadRequest {
 }
 
 /**
+ * Fixture 전용 agent 생성 요청입니다. 기존 agent 설정 7개 필드를 그대로 사용하고, 응답 유실에 대비한 optional request_id만 추가합니다. 같은 소유자·workspace·operation 범위에서 같은 request_id와 전체 payload/fixture를 서버의 최초 생성 시도 timestamp부터 24시간 동안 재전송하면 같은 agent_id를 HTTP 201로 반환합니다. 일반 생성 요청에는 request_id를 추가하지 않습니다.
+ */
+export interface CreateOnboardingAgentRequest {
+  /**
+   * agent 추가 화면의 설명 입력값입니다.
+   */
+  description?: string;
+  /**
+   * agent 추가 화면의 지침 textarea 입력값입니다.
+   */
+  instruction?: string;
+  /**
+   * 선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다.
+   */
+  model_id?: string;
+  /**
+   * agent 추가 화면의 이름 입력값입니다.
+   */
+  name: string;
+  /**
+   * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
+   */
+  profile_thumbnail_url?: string;
+  /**
+   * 선택적인 생성 재시도 식별자입니다. ASCII 영숫자와 . _ : - 만 1~128바이트 허용합니다. 클라이언트는 동일 생성 의도와 전체 payload에 같은 값을 유지하며 최초 생성 요청을 시작한 시점부터 24시간 이내에만 재시도 보장을 사용합니다. 생략 시 기존처럼 각 요청이 별도의 agent를 생성합니다.
+   */
+  request_id?: string;
+  /**
+   * agent가 사용할 런타임 dropdown 선택값입니다.
+   */
+  runtime_id: string;
+  /**
+   * agent 공개 범위 radio 입력값입니다.
+   */
+  visibility: AgentVisibility;
+}
+
+/**
  * runtime 설정 화면에서 표시하는 desktop local daemon online/offline 상태입니다.
  */
 export type DaemonAvailability = "online" | "offline";
@@ -575,6 +854,17 @@ export type DaemonControlAction = "start" | "restart" | "stop";
  * daemon command가 접수된 뒤 client가 버튼/상태를 표시할 때 사용하는 제어 상태입니다.
  */
 export type DaemonControlState = "idle" | "starting" | "restarting" | "stopping" | "failed";
+
+/**
+ * Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.
+ */
+export interface DeleteAIAgentTaskAgentAssignmentRequest {
+  /**
+   * Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained.
+   */
+  assignment_id?: string;
+  reason?: string;
+}
 
 /**
  * agent 삭제로 정리된 queued/running task 수를 포함한 응답입니다.
@@ -694,6 +984,42 @@ export type ProviderDiagnosticCode = "none" | "executable-missing" | "login-requ
 export type ProviderHealthStatus = "healthy" | "degraded" | "unavailable" | "unknown";
 
 /**
+ * ProviderRecoveryCandidate 타입입니다.
+ */
+export interface ProviderRecoveryCandidate {
+  /**
+   * Explicit model present in target runtime inventory; max 128 bytes; no whitespace/control.
+   */
+  model_id: string;
+  /**
+   * claude/codex/cursor/openclaw; validated against same owner and device inventory.
+   */
+  provider: string;
+}
+
+/**
+ * ProviderRecoveryPolicy 타입입니다.
+ */
+export interface ProviderRecoveryPolicy {
+  /**
+   * At most3 distinct providers, ordered; requires max_switches1.
+   */
+  fallbacks?: ProviderRecoveryCandidate[];
+  /**
+   * Including initial attempt; default3, bounds1..3.
+   */
+  max_attempts?: number;
+  /**
+   * Pre-dispatch recovery only; default30, bounds1..60.
+   */
+  max_elapsed_seconds?: number;
+  /**
+   * 0 by default; max1; explicit nonempty fallbacks required for1.
+   */
+  max_switches?: number;
+}
+
+/**
  * client에 노출되는 runtime online/offline 상태입니다.
  */
 export type RuntimeAvailability = "online" | "offline";
@@ -774,10 +1100,18 @@ export interface TaskAgentParticipantRecord {
   agent_id: string;
   is_owned_by_viewer: boolean;
   /**
-   * At least one active execution for this participant requires stopping before removal.
+   * At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID.
    */
   is_stop_required: boolean;
+  /**
+   * Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained.
+   */
+  latest_assignment_id?: string;
   name: string;
+  /**
+   * 참여자 Agent의 고정 profile 색상입니다.
+   */
+  profile_color: AgentProfileColor;
   profile_thumbnail_url?: string;
 }
 
@@ -786,6 +1120,10 @@ export interface TaskAgentParticipantRecord {
  */
 export interface UnassignAIAgentTaskRequest {
   agent_id: string;
+  /**
+   * Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership.
+   */
+  assignment_id?: string;
   reason?: string;
 }
 
@@ -809,6 +1147,10 @@ export interface UpdateAgentConfigurationRequest {
    * agent 설정 화면의 이름 입력값입니다.
    */
   name?: string;
+  /**
+   * 호환을 위해 받을 수 있는 무시되는 입력입니다. 생성 시 정해진 profile 색상은 이 요청으로 바뀌지 않습니다.
+   */
+  profile_color?: AgentProfileColor;
   /**
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
@@ -842,10 +1184,12 @@ export interface RiidoClientConfig {
 }
 
 /**
- * 요청 단위로 전달할 수 있는 옵션입니다. 현재는 AbortSignal만 전달합니다.
+ * 요청 단위로 전달할 수 있는 옵션입니다. AbortSignal과 viewer JWT를 전달합니다.
  */
 export interface RiidoRequestOptions {
   signal?: AbortSignal;
+  /** 호출자의 Riido 사용자 JWT입니다. 설정하면 `Authorization: Bearer`로 함께 보냅니다. 온보딩 완료처럼 viewer 증명이 필요한 요청에만 전달합니다. */
+  viewerJwt?: string;
 }
 
 /**
@@ -857,6 +1201,10 @@ export type RiidoQueryOptions<TData> = Omit<UseQueryOptions<TData>, 'queryKey' |
  * React Query mutation option을 Riido endpoint 변수 타입과 묶은 타입입니다.
  */
 export type RiidoMutationOptions<TData, TVariables> = UseMutationOptions<TData, Error, TVariables>;
+
+function riidoViewerHeaders(options: RiidoRequestOptions): Record<string, string> {
+  return options.viewerJwt ? { Authorization: `Bearer ${options.viewerJwt}` } : {};
+}
 
 async function riidoRequest<T>(config: RiidoClientConfig, path: string, init: RequestInit = {}): Promise<T> {
   const fetcher = config.fetcher ?? fetch;
@@ -895,7 +1243,7 @@ async function riidoRawRequest(config: RiidoClientConfig, path: string, init: Re
  */
 export async function createAIAgent(config: RiidoClientConfig, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = "/v1/client/ai-agent/agents";
-  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -904,6 +1252,7 @@ export async function createAIAgent(config: RiidoClientConfig, body: CreateAgent
  */
 export interface CreateAIAgentMutationVariables {
   body: CreateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -922,7 +1271,7 @@ export function createAIAgentMutationOptions(config: RiidoClientConfig, options:
   return {
     ...options,
     mutationKey: createAIAgentMutationKey(),
-    mutationFn: (variables: CreateAIAgentMutationVariables) => createAIAgent(config, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentMutationVariables) => createAIAgent(config, variables.body, variables.options ?? {}),
   };
 }
 
@@ -939,7 +1288,7 @@ export interface DeleteAIAgentPathParams {
  */
 export async function deleteAIAgent(config: RiidoClientConfig, params: DeleteAIAgentPathParams, options: RiidoRequestOptions = {}): Promise<DeleteAgentResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -948,6 +1297,7 @@ export async function deleteAIAgent(config: RiidoClientConfig, params: DeleteAIA
  */
 export interface DeleteAIAgentMutationVariables {
   params: DeleteAIAgentPathParams;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -966,7 +1316,7 @@ export function deleteAIAgentMutationOptions(config: RiidoClientConfig, options:
   return {
     ...options,
     mutationKey: deleteAIAgentMutationKey(),
-    mutationFn: (variables: DeleteAIAgentMutationVariables) => deleteAIAgent(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentMutationVariables) => deleteAIAgent(config, variables.params, variables.options ?? {}),
   };
 }
 
@@ -983,7 +1333,7 @@ export interface UpdateAIAgentConfigurationPathParams {
  */
 export async function updateAIAgentConfiguration(config: RiidoClientConfig, params: UpdateAIAgentConfigurationPathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'PATCH', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'PATCH', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -993,6 +1343,7 @@ export async function updateAIAgentConfiguration(config: RiidoClientConfig, para
 export interface UpdateAIAgentConfigurationMutationVariables {
   params: UpdateAIAgentConfigurationPathParams;
   body: UpdateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1011,7 +1362,7 @@ export function updateAIAgentConfigurationMutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: updateAIAgentConfigurationMutationKey(),
-    mutationFn: (variables: UpdateAIAgentConfigurationMutationVariables) => updateAIAgentConfiguration(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UpdateAIAgentConfigurationMutationVariables) => updateAIAgentConfiguration(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1028,7 +1379,7 @@ export interface GetAIAgentDaemonPathParams {
  */
 export async function getAIAgentDaemon(config: RiidoClientConfig, params: GetAIAgentDaemonPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1074,7 +1425,7 @@ export interface RestartAIAgentDaemonPathParams {
  */
 export async function restartAIAgentDaemon(config: RiidoClientConfig, params: RestartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1084,6 +1435,7 @@ export async function restartAIAgentDaemon(config: RiidoClientConfig, params: Re
 export interface RestartAIAgentDaemonMutationVariables {
   params: RestartAIAgentDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1102,7 +1454,7 @@ export function restartAIAgentDaemonMutationOptions(config: RiidoClientConfig, o
   return {
     ...options,
     mutationKey: restartAIAgentDaemonMutationKey(),
-    mutationFn: (variables: RestartAIAgentDaemonMutationVariables) => restartAIAgentDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDaemonMutationVariables) => restartAIAgentDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1119,7 +1471,7 @@ export interface StartAIAgentDaemonPathParams {
  */
 export async function startAIAgentDaemon(config: RiidoClientConfig, params: StartAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1129,6 +1481,7 @@ export async function startAIAgentDaemon(config: RiidoClientConfig, params: Star
 export interface StartAIAgentDaemonMutationVariables {
   params: StartAIAgentDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1147,7 +1500,7 @@ export function startAIAgentDaemonMutationOptions(config: RiidoClientConfig, opt
   return {
     ...options,
     mutationKey: startAIAgentDaemonMutationKey(),
-    mutationFn: (variables: StartAIAgentDaemonMutationVariables) => startAIAgentDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDaemonMutationVariables) => startAIAgentDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1164,7 +1517,7 @@ export interface StopAIAgentDaemonPathParams {
  */
 export async function stopAIAgentDaemon(config: RiidoClientConfig, params: StopAIAgentDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1174,6 +1527,7 @@ export async function stopAIAgentDaemon(config: RiidoClientConfig, params: StopA
 export interface StopAIAgentDaemonMutationVariables {
   params: StopAIAgentDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1192,7 +1546,57 @@ export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, opti
   return {
     ...options,
     mutationKey: stopAIAgentDaemonMutationKey(),
-    mutationFn: (variables: StopAIAgentDaemonMutationVariables) => stopAIAgentDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDaemonMutationVariables) => stopAIAgentDaemon(config, variables.params, variables.body, variables.options ?? {}),
+  };
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 경로 파라미터입니다.
+ */
+export interface GetAgentDashboardPathParams {
+  agent_id: string;
+  page?: number;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ */
+export async function getAgentDashboard(config: RiidoClientConfig, params: GetAgentDashboardPathParams, options: RiidoRequestOptions = {}): Promise<AgentDashboardResponse> {
+  const path = `/v1/client/ai-agent/agents/${params.agent_id}/dashboard`;
+  const query = new URLSearchParams();
+  if (params.page !== undefined) query.set("page", String(params.page));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * cache tag: `aiAgent.agents.dashboard`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAgentDashboardQueryKeyRoot(): readonly unknown[] {
+  return ["aiAgent.agents.dashboard"] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAgentDashboardQueryKey(params: GetAgentDashboardPathParams): readonly unknown[] {
+  return [...getAgentDashboardQueryKeyRoot(), params] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAgentDashboardQueryOptions(config: RiidoClientConfig, params: GetAgentDashboardPathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAgentDashboardQueryKey(params),
+    queryFn: () => getAgentDashboard(config, params, { signal }),
   };
 }
 
@@ -1209,7 +1613,7 @@ export interface GetAIAgentEditabilityPathParams {
  */
 export async function getAIAgentEditability(config: RiidoClientConfig, params: GetAIAgentEditabilityPathParams, options: RiidoRequestOptions = {}): Promise<AgentEditabilityResponse> {
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/editability`;
-  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1247,7 +1651,7 @@ export function getAIAgentEditabilityQueryOptions(config: RiidoClientConfig, par
  */
 export async function getAIAgentClientBootstrap(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponse> {
   const path = "/v1/client/ai-agent/bootstrap";
-  return riidoRequest<ClientBootstrapResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<ClientBootstrapResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1285,7 +1689,7 @@ export function getAIAgentClientBootstrapQueryOptions(config: RiidoClientConfig,
  */
 export async function listAIAgentDeviceRuntimes(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<DeviceRuntimeListResponse> {
   const path = "/v1/client/ai-agent/devices";
-  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1331,7 +1735,7 @@ export interface GetAIAgentDeviceDaemonPathParams {
  */
 export async function getAIAgentDeviceDaemon(config: RiidoClientConfig, params: GetAIAgentDeviceDaemonPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1377,7 +1781,7 @@ export interface RestartAIAgentDeviceDaemonPathParams {
  */
 export async function restartAIAgentDeviceDaemon(config: RiidoClientConfig, params: RestartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1387,6 +1791,7 @@ export async function restartAIAgentDeviceDaemon(config: RiidoClientConfig, para
 export interface RestartAIAgentDeviceDaemonMutationVariables {
   params: RestartAIAgentDeviceDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1405,7 +1810,7 @@ export function restartAIAgentDeviceDaemonMutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: restartAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: RestartAIAgentDeviceDaemonMutationVariables) => restartAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDeviceDaemonMutationVariables) => restartAIAgentDeviceDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1422,7 +1827,7 @@ export interface StartAIAgentDeviceDaemonPathParams {
  */
 export async function startAIAgentDeviceDaemon(config: RiidoClientConfig, params: StartAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1432,6 +1837,7 @@ export async function startAIAgentDeviceDaemon(config: RiidoClientConfig, params
 export interface StartAIAgentDeviceDaemonMutationVariables {
   params: StartAIAgentDeviceDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1450,7 +1856,7 @@ export function startAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfi
   return {
     ...options,
     mutationKey: startAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: StartAIAgentDeviceDaemonMutationVariables) => startAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDeviceDaemonMutationVariables) => startAIAgentDeviceDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1467,7 +1873,7 @@ export interface StopAIAgentDeviceDaemonPathParams {
  */
 export async function stopAIAgentDeviceDaemon(config: RiidoClientConfig, params: StopAIAgentDeviceDaemonPathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1477,6 +1883,7 @@ export async function stopAIAgentDeviceDaemon(config: RiidoClientConfig, params:
 export interface StopAIAgentDeviceDaemonMutationVariables {
   params: StopAIAgentDeviceDaemonPathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1495,7 +1902,7 @@ export function stopAIAgentDeviceDaemonMutationOptions(config: RiidoClientConfig
   return {
     ...options,
     mutationKey: stopAIAgentDeviceDaemonMutationKey(),
-    mutationFn: (variables: StopAIAgentDeviceDaemonMutationVariables) => stopAIAgentDeviceDaemon(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDeviceDaemonMutationVariables) => stopAIAgentDeviceDaemon(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1512,7 +1919,7 @@ export interface ListAIAgentDeviceDaemonsPathParams {
  */
 export async function listAIAgentDeviceDaemons(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsPathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
   const path = `/v1/client/ai-agent/devices/${params.device_id}/daemons`;
-  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1550,7 +1957,7 @@ export function listAIAgentDeviceDaemonsQueryOptions(config: RiidoClientConfig, 
  */
 export async function streamAIAgentClientEvents(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = "/v1/client/ai-agent/events";
-  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal });
+  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1588,7 +1995,7 @@ export function streamAIAgentClientEventsQueryOptions(config: RiidoClientConfig,
  */
 export async function listAIAgentOnboardingFixtures(config: RiidoClientConfig, options: RiidoRequestOptions = {}): Promise<AgentOnboardingFixtureListResponse> {
   const path = "/v1/client/ai-agent/onboarding/fixtures";
-  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1632,9 +2039,9 @@ export interface CreateAIAgentFromOnboardingFixturePathParams {
 /**
  * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다
  */
-export async function createAIAgentFromOnboardingFixture(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
+export async function createAIAgentFromOnboardingFixture(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateOnboardingAgentRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponse> {
   const path = `/v1/client/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
-  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1643,7 +2050,8 @@ export async function createAIAgentFromOnboardingFixture(config: RiidoClientConf
  */
 export interface CreateAIAgentFromOnboardingFixtureMutationVariables {
   params: CreateAIAgentFromOnboardingFixturePathParams;
-  body: CreateAgentConfigurationRequest;
+  body: CreateOnboardingAgentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1662,7 +2070,7 @@ export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoC
   return {
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureMutationKey(),
-    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureMutationVariables) => createAIAgentFromOnboardingFixture(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1671,7 +2079,7 @@ export function createAIAgentFromOnboardingFixtureMutationOptions(config: RiidoC
  */
 export async function createAIAgentProfileThumbnailUpload(config: RiidoClientConfig, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
   const path = "/v1/client/ai-agent/profile-thumbnails/uploads";
-  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1680,6 +2088,7 @@ export async function createAIAgentProfileThumbnailUpload(config: RiidoClientCon
  */
 export interface CreateAIAgentProfileThumbnailUploadMutationVariables {
   body: CreateAgentProfileThumbnailUploadRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1698,7 +2107,7 @@ export function createAIAgentProfileThumbnailUploadMutationOptions(config: Riido
   return {
     ...options,
     mutationKey: createAIAgentProfileThumbnailUploadMutationKey(),
-    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadMutationVariables) => createAIAgentProfileThumbnailUpload(config, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadMutationVariables) => createAIAgentProfileThumbnailUpload(config, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1715,7 +2124,7 @@ export interface ListAIAgentTaskAssignableAgentsPathParams {
  */
 export async function listAIAgentTaskAssignableAgents(config: RiidoClientConfig, params: ListAIAgentTaskAssignableAgentsPathParams, options: RiidoRequestOptions = {}): Promise<AgentClientListResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignable-agents`;
-  return riidoRequest<AgentClientListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentClientListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1761,7 +2170,7 @@ export interface UnassignAIAgentTaskPathParams {
  */
 export async function unassignAIAgentTask(config: RiidoClientConfig, params: UnassignAIAgentTaskPathParams, body: UnassignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1771,6 +2180,7 @@ export async function unassignAIAgentTask(config: RiidoClientConfig, params: Una
 export interface UnassignAIAgentTaskMutationVariables {
   params: UnassignAIAgentTaskPathParams;
   body: UnassignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1789,7 +2199,7 @@ export function unassignAIAgentTaskMutationOptions(config: RiidoClientConfig, op
   return {
     ...options,
     mutationKey: unassignAIAgentTaskMutationKey(),
-    mutationFn: (variables: UnassignAIAgentTaskMutationVariables) => unassignAIAgentTask(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UnassignAIAgentTaskMutationVariables) => unassignAIAgentTask(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1806,7 +2216,7 @@ export interface AssignAIAgentTaskPathParams {
  */
 export async function assignAIAgentTask(config: RiidoClientConfig, params: AssignAIAgentTaskPathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1816,6 +2226,7 @@ export async function assignAIAgentTask(config: RiidoClientConfig, params: Assig
 export interface AssignAIAgentTaskMutationVariables {
   params: AssignAIAgentTaskPathParams;
   body: AssignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1834,7 +2245,7 @@ export function assignAIAgentTaskMutationOptions(config: RiidoClientConfig, opti
   return {
     ...options,
     mutationKey: assignAIAgentTaskMutationKey(),
-    mutationFn: (variables: AssignAIAgentTaskMutationVariables) => assignAIAgentTask(config, variables.params, variables.body, {}),
+    mutationFn: (variables: AssignAIAgentTaskMutationVariables) => assignAIAgentTask(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1851,7 +2262,7 @@ export interface SubmitAIAgentTaskCommentPathParams {
  */
 export async function submitAIAgentTaskComment(config: RiidoClientConfig, params: SubmitAIAgentTaskCommentPathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/comments`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1861,6 +2272,7 @@ export async function submitAIAgentTaskComment(config: RiidoClientConfig, params
 export interface SubmitAIAgentTaskCommentMutationVariables {
   params: SubmitAIAgentTaskCommentPathParams;
   body: SubmitAIAgentTaskCommentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1879,7 +2291,7 @@ export function submitAIAgentTaskCommentMutationOptions(config: RiidoClientConfi
   return {
     ...options,
     mutationKey: submitAIAgentTaskCommentMutationKey(),
-    mutationFn: (variables: SubmitAIAgentTaskCommentMutationVariables) => submitAIAgentTaskComment(config, variables.params, variables.body, {}),
+    mutationFn: (variables: SubmitAIAgentTaskCommentMutationVariables) => submitAIAgentTaskComment(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1896,7 +2308,7 @@ export interface StopAIAgentTaskPathParams {
  */
 export async function stopAIAgentTask(config: RiidoClientConfig, params: StopAIAgentTaskPathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/stop`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1906,6 +2318,7 @@ export async function stopAIAgentTask(config: RiidoClientConfig, params: StopAIA
 export interface StopAIAgentTaskMutationVariables {
   params: StopAIAgentTaskPathParams;
   body: StopAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -1924,7 +2337,7 @@ export function stopAIAgentTaskMutationOptions(config: RiidoClientConfig, option
   return {
     ...options,
     mutationKey: stopAIAgentTaskMutationKey(),
-    mutationFn: (variables: StopAIAgentTaskMutationVariables) => stopAIAgentTask(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentTaskMutationVariables) => stopAIAgentTask(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -1941,7 +2354,7 @@ export interface ListAIAgentTaskThreadsPathParams {
  */
 export async function listAIAgentTaskThreads(config: RiidoClientConfig, params: ListAIAgentTaskThreadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads`;
-  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -1988,7 +2401,7 @@ export interface CreateAIAgentTaskThreadMessagePathParams {
  */
 export async function createAIAgentTaskThreadMessage(config: RiidoClientConfig, params: CreateAIAgentTaskThreadMessagePathParams, body: CreateAIAgentTaskThreadMessageRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v1/client/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -1998,6 +2411,7 @@ export async function createAIAgentTaskThreadMessage(config: RiidoClientConfig, 
 export interface CreateAIAgentTaskThreadMessageMutationVariables {
   params: CreateAIAgentTaskThreadMessagePathParams;
   body: CreateAIAgentTaskThreadMessageRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2016,7 +2430,7 @@ export function createAIAgentTaskThreadMessageMutationOptions(config: RiidoClien
   return {
     ...options,
     mutationKey: createAIAgentTaskThreadMessageMutationKey(),
-    mutationFn: (variables: CreateAIAgentTaskThreadMessageMutationVariables) => createAIAgentTaskThreadMessage(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentTaskThreadMessageMutationVariables) => createAIAgentTaskThreadMessage(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2033,7 +2447,7 @@ export interface CreateAIAgentV2PathParams {
  */
 export async function createAIAgentV2(config: RiidoClientConfig, params: CreateAIAgentV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents`;
-  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2043,6 +2457,7 @@ export async function createAIAgentV2(config: RiidoClientConfig, params: CreateA
 export interface CreateAIAgentV2MutationVariables {
   params: CreateAIAgentV2PathParams;
   body: CreateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2061,7 +2476,7 @@ export function createAIAgentV2MutationOptions(config: RiidoClientConfig, option
   return {
     ...options,
     mutationKey: createAIAgentV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentV2MutationVariables) => createAIAgentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentV2MutationVariables) => createAIAgentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2079,7 +2494,7 @@ export interface DeleteAIAgentV2PathParams {
  */
 export async function deleteAIAgentV2(config: RiidoClientConfig, params: DeleteAIAgentV2PathParams, options: RiidoRequestOptions = {}): Promise<DeleteAgentResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<DeleteAgentResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2088,6 +2503,7 @@ export async function deleteAIAgentV2(config: RiidoClientConfig, params: DeleteA
  */
 export interface DeleteAIAgentV2MutationVariables {
   params: DeleteAIAgentV2PathParams;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2106,7 +2522,7 @@ export function deleteAIAgentV2MutationOptions(config: RiidoClientConfig, option
   return {
     ...options,
     mutationKey: deleteAIAgentV2MutationKey(),
-    mutationFn: (variables: DeleteAIAgentV2MutationVariables) => deleteAIAgentV2(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentV2MutationVariables) => deleteAIAgentV2(config, variables.params, variables.options ?? {}),
   };
 }
 
@@ -2124,7 +2540,7 @@ export interface UpdateAIAgentConfigurationV2PathParams {
  */
 export async function updateAIAgentConfigurationV2(config: RiidoClientConfig, params: UpdateAIAgentConfigurationV2PathParams, body: UpdateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}`;
-  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'PATCH', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'PATCH', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2134,6 +2550,7 @@ export async function updateAIAgentConfigurationV2(config: RiidoClientConfig, pa
 export interface UpdateAIAgentConfigurationV2MutationVariables {
   params: UpdateAIAgentConfigurationV2PathParams;
   body: UpdateAgentConfigurationRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2152,7 +2569,7 @@ export function updateAIAgentConfigurationV2MutationOptions(config: RiidoClientC
   return {
     ...options,
     mutationKey: updateAIAgentConfigurationV2MutationKey(),
-    mutationFn: (variables: UpdateAIAgentConfigurationV2MutationVariables) => updateAIAgentConfigurationV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UpdateAIAgentConfigurationV2MutationVariables) => updateAIAgentConfigurationV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2170,7 +2587,7 @@ export interface GetAIAgentDaemonV2PathParams {
  */
 export async function getAIAgentDaemonV2(config: RiidoClientConfig, params: GetAIAgentDaemonV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2217,7 +2634,7 @@ export interface RestartAIAgentDaemonV2PathParams {
  */
 export async function restartAIAgentDaemonV2(config: RiidoClientConfig, params: RestartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2227,6 +2644,7 @@ export async function restartAIAgentDaemonV2(config: RiidoClientConfig, params: 
 export interface RestartAIAgentDaemonV2MutationVariables {
   params: RestartAIAgentDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2245,7 +2663,7 @@ export function restartAIAgentDaemonV2MutationOptions(config: RiidoClientConfig,
   return {
     ...options,
     mutationKey: restartAIAgentDaemonV2MutationKey(),
-    mutationFn: (variables: RestartAIAgentDaemonV2MutationVariables) => restartAIAgentDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDaemonV2MutationVariables) => restartAIAgentDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2263,7 +2681,7 @@ export interface StartAIAgentDaemonV2PathParams {
  */
 export async function startAIAgentDaemonV2(config: RiidoClientConfig, params: StartAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2273,6 +2691,7 @@ export async function startAIAgentDaemonV2(config: RiidoClientConfig, params: St
 export interface StartAIAgentDaemonV2MutationVariables {
   params: StartAIAgentDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2291,7 +2710,7 @@ export function startAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, o
   return {
     ...options,
     mutationKey: startAIAgentDaemonV2MutationKey(),
-    mutationFn: (variables: StartAIAgentDaemonV2MutationVariables) => startAIAgentDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDaemonV2MutationVariables) => startAIAgentDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2309,7 +2728,7 @@ export interface StopAIAgentDaemonV2PathParams {
  */
 export async function stopAIAgentDaemonV2(config: RiidoClientConfig, params: StopAIAgentDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2319,6 +2738,7 @@ export async function stopAIAgentDaemonV2(config: RiidoClientConfig, params: Sto
 export interface StopAIAgentDaemonV2MutationVariables {
   params: StopAIAgentDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2337,7 +2757,58 @@ export function stopAIAgentDaemonV2MutationOptions(config: RiidoClientConfig, op
   return {
     ...options,
     mutationKey: stopAIAgentDaemonV2MutationKey(),
-    mutationFn: (variables: StopAIAgentDaemonV2MutationVariables) => stopAIAgentDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDaemonV2MutationVariables) => stopAIAgentDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
+  };
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 경로 파라미터입니다.
+ */
+export interface GetAgentDashboardV2PathParams {
+  workspace_id: string;
+  agent_id: string;
+  page?: number;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ */
+export async function getAgentDashboardV2(config: RiidoClientConfig, params: GetAgentDashboardV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentDashboardResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/dashboard`;
+  const query = new URLSearchParams();
+  if (params.page !== undefined) query.set("page", String(params.page));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * cache tag: `v2.agents.dashboard`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAgentDashboardV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.agents.dashboard"] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAgentDashboardV2QueryKey(params: GetAgentDashboardV2PathParams): readonly unknown[] {
+  return [...getAgentDashboardV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAgentDashboardV2QueryOptions(config: RiidoClientConfig, params: GetAgentDashboardV2PathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAgentDashboardV2QueryKey(params),
+    queryFn: () => getAgentDashboardV2(config, params, { signal }),
   };
 }
 
@@ -2355,7 +2826,7 @@ export interface GetAIAgentEditabilityV2PathParams {
  */
 export async function getAIAgentEditabilityV2(config: RiidoClientConfig, params: GetAIAgentEditabilityV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentEditabilityResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/editability`;
-  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentEditabilityResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2401,7 +2872,7 @@ export interface GetAIAgentClientBootstrapV2PathParams {
  */
 export async function getAIAgentClientBootstrapV2(config: RiidoClientConfig, params: GetAIAgentClientBootstrapV2PathParams, options: RiidoRequestOptions = {}): Promise<ClientBootstrapResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/bootstrap`;
-  return riidoRequest<ClientBootstrapResponseV2>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<ClientBootstrapResponseV2>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2435,6 +2906,52 @@ export function getAIAgentClientBootstrapV2QueryOptions(config: RiidoClientConfi
 }
 
 /**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface GetAIAgentDesktopPresenceV2PathParams {
+  workspace_id: string;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ */
+export async function getAIAgentDesktopPresenceV2(config: RiidoClientConfig, params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentDesktopPresenceResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/desktop-presence`;
+  return riidoRequest<AIAgentDesktopPresenceResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * cache tag: `v2.aiAgent.desktopPresence`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function getAIAgentDesktopPresenceV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.aiAgent.desktopPresence"] as const;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function getAIAgentDesktopPresenceV2QueryKey(params: GetAIAgentDesktopPresenceV2PathParams): readonly unknown[] {
+  return [...getAIAgentDesktopPresenceV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function getAIAgentDesktopPresenceV2QueryOptions(config: RiidoClientConfig, params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoQueryOptions<AIAgentDesktopPresenceResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: getAIAgentDesktopPresenceV2QueryKey(params),
+    queryFn: () => getAIAgentDesktopPresenceV2(config, params, { signal }),
+  };
+}
+
+/**
  * 권한이 확인된 principal의 device runtime 상태를 조회합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
@@ -2447,7 +2964,7 @@ export interface ListAIAgentDeviceRuntimesV2PathParams {
  */
 export async function listAIAgentDeviceRuntimesV2(config: RiidoClientConfig, params: ListAIAgentDeviceRuntimesV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceRuntimeListResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices`;
-  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceRuntimeListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2494,7 +3011,7 @@ export interface GetAIAgentDeviceDaemonV2PathParams {
  */
 export async function getAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: GetAIAgentDeviceDaemonV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonDetailResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon`;
-  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonDetailResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2541,7 +3058,7 @@ export interface RestartAIAgentDeviceDaemonV2PathParams {
  */
 export async function restartAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: RestartAIAgentDeviceDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon/restart`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2551,6 +3068,7 @@ export async function restartAIAgentDeviceDaemonV2(config: RiidoClientConfig, pa
 export interface RestartAIAgentDeviceDaemonV2MutationVariables {
   params: RestartAIAgentDeviceDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2569,7 +3087,7 @@ export function restartAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientC
   return {
     ...options,
     mutationKey: restartAIAgentDeviceDaemonV2MutationKey(),
-    mutationFn: (variables: RestartAIAgentDeviceDaemonV2MutationVariables) => restartAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: RestartAIAgentDeviceDaemonV2MutationVariables) => restartAIAgentDeviceDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2587,7 +3105,7 @@ export interface StartAIAgentDeviceDaemonV2PathParams {
  */
 export async function startAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: StartAIAgentDeviceDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon/start`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2597,6 +3115,7 @@ export async function startAIAgentDeviceDaemonV2(config: RiidoClientConfig, para
 export interface StartAIAgentDeviceDaemonV2MutationVariables {
   params: StartAIAgentDeviceDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2615,7 +3134,7 @@ export function startAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: startAIAgentDeviceDaemonV2MutationKey(),
-    mutationFn: (variables: StartAIAgentDeviceDaemonV2MutationVariables) => startAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StartAIAgentDeviceDaemonV2MutationVariables) => startAIAgentDeviceDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2633,7 +3152,7 @@ export interface StopAIAgentDeviceDaemonV2PathParams {
  */
 export async function stopAIAgentDeviceDaemonV2(config: RiidoClientConfig, params: StopAIAgentDeviceDaemonV2PathParams, body: ControlDeviceDaemonRequest, options: RiidoRequestOptions = {}): Promise<DeviceDaemonCommandResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemon/stop`;
-  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<DeviceDaemonCommandResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2643,6 +3162,7 @@ export async function stopAIAgentDeviceDaemonV2(config: RiidoClientConfig, param
 export interface StopAIAgentDeviceDaemonV2MutationVariables {
   params: StopAIAgentDeviceDaemonV2PathParams;
   body: ControlDeviceDaemonRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2661,7 +3181,7 @@ export function stopAIAgentDeviceDaemonV2MutationOptions(config: RiidoClientConf
   return {
     ...options,
     mutationKey: stopAIAgentDeviceDaemonV2MutationKey(),
-    mutationFn: (variables: StopAIAgentDeviceDaemonV2MutationVariables) => stopAIAgentDeviceDaemonV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentDeviceDaemonV2MutationVariables) => stopAIAgentDeviceDaemonV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2679,7 +3199,7 @@ export interface ListAIAgentDeviceDaemonsV2PathParams {
  */
 export async function listAIAgentDeviceDaemonsV2(config: RiidoClientConfig, params: ListAIAgentDeviceDaemonsV2PathParams, options: RiidoRequestOptions = {}): Promise<DeviceDaemonListResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/devices/${params.device_id}/daemons`;
-  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<DeviceDaemonListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2725,7 +3245,7 @@ export interface StreamAIAgentClientEventsV2PathParams {
  */
 export async function streamAIAgentClientEventsV2(config: RiidoClientConfig, params: StreamAIAgentClientEventsV2PathParams, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/events`;
-  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal });
+  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2771,7 +3291,7 @@ export interface ListAIAgentOnboardingFixturesV2PathParams {
  */
 export async function listAIAgentOnboardingFixturesV2(config: RiidoClientConfig, params: ListAIAgentOnboardingFixturesV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentOnboardingFixtureListResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures`;
-  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentOnboardingFixtureListResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2816,9 +3336,9 @@ export interface CreateAIAgentFromOnboardingFixtureV2PathParams {
 /**
  * 선택한 onboarding fixture를 기준으로 일반 AI agent를 생성합니다 (v2 workspace-scoped)
  */
-export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
+export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientConfig, params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateOnboardingAgentRequest, options: RiidoRequestOptions = {}): Promise<AgentClientRecordResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/onboarding/fixtures/${params.fixture_id}/agents`;
-  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentClientRecordResponseV2>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2827,7 +3347,8 @@ export async function createAIAgentFromOnboardingFixtureV2(config: RiidoClientCo
  */
 export interface CreateAIAgentFromOnboardingFixtureV2MutationVariables {
   params: CreateAIAgentFromOnboardingFixtureV2PathParams;
-  body: CreateAgentConfigurationRequest;
+  body: CreateOnboardingAgentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2846,7 +3367,7 @@ export function createAIAgentFromOnboardingFixtureV2MutationOptions(config: Riid
   return {
     ...options,
     mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentFromOnboardingFixtureV2MutationVariables) => createAIAgentFromOnboardingFixtureV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2863,7 +3384,7 @@ export interface CreateAIAgentProfileThumbnailUploadV2PathParams {
  */
 export async function createAIAgentProfileThumbnailUploadV2(config: RiidoClientConfig, params: CreateAIAgentProfileThumbnailUploadV2PathParams, body: CreateAgentProfileThumbnailUploadRequest, options: RiidoRequestOptions = {}): Promise<AgentProfileThumbnailUploadResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/profile-thumbnails/uploads`;
-  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AgentProfileThumbnailUploadResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2873,6 +3394,7 @@ export async function createAIAgentProfileThumbnailUploadV2(config: RiidoClientC
 export interface CreateAIAgentProfileThumbnailUploadV2MutationVariables {
   params: CreateAIAgentProfileThumbnailUploadV2PathParams;
   body: CreateAgentProfileThumbnailUploadRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2891,7 +3413,7 @@ export function createAIAgentProfileThumbnailUploadV2MutationOptions(config: Rii
   return {
     ...options,
     mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -2908,7 +3430,7 @@ export interface ListWorkspaceAssignedAgentProfilesV2PathParams {
  */
 export async function listWorkspaceAssignedAgentProfilesV2(config: RiidoClientConfig, params: ListWorkspaceAssignedAgentProfilesV2PathParams, options: RiidoRequestOptions = {}): Promise<AssignedAgentProfileMapResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/assigned-agent-profiles`;
-  return riidoRequest<AssignedAgentProfileMapResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AssignedAgentProfileMapResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -2955,7 +3477,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2PathParams {
  */
 export async function createAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: CreateAIAgentTaskAgentAssignmentV2PathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -2965,6 +3487,7 @@ export async function createAIAgentTaskAgentAssignmentV2(config: RiidoClientConf
 export interface CreateAIAgentTaskAgentAssignmentV2MutationVariables {
   params: CreateAIAgentTaskAgentAssignmentV2PathParams;
   body: AssignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -2983,12 +3506,12 @@ export function createAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoC
   return {
     ...options,
     mutationKey: createAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentTaskAgentAssignmentV2MutationVariables) => createAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentTaskAgentAssignmentV2MutationVariables) => createAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 경로 파라미터입니다.
  */
 export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
@@ -2998,23 +3521,25 @@ export interface DeleteAIAgentTaskAgentAssignmentV2PathParams {
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  */
-export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+export async function deleteAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments/${params.agent_id}`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * mutation 함수에 전달하는 변수입니다.
  */
 export interface DeleteAIAgentTaskAgentAssignmentV2MutationVariables {
   params: DeleteAIAgentTaskAgentAssignmentV2PathParams;
+  body: DeleteAIAgentTaskAgentAssignmentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 이 mutation을 구분하는 React Query mutation key입니다.
  */
 export function deleteAIAgentTaskAgentAssignmentV2MutationKey(): readonly unknown[] {
@@ -3022,14 +3547,14 @@ export function deleteAIAgentTaskAgentAssignmentV2MutationKey(): readonly unknow
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * useMutation에 전달할 수 있는 옵션입니다.
  */
 export function deleteAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) {
   return {
     ...options,
     mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, {}),
+    mutationFn: (variables: DeleteAIAgentTaskAgentAssignmentV2MutationVariables) => deleteAIAgentTaskAgentAssignmentV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3048,7 +3573,7 @@ export interface StopAIAgentTaskAgentAssignmentV2PathParams {
  */
 export async function stopAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig, params: StopAIAgentTaskAgentAssignmentV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/agent-assignments/${params.agent_id}/stop`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3057,6 +3582,7 @@ export async function stopAIAgentTaskAgentAssignmentV2(config: RiidoClientConfig
  */
 export interface StopAIAgentTaskAgentAssignmentV2MutationVariables {
   params: StopAIAgentTaskAgentAssignmentV2PathParams;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3075,7 +3601,7 @@ export function stopAIAgentTaskAgentAssignmentV2MutationOptions(config: RiidoCli
   return {
     ...options,
     mutationKey: stopAIAgentTaskAgentAssignmentV2MutationKey(),
-    mutationFn: (variables: StopAIAgentTaskAgentAssignmentV2MutationVariables) => stopAIAgentTaskAgentAssignmentV2(config, variables.params, {}),
+    mutationFn: (variables: StopAIAgentTaskAgentAssignmentV2MutationVariables) => stopAIAgentTaskAgentAssignmentV2(config, variables.params, variables.options ?? {}),
   };
 }
 
@@ -3093,7 +3619,7 @@ export interface ListAIAgentTaskAssignableAgentsV2PathParams {
  */
 export async function listAIAgentTaskAssignableAgentsV2(config: RiidoClientConfig, params: ListAIAgentTaskAssignableAgentsV2PathParams, options: RiidoRequestOptions = {}): Promise<AgentClientListResponseV2> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignable-agents`;
-  return riidoRequest<AgentClientListResponseV2>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AgentClientListResponseV2>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3140,7 +3666,7 @@ export interface UnassignAIAgentTaskV2PathParams {
  */
 export async function unassignAIAgentTaskV2(config: RiidoClientConfig, params: UnassignAIAgentTaskV2PathParams, body: UnassignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3150,6 +3676,7 @@ export async function unassignAIAgentTaskV2(config: RiidoClientConfig, params: U
 export interface UnassignAIAgentTaskV2MutationVariables {
   params: UnassignAIAgentTaskV2PathParams;
   body: UnassignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3168,7 +3695,7 @@ export function unassignAIAgentTaskV2MutationOptions(config: RiidoClientConfig, 
   return {
     ...options,
     mutationKey: unassignAIAgentTaskV2MutationKey(),
-    mutationFn: (variables: UnassignAIAgentTaskV2MutationVariables) => unassignAIAgentTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: UnassignAIAgentTaskV2MutationVariables) => unassignAIAgentTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3186,7 +3713,7 @@ export interface AssignAIAgentTaskV2PathParams {
  */
 export async function assignAIAgentTaskV2(config: RiidoClientConfig, params: AssignAIAgentTaskV2PathParams, body: AssignAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/assignment`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3196,6 +3723,7 @@ export async function assignAIAgentTaskV2(config: RiidoClientConfig, params: Ass
 export interface AssignAIAgentTaskV2MutationVariables {
   params: AssignAIAgentTaskV2PathParams;
   body: AssignAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3214,7 +3742,7 @@ export function assignAIAgentTaskV2MutationOptions(config: RiidoClientConfig, op
   return {
     ...options,
     mutationKey: assignAIAgentTaskV2MutationKey(),
-    mutationFn: (variables: AssignAIAgentTaskV2MutationVariables) => assignAIAgentTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: AssignAIAgentTaskV2MutationVariables) => assignAIAgentTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3232,7 +3760,7 @@ export interface SubmitAIAgentTaskCommentV2PathParams {
  */
 export async function submitAIAgentTaskCommentV2(config: RiidoClientConfig, params: SubmitAIAgentTaskCommentV2PathParams, body: SubmitAIAgentTaskCommentRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/comments`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3242,6 +3770,7 @@ export async function submitAIAgentTaskCommentV2(config: RiidoClientConfig, para
 export interface SubmitAIAgentTaskCommentV2MutationVariables {
   params: SubmitAIAgentTaskCommentV2PathParams;
   body: SubmitAIAgentTaskCommentRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3260,7 +3789,54 @@ export function submitAIAgentTaskCommentV2MutationOptions(config: RiidoClientCon
   return {
     ...options,
     mutationKey: submitAIAgentTaskCommentV2MutationKey(),
-    mutationFn: (variables: SubmitAIAgentTaskCommentV2MutationVariables) => submitAIAgentTaskCommentV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: SubmitAIAgentTaskCommentV2MutationVariables) => submitAIAgentTaskCommentV2(config, variables.params, variables.body, variables.options ?? {}),
+  };
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ */
+export async function completeAIAgentOnboardingTaskV2(config: RiidoClientConfig, params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/onboarding-completion`;
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2MutationVariables {
+  params: CompleteAIAgentOnboardingTaskV2PathParams;
+  body: CompleteAIAgentOnboardingTaskRequest;
+  options?: RiidoRequestOptions;
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function completeAIAgentOnboardingTaskV2MutationKey(): readonly unknown[] {
+  return ["completeAIAgentOnboardingTaskV2"] as const;
+}
+
+/**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function completeAIAgentOnboardingTaskV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: completeAIAgentOnboardingTaskV2MutationKey(),
+    mutationFn: (variables: CompleteAIAgentOnboardingTaskV2MutationVariables) => completeAIAgentOnboardingTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3278,7 +3854,7 @@ export interface StopAIAgentTaskV2PathParams {
  */
 export async function stopAIAgentTaskV2(config: RiidoClientConfig, params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/stop`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3288,6 +3864,7 @@ export async function stopAIAgentTaskV2(config: RiidoClientConfig, params: StopA
 export interface StopAIAgentTaskV2MutationVariables {
   params: StopAIAgentTaskV2PathParams;
   body: StopAIAgentTaskRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3306,7 +3883,7 @@ export function stopAIAgentTaskV2MutationOptions(config: RiidoClientConfig, opti
   return {
     ...options,
     mutationKey: stopAIAgentTaskV2MutationKey(),
-    mutationFn: (variables: StopAIAgentTaskV2MutationVariables) => stopAIAgentTaskV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: StopAIAgentTaskV2MutationVariables) => stopAIAgentTaskV2(config, variables.params, variables.body, variables.options ?? {}),
   };
 }
 
@@ -3324,7 +3901,7 @@ export interface GetAIAgentTaskThreadStreamSubscriptionV2PathParams {
  */
 export async function getAIAgentTaskThreadStreamSubscriptionV2(config: RiidoClientConfig, params: GetAIAgentTaskThreadStreamSubscriptionV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadStreamSubscriptionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/thread-stream-subscription`;
-  return riidoRequest<AIAgentTaskThreadStreamSubscriptionResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AIAgentTaskThreadStreamSubscriptionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3371,7 +3948,7 @@ export interface ListAIAgentTaskThreadsV2PathParams {
  */
 export async function listAIAgentTaskThreadsV2(config: RiidoClientConfig, params: ListAIAgentTaskThreadsV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadCollectionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads`;
-  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal });
+  return riidoRequest<AIAgentTaskThreadCollectionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**
@@ -3419,7 +3996,7 @@ export interface CreateAIAgentTaskThreadMessageV2PathParams {
  */
 export async function createAIAgentTaskThreadMessageV2(config: RiidoClientConfig, params: CreateAIAgentTaskThreadMessageV2PathParams, body: CreateAIAgentTaskThreadMessageRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskActionResponse> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages`;
-  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, body: JSON.stringify(body) });
+  return riidoRequest<AIAgentTaskActionResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
 }
 
 /**
@@ -3429,6 +4006,7 @@ export async function createAIAgentTaskThreadMessageV2(config: RiidoClientConfig
 export interface CreateAIAgentTaskThreadMessageV2MutationVariables {
   params: CreateAIAgentTaskThreadMessageV2PathParams;
   body: CreateAIAgentTaskThreadMessageRequest;
+  options?: RiidoRequestOptions;
 }
 
 /**
@@ -3447,7 +4025,54 @@ export function createAIAgentTaskThreadMessageV2MutationOptions(config: RiidoCli
   return {
     ...options,
     mutationKey: createAIAgentTaskThreadMessageV2MutationKey(),
-    mutationFn: (variables: CreateAIAgentTaskThreadMessageV2MutationVariables) => createAIAgentTaskThreadMessageV2(config, variables.params, variables.body, {}),
+    mutationFn: (variables: CreateAIAgentTaskThreadMessageV2MutationVariables) => createAIAgentTaskThreadMessageV2(config, variables.params, variables.body, variables.options ?? {}),
+  };
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentTaskThreadHistoryV3PathParams {
+  workspace_id: string;
+  task_id: string;
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ */
+export async function listAIAgentTaskThreadHistoryV3(config: RiidoClientConfig, params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadHistoryCollectionResponse> {
+  const path = `/v3/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads`;
+  return riidoRequest<AIAgentTaskThreadHistoryCollectionResponse>(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * cache tag: `v3.aiAgent.tasks.threads`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentTaskThreadHistoryV3QueryKeyRoot(): readonly unknown[] {
+  return ["v3.aiAgent.tasks.threads"] as const;
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentTaskThreadHistoryV3QueryKey(params: ListAIAgentTaskThreadHistoryV3PathParams): readonly unknown[] {
+  return [...listAIAgentTaskThreadHistoryV3QueryKeyRoot(), params] as const;
+}
+
+/**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentTaskThreadHistoryV3QueryOptions(config: RiidoClientConfig, params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentTaskThreadHistoryV3QueryKey(params),
+    queryFn: () => listAIAgentTaskThreadHistoryV3(config, params, { signal }),
   };
 }
 
@@ -3769,6 +4394,48 @@ export interface StopAIAgentDaemonEndpoint {
      */
     readonly all: (queryClient: QueryClient) => Promise<void[]>;
   };
+}
+
+/**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `agents.dashboard`
+ * 접근 예시: `riido.aiAgent.agents.dashboard`
+ * cache tag: `aiAgent.agents.dashboard`
+ */
+export interface GetAgentDashboardEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAgentDashboardPathParams, options?: RiidoRequestOptions) => Promise<AgentDashboardResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAgentDashboardPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAgentDashboardPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => Promise<void>;
 }
 
 /**
@@ -4205,7 +4872,7 @@ export interface CreateAIAgentFromOnboardingFixtureEndpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponse>;
+  readonly request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponse>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -4916,6 +5583,48 @@ export interface StopAIAgentDaemonV2Endpoint {
 }
 
 /**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `v2.aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `aiAgent.agents.dashboard`
+ * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+ * cache tag: `v2.agents.dashboard`
+ */
+export interface GetAgentDashboardV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAgentDashboardV2PathParams, options?: RiidoRequestOptions) => Promise<AgentDashboardResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAgentDashboardV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => ReturnType<typeof getAgentDashboardV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => Promise<void>;
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.agents.editability`
  * 검색용 generated 경로: `aiAgent.agents.editability`
@@ -4997,6 +5706,48 @@ export interface GetAIAgentClientBootstrapV2Endpoint {
    * 현재 endpoint를 prefetch합니다.
    */
   readonly prefetch: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => Promise<void>;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.desktopPresence`
+ * 검색용 generated 경로: `aiAgent.desktopPresence`
+ * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+ * cache tag: `v2.aiAgent.desktopPresence`
+ */
+export interface GetAIAgentDesktopPresenceV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentDesktopPresenceResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: GetAIAgentDesktopPresenceV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => ReturnType<typeof getAIAgentDesktopPresenceV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => ReturnType<typeof getAIAgentDesktopPresenceV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => Promise<void>;
 }
 
 /**
@@ -5349,7 +6100,7 @@ export interface CreateAIAgentFromOnboardingFixtureV2Endpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
+  readonly request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => Promise<AgentClientRecordResponseV2>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -5514,7 +6265,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2Endpoint {
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
  * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
  * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -5524,7 +6275,7 @@ export interface DeleteAIAgentTaskAgentAssignmentV2Endpoint {
   /**
    * HTTP 요청을 직접 실행합니다.
    */
-  readonly request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  readonly request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
   /**
    * 이 mutation을 구분하는 key입니다.
    */
@@ -5819,6 +6570,65 @@ export interface SubmitAIAgentTaskCommentV2Endpoint {
 }
 
 /**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+ * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+ * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskActionResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables>) => ReturnType<typeof completeAIAgentOnboardingTaskV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables>) => ReturnType<typeof completeAIAgentOnboardingTaskV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v2.aiAgent.bootstrap` cache tag를 무효화합니다.
+     */
+    readonly aiAgentBootstrap: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignableAgents` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignableAgents: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.assignedAgentProfiles` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v2.aiAgent.tasks.threadStreamSubscription` cache tag를 무효화합니다.
+     */
+    readonly aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * `v3.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly v3AiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.stop`
  * 검색용 generated 경로: `aiAgent.tasks.stop`
@@ -6005,6 +6815,48 @@ export interface CreateAIAgentTaskThreadMessageV2Endpoint {
 }
 
 /**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 계약 generated path: `v3.aiAgent.tasks.threads`
+ * 검색용 generated 경로: `aiAgent.tasks.threads`
+ * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+ * cache tag: `v3.aiAgent.tasks.threads`
+ */
+export interface ListAIAgentTaskThreadHistoryV3Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskThreadHistoryCollectionResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentTaskThreadHistoryV3PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadHistoryV3QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => ReturnType<typeof listAIAgentTaskThreadHistoryV3QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => Promise<void>;
+}
+
+/**
  * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentAgentsDaemonNamespace {
@@ -6058,6 +6910,14 @@ export interface RiidoAIAgentAgentsNamespace {
    * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
    */
   readonly daemon: RiidoAIAgentAgentsDaemonNamespace;
+  /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `agents.dashboard`
+   * 접근 예시: `riido.aiAgent.agents.dashboard`
+   * cache tag: `aiAgent.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardEndpoint;
   /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
    * 계약 generated path: `aiAgent.agents.delete`
@@ -6384,6 +7244,14 @@ export interface RiidoV2AIAgentAgentsNamespace {
    */
   readonly daemon: RiidoV2AIAgentAgentsDaemonNamespace;
   /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `v2.aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `aiAgent.agents.dashboard`
+   * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+   * cache tag: `v2.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardV2Endpoint;
+  /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.agents.delete`
    * 검색용 generated 경로: `aiAgent.agents.delete`
@@ -6557,7 +7425,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
    */
   readonly create: CreateAIAgentTaskAgentAssignmentV2Endpoint;
   /**
-   * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+   * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -6572,6 +7440,20 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
    * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly stop: StopAIAgentTaskAgentAssignmentV2Endpoint;
+}
+
+/**
+ * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksOnboardingCompletionNamespace {
+  /**
+   * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+   * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+   * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`, `v3.aiAgent.tasks.threads`
+   */
+  readonly create: CompleteAIAgentOnboardingTaskV2Endpoint;
 }
 
 /**
@@ -6620,6 +7502,10 @@ export interface RiidoV2AIAgentTasksNamespace {
    * cache tag: `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly assignedAgentProfiles: ListWorkspaceAssignedAgentProfilesV2Endpoint;
+  /**
+   * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+   */
+  readonly onboardingCompletion: RiidoV2AIAgentTasksOnboardingCompletionNamespace;
   /**
    * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.stop`
@@ -6683,6 +7569,14 @@ export interface RiidoV2AIAgentNamespace {
    */
   readonly bootstrap: GetAIAgentClientBootstrapV2Endpoint;
   /**
+   * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.desktopPresence`
+   * 검색용 generated 경로: `aiAgent.desktopPresence`
+   * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+   * cache tag: `v2.aiAgent.desktopPresence`
+   */
+  readonly desktopPresence: GetAIAgentDesktopPresenceV2Endpoint;
+  /**
    * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
    */
   readonly devices: RiidoV2AIAgentDevicesNamespace;
@@ -6715,6 +7609,40 @@ export interface RiidoV2Module {
 }
 
 /**
+ * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+ */
+export interface RiidoV3AIAgentTasksNamespace {
+  /**
+   * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+   * 계약 generated path: `v3.aiAgent.tasks.threads`
+   * 검색용 generated 경로: `aiAgent.tasks.threads`
+   * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+   * cache tag: `v3.aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadHistoryV3Endpoint;
+}
+
+/**
+ * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+ */
+export interface RiidoV3AIAgentNamespace {
+  /**
+   * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+   */
+  readonly tasks: RiidoV3AIAgentTasksNamespace;
+}
+
+/**
+ * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+ */
+export interface RiidoV3Module {
+  /**
+   * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+   */
+  readonly aiAgent: RiidoV3AIAgentNamespace;
+}
+
+/**
  * control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.
  */
 export interface RiidoControlPlaneClient {
@@ -6726,6 +7654,10 @@ export interface RiidoControlPlaneClient {
    * v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.
    */
   readonly v2: RiidoV2Module;
+  /**
+   * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+   */
+  readonly v3: RiidoV3Module;
 }
 
 /**
@@ -6792,6 +7724,16 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentDaemonQueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentDeviceRuntimesQueryKeyRoot() })]),
             },
           },
+        },
+        dashboard: {
+          request: (params: GetAgentDashboardPathParams, options?: RiidoRequestOptions) => getAgentDashboard(config, params, options),
+          queryKeyRoot: getAgentDashboardQueryKeyRoot,
+          queryKey: getAgentDashboardQueryKey,
+          query: (params: GetAgentDashboardPathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardQueryOptions(config, params, options),
+          queryOptions: (params: GetAgentDashboardPathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardQueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: GetAgentDashboardPathParams) => queryClient.invalidateQueries({ queryKey: getAgentDashboardQueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAgentDashboardQueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: GetAgentDashboardPathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => queryClient.prefetchQuery(getAgentDashboardQueryOptions(config, params, options)),
         },
         delete: {
           request: (params: DeleteAIAgentPathParams, options?: RiidoRequestOptions) => deleteAIAgent(config, params, options),
@@ -6932,7 +7874,7 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesQueryKeyRoot() }),
           prefetch: (queryClient: QueryClient, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => queryClient.prefetchQuery(listAIAgentOnboardingFixturesQueryOptions(config, options)),
           createAgent: {
-            request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixture(config, params, body, options),
+            request: (params: CreateAIAgentFromOnboardingFixturePathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixture(config, params, body, options),
             mutationKey: createAIAgentFromOnboardingFixtureMutationKey,
             mutation: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => createAIAgentFromOnboardingFixtureMutationOptions(config, options),
             mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponse, CreateAIAgentFromOnboardingFixtureMutationVariables> = {}) => createAIAgentFromOnboardingFixtureMutationOptions(config, options),
@@ -7102,6 +8044,16 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               },
             },
           },
+          dashboard: {
+            request: (params: GetAgentDashboardV2PathParams, options?: RiidoRequestOptions) => getAgentDashboardV2(config, params, options),
+            queryKeyRoot: getAgentDashboardV2QueryKeyRoot,
+            queryKey: getAgentDashboardV2QueryKey,
+            query: (params: GetAgentDashboardV2PathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardV2QueryOptions(config, params, options),
+            queryOptions: (params: GetAgentDashboardV2PathParams, options: RiidoQueryOptions<AgentDashboardResponse> = {}) => getAgentDashboardV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams) => queryClient.invalidateQueries({ queryKey: getAgentDashboardV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAgentDashboardV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: GetAgentDashboardV2PathParams, options?: RiidoQueryOptions<AgentDashboardResponse>) => queryClient.prefetchQuery(getAgentDashboardV2QueryOptions(config, params, options)),
+          },
           delete: {
             request: (params: DeleteAIAgentV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentV2(config, params, options),
             mutationKey: deleteAIAgentV2MutationKey,
@@ -7149,6 +8101,16 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
           invalidate: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKey(params) }),
           invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
           prefetch: (queryClient: QueryClient, params: GetAIAgentClientBootstrapV2PathParams, options?: RiidoQueryOptions<ClientBootstrapResponseV2>) => queryClient.prefetchQuery(getAIAgentClientBootstrapV2QueryOptions(config, params, options)),
+        },
+        desktopPresence: {
+          request: (params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoRequestOptions) => getAIAgentDesktopPresenceV2(config, params, options),
+          queryKeyRoot: getAIAgentDesktopPresenceV2QueryKeyRoot,
+          queryKey: getAIAgentDesktopPresenceV2QueryKey,
+          query: (params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoQueryOptions<AIAgentDesktopPresenceResponse> = {}) => getAIAgentDesktopPresenceV2QueryOptions(config, params, options),
+          queryOptions: (params: GetAIAgentDesktopPresenceV2PathParams, options: RiidoQueryOptions<AIAgentDesktopPresenceResponse> = {}) => getAIAgentDesktopPresenceV2QueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams) => queryClient.invalidateQueries({ queryKey: getAIAgentDesktopPresenceV2QueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentDesktopPresenceV2QueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: GetAIAgentDesktopPresenceV2PathParams, options?: RiidoQueryOptions<AIAgentDesktopPresenceResponse>) => queryClient.prefetchQuery(getAIAgentDesktopPresenceV2QueryOptions(config, params, options)),
         },
         devices: {
           daemon: {
@@ -7242,7 +8204,7 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentOnboardingFixturesV2QueryKeyRoot() }),
             prefetch: (queryClient: QueryClient, params: ListAIAgentOnboardingFixturesV2PathParams, options?: RiidoQueryOptions<AgentOnboardingFixtureListResponse>) => queryClient.prefetchQuery(listAIAgentOnboardingFixturesV2QueryOptions(config, params, options)),
             createAgent: {
-              request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateAgentConfigurationRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixtureV2(config, params, body, options),
+              request: (params: CreateAIAgentFromOnboardingFixtureV2PathParams, body: CreateOnboardingAgentRequest, options?: RiidoRequestOptions) => createAIAgentFromOnboardingFixtureV2(config, params, body, options),
               mutationKey: createAIAgentFromOnboardingFixtureV2MutationKey,
               mutation: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => createAIAgentFromOnboardingFixtureV2MutationOptions(config, options),
               mutationOptions: (options: RiidoMutationOptions<AgentClientRecordResponseV2, CreateAIAgentFromOnboardingFixtureV2MutationVariables> = {}) => createAIAgentFromOnboardingFixtureV2MutationOptions(config, options),
@@ -7284,7 +8246,7 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               },
             },
             delete: {
-              request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentTaskAgentAssignmentV2(config, params, options),
+              request: (params: DeleteAIAgentTaskAgentAssignmentV2PathParams, body: DeleteAIAgentTaskAgentAssignmentRequest, options?: RiidoRequestOptions) => deleteAIAgentTaskAgentAssignmentV2(config, params, body, options),
               mutationKey: deleteAIAgentTaskAgentAssignmentV2MutationKey,
               mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => deleteAIAgentTaskAgentAssignmentV2MutationOptions(config, options),
               mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, DeleteAIAgentTaskAgentAssignmentV2MutationVariables> = {}) => deleteAIAgentTaskAgentAssignmentV2MutationOptions(config, options),
@@ -7344,6 +8306,23 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             invalidate: (queryClient: QueryClient, params: ListWorkspaceAssignedAgentProfilesV2PathParams) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKey(params) }),
             invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
             prefetch: (queryClient: QueryClient, params: ListWorkspaceAssignedAgentProfilesV2PathParams, options?: RiidoQueryOptions<AssignedAgentProfileMapResponse>) => queryClient.prefetchQuery(listWorkspaceAssignedAgentProfilesV2QueryOptions(config, params, options)),
+          },
+          onboardingCompletion: {
+            create: {
+              request: (params: CompleteAIAgentOnboardingTaskV2PathParams, body: CompleteAIAgentOnboardingTaskRequest, options?: RiidoRequestOptions) => completeAIAgentOnboardingTaskV2(config, params, body, options),
+              mutationKey: completeAIAgentOnboardingTaskV2MutationKey,
+              mutation: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) => completeAIAgentOnboardingTaskV2MutationOptions(config, options),
+              mutationOptions: (options: RiidoMutationOptions<AIAgentTaskActionResponse, CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) => completeAIAgentOnboardingTaskV2MutationOptions(config, options),
+              invalidates: {
+                aiAgentBootstrap: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }),
+                aiAgentTasksAssignableAgents: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }),
+                aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
+                aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
+                aiAgentTasksThreadStreamSubscription: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }),
+                v3AiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() }),
+                all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: getAIAgentTaskThreadStreamSubscriptionV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() })]),
+              },
+            },
           },
           stop: {
             request: (params: StopAIAgentTaskV2PathParams, body: StopAIAgentTaskRequest, options?: RiidoRequestOptions) => stopAIAgentTaskV2(config, params, body, options),
@@ -7418,6 +8397,22 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
               all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() })]),
             },
+          },
+        },
+      },
+    },
+    v3: {
+      aiAgent: {
+        tasks: {
+          threads: {
+            request: (params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoRequestOptions) => listAIAgentTaskThreadHistoryV3(config, params, options),
+            queryKeyRoot: listAIAgentTaskThreadHistoryV3QueryKeyRoot,
+            queryKey: listAIAgentTaskThreadHistoryV3QueryKey,
+            query: (params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse> = {}) => listAIAgentTaskThreadHistoryV3QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentTaskThreadHistoryV3PathParams, options: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse> = {}) => listAIAgentTaskThreadHistoryV3QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentTaskThreadHistoryV3PathParams, options?: RiidoQueryOptions<AIAgentTaskThreadHistoryCollectionResponse>) => queryClient.prefetchQuery(listAIAgentTaskThreadHistoryV3QueryOptions(config, params, options)),
           },
         },
       },

@@ -45,6 +45,12 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentThreadProgress(ctx context.
 	}
 	s.agents[input.AgentID] = agent
 	event := input.event()
+
+	if existing, ok := s.taskThreadForAssignmentLocked(req.TaskID, agentID, req.AssignmentID); ok && existing.ConfirmationReason != "" {
+		event.WorkStatus = AgentWorkStatusWaitingForUser
+		agent.WorkStatus = AgentWorkStatusWaitingForUser
+		s.agents[agentID] = agent
+	}
 	s.appendThreadProgressLocked(event)
 	s.appendClientEventLocked(event.EventType, event)
 	return AgentThreadProgressBatchResponse{

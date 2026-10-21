@@ -23,7 +23,7 @@ func riidoAIServerEnvKeys() []string {
 		envDynamoDBEndpoint, envAgentProfileThumbnailBucket, envAgentProfileThumbnailPrefix,
 		envAgentProfileThumbnailCDNBase, envAgentProfileThumbnailMaxBytes,
 		envAgentProfileThumbnailExpires, envAgentProfileThumbnailS3Endpoint,
-		envTaskContextBaseURL, envTaskContextWorkspaceID, envTaskContextTeamID,
+		envTaskContextBaseURL, envTaskContextGraphQLURL, envTaskContextWorkspaceID, envTaskContextTeamID,
 		envTaskContextAPIKey, envTaskContextTimeout, envLongPollMaxHoldSeconds,
 		envLongPollTickSeconds, envExternalAuthzAPIKey,
 		envAWSContainerCredentialsFullURI, envAWSContainerCredentialsRelativeURI,

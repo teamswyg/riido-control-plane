@@ -6,6 +6,7 @@ import (
 )
 
 type ServerConfig struct {
+	CommentDelivery          CommentDeliveryConfig
 	Authorizer               RequestAuthorizer
 	AgentCatalogStore        AgentCatalogStore
 	AIAgentClient            AIAgentClientStore
@@ -43,5 +44,6 @@ type Server struct {
 	providerRead             ProviderStatusReader
 	devices                  DeviceCredentialStore
 	aiAgentGlobalReconcile   *aiAgentGlobalReconcileGate
+	taskAgentExecutionGate   taskAgentExecutionGate
 	config                   ServerConfig
 }

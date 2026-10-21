@@ -108,6 +108,20 @@ export interface StopAIAgentDaemonReactEndpoint extends core.StopAIAgentDaemonEn
 }
 
 /**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `agents.dashboard`
+ * 접근 예시: `riido.aiAgent.agents.dashboard`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAgentDashboardReactEndpoint extends core.GetAgentDashboardEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAgentDashboardPathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => UseQueryResult<core.AgentDashboardResponse, Error>;
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다
  * 계약 generated path: `aiAgent.agents.editability`
  * 검색용 generated 경로: `agents.editability`
@@ -472,6 +486,20 @@ export interface StopAIAgentDaemonV2ReactEndpoint extends core.StopAIAgentDaemon
 }
 
 /**
+ * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+ * 계약 generated path: `v2.aiAgent.agents.dashboard`
+ * 검색용 generated 경로: `aiAgent.agents.dashboard`
+ * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAgentDashboardV2ReactEndpoint extends core.GetAgentDashboardV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAgentDashboardV2PathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => UseQueryResult<core.AgentDashboardResponse, Error>;
+}
+
+/**
  * client control 활성화 전에 agent 수정 가능 여부를 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.agents.editability`
  * 검색용 generated 경로: `aiAgent.agents.editability`
@@ -497,6 +525,20 @@ export interface GetAIAgentClientBootstrapV2ReactEndpoint extends core.GetAIAgen
    * React Query useQuery hook입니다.
    */
   readonly useQuery: (params: core.GetAIAgentClientBootstrapV2PathParams, options?: core.RiidoQueryOptions<core.ClientBootstrapResponseV2>) => UseQueryResult<core.ClientBootstrapResponseV2, Error>;
+}
+
+/**
+ * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.desktopPresence`
+ * 검색용 generated 경로: `aiAgent.desktopPresence`
+ * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface GetAIAgentDesktopPresenceV2ReactEndpoint extends core.GetAIAgentDesktopPresenceV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.GetAIAgentDesktopPresenceV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentDesktopPresenceResponse>) => UseQueryResult<core.AIAgentDesktopPresenceResponse, Error>;
 }
 
 /**
@@ -668,7 +710,7 @@ export interface CreateAIAgentTaskAgentAssignmentV2ReactEndpoint extends core.Cr
 }
 
 /**
- * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+ * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
  * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
  * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -752,6 +794,20 @@ export interface SubmitAIAgentTaskCommentV2ReactEndpoint extends core.SubmitAIAg
 }
 
 /**
+ * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+ * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+ * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface CompleteAIAgentOnboardingTaskV2ReactEndpoint extends core.CompleteAIAgentOnboardingTaskV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CompleteAIAgentOnboardingTaskV2MutationVariables>) => UseMutationResult<core.AIAgentTaskActionResponse, Error, core.CompleteAIAgentOnboardingTaskV2MutationVariables>;
+}
+
+/**
  * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.stop`
  * 검색용 generated 경로: `aiAgent.tasks.stop`
@@ -808,6 +864,20 @@ export interface CreateAIAgentTaskThreadMessageV2ReactEndpoint extends core.Crea
 }
 
 /**
+ * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+ * 계약 generated path: `v3.aiAgent.tasks.threads`
+ * 검색용 generated 경로: `aiAgent.tasks.threads`
+ * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentTaskThreadHistoryV3ReactEndpoint extends core.ListAIAgentTaskThreadHistoryV3Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentTaskThreadHistoryV3PathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadHistoryCollectionResponse>) => UseQueryResult<core.AIAgentTaskThreadHistoryCollectionResponse, Error>;
+}
+
+/**
  * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
  */
 export interface RiidoAIAgentAgentsDaemonReactNamespace {
@@ -861,6 +931,14 @@ export interface RiidoAIAgentAgentsReactNamespace {
    * agent visibility/access 권한을 통해 해당 agent에 연결된 desktop local daemon 상세와 제어 command를 다루는 namespace입니다.
    */
   readonly daemon: RiidoAIAgentAgentsDaemonReactNamespace;
+  /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `agents.dashboard`
+   * 접근 예시: `riido.aiAgent.agents.dashboard`
+   * cache tag: `aiAgent.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardReactEndpoint;
   /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다
    * 계약 generated path: `aiAgent.agents.delete`
@@ -1187,6 +1265,14 @@ export interface RiidoV2AIAgentAgentsReactNamespace {
    */
   readonly daemon: RiidoV2AIAgentAgentsDaemonReactNamespace;
   /**
+   * 에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.
+   * 계약 generated path: `v2.aiAgent.agents.dashboard`
+   * 검색용 generated 경로: `aiAgent.agents.dashboard`
+   * 접근 예시: `riido.v2.aiAgent.agents.dashboard`
+   * cache tag: `v2.agents.dashboard`
+   */
+  readonly dashboard: GetAgentDashboardV2ReactEndpoint;
+  /**
    * agent를 삭제하고 queued/running assignment를 강제로 정리합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.agents.delete`
    * 검색용 generated 경로: `aiAgent.agents.delete`
@@ -1360,7 +1446,7 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
    */
   readonly create: CreateAIAgentTaskAgentAssignmentV2ReactEndpoint;
   /**
-   * task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)
+   * task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.agentAssignments.delete`
    * 검색용 generated 경로: `aiAgent.tasks.agentAssignments.delete`
    * 접근 예시: `riido.v2.aiAgent.tasks.agentAssignments.delete`
@@ -1375,6 +1461,20 @@ export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
    * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`
    */
   readonly stop: StopAIAgentTaskAgentAssignmentV2ReactEndpoint;
+}
+
+/**
+ * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksOnboardingCompletionReactNamespace {
+  /**
+   * 온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.onboardingCompletion.create`
+   * 검색용 generated 경로: `aiAgent.tasks.onboardingCompletion.create`
+   * 접근 예시: `riido.v2.aiAgent.tasks.onboardingCompletion.create`
+   * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`, `v2.aiAgent.tasks.threadStreamSubscription`, `v3.aiAgent.tasks.threads`
+   */
+  readonly create: CompleteAIAgentOnboardingTaskV2ReactEndpoint;
 }
 
 /**
@@ -1423,6 +1523,10 @@ export interface RiidoV2AIAgentTasksReactNamespace {
    * cache tag: `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly assignedAgentProfiles: ListWorkspaceAssignedAgentProfilesV2ReactEndpoint;
+  /**
+   * v2.aiAgent.tasks.onboardingCompletion namespace입니다.
+   */
+  readonly onboardingCompletion: RiidoV2AIAgentTasksOnboardingCompletionReactNamespace;
   /**
    * task thread의 stop action으로 AI agent 작업을 중단합니다 (v2 workspace-scoped)
    * 계약 generated path: `v2.aiAgent.tasks.stop`
@@ -1486,6 +1590,14 @@ export interface RiidoV2AIAgentReactNamespace {
    */
   readonly bootstrap: GetAIAgentClientBootstrapV2ReactEndpoint;
   /**
+   * 같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.desktopPresence`
+   * 검색용 generated 경로: `aiAgent.desktopPresence`
+   * 접근 예시: `riido.v2.aiAgent.desktopPresence`
+   * cache tag: `v2.aiAgent.desktopPresence`
+   */
+  readonly desktopPresence: GetAIAgentDesktopPresenceV2ReactEndpoint;
+  /**
    * account-owned device/runtime을 선택된 workspace agent 권한에 맞춰 읽는 v2 namespace입니다.
    */
   readonly devices: RiidoV2AIAgentDevicesReactNamespace;
@@ -1518,6 +1630,40 @@ export interface RiidoV2ReactModule {
 }
 
 /**
+ * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+ */
+export interface RiidoV3AIAgentTasksReactNamespace {
+  /**
+   * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
+   * 계약 generated path: `v3.aiAgent.tasks.threads`
+   * 검색용 generated 경로: `aiAgent.tasks.threads`
+   * 접근 예시: `riido.v3.aiAgent.tasks.threads`
+   * cache tag: `v3.aiAgent.tasks.threads`
+   */
+  readonly threads: ListAIAgentTaskThreadHistoryV3ReactEndpoint;
+}
+
+/**
+ * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+ */
+export interface RiidoV3AIAgentReactNamespace {
+  /**
+   * 선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다.
+   */
+  readonly tasks: RiidoV3AIAgentTasksReactNamespace;
+}
+
+/**
+ * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+ */
+export interface RiidoV3ReactModule {
+  /**
+   * workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다.
+   */
+  readonly aiAgent: RiidoV3AIAgentReactNamespace;
+}
+
+/**
  * control-plane API를 DSL client metadata의 module/namespace별로 묶은 config-bound facade입니다.
  */
 export interface RiidoControlPlaneReactClient {
@@ -1529,6 +1675,10 @@ export interface RiidoControlPlaneReactClient {
    * v2 client API module입니다. workspace-scoped AI Agent API를 riido.v2.aiAgent.* 경로로 제공합니다. v1은 UI 테스트 호환 표면으로 유지됩니다.
    */
   readonly v2: RiidoV2ReactModule;
+  /**
+   * v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.
+   */
+  readonly v3: RiidoV3ReactModule;
 }
 
 /**
@@ -1563,6 +1713,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               ...coreClient.aiAgent.agents.daemon.stop,
               useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDaemonMutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDaemonMutationVariables>(coreClient.aiAgent.agents.daemon.stop.mutation(options)),
             },
+          },
+          dashboard: {
+            ...coreClient.aiAgent.agents.dashboard,
+            useQuery: (params: core.GetAgentDashboardPathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => useQuery<core.AgentDashboardResponse, Error>(coreClient.aiAgent.agents.dashboard.query(params, options)),
           },
           delete: {
             ...coreClient.aiAgent.agents.delete,
@@ -1693,6 +1847,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
                 useMutation: (options: core.RiidoMutationOptions<core.DeviceDaemonCommandResponse, core.StopAIAgentDaemonV2MutationVariables> = {}) => useMutation<core.DeviceDaemonCommandResponse, Error, core.StopAIAgentDaemonV2MutationVariables>(coreClient.v2.aiAgent.agents.daemon.stop.mutation(options)),
               },
             },
+            dashboard: {
+              ...coreClient.v2.aiAgent.agents.dashboard,
+              useQuery: (params: core.GetAgentDashboardV2PathParams, options?: core.RiidoQueryOptions<core.AgentDashboardResponse>) => useQuery<core.AgentDashboardResponse, Error>(coreClient.v2.aiAgent.agents.dashboard.query(params, options)),
+            },
             delete: {
               ...coreClient.v2.aiAgent.agents.delete,
               useMutation: (options: core.RiidoMutationOptions<core.DeleteAgentResponse, core.DeleteAIAgentV2MutationVariables> = {}) => useMutation<core.DeleteAgentResponse, Error, core.DeleteAIAgentV2MutationVariables>(coreClient.v2.aiAgent.agents.delete.mutation(options)),
@@ -1709,6 +1867,10 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
           bootstrap: {
             ...coreClient.v2.aiAgent.bootstrap,
             useQuery: (params: core.GetAIAgentClientBootstrapV2PathParams, options?: core.RiidoQueryOptions<core.ClientBootstrapResponseV2>) => useQuery<core.ClientBootstrapResponseV2, Error>(coreClient.v2.aiAgent.bootstrap.query(params, options)),
+          },
+          desktopPresence: {
+            ...coreClient.v2.aiAgent.desktopPresence,
+            useQuery: (params: core.GetAIAgentDesktopPresenceV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentDesktopPresenceResponse>) => useQuery<core.AIAgentDesktopPresenceResponse, Error>(coreClient.v2.aiAgent.desktopPresence.query(params, options)),
           },
           devices: {
             daemon: {
@@ -1791,6 +1953,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               ...coreClient.v2.aiAgent.tasks.assignedAgentProfiles,
               useQuery: (params: core.ListWorkspaceAssignedAgentProfilesV2PathParams, options?: core.RiidoQueryOptions<core.AssignedAgentProfileMapResponse>) => useQuery<core.AssignedAgentProfileMapResponse, Error>(coreClient.v2.aiAgent.tasks.assignedAgentProfiles.query(params, options)),
             },
+            onboardingCompletion: {
+              create: {
+                ...coreClient.v2.aiAgent.tasks.onboardingCompletion.create,
+                useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CompleteAIAgentOnboardingTaskV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.CompleteAIAgentOnboardingTaskV2MutationVariables>(coreClient.v2.aiAgent.tasks.onboardingCompletion.create.mutation(options)),
+              },
+            },
             stop: {
               ...coreClient.v2.aiAgent.tasks.stop,
               useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.StopAIAgentTaskV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.StopAIAgentTaskV2MutationVariables>(coreClient.v2.aiAgent.tasks.stop.mutation(options)),
@@ -1816,6 +1984,16 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             unassign: {
               ...coreClient.v2.aiAgent.tasks.unassign,
               useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.UnassignAIAgentTaskV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.UnassignAIAgentTaskV2MutationVariables>(coreClient.v2.aiAgent.tasks.unassign.mutation(options)),
+            },
+          },
+        },
+      },
+      v3: {
+        aiAgent: {
+          tasks: {
+            threads: {
+              ...coreClient.v3.aiAgent.tasks.threads,
+              useQuery: (params: core.ListAIAgentTaskThreadHistoryV3PathParams, options?: core.RiidoQueryOptions<core.AIAgentTaskThreadHistoryCollectionResponse>) => useQuery<core.AIAgentTaskThreadHistoryCollectionResponse, Error>(coreClient.v3.aiAgent.tasks.threads.query(params, options)),
             },
           },
         },

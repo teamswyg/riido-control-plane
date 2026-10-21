@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -32,4 +33,10 @@ type DynamoDBAIAgentClientSnapshot struct {
 	credentialsProvider AWSCredentialsProvider
 	metrics             *AIAgentClientPersistenceMetrics
 	partHashes          map[string]string
+	onboardingBaseline  AIAgentClientSnapshot
+	// grantsReadCredentials caches credentials for presence polls that read
+	// connection grants outside the command loop.
+	grantsReadMu          sync.Mutex
+	grantsReadPending     chan struct{}
+	grantsReadCredentials AWSCredentials
 }

@@ -6,6 +6,7 @@ func mergeHTTPTransactionBucketState(
 ) {
 	for key, state := range source {
 		current := byKey[key]
+		current.metric.DurationKind = state.metric.DurationKind
 		current.metric.Method = state.metric.Method
 		current.metric.Route = state.metric.Route
 		current.metric.ClientSurface = state.metric.ClientSurface

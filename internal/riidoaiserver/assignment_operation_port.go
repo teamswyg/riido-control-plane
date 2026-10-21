@@ -50,11 +50,6 @@ type AssignmentProjectionReader interface {
 	LoadAssignmentProjection(ctx context.Context, assignmentID string) (AssignmentProjection, bool, error)
 }
 
-type AssignmentProjection struct {
-	Assignment   Assignment
-	LastEventSeq int64
-}
-
 type AssignmentActiveLease struct {
 	AgentID            string
 	ActiveAssignmentID string
@@ -82,15 +77,18 @@ type AssignmentClaimResult struct {
 }
 
 type AssignmentOperationRecord struct {
-	SchemaVersion string                  `json:"schema_version"`
-	OperationID   string                  `json:"operation_id"`
-	OperationType AssignmentOperationType `json:"operation_type"`
-	TaskID        string                  `json:"task_id"`
-	AssignmentID  string                  `json:"assignment_id"`
-	AgentID       string                  `json:"agent_id"`
-	Assignment    Assignment              `json:"assignment"`
-	Events        []TaskEvent             `json:"events"`
-	RecordedAt    time.Time               `json:"recorded_at"`
+	ExpectedProjection *AssignmentProjection `json:"-"`
+	eventACK           *assignmentEventACKReceipt
+	createsExecution   bool
+	SchemaVersion      string                  `json:"schema_version"`
+	OperationID        string                  `json:"operation_id"`
+	OperationType      AssignmentOperationType `json:"operation_type"`
+	TaskID             string                  `json:"task_id"`
+	AssignmentID       string                  `json:"assignment_id"`
+	AgentID            string                  `json:"agent_id"`
+	Assignment         Assignment              `json:"assignment"`
+	Events             []TaskEvent             `json:"events"`
+	RecordedAt         time.Time               `json:"recorded_at"`
 }
 
 func validateAssignmentOperationRecord(record AssignmentOperationRecord) error {

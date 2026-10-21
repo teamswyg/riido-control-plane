@@ -45,3 +45,11 @@ func (s otelTraceSpan) SetAttributes(attributes ...riidoaiserver.TraceAttribute)
 	}
 	s.span.SetAttributes(otelAttributes(attributes)...)
 }
+
+func (r otelTraceRecorder) TraceCorrelation(ctx context.Context) (string, string) {
+	spanContext := trace.SpanContextFromContext(ctx)
+	if !spanContext.IsValid() {
+		return "", ""
+	}
+	return spanContext.TraceID().String(), spanContext.SpanID().String()
+}

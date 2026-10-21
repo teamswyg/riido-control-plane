@@ -1,6 +1,10 @@
 package riidoaiserver
 
-import "slices"
+import (
+	"slices"
+
+	"github.com/teamswyg/riido-contracts/assignment"
+)
 
 func assignmentHoldsActiveLease(state AssignmentState) bool {
 	code := state.Code()
@@ -33,6 +37,7 @@ func (state *storeState) assignmentForClientStop(taskID string, req CancelAssign
 
 func copyAssignment(a Assignment) *Assignment {
 	cp := a
+	cp.RecoveryPolicy = assignment.CloneProviderRecoveryPolicy(a.RecoveryPolicy)
 	return &cp
 }
 

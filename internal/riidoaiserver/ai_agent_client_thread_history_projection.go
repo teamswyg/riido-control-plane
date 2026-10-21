@@ -16,12 +16,14 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	ids := s.visibleTaskMemberIDsLocked(principal, taskID)
 	threads, snapshots := s.visibleTaskThreadHistoryRecordsLocked(principal, taskID)
 	response := AIAgentTaskThreadHistoryCollectionResponse{
-		SchemaVersion:  SchemaVersion,
-		TaskID:         taskID,
-		Threads:        threads,
-		AgentSnapshots: snapshots,
+		SchemaVersion:    SchemaVersion,
+		AssignedAgentIDs: ids,
+		TaskID:           taskID,
+		Threads:          threads,
+		AgentSnapshots:   snapshots,
 	}
 	suppressSupersededQueuedHistoryMessages(response.Threads)
 	response.ActiveStream = taskThreadHistoryActiveStream(response.Threads)
@@ -30,19 +32,21 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 
 func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(thread AIAgentTaskThreadRecord, streamHref string) AIAgentTaskThreadHistoryRecord {
 	record := AIAgentTaskThreadHistoryRecord{
-		ThreadID:        thread.ThreadID,
-		ConversationID:  taskThreadConversationID(thread),
-		ParentThreadID:  taskThreadParentThreadID(thread),
-		TaskID:          thread.TaskID,
-		AssignmentID:    thread.AssignmentID,
-		AgentID:         thread.AgentID,
-		AgentSnapshotID: thread.AgentSnapshotID,
-		RunID:           thread.RunID,
-		WorkStatus:      thread.WorkStatus,
-		AssignmentState: thread.AssignmentState,
-		StartedAt:       thread.StartedAt,
-		CompletedAt:     thread.CompletedAt,
-		Messages:        s.taskThreadHistoryMessagesLocked(thread),
+		ExecutionContext:   copyExecutionContext(thread.ExecutionContext),
+		FailureDiagnostics: clientVisibleFailureDiagnostics(thread.FailureDiagnostics),
+		ThreadID:           thread.ThreadID,
+		ConversationID:     taskThreadConversationID(thread),
+		ParentThreadID:     taskThreadParentThreadID(thread),
+		TaskID:             thread.TaskID,
+		AssignmentID:       thread.AssignmentID,
+		AgentID:            thread.AgentID,
+		AgentSnapshotID:    thread.AgentSnapshotID,
+		RunID:              thread.RunID,
+		WorkStatus:         thread.WorkStatus,
+		AssignmentState:    thread.AssignmentState,
+		StartedAt:          thread.StartedAt,
+		CompletedAt:        thread.CompletedAt,
+		Messages:           s.taskThreadHistoryMessagesLocked(thread),
 	}
 	if taskThreadHasActiveStream(thread) {
 		link := activeStreamLinkForThreadHref(thread, streamHref)

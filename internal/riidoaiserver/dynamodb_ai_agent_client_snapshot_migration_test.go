@@ -33,5 +33,8 @@ func TestDynamoDBAIAgentClientSnapshotMigratesLegacySnapshotToSplitParts(t *test
 	if !ok || loaded.NextDeviceCredentialSeq != 7 || loaded.NextDaemonCommand != 9 {
 		t.Fatalf("loaded legacy snapshot ok=%v snapshot=%+v", ok, loaded)
 	}
+	if err := fixture.store.SaveAIAgentClientSnapshot(context.Background(), loaded); err != nil {
+		t.Fatal(err)
+	}
 	assertSnapshotManifestAndParts(t, items, "7", "9")
 }

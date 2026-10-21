@@ -22,7 +22,11 @@ func writeMutationOperation(b *strings.Builder, info operationInfo) {
 	if info.RequestType != "" {
 		callArgs = append(callArgs, "variables.body")
 	}
-	callArgs = append(callArgs, "{}")
+	if info.MutationVariables == "void" {
+		callArgs = append(callArgs, "{}")
+	} else {
+		callArgs = append(callArgs, "variables.options ?? {}")
+	}
 	fmt.Fprintf(b, "%s(%s),\n", info.Name, strings.Join(callArgs, ", "))
 	b.WriteString("  };\n")
 	b.WriteString("}\n\n")
@@ -41,6 +45,7 @@ func writeMutationVariables(b *strings.Builder, info operationInfo) string {
 	if info.RequestType != "" {
 		fmt.Fprintf(b, "  body: %s;\n", info.RequestType)
 	}
+	b.WriteString("  options?: RiidoRequestOptions;\n")
 	b.WriteString("}\n\n")
 	return typeName
 }

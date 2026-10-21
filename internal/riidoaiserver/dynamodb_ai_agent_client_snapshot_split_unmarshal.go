@@ -7,6 +7,10 @@ import (
 
 func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapshot *AIAgentClientSnapshot) error {
 	switch name {
+	case dynamoDBAIAgentClientSnapshotPartOnboardingAgentCreates:
+		return json.Unmarshal(raw, &snapshot.OnboardingAgentCreates)
+	case dynamoDBAIAgentClientSnapshotPartTaskRequestReceipts:
+		return json.Unmarshal(raw, &snapshot.TaskRequestReceipts)
 	case dynamoDBAIAgentClientSnapshotPartDevices:
 		return json.Unmarshal(raw, &snapshot.Devices)
 	case dynamoDBAIAgentClientSnapshotPartDeviceCredentials:
@@ -27,6 +31,12 @@ func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapsho
 		return json.Unmarshal(raw, &snapshot.TaskThreadMessages)
 	case dynamoDBAIAgentClientSnapshotPartEvents:
 		return json.Unmarshal(raw, &snapshot.Events)
+	case dynamoDBAIAgentClientSnapshotPartOnboardingCreated:
+		return json.Unmarshal(raw, &snapshot.OnboardingCreatedIDs)
+	case dynamoDBAIAgentClientSnapshotPartOnboardingDone:
+		return json.Unmarshal(raw, &snapshot.OnboardingCompletions)
+	case dynamoDBAIAgentClientSnapshotPartOnboardingThreads:
+		return json.Unmarshal(raw, &snapshot.OnboardingCompletionThreads)
 	default:
 		return fmt.Errorf("unknown AI Agent client snapshot part %s", name)
 	}

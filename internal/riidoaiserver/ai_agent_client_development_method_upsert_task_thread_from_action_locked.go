@@ -17,11 +17,13 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		RunID:              response.RunID,
 		SourceCommentID:    strings.TrimSpace(sourceCommentID),
 		WorkStatus:         response.WorkStatus,
+		ConfirmationReason: response.ConfirmationReason,
 		AssignmentState:    response.AssignmentState,
 		CommentKind:        response.CommentKind,
 		Message:            response.Message,
 		ResultMessage:      response.ResultMessage,
 		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
+		ExecutionContext:   copyExecutionContext(response.ExecutionContext),
 		StartedAt:          now,
 		Lines:              []AgentThreadProgressLine{},
 	}
@@ -38,6 +40,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 			threads[i].ConversationID = taskThreadConversationID(threads[i])
 		}
 		threads[i].WorkStatus = response.WorkStatus
+		threads[i].ConfirmationReason = response.ConfirmationReason
 		if strings.TrimSpace(response.AssignmentID) != "" {
 			threads[i].AssignmentID = strings.TrimSpace(response.AssignmentID)
 		}
@@ -49,6 +52,7 @@ func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(respons
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = nil
 		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
+		threads[i].ExecutionContext = copyExecutionContext(response.ExecutionContext)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage

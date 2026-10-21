@@ -42,8 +42,8 @@ This reader is generated from the CloudWatch EMF shape SSOT.
 
 ## Evidence Loop
 
-- Observation: Live CloudWatch logs showed fresh process-window metrics next to persisted store-state counters, making post-deploy poll and snapshot readings easy to misinterpret.
-- Hypothesis: EMF records should carry machine-checkable metric scope metadata so Logs Insights readers can distinguish cumulative store state, rolling windows, and process-lifetime counters.
+- Observation: Live CloudWatch logs showed rolling metrics, persisted counters and deliberate 25-second daemon poll waits together. SSE connections and poll waits can be mistaken for interactive request latency.
+- Hypothesis: EMF records carry machine-checkable metric scope metadata. Interactive request aggregates exclude SSE stream_lifetime and daemon poll_wait; route breakdowns preserve both durations and request counts, and cannot be summed across overlapping rolling samples as unique requests.
 - Execute: Generate a sample EMF envelope, verify required dimensions, JSON fields, metric scopes, metric units, and source anchors, then upload redaction-safe evidence in CI.
 - Evaluate: The verifier fails on stale generated docs, missing source anchors, missing JSON fields, missing scope metadata, or metric unit drift.
 - Retrospective: Metric scope metadata keeps observability evidence executable without adding CloudWatch dimensions or publishing live AWS data.

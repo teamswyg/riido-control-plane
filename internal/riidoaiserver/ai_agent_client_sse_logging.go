@@ -1,27 +1,70 @@
 package riidoaiserver
 
 import (
+	"context"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
 )
 
 func logAIAgentClientStreamOpen(r *http.Request, replayEvents int) {
+	ctx, span := startSSEObservation(r.Context(), "stream_open", StringTraceAttribute("http.route", sseLogRoute(r)), Int64TraceAttribute("riido.sse.replay_events", int64(replayEvents)))
+	defer span.End()
+	traceID, spanID := traceCorrelationFromContext(ctx)
 	log.Printf(
-		"riido_ai_agent_sse event=stream_open path=%q replay_cursor_present=%t replay_events=%d",
-		r.URL.Path, strings.TrimSpace(r.Header.Get("Last-Event-ID")) != "", replayEvents,
+		"riido_ai_agent_sse event=stream_open route=%q replay_cursor_present=%t replay_events=%d trace_id=%q span_id=%q",
+		sseLogRoute(r), strings.TrimSpace(r.Header.Get("Last-Event-ID")) != "", replayEvents, traceID, spanID,
 	)
 }
 
 func logAIAgentClientStreamClose(r *http.Request, reason string, err error) {
-	errorText := ""
-	if err != nil {
-		errorText = err.Error()
+	ctx, span := startSSEObservation(r.Context(), "stream_closed", StringTraceAttribute("http.route", sseLogRoute(r)), StringTraceAttribute("riido.sse.close_reason", boundedSSECloseReason(reason)), StringTraceAttribute("error.type", sseCloseErrorType(reason, err)))
+	defer span.End()
+	if sseCloseErrorType(reason, err) == "write_error" {
+		span.RecordError(errors.New("SSE write failed"))
 	}
+	traceID, spanID := traceCorrelationFromContext(ctx)
 	log.Printf(
-		"riido_ai_agent_sse event=stream_closed path=%q reason=%q error=%q",
-		r.URL.Path, reason, errorText,
+		"riido_ai_agent_sse event=stream_closed route=%q reason=%q error_type=%q trace_id=%q span_id=%q",
+		sseLogRoute(r), boundedSSECloseReason(reason), sseCloseErrorType(reason, err), traceID, spanID,
 	)
+}
+
+func sseLogRoute(r *http.Request) string {
+	if route, ok := r.Context().Value(requestLogRouteContextKey{}).(string); ok && route != "" {
+		return route
+	}
+	if route := traceHTTPRoute(r.Method, r.URL.Path); route != "" {
+		return route
+	}
+	return "unknown"
+}
+
+func boundedSSECloseReason(reason string) string {
+	switch reason {
+	case "replay_write_error", "replay_complete", "subscriber_closed", "event_write_error", "keepalive_write_error", "request_context_done":
+		return reason
+	default:
+		return "unknown"
+	}
+}
+
+func sseCloseErrorType(reason string, err error) string {
+	switch {
+	case err == nil:
+		return "none"
+	case errors.Is(err, context.Canceled):
+		return "cancelled"
+	case errors.Is(err, context.DeadlineExceeded):
+		return "deadline_exceeded"
+	}
+	switch boundedSSECloseReason(reason) {
+	case "replay_write_error", "event_write_error", "keepalive_write_error":
+		return "write_error"
+	default:
+		return "unknown"
+	}
 }
 
 func logAIAgentClientSubscriberDeliverySummary(subscriber aiAgentClientSubscriber) {

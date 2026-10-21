@@ -6,7 +6,8 @@ import (
 
 func assignedAgentProfileFromAgent(agent AgentClientRecord) AssignedAgentProfile {
 	return AssignedAgentProfile{
-		AvatarURL: strings.TrimSpace(agent.ProfileThumbnailURL),
-		TmpColor:  strings.TrimSpace(agent.TmpColor),
+		AvatarURL:    strings.TrimSpace(agent.ProfileThumbnailURL),
+		TmpColor:     strings.TrimSpace(agent.TmpColor),
+		ProfileColor: profileColorOrFallback(agent.ProfileColor, agent.AgentID),
 	}
 }

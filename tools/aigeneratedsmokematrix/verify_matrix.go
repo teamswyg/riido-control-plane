@@ -42,3 +42,4 @@ func verifyEntry(m manifest, ops map[string]generatedOperation, entry smokeEntry
 }
 
 func wantsV2(entry smokeEntry) bool { return strings.HasPrefix(entry.GeneratedPath, "v2.") }
+func wantsV3(entry smokeEntry) bool { return strings.HasPrefix(entry.GeneratedPath, "v3.") }

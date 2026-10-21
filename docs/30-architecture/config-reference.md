@@ -10,12 +10,14 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `52`; manifest entries: `52`; secret/credential entries: `7`; operator-only entries: `12`.
+Runtime env reads: `55`; manifest entries: `55`; secret/credential entries: `8`; operator-only entries: `14`.
 
 ## Runtime Env
 
 | Variable | Default | Sensitivity | Meaning |
 | --- | --- | --- | --- |
+| `RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL` | `empty` | `operator` | Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery. |
+| `RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY` | `empty` | `secret` | Dedicated server-to-server comment delivery secret (minimum 32 bytes). |
 | `RIIDO_AI_SERVER_ADDR` | `:8080` | `public` | HTTP listen address passed to the main API server. |
 | `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS` | `10` | `public` | Graceful shutdown timeout after SIGINT or SIGTERM. |
 | `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON` | `empty` | `secret` | Static bearer-token credential JSON for public-testable authorization. |
@@ -33,7 +35,7 @@ Runtime env reads: `52`; manifest entries: `52`; secret/credential entries: `7`;
 | `RIIDO_AI_SERVER_METRICS_LOG_INTERVAL_SECONDS` | `disabled` | `public` | Positive stdout CloudWatch EMF publish interval. |
 | `RIIDO_AI_SERVER_PPROF_ADDR` | `disabled` | `operator` | Optional loopback-only pprof listener address. |
 | `RIIDO_AI_SERVER_TRACING_ENABLED` | `false` | `public` | Opt-in OpenTelemetry trace export switch. |
-| `RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO` | `0.01` | `public` | Trace sampling ratio from 0 to 1. |
+| `RIIDO_AI_SERVER_TRACING_SAMPLE_RATIO` | `0.01` | `public` | Finite trace sampling ratio from 0 to 1; NaN and infinities are rejected. |
 | `RIIDO_AI_SERVER_OTEL_EXPORTER_OTLP_ENDPOINT` | `empty` | `operator` | Riido-specific OTLP/HTTP collector endpoint override. |
 | `RIIDO_AI_SERVER_TRACING_SERVICE_NAME` | `riido_ai_server` | `public` | OpenTelemetry service.name override. |
 | `RIIDO_AI_SERVER_WEB_ALLOWED_ORIGINS` | `empty` | `public` | Comma-separated exact browser origins allowed by CORS. |
@@ -56,6 +58,7 @@ Runtime env reads: `52`; manifest entries: `52`; secret/credential entries: `7`;
 | `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS` | `300` | `public` | Lifetime for the signed S3 POST upload intent. |
 | `RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT` | `AWS bucket endpoint` | `operator` | Optional S3-compatible endpoint override for tests. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL` | `empty` | `operator` | Existing Riido API server base URL for server-to-server task context lookup. |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_GRAPHQL_URL` | `task context base URL + /graphql` | `operator` | Optional monolith GraphQL endpoint for private viewer-authorized Agent Records metadata and onboarding first-task provenance. Defaults to the REST task-context base URL plus /graphql; REST document/component routes keep their original base URL. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID` | `empty` | `operator` | Legacy Open API task-context adapter workspace id. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID` | `empty` | `operator` | Legacy Open API task-context adapter team id. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY` | `empty` | `secret` | Legacy task-context workspace API key sent server-to-server. |
@@ -71,7 +74,7 @@ Runtime env reads: `52`; manifest entries: `52`; secret/credential entries: `7`;
 
 ## Runtime Rules
 
-Every runtime env read by cmd/riido_ai_server must appear exactly once in this manifest.; Generated docs must not contain live values, account ids, raw tokens, or deployment evidence.; Secret or credential env vars may document names and semantics only, never values.; Profile thumbnail configuration signs upload intents; image bytes are never proxied by control-plane.; Tracing metadata must use route patterns and operation names only, not task ids, prompts, credentials, or raw content.; Public PR checks must not require AWS credentials or Terraform state..
+Every runtime env read by cmd/riido_ai_server must appear exactly once in this manifest.; Generated docs must not contain live values, account ids, raw tokens, or deployment evidence.; Secret or credential env vars may document names and semantics only, never values.; Profile thumbnail configuration signs upload intents; image bytes are never proxied by control-plane.; Tracing metadata must use route patterns and operation names only, not task ids, prompts, credentials, or raw content.; Public PR checks must not require AWS credentials or Terraform state.; service.version is a validated 40-character source revision embedded by the image workflow; dirty, invalid or unversioned builds report unknown without exporting environment or filesystem paths.; SSE stream_open, stream_closed and terminal_delivery logs reference short completed observation spans rather than waiting for the long-lived connection span; actual X-Ray retention and joins require deployment evidence..
 
 ## Evidence Loop
 

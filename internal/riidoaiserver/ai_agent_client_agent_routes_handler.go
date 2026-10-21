@@ -29,6 +29,8 @@ func (s Server) handleAIAgentClientAgents(w http.ResponseWriter, r *http.Request
 	case strings.HasPrefix(suffix, "daemon/") && r.Method == http.MethodPost:
 		action := strings.TrimPrefix(suffix, "daemon/")
 		s.handleAIAgentClientAgentDaemonControl(w, r, agentID, action)
+	case suffix == "dashboard":
+		s.handleAgentDashboard(w, r, agentID)
 	case suffix == "editability" && r.Method == http.MethodGet:
 		s.handleAIAgentClientEditability(w, r, agentID)
 	case suffix == "" && r.Method == http.MethodPatch:

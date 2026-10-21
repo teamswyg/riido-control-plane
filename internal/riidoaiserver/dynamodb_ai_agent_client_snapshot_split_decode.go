@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -12,6 +13,20 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 	}
 	if dynamoDBStringValue(current, "storage_version") != dynamoDBAIAgentClientSnapshotSplitStorageVersion {
 		return AIAgentClientSnapshot{}, 0, fmt.Errorf("unsupported AI Agent client snapshot storage_version %q", dynamoDBStringValue(current, "storage_version"))
+	}
+	// A consistent Query is not a multi-item snapshot. Reject mixed parts
+	// observed across a concurrent atomic write before publishing any state.
+	hashes := map[string]string{}
+	if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &hashes); err != nil {
+		return AIAgentClientSnapshot{}, 0, err
+	}
+	parts := dynamoDBAIAgentClientSnapshotItemsByPart(items)
+	for name, hash := range hashes {
+		item := parts[name]
+		raw, err := gunzipBase64(dynamoDBStringValue(item, "part_gzip"))
+		if err != nil || hash != sha256Hex(raw) {
+			return AIAgentClientSnapshot{}, 0, errAIAgentSnapshotConflict
+		}
 	}
 	snapshot := dynamoDBAIAgentClientSnapshotFromManifest(current)
 	var encodedBytes int64

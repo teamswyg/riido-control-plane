@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"encoding/json"
 	"net/http"
 )
 
@@ -44,12 +45,21 @@ func (s Server) handleAIAgentClientCreateFromOnboardingFixture(w http.ResponseWr
 	if !ok {
 		return
 	}
-	var req CreateAgentConfigurationRequest
+	var req CreateOnboardingAgentRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	response, err := s.aiAgent.CreateAIAgentFromOnboardingFixture(r.Context(), principal, fixtureID, req)
+	ctx := r.Context()
+	if len(req.RequestID) != 0 {
+		var requestID string
+		if err := json.Unmarshal(req.RequestID, &requestID); err != nil || requestID == "" {
+			writeError(w, http.StatusBadRequest, "request_id must be an ASCII token of 1 to 128 bytes")
+			return
+		}
+		ctx = withOnboardingAgentCreateRequestID(ctx, requestID)
+	}
+	response, err := s.aiAgent.CreateAIAgentFromOnboardingFixture(ctx, principal, fixtureID, req.CreateAgentConfigurationRequest)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return

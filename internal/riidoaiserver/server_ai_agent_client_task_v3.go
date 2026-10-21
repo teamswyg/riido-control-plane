@@ -32,11 +32,12 @@ func (s Server) handleAIAgentClientTaskThreadsV3(w http.ResponseWriter, r *http.
 		return
 	}
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	response, err := s.aiAgent.ListAIAgentTaskThreadHistory(r.Context(), principal, taskID)
 	if err != nil {
+		logRequestFailure(r, "thread_history", err)
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}

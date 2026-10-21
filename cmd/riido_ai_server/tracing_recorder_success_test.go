@@ -41,7 +41,7 @@ func TestOtelTraceRecorderRecordsSpanAttributesAndErrors(t *testing.T) {
 	if got.Name() != "riido.test.span" || got.SpanKind() != trace.SpanKindServer {
 		t.Fatalf("span = %q/%v", got.Name(), got.SpanKind())
 	}
-	if got.Status().Code != codes.Error || got.Status().Description != "boom" {
+	if got.Status().Code != codes.Error || got.Status().Description != "operation failed" {
 		t.Fatalf("span status = %v/%q", got.Status().Code, got.Status().Description)
 	}
 	attrs := map[string]attribute.Value{}
@@ -50,5 +50,24 @@ func TestOtelTraceRecorderRecordsSpanAttributesAndErrors(t *testing.T) {
 	}
 	if attrs["riido.route"].AsString() != "/v1/test" || !attrs["riido.allowed"].AsBool() {
 		t.Fatalf("span attrs = %#v", attrs)
+	}
+}
+
+func TestOtelTraceRecorderProvidesValidCurrentCorrelation(t *testing.T) {
+	provider := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.AlwaysSample()))
+	t.Cleanup(func() {
+		if err := provider.Shutdown(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+	})
+	recorder := otelTraceRecorder{tracer: provider.Tracer("correlation-test")}
+	ctx, span := recorder.StartTraceSpan(context.Background(), riidoaiserver.TraceSpanStart{Name: "test correlation"})
+	defer span.End()
+	traceID, spanID := recorder.TraceCorrelation(ctx)
+	if traceID != trace.SpanContextFromContext(ctx).TraceID().String() || spanID != trace.SpanContextFromContext(ctx).SpanID().String() {
+		t.Fatal("correlation did not identify current OTel span")
+	}
+	if traceID, spanID := recorder.TraceCorrelation(context.Background()); traceID != "" || spanID != "" {
+		t.Fatal("invented trace context")
 	}
 }

@@ -22,7 +22,7 @@ func TestAssignmentJournalBehaviorGolden(t *testing.T) {
 	if err := json.Unmarshal(data, &got); err != nil {
 		t.Fatal(err)
 	}
-	if got.SchemaVersion != requirements.EvidenceSchema || got.ReplayRules != 8 {
+	if got.SchemaVersion != requirements.EvidenceSchema || got.ReplayRules != 11 {
 		t.Fatalf("unexpected evidence: %+v", got)
 	}
 	if got.Ports != 6 || got.Records != 4 || got.Constants != 4 {

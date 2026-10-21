@@ -7,6 +7,8 @@ import (
 )
 
 func normalizeProgressLine(line AgentThreadProgressLine) (AgentThreadProgressLine, bool) {
+	// Ingest accepts only classified catalog arguments, never a saved projection.
+	line.displayMessage = ""
 	line.Message = strings.TrimSpace(line.Message)
 	line.MessageKey = strings.TrimSpace(line.MessageKey)
 	line.MessageArgs = copyStringMap(line.MessageArgs)

@@ -21,6 +21,7 @@ func agentRecordFromTaskThreadSnapshot(thread AIAgentTaskThreadRecord) AgentClie
 		Name:                snapshot.Name,
 		ProfileThumbnailURL: snapshot.ProfileThumbnailURL,
 		TmpColor:            snapshot.TmpColor,
+		ProfileColor:        profileColorOrFallback(snapshot.ProfileColor, snapshot.AgentID),
 		Visibility:          snapshot.Visibility,
 		RuntimeKind:         snapshot.RuntimeKind,
 		ModelID:             snapshot.ModelID,

@@ -24,33 +24,28 @@ type AIAgentClientSnapshotStore interface {
 }
 
 type AIAgentClientSnapshot struct {
-	Version                 int64                                        `json:"version,omitempty"`
-	ExpectedVersion         int64                                        `json:"-"`
-	SchemaVersion           string                                       `json:"schema_version"`
-	SavedAt                 time.Time                                    `json:"saved_at"`
-	WorkspaceID             string                                       `json:"workspace_id"`
-	Devices                 []DeviceRecord                               `json:"devices"`
-	DeviceCredentials       []AIAgentClientDeviceCredentialSnapshot      `json:"device_credentials"`
-	DeviceConnectionGrants  []DeviceConnectionGrant                      `json:"device_connection_grants,omitempty"`
-	Daemons                 []DeviceDaemonRecord                         `json:"daemons"`
-	Agents                  []AgentClientRecord                          `json:"agents"`
-	Fixtures                []AgentOnboardingFixture                     `json:"fixtures"`
-	TaskAgentMemberships    map[string]map[string]AIAgentTaskMembership  `json:"task_agent_memberships"`
-	TaskThreads             map[string][]AIAgentTaskThreadRecord         `json:"task_threads"`
-	TaskThreadMessages      map[string][]AIAgentTaskThreadHistoryMessage `json:"task_thread_messages,omitempty"`
-	Events                  []AIAgentClientEventSnapshot                 `json:"events"`
-	NextDeviceCredentialSeq int                                          `json:"next_device_credential_seq"`
-	NextDaemonCommand       int                                          `json:"next_daemon_command"`
-}
-
-type AIAgentClientDeviceCredentialSnapshot struct {
-	DeviceID         string    `json:"device_id"`
-	MachineID        string    `json:"machine_id,omitempty"`
-	SecretHashSHA256 string    `json:"secret_hash_sha256"`
-	OwnerPrincipalID string    `json:"owner_principal_id"`
-	WorkspaceID      string    `json:"workspace_id"`
-	DisplayName      string    `json:"display_name,omitempty"`
-	IssuedAt         time.Time `json:"issued_at"`
+	OnboardingAgentCreates      map[string]onboardingAgentCreateReceipt      `json:"onboarding_agent_creates,omitempty"`
+	TaskRequestReceipts         map[string]AIAgentTaskActionResponse         `json:"task_request_receipts,omitempty"`
+	Version                     int64                                        `json:"version,omitempty"`
+	ExpectedVersion             int64                                        `json:"-"`
+	SchemaVersion               string                                       `json:"schema_version"`
+	SavedAt                     time.Time                                    `json:"saved_at"`
+	WorkspaceID                 string                                       `json:"workspace_id"`
+	Devices                     []DeviceRecord                               `json:"devices"`
+	DeviceCredentials           []AIAgentClientDeviceCredentialSnapshot      `json:"device_credentials"`
+	DeviceConnectionGrants      []DeviceConnectionGrant                      `json:"device_connection_grants"`
+	Daemons                     []DeviceDaemonRecord                         `json:"daemons"`
+	Agents                      []AgentClientRecord                          `json:"agents"`
+	OnboardingCreatedIDs        []string                                     `json:"onboarding_created_agent_ids,omitempty"`
+	OnboardingCompletions       map[string]string                            `json:"onboarding_completed_tasks,omitempty"`
+	OnboardingCompletionThreads map[string]AIAgentTaskThreadRecord           `json:"onboarding_completion_threads,omitempty"`
+	Fixtures                    []AgentOnboardingFixture                     `json:"fixtures"`
+	TaskAgentMemberships        map[string]map[string]AIAgentTaskMembership  `json:"task_agent_memberships"`
+	TaskThreads                 map[string][]AIAgentTaskThreadRecord         `json:"task_threads"`
+	TaskThreadMessages          map[string][]AIAgentTaskThreadHistoryMessage `json:"task_thread_messages,omitempty"`
+	Events                      []AIAgentClientEventSnapshot                 `json:"events"`
+	NextDeviceCredentialSeq     int                                          `json:"next_device_credential_seq"`
+	NextDaemonCommand           int                                          `json:"next_daemon_command"`
 }
 
 type AIAgentClientEventSnapshot struct {
@@ -70,6 +65,7 @@ type PersistentAIAgentClientStore struct {
 	snapshotLastReloadAt          time.Time
 	snapshotLastSavedAt           time.Time
 	snapshotClock                 func() time.Time
+	snapshotReloadRequired        bool
 }
 
 func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAgentClientStore, snapshotStore AIAgentClientSnapshotStore) (*PersistentAIAgentClientStore, error) {
@@ -136,12 +132,15 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 		return nil
 	}
 	s.snapshotReloadMu.Lock()
-	if !s.shouldReloadSnapshotLocked() {
+	if !s.snapshotReloadRequired && !s.shouldReloadSnapshotLocked() {
 		s.snapshotReloadMu.Unlock()
 		return nil
 	}
 	snapshot, ok, err := s.snapshotStore.LoadAIAgentClientSnapshot(ctx)
 	if err != nil || !ok {
+		if err == nil && s.snapshotReloadRequired {
+			err = errAIAgentSnapshotConflict
+		}
 		s.snapshotReloadMu.Unlock()
 		return err
 	}
@@ -151,6 +150,7 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 		return err
 	}
 	repaired := s.repairStaleActiveTaskThreads(s.snapshotNow().UTC())
+	s.snapshotReloadRequired = false
 	s.snapshotLastReloadAt = s.snapshotNow()
 	s.snapshotReloadMu.Unlock()
 	if repaired {
@@ -163,12 +163,19 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	if s == nil || s.snapshotStore == nil || s.DevelopmentAIAgentClientStore == nil {
 		return nil
 	}
+	s.snapshotReloadMu.Lock()
+	required := s.snapshotReloadRequired
+	s.snapshotReloadMu.Unlock()
+	if required {
+		return errAIAgentSnapshotConflict
+	}
 	snapshot, err := s.snapshot(s.snapshotNow().UTC())
 	if err != nil {
 		return err
 	}
 	snapshot.ExpectedVersion = s.version
 	snapshot.Version = s.version + 1
+	ctx = context.WithValue(ctx, taskAgentPreserveMembershipContextKey{}, true)
 	if err := s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot); err != nil {
 		return err
 	}
@@ -221,6 +228,9 @@ func (s *PersistentAIAgentClientStore) snapshotNow() time.Time {
 func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClientSnapshot, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.taskAgentMemberships == nil {
+		s.taskAgentMemberships = legacyTaskAgentMemberships(s.taskThreads)
+	}
 	credentials := make([]AIAgentClientDeviceCredentialSnapshot, 0, len(s.deviceCredentials))
 	for _, record := range s.deviceCredentials {
 		credentials = append(credentials, AIAgentClientDeviceCredentialSnapshot{
@@ -266,7 +276,12 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		// stream is unaffected — it delivers every line in real time.
 		retainedThreads := threads
 		if len(retainedThreads) > aiAgentClientThreadsPerTaskLimit {
-			retainedThreads = retainedThreads[len(retainedThreads)-aiAgentClientThreadsPerTaskLimit:]
+			retainedThreads = make([]AIAgentTaskThreadRecord, 0, len(threads))
+			for index, thread := range threads {
+				if index >= len(threads)-aiAgentClientThreadsPerTaskLimit || taskThreadNeedsRetention(thread) {
+					retainedThreads = append(retainedThreads, thread)
+				}
+			}
 		}
 		copied := make([]AIAgentTaskThreadRecord, len(retainedThreads))
 		for i, thread := range retainedThreads {
@@ -285,21 +300,26 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		return AIAgentClientSnapshot{}, err
 	}
 	return AIAgentClientSnapshot{
-		SchemaVersion:           AIAgentClientPersistenceSchemaVersion,
-		SavedAt:                 savedAt.UTC(),
-		WorkspaceID:             s.workspaceID,
-		Devices:                 copyDevices(s.devices),
-		DeviceCredentials:       credentials,
-		DeviceConnectionGrants:  copyDeviceConnectionGrants(s.deviceConnectionGrants),
-		Daemons:                 daemons,
-		Agents:                  agents,
-		Fixtures:                copyAgentOnboardingFixtures(s.fixtures),
-		TaskThreads:             taskThreads,
-		TaskAgentMemberships:    copyTaskAgentMemberships(s.taskAgentMemberships),
-		TaskThreadMessages:      taskThreadMessages,
-		Events:                  events,
-		NextDeviceCredentialSeq: s.nextDeviceCredentialSeq,
-		NextDaemonCommand:       s.nextDaemonCommand,
+		SchemaVersion:               AIAgentClientPersistenceSchemaVersion,
+		SavedAt:                     savedAt.UTC(),
+		WorkspaceID:                 s.workspaceID,
+		Devices:                     copyDevices(s.devices),
+		DeviceCredentials:           credentials,
+		DeviceConnectionGrants:      copyDeviceConnectionGrants(s.deviceConnectionGrants),
+		Daemons:                     daemons,
+		Agents:                      agents,
+		Fixtures:                    copyAgentOnboardingFixtures(s.fixtures),
+		TaskThreads:                 taskThreads,
+		TaskRequestReceipts:         cloneTaskRequestReceipts(s.taskRequestReceipts),
+		OnboardingAgentCreates:      cloneOnboardingAgentCreates(s.onboardingAgentCreates),
+		OnboardingCreatedIDs:        onboardingCreatedAgentIDsSnapshot(s.onboardingCreated),
+		OnboardingCompletions:       cloneOnboardingCompletedTasks(s.onboardingCompletions),
+		OnboardingCompletionThreads: cloneOnboardingCompletionThreads(s.onboardingCompletionThreads),
+		TaskAgentMemberships:        copyTaskAgentMemberships(s.taskAgentMemberships),
+		TaskThreadMessages:          taskThreadMessages,
+		Events:                      events,
+		NextDeviceCredentialSeq:     s.nextDeviceCredentialSeq,
+		NextDaemonCommand:           s.nextDaemonCommand,
 	}, nil
 }
 
@@ -361,25 +381,27 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	// Older v2 snapshots predate explicit account connection grants. The
 	// credential row proves the original account/workspace connection, so seed
 	// that fact without changing the device owner or rotating its secret.
-	for _, credential := range deviceCredentials {
-		if credential.ownerPrincipalID == "" || credential.workspaceID == "" {
-			continue
-		}
-		key := deviceConnectionGrantKey(credential.deviceID, credential.ownerPrincipalID, credential.workspaceID)
-		deviceGrants := deviceConnectionGrants[credential.deviceID]
-		if deviceGrants == nil {
-			deviceGrants = map[string]DeviceConnectionGrant{}
-			deviceConnectionGrants[credential.deviceID] = deviceGrants
-		}
-		if _, ok := deviceGrants[key]; ok {
-			continue
-		}
-		deviceGrants[key] = DeviceConnectionGrant{
-			DeviceID:    credential.deviceID,
-			PrincipalID: credential.ownerPrincipalID,
-			WorkspaceID: credential.workspaceID,
-			ConnectedAt: credential.issuedAt,
-			LastSeenAt:  credential.issuedAt,
+	if snapshot.DeviceConnectionGrants == nil {
+		for _, credential := range deviceCredentials {
+			if credential.ownerPrincipalID == "" || credential.workspaceID == "" {
+				continue
+			}
+			key := deviceConnectionGrantKey(credential.deviceID, credential.ownerPrincipalID, credential.workspaceID)
+			deviceGrants := deviceConnectionGrants[credential.deviceID]
+			if deviceGrants == nil {
+				deviceGrants = map[string]DeviceConnectionGrant{}
+				deviceConnectionGrants[credential.deviceID] = deviceGrants
+			}
+			if _, ok := deviceGrants[key]; ok {
+				continue
+			}
+			deviceGrants[key] = DeviceConnectionGrant{
+				DeviceID:    credential.deviceID,
+				PrincipalID: credential.ownerPrincipalID,
+				WorkspaceID: credential.workspaceID,
+				ConnectedAt: credential.issuedAt,
+				LastSeenAt:  credential.issuedAt,
+			}
 		}
 	}
 	daemons := make(map[string]DeviceDaemonRecord, len(snapshot.Daemons))
@@ -439,11 +461,18 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.fixtures = copyAgentOnboardingFixtures(snapshot.Fixtures)
 	s.ensureOnboardingFixtureColorsLocked()
 	s.taskThreads = taskThreads
+	s.taskRequestReceipts = cloneTaskRequestReceipts(snapshot.TaskRequestReceipts)
+	s.onboardingAgentCreates = cloneOnboardingAgentCreates(snapshot.OnboardingAgentCreates)
+	s.onboardingCreated = onboardingCreatedAgentsFromSnapshot(snapshot.OnboardingCreatedIDs)
+	backfillOnboardingCreatedFromFixtureTmpColor(s.onboardingCreated, agents)
+	s.onboardingCompletions = cloneOnboardingCompletedTasks(snapshot.OnboardingCompletions)
+	s.onboardingCompletionThreads = cloneOnboardingCompletionThreads(snapshot.OnboardingCompletionThreads)
 	s.taskAgentMemberships = copyTaskAgentMemberships(snapshot.TaskAgentMemberships)
 	if s.taskAgentMemberships == nil {
 		s.taskAgentMemberships = legacyTaskAgentMemberships(taskThreads)
 	}
 	s.taskThreadMessages = taskThreadMessages
+	s.ensureAgentProfileColorsLocked()
 	s.taskThreadProgressCache = map[string]taskThreadProgressMessageCache{}
 	s.events = events
 	if preserveSubscribers {
@@ -498,6 +527,9 @@ func restoreSnapshotEventPayload(eventType string, raw json.RawMessage) (any, er
 		return payload, json.Unmarshal(raw, &payload)
 	case AgentClientEventEditabilityChanged:
 		var payload AgentEditabilityChangedEvent
+		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventTaskNotification:
+		var payload AgentTaskNotificationEvent
 		return payload, json.Unmarshal(raw, &payload)
 	case AgentClientEventWorkStatusChanged:
 		var payload AgentWorkStatusChangedEvent

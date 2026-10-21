@@ -7,5 +7,6 @@ func copyTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
 	thread.ResultMessage = clientVisibleTaskThreadResultMessage(thread)
 	thread.QueueDiagnostics = copyQueueDiagnostics(thread.QueueDiagnostics)
 	thread.FailureDiagnostics = clientVisibleFailureDiagnostics(thread.FailureDiagnostics)
+	thread.ExecutionContext = copyExecutionContext(thread.ExecutionContext)
 	return thread
 }

@@ -2,7 +2,7 @@ package riidoaiserver
 
 import "testing"
 
-func TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument(t *testing.T) {
+func TestAssignmentPromptDoesNotGateNonCommandComponentDocument(t *testing.T) {
 	t.Parallel()
 	for _, componentType := range []string{"project", "milestone", "task", "subtask"} {
 		prompt, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
@@ -24,8 +24,8 @@ func TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument(t *testing.T
 		}
 		assertPromptHasAll(t, prompt.Prompt, []string{
 			"- intent_class: intent_oriented",
-			"- intent_gate_required: true",
-			"- first_response_policy: ask_for_intent_before_deliverables_do_not_create_deliverables_until_user_replies",
+			"- intent_gate_required: false",
+			"- first_response_policy: act_on_requested_outcome_ask_only_for_specific_blocking_information",
 		})
 	}
 }

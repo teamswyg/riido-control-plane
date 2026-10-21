@@ -7,6 +7,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "contracts/ai-agent-client/**"
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/**"
       - ".github/workflows/evidence-graph.yml"
@@ -58,6 +59,8 @@ on:
       - "docs/30-architecture/review-account-seed.riido.json"
       - "docs/30-architecture/config-reference.md"
       - "docs/30-architecture/config-reference.riido.json"
+      - "docs/30-architecture/agent-task-context.md"
+      - "docs/30-architecture/agent-task-context.riido.json"
       - "docs/30-architecture/go-ci-baseline.md"
       - "docs/30-architecture/go-ci-baseline.riido.json"
       - "docs/30-architecture/web-frontend-api.md"
@@ -342,6 +345,7 @@ on:
       - "go.sum"
   pull_request:
     paths:
+      - "contracts/ai-agent-client/**"
       - ".github/workflows/loop-registry.yml"
       - ".github/workflows/**"
       - ".github/workflows/evidence-graph.yml"
@@ -617,7 +621,7 @@ jobs:
           go test ./tools/aiagentclientapi -run 'Test(GeneratedDocMatchesManifest|RunWritesEvidence)$' -count=1
           go test ./tools/evidencegraph ./tools/harnesspromotion ./tools/liveworkflowevidence ./tools/closedloopcandidateintake ./tools/closedloopcandidatedecision ./tools/precommitbaseline -count=1
           go test ./internal/riidoaiserver \
-            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation|AIAgentIntentDialogueScenarioKeepsProgressAndLimitResult|HTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment|HTTPAIAgentIntentDialogueV3KeepsScenarioTimeline|AssignmentPromptClassifiesIntentComponentTypes|AssignmentPromptKeepsExplicitInstructionExecutable)$' \
+            -run 'Test(TaskThreadsKeepAgentSnapshotAfterAgentDeleted|TaskThreadsBackfillDeletedAgentSnapshotForLegacyRows|AssignedAgentProfilesFallbackToThreadSnapshotForDeletedActiveAgent|AIAgentTaskThreadHistoryKeepsUserFollowupMessages|PersistentAIAgentTaskThreadHistoryRestoresUserMessages|AIAgentClientSameProviderAgentsKeepDistinctAssignments|HTTPAIAgentClientProviderMultiAssignmentReplaysEachThread|AIAgentTaskThreadHistoryConversationGrouping|HTTPAIAgentClientV3ThreadHistory|AIAgentIntentDialogueScenarioStaysInConversation|AIAgentIntentDialogueScenarioKeepsProgressAndLimitResult|HTTPAIAgentAssignmentExecutesWithoutIntentGate|HTTPAIAgentIntentDialogueV3KeepsScenarioTimeline|AssignmentPromptClassifiesIntentComponentTypes|AssignmentPromptKeepsExplicitInstructionExecutable)$' \
             -count=1
           go run ./tools/loopregistry \
             -check-doc \

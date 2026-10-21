@@ -21,7 +21,7 @@ func (s Server) cancelAIAgentAssignmentsForDelete(ctx context.Context, principal
 	seen := map[string]bool{}
 	for _, thread := range threads {
 		assignmentID := strings.TrimSpace(thread.AssignmentID)
-		if assignmentID == "" || seen[assignmentID] || isIntentGateAssignmentID(assignmentID) {
+		if assignmentID == "" || seen[assignmentID] || isNonDurableAssignmentID(assignmentID) {
 			continue
 		}
 		seen[assignmentID] = true

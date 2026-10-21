@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 )
@@ -30,7 +29,8 @@ func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Reque
 	}
 	var req DeviceRuntimeSnapshotSyncRequest
 	if err := decodeJSON(r, &req); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		logRequestFailure(r, "runtime_snapshot_decode", err)
+		writeError(w, http.StatusBadRequest, "invalid runtime snapshot JSON")
 		return
 	}
 	req.DeviceID = strings.TrimSpace(req.DeviceID)
@@ -43,13 +43,10 @@ func (s Server) handleDaemonRuntimeSnapshot(w http.ResponseWriter, r *http.Reque
 	}
 	response, err := s.daemonRuntime.SyncAIAgentDaemonRuntimeSnapshot(r.Context(), principal, req)
 	if err != nil {
-		if errors.Is(err, ErrAuthorizationForbidden) {
-			writeError(w, http.StatusForbidden, "forbidden")
-			return
-		}
-		writeError(w, http.StatusBadRequest, err.Error())
+		logRequestFailure(r, "runtime_snapshot_sync", err)
+		status, message := runtimeSnapshotErrorResponse(err)
+		writeError(w, status, message)
 		return
 	}
-	traceProviderHealth(r.Context(), response.Device.DeviceID, response.Device.Runtimes)
 	writeJSON(w, http.StatusAccepted, response)
 }

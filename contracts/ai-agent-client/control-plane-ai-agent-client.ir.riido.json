@@ -187,6 +187,33 @@
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
         }
       ]
+    },
+    {
+      "module": "v3",
+      "description": "v3 client API module입니다. workspace-scoped AI Agent API 중 historical thread read model처럼 v2 응답 shape를 바꿀 수 없는 surface를 riido.v3.aiAgent.* 경로로 제공합니다.",
+      "namespaces": [
+        {
+          "path": [
+            "aiAgent"
+          ],
+          "description": "workspace_id path parameter로 범위가 정해지는 AI Agent v3 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks"
+          ],
+          "description": "선택된 workspace의 task thread에서 historical AI Agent read model을 다루는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
+            "threads"
+          ],
+          "description": "agent/user/progress message history와 deduplicated agent snapshot map을 함께 읽는 v3 thread history namespace입니다."
+        }
+      ]
     }
   ],
   "resources": [
@@ -352,7 +379,12 @@
         "daemon: batch parsed progress lines before SaaS ingest; default cadence is 10 seconds",
         "daemon: flush pending progress before terminal assignment events",
         "server: fan out accepted progress batches through the client event stream as typed task-thread progress events",
-        "client: render task-thread progress from typed event payloads and never parse provider raw output"
+        "client: render task-thread progress from typed event payloads and never parse provider raw output",
+        "server: optional display_message projects only codes 1101/tool.collecting and 1103/tool.running description, or 1104/tool.completed summary; when message_key is present it must match the catalog code",
+        "server: display_message is plain single-line text limited to 180 Unicode characters; omit it for unknown progress, assistant partials, raw tool transcripts, and inapplicable queue status",
+        "server: preserve the same display_message in live progress lines and cold v3 history, without exposing message_code or message_args in the public response",
+        "client: prefer display_message for meaningful progress; treat missing summaries as absent information and never fabricate task-specific activity from raw message text",
+        "compatibility: existing message/body, execution lifecycle, stop behavior, and authorization are unchanged; display_message is optional response copy and not a command or state"
       ]
     },
     {
@@ -383,7 +415,10 @@
         "client: use task_agent_participants for assigned participants and assigned_agent_profiles for legacy active avatar hints; use separate APIs for candidate selection and task-thread history",
         "server: retain completed, stopped, and failed Agents in task_agent_participants until explicit participant removal; execution status does not delete membership",
         "server: explicit participant removal omits that Agent from task_agent_participants without deleting or rewriting terminal execution history",
-        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution"
+        "server: task_agent_participants preserves workspace/private visibility and reports is_stop_required from the current active execution",
+        "server: latest_assignment_id identifies the latest retained execution of this task Agent regardless of execution status; omit it when no execution is retained",
+        "client: use latest_assignment_id only as the observed removal guard; membership and execution ownership are independent of this identifier",
+        "server: participant removal cancels the observed active executions before removing membership and returns 409 without removing membership if a new execution appears before the removal commit, including requests without assignment_id"
       ]
     },
     {
@@ -415,7 +450,13 @@
         "required_form_controls: Figma node-id=417-21803 / 432-35544 says name, runtime, model, and visibility are required controls; profile_thumbnail_url, description, and instruction remain optional values",
         "agent_add_screen_field_set: Figma agent add/settings screen fields map to CreateAgentConfigurationRequest.name, profile_thumbnail_url, description, runtime_id, model_id, visibility, and instruction; model options come from RuntimeRecord.models and profile image upload uses createAIAgentProfileThumbnailUpload before saving profile_thumbnail_url",
         "create: client-facing agent creation stores the same profile fields, binds an authorized selectable runtime_id from the device/runtime read model, stamps owner_principal_id from authorization, and returns created_at and updated_at",
-        "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1"
+        "mutation: profile fields follow agent_mutation_safety.v1 and ai_agent_rbac.v1",
+        "profile_color: one of blue, orange, green, purple; set once at creation and never changed by create, update, or PATCH-style requests",
+        "profile_color_onboarding: Agents created through the onboarding fixture create path use blue",
+        "profile_color_other: other Agents created in a workspace take a color chosen at random among the least-used profile_color values in that workspace",
+        "profile_color_backfill: Agents loaded from a snapshot without profile_color receive one deterministically from the snapshot (fixture-created agents with tmp_color get blue; the rest take the least-used color in created_at and agent_id order, and any tie among least-used colors is broken by the fixed order blue, orange, green, purple, taking the first) and keep it",
+        "profile_color_projection: profile_color is projected to agent records, task_agent_participants, assigned_agent_profiles, and thread agent snapshots; clients must not derive it from tmp_color",
+        "profile_color_update: update requests accept profile_color for compatibility and ignore it; the stored color never changes"
       ]
     },
     {
@@ -428,7 +469,6 @@
         "model: AgentOnboardingFixture does not own model_id; model defaults are derived from the selected runtime model catalog until a separate model recommendation policy is promoted",
         "figma_138_7389: current onboarding fixture rows are 리도, 영실, 홍도, and 지원 in fixture response order",
         "figma_fixture_colors: onboarding avatar fallback colors are 리도 #C9A452, 영실 #6AA437, 홍도 #B87EAD, 지원 #2F84DE",
-        "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateAgentConfigurationRequest body and creates a normal owned agent",
         "fixture_identity: fixture-created agents keep the submitted display name exactly, may share names with other agents, use agent_id as durable identity and tie-breaker, and remain editable/deletable through normal agent RBAC and editability rules",
         "no_template_entity: the control plane must not expose template create/update/delete APIs or persist AgentTemplate records for this onboarding flow",
         "figma_432_46849: revised onboarding order is interpreted as client-local agent draft/configuration first, then runtime/workspace selection, while final fixture/direct create still requires selected workspace_id and runtime_id",
@@ -437,7 +477,62 @@
         "direct_setting_presentation: dimmed fixture rows, placeholder copy, row expansion, and scroll affordance are client presentation",
         "no_runtime: when no selectable runtime is detected, clients skip the fixture-selection step and show the no-installed-AI start state",
         "agent_add_visibility: Figma node-id=337-24013 hides the agent-add affordance when the authorized workspace/member device-runtime read model has no selectable runtime; this is client presentation and does not add a separate eligibility endpoint",
-        "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout"
+        "presentation: clients own scrolling, row selection, pre-selection disabled-next state, truncation, preview skeleton, and preview popover layout",
+        "fixture_create: selecting 리도/영실/홍도/지원 calls createAIAgentFromOnboardingFixture with fixture_id plus a complete CreateOnboardingAgentRequest body and creates a normal owned agent",
+        "fixture_request: only fixture create v1/v2 uses CreateOnboardingAgentRequest, which adds optional request_id to the unchanged seven CreateAgentConfigurationRequest fields; direct create does not accept this deduplication contract",
+        "fixture_request_id: when present, request_id is 1..128 ASCII bytes matching ^[A-Za-z0-9._:-]{1,128}$; empty, whitespace, non-ASCII, or oversized values are invalid requests",
+        "fixture_idempotency_scope: scope request_id by the authorized principal, resolved workspace, and fixture-create operation; v1/v2 projection aliases of that operation share the same scope, while assignment and onboarding task completion use separate receipts",
+        "fixture_idempotency_payload: within the retained receipt window the same key plus the same fixture_id and full submitted creation payload returns the original agent_id with HTTP 201, including response loss and server restart; any changed field or fixture_id returns HTTP 409 without creation",
+        "fixture_idempotency_deleted: bind the receipt to the original agent_id and agent CreatedAt incarnation; if that agent has been deleted, or the same agent_id was reused with a different CreatedAt, replay returns HTTP 409 and never recreates or returns the replacement agent",
+        "fixture_idempotency_retention: retain every successful private creation receipt until 24 hours after the server-recorded creation-attempt timestamp (receipt created_at); this is the public replay window, not 24 hours after the HTTP response or durable acknowledgement; after expiry a request may be treated as a new creation, so clients must not assume deduplication beyond that window",
+        "fixture_idempotency_durability: commit agent creation and its private receipt atomically before HTTP 201; fixture creation emits no create event, and this retry contract adds none; receipt scope and request_id are hashed, never exposed in client records, events, logs, or telemetry; preserve no raw key in stored receipts",
+        "fixture_idempotency_capacity: bound private receipts and fail closed with HTTP 503 before agent creation if no capacity is available; never evict unexpired receipts to admit another key",
+        "fixture_idempotency_compatibility: callers without request_id keep independent-create behavior, including duplicate names; no deduplication is claimed for old callers, and display names remain non-unique identity hints rather than keys"
+      ]
+    },
+    {
+      "policy_id": "ai_agent_onboarding_completion.v1",
+      "kind": "onboarding",
+      "description": "앱 온보딩 첫 작업의 완료 결과는 실행과 독립된 completed task thread와 agent 댓글 한 건으로 기록됩니다.",
+      "rules": [
+        "server: the completion adds the agent as a persistent task participant and records a completed thread with assignment_id prefix onboarding-seed-",
+        "server: the completion never calls the assignment queue, never creates a queued, leasable, or running assignment, and performs no AI execution",
+        "server: the completion comment is an agent-authored message with comment_kind task_completed; agents cannot edit task bodies",
+        "idempotency: the same task and agent, or the same request_id, returns the existing completion response without duplicating participants or messages",
+        "non_durable: onboarding-seed- assignment IDs are non-durable; stop, cancel, participant removal, and reconcile paths must not treat them as queued executions",
+        "stop_rejected: a stop request that names an onboarding-seed assignment, or resolves to one, is rejected with 409 task thread conflict and changes nothing; the completed thread and its task_completed message stay as recorded",
+        "access: the workspace, task, and agent must be visible to the authorized principal, using the same checks as agent assignment",
+        "locale: template copy is selected by locale ko or en; omitted locale means ko",
+        "copy_schedule_ko: 단계 4개의 기간과 날짜, 산출물을 이 작업의 문서로 정리해 뒀어요. 팀원을 초대하면 단계마다 담당자를 정해 보세요.",
+        "copy_schedule_en: Laid out the 4 phases' durations, dates, and deliverables in this task's document. Once you invite teammates, pick an owner for each phase.",
+        "copy_interview_ko: 질문지를 이 작업의 문서로 남겼어요. \"~라면 쓰시겠어요?\"처럼 답을 유도하는 질문은 뺐어요.",
+        "copy_interview_en: Saved the questions as this task's document. Leading questions like \"Would you use it if…?\" were left out.",
+        "copy_launch_ko: 출시 전·당일·후에 확인할 항목 9개를 이 작업의 문서로 정리해 뒀어요. 출시일은 오늘부터 7일 뒤로 잡았어요.",
+        "copy_launch_en: Laid out 9 items to check before, on, and after launch in this task's document. The launch date is set 7 days from today.",
+        "precondition_task: the target task must be the first-task bundle created by the monolith importOnboardingFirstTaskBundle; its document already exists from that mutation. This completion never creates subtasks or documents, and the copy describes only what that mutation already created. provenance is verified as monolith 조회로 확인함(fail-closed): control-plane first resolves the task team from the monolith, then sends one monolith GraphQL request with the viewer's Riido JWT sent as Authorization Bearer that asks getMyAccountInfo { id } and onboardingFirstTaskBundleTemplate(teamId, taskId); the viewer id must equal the authorized agent principal (otherwise 403), the recorded bundle template must equal the request template_key (otherwise 400), and a null template, a monolith error, or a missing Bearer token refuses the completion with 400, 502, or 401 respectively; nothing is recorded in any case",
+        "eligibility: the agent must be owned by the authorized principal (owner_principal_id) and visible in the same workspace, and must have been created through the onboarding fixture path; a non-owned agent is reported as not found, and an owned agent without onboarding provenance is rejected as an invalid request",
+        "one_completion_per_agent: an onboarding-created agent completes onboarding at most once across all tasks; a second completion on another task is rejected with 409 conflict and records nothing",
+        "no_prior_history: the target task must have no existing assignment, thread, or participant membership for the agent; otherwise the request is rejected with 409 conflict. A repeat for the same task and agent is not a new completion and returns the existing record (idempotent) before this check",
+        "active_execution: a queued or running execution for the same task and agent is part of the prior history, so the completion is rejected with 409 conflict and never serializes behind it",
+        "request_id_scope: request_id is scoped to workspace_id, the authorized owner principal, and this operation; it never shares receipts with assignment request_id values. Reusing a request_id for a different task or agent is rejected with 409 conflict instead of replaying the other record",
+        "membership_removal: an onboarding-seed participant is removable through the normal participant removal path only while the membership has no durable assignment generation; a removal that names an onboarding-seed assignment on a membership with durable generation is rejected with 409 membership-changed"
+      ]
+    },
+    {
+      "policy_id": "desktop_presence.v1",
+      "kind": "liveness",
+      "description": "웹 온보딩은 같은 계정의 승인된 과거 데스크톱 앱 접속을 서버 시각으로 확인합니다. 현재 온라인 상태나 자격 증명 유효성을 보증하지 않습니다.",
+      "rules": [
+        "server: last_seen_at is the latest server-recorded last-seen time among successfully authorized desktop device connection records owned by the authorized principal; another principal's records never count",
+        "server: last_seen_at advances only on successful authorized devices/connect or device credential enrollment; desktop navigation attempts a connection when login, machine, and workspace context are available, while failed or skipped calls and daemon heartbeats do not advance it",
+        "server: last_seen_at is omitted when no owned desktop connection record has a usable last-seen timestamp; zero or malformed timestamps are not evidence of a connection",
+        "server: checked_at is the server time when the response was built; clients compare last_seen_at only against server time derived from checked_at, never against the browser clock",
+        "scope: presence is principal-scoped; the workspace_id path segment selects the authorization scope and never exposes other members' devices",
+        "privacy: the response carries no device_id, device name, platform, IP address, or app version",
+        "history: a connection grant is append-only evidence of a past authorized connection, not an active authorization grant; last_seen_at may remain after credential revocation or membership removal and does not prove that a device is online, a credential is currently valid, or the principal still belongs to the historical workspace",
+        "read_boundary: a store with a persistent connection-record reader returns only its observed committed records without restoring a stale full snapshot or advancing daemon liveness; an authoritative read or integrity failure is an error, never a checked_at-only success or a stale in-memory fallback",
+        "fallback: stores without a persistent connection-record reader may answer from current-process memory, which does not guarantee cross-replica visibility or history after restart; an omitted last_seen_at is not a global proof that the account has never connected",
+        "client: web onboarding sets its server-time watch start to checked_at minus the time it had already been watching when it sent that request, and uses last_seen_at strictly later than that start; a connection during the first request's network latency may be missed until a later devices/connect or device enrollment, so an app that remains on the same page is not guaranteed to be detected; account-mismatch guidance and polling cadence are client presentation"
       ]
     }
   ],
@@ -716,6 +811,82 @@
           "value": "desktop_webview"
         }
       ]
+    },
+    {
+      "name": "AIAgentTaskThreadMessageRole",
+      "type": "string",
+      "description": "v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.",
+      "values": [
+        {
+          "value": "user",
+          "description": "사용자가 thread에 남긴 다음 작업 지시입니다."
+        },
+        {
+          "value": "agent",
+          "description": "AI Agent가 생성한 상태/최종 결과 메시지입니다."
+        },
+        {
+          "value": "progress",
+          "description": "runtime output에서 파생된 진행 로그 메시지입니다."
+        }
+      ]
+    },
+    {
+      "name": "AgentProfileColor",
+      "type": "string",
+      "description": "AI Agent profile 색상 4종입니다.",
+      "values": [
+        {
+          "value": "blue",
+          "description": "파란색입니다. 온보딩으로 만든 Agent의 고정 색입니다."
+        },
+        {
+          "value": "orange",
+          "description": "주황색입니다."
+        },
+        {
+          "value": "green",
+          "description": "초록색입니다."
+        },
+        {
+          "value": "purple",
+          "description": "보라색입니다."
+        }
+      ]
+    },
+    {
+      "name": "AIAgentOnboardingTaskTemplateKey",
+      "type": "string",
+      "description": "앱 온보딩 첫 작업 결과 템플릿 3종입니다. 결과 본문은 서버가 가진 승인된 문구를 사용합니다.",
+      "values": [
+        {
+          "value": "schedule",
+          "description": "일정 계획 템플릿입니다. 4개 단계의 기간과 날짜, 산출물을 작업 문서로 남깁니다."
+        },
+        {
+          "value": "interview",
+          "description": "고객 인터뷰 질문지 템플릿입니다. 질문지를 작업 문서로 남깁니다."
+        },
+        {
+          "value": "launch",
+          "description": "출시 준비 템플릿입니다. 9개 항목을 작업 문서로 남깁니다."
+        }
+      ]
+    },
+    {
+      "name": "AIAgentOnboardingLocale",
+      "type": "string",
+      "description": "온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.",
+      "values": [
+        {
+          "value": "ko",
+          "description": "한국어 문구입니다."
+        },
+        {
+          "value": "en",
+          "description": "영어 문구입니다."
+        }
+      ]
     }
   ],
   "sum_types": [
@@ -743,11 +914,84 @@
         {
           "kind": "agent_thread_progress",
           "schema": "AgentThreadProgressEvent"
+        },
+        {
+          "kind": "agent_task_notification",
+          "schema": "AgentTaskNotificationEvent"
         }
       ]
     }
   ],
   "components": [
+    {
+      "name": "AIAgentExecutionContext",
+      "schema": {
+        "name": "AIAgentExecutionContext",
+        "description": "RIID-5820 호스트 실행 환경과 검증 상태. 로컬 절대 경로·명령·credential은 포함하지 않는다. 누락은 legacy/unknown이며 검증 통과가 아니다.",
+        "type": "object",
+        "required": [
+          "workspace_kind",
+          "verification_status",
+          "diagnostic_code",
+          "next_action"
+        ],
+        "properties": [
+          {
+            "name": "workspace_kind",
+            "type": "string",
+            "enum": [
+              "unknown",
+              "isolated",
+              "repository_clone",
+              "assignment_worktree",
+              "native_resume"
+            ]
+          },
+          {
+            "name": "verification_status",
+            "type": "string",
+            "enum": [
+              "not_configured",
+              "not_run",
+              "pending",
+              "passed",
+              "failed",
+              "cancelled",
+              "unknown"
+            ]
+          },
+          {
+            "name": "diagnostic_code",
+            "type": "string",
+            "enum": [
+              "none",
+              "user_cancelled",
+              "run_cancelled",
+              "run_timeout",
+              "workspace_preparation_failed",
+              "session_scope_conflict",
+              "host_verification_failed",
+              "provider_blocked",
+              "provider_failed",
+              "process_aborted",
+              "unknown"
+            ]
+          },
+          {
+            "name": "next_action",
+            "type": "string",
+            "enum": [
+              "none",
+              "check_workspace",
+              "review_session",
+              "review_result",
+              "check_provider",
+              "review_permissions"
+            ]
+          }
+        ]
+      }
+    },
     {
       "name": "RuntimeModelRecord",
       "schema": {
@@ -1146,6 +1390,11 @@
             "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."
           },
           {
+            "name": "profile_color",
+            "description": "agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다.",
+            "ref": "AgentProfileColor"
+          },
+          {
             "name": "description",
             "type": "string",
             "max_length": 160
@@ -1217,7 +1466,8 @@
           "editability",
           "assigned_task_count",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "profile_color"
         ],
         "properties": [
           {
@@ -1251,6 +1501,11 @@
             "name": "tmp_color",
             "type": "string",
             "description": "fixture-created agent에 복사되는 avatar fallback color입니다. 예: #C9A452. 직접 설정 agent는 생략될 수 있습니다."
+          },
+          {
+            "name": "profile_color",
+            "description": "agent profile 색상입니다. 생성 시 정해지며 이후 설정 수정 요청으로 바뀌지 않습니다.",
+            "ref": "AgentProfileColor"
           },
           {
             "name": "description",
@@ -1365,6 +1620,9 @@
         "name": "AssignedAgentProfile",
         "description": "workspace task/card 목록에서 현재 배정된 AI Agent를 표시하기 위한 최소 profile 값입니다.",
         "type": "object",
+        "required": [
+          "profile_color"
+        ],
         "properties": [
           {
             "name": "avatar_url",
@@ -1376,6 +1634,11 @@
             "name": "tmp_color",
             "type": "string",
             "description": "fixture-created agent에 복사된 avatar fallback color입니다. 예: 리도 #C9A452."
+          },
+          {
+            "name": "profile_color",
+            "description": "배정된 Agent의 고정 profile 색상입니다. tmp_color와 독립적으로 항상 내려갑니다.",
+            "ref": "AgentProfileColor"
           }
         ]
       }
@@ -1390,7 +1653,8 @@
           "agent_id",
           "name",
           "is_owned_by_viewer",
-          "is_stop_required"
+          "is_stop_required",
+          "profile_color"
         ],
         "properties": [
           {
@@ -1407,13 +1671,23 @@
             "format": "uri"
           },
           {
+            "name": "profile_color",
+            "description": "참여자 Agent의 고정 profile 색상입니다.",
+            "ref": "AgentProfileColor"
+          },
+          {
             "name": "is_owned_by_viewer",
             "type": "boolean"
           },
           {
             "name": "is_stop_required",
             "type": "boolean",
-            "description": "At least one active execution for this participant requires stopping before removal."
+            "description": "At least one current active execution must be cancelled as part of participant removal; does not determine membership or the latest observed execution ID."
+          },
+          {
+            "name": "latest_assignment_id",
+            "type": "string",
+            "description": "Latest retained execution ID for an observed-removal guard, independent of execution status; absent when no execution history is retained."
           }
         ]
       }
@@ -1965,6 +2239,11 @@
             "name": "model_id",
             "type": "string",
             "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+          },
+          {
+            "name": "profile_color",
+            "description": "호환을 위해 받을 수 있는 무시되는 입력입니다. 생성 시 정해진 profile 색상은 이 요청으로 바뀌지 않습니다.",
+            "ref": "AgentProfileColor"
           }
         ]
       }
@@ -2002,10 +2281,65 @@
       }
     },
     {
+      "name": "ProviderRecoveryCandidate",
+      "schema": {
+        "name": "ProviderRecoveryCandidate",
+        "type": "object",
+        "required": [
+          "provider",
+          "model_id"
+        ],
+        "properties": [
+          {
+            "name": "provider",
+            "type": "string",
+            "description": "claude/codex/cursor/openclaw; validated against same owner and device inventory."
+          },
+          {
+            "name": "model_id",
+            "type": "string",
+            "description": "Explicit model present in target runtime inventory; max 128 bytes; no whitespace/control."
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProviderRecoveryPolicy",
+      "schema": {
+        "name": "ProviderRecoveryPolicy",
+        "type": "object",
+        "properties": [
+          {
+            "name": "max_attempts",
+            "type": "integer",
+            "description": "Including initial attempt; default3, bounds1..3."
+          },
+          {
+            "name": "max_elapsed_seconds",
+            "type": "integer",
+            "description": "Pre-dispatch recovery only; default30, bounds1..60."
+          },
+          {
+            "name": "max_switches",
+            "type": "integer",
+            "description": "0 by default; max1; explicit nonempty fallbacks required for1."
+          },
+          {
+            "name": "fallbacks",
+            "type": "array",
+            "description": "At most3 distinct providers, ordered; requires max_switches1.",
+            "items": {
+              "ref": "ProviderRecoveryCandidate"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AssignAIAgentTaskRequest",
       "schema": {
         "name": "AssignAIAgentTaskRequest",
-        "description": "task participant dropdown에서 agent를 배정하기 위한 요청입니다. 요청 body는 agent_id만 받으며 team_id/teamId/OpenAPI/Open API key는 이 계약의 입력이 아닙니다.",
+        "description": "작업 배정 요청. recovery_policy는 실행 전 검증에 한정된 유한 복구 예산이며 명시적 fallback은 서버가 같은 소유자의 같은 device/model inventory 및 권한을 검증한 경우에만 허용한다.",
         "type": "object",
         "required": [
           "agent_id"
@@ -2014,6 +2348,18 @@
           {
             "name": "agent_id",
             "type": "string"
+          },
+          {
+            "name": "request_id",
+            "type": "string"
+          },
+          {
+            "name": "instruction",
+            "type": "string"
+          },
+          {
+            "name": "recovery_policy",
+            "ref": "ProviderRecoveryPolicy"
           }
         ]
       }
@@ -2031,6 +2377,11 @@
           {
             "name": "agent_id",
             "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string",
+            "description": "Optional latest retained execution ID observed before participant removal; guards removal generation without defining membership or execution ownership."
           },
           {
             "name": "reason",
@@ -2164,6 +2515,11 @@
             "type": "string"
           },
           {
+            "name": "profile_color",
+            "description": "thread snapshot 시점의 profile 색상입니다.",
+            "ref": "AgentProfileColor"
+          },
+          {
             "name": "visibility",
             "ref": "AgentVisibility"
           },
@@ -2257,6 +2613,18 @@
           {
             "name": "failure_diagnostics",
             "ref": "AIAgentTaskThreadFailureDiagnostics"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
           }
         ]
       }
@@ -2424,6 +2792,18 @@
           {
             "name": "failure_diagnostics",
             "ref": "AIAgentTaskThreadFailureDiagnostics"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
           }
         ]
       }
@@ -2455,6 +2835,13 @@
           {
             "name": "message_key",
             "type": "string"
+          },
+          {
+            "name": "display_message",
+            "type": "string",
+            "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
+            "max_length": 180,
+            "pattern": "^[^\\r\\n]*$"
           }
         ]
       }
@@ -2680,6 +3067,18 @@
             "items": {
               "ref": "AgentThreadProgressLine"
             }
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
           }
         ]
       }
@@ -2693,7 +3092,8 @@
         "required": [
           "schema_version",
           "task_id",
-          "threads"
+          "threads",
+          "assigned_agent_ids"
         ],
         "properties": [
           {
@@ -2714,6 +3114,13 @@
           {
             "name": "active_stream",
             "ref": "AIAgentTaskThreadStreamLink"
+          },
+          {
+            "name": "assigned_agent_ids",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -2834,6 +3241,684 @@
           }
         ]
       }
+    },
+    {
+      "name": "AgentTaskNotificationEvent",
+      "schema": {
+        "name": "AgentTaskNotificationEvent",
+        "description": "배정자에게 전달하는 실행 결과·확인 요청. 업무 완료와 구분하고 신규 연결에는 과거 알림을 재생하지 않는다.",
+        "type": "object",
+        "required": [
+          "event_type",
+          "schema_version",
+          "event_id",
+          "occurred_at",
+          "workspace_id",
+          "task_id",
+          "agent_id",
+          "assignment_id",
+          "run_id",
+          "created_by",
+          "recipient_principal_id",
+          "notification_type",
+          "work_status",
+          "assignment_state"
+        ],
+        "properties": [
+          {
+            "name": "event_type",
+            "type": "string",
+            "enum": [
+              "agent_task_notification"
+            ]
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "event_id",
+            "type": "string"
+          },
+          {
+            "name": "occurred_at",
+            "type": "string"
+          },
+          {
+            "name": "workspace_id",
+            "type": "string"
+          },
+          {
+            "name": "team_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "created_by",
+            "type": "string"
+          },
+          {
+            "name": "recipient_principal_id",
+            "type": "string"
+          },
+          {
+            "name": "notification_type",
+            "type": "string",
+            "enum": [
+              "result_ready",
+              "answer_required",
+              "approval_required",
+              "failed"
+            ]
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string",
+            "enum": [
+              "answer_required",
+              "approval_required"
+            ]
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeleteAIAgentTaskAgentAssignmentRequest",
+      "schema": {
+        "name": "DeleteAIAgentTaskAgentAssignmentRequest",
+        "description": "Optional body for explicit removal of the path task Agent participant; absence of assignment_id still requires the server to fence new executions before commit.",
+        "type": "object",
+        "properties": [
+          {
+            "name": "assignment_id",
+            "type": "string",
+            "description": "Optional latest retained execution ID observed before participant removal; independent of execution status and omitted when no execution is retained."
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryMessage",
+      "schema": {
+        "name": "AIAgentTaskThreadHistoryMessage",
+        "description": "v3 task thread history에서 사용자 지시, agent 결과, runtime progress를 한 timeline 안에 보존하는 message row입니다.",
+        "type": "object",
+        "required": [
+          "message_id",
+          "role"
+        ],
+        "properties": [
+          {
+            "name": "message_id",
+            "type": "string"
+          },
+          {
+            "name": "role",
+            "ref": "AIAgentTaskThreadMessageRole"
+          },
+          {
+            "name": "comment_kind",
+            "ref": "AgentTaskCommentKind"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "source_message_id",
+            "type": "string"
+          },
+          {
+            "name": "seq",
+            "type": "integer"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "result_message",
+            "type": "string"
+          },
+          {
+            "name": "observed_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "display_message",
+            "type": "string",
+            "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
+            "max_length": 180,
+            "pattern": "^[^\\r\\n]*$"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryRecord",
+      "schema": {
+        "name": "AIAgentTaskThreadHistoryRecord",
+        "description": "v3 task 화면에서 한 AI Agent thread를 historical message timeline으로 복원하기 위한 record입니다.",
+        "type": "object",
+        "required": [
+          "thread_id",
+          "task_id",
+          "agent_id",
+          "run_id",
+          "work_status",
+          "assignment_state",
+          "conversation_id",
+          "messages"
+        ],
+        "properties": [
+          {
+            "name": "thread_id",
+            "type": "string"
+          },
+          {
+            "name": "conversation_id",
+            "type": "string",
+            "description": "같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다."
+          },
+          {
+            "name": "parent_thread_id",
+            "type": "string",
+            "description": "후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다."
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "agent_snapshot_id",
+            "type": "string",
+            "description": "agent_snapshots map에서 표시 snapshot을 찾기 위한 key입니다."
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "ref": "AgentWorkStatus"
+          },
+          {
+            "name": "assignment_state",
+            "ref": "AgentAssignmentState"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "completed_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "messages",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadHistoryMessage"
+            }
+          },
+          {
+            "name": "active_stream",
+            "ref": "AIAgentTaskThreadStreamLink"
+          },
+          {
+            "name": "execution_context",
+            "ref": "AIAgentExecutionContext"
+          },
+          {
+            "name": "failure_diagnostics",
+            "ref": "AIAgentTaskThreadFailureDiagnostics"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentTaskThreadHistoryCollectionResponse",
+      "schema": {
+        "name": "AIAgentTaskThreadHistoryCollectionResponse",
+        "description": "v3 task 화면 진입 시 thread별 user/agent/progress history와 deduplicated agent snapshot map을 함께 읽는 응답입니다.",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "task_id",
+          "threads",
+          "assigned_agent_ids"
+        ],
+        "properties": [
+          {
+            "name": "assigned_agent_ids",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "threads",
+            "type": "array",
+            "items": {
+              "ref": "AIAgentTaskThreadHistoryRecord"
+            }
+          },
+          {
+            "name": "agent_snapshots",
+            "type": "object",
+            "description": "agent_snapshot_id를 key로 하는 snapshot map입니다. thread row는 이 map을 참조하여 snapshot 중복 전송을 줄입니다.",
+            "additional_properties_ref": "AIAgentTaskThreadAgentSnapshot"
+          },
+          {
+            "name": "active_stream",
+            "ref": "AIAgentTaskThreadStreamLink"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDashboardTask",
+      "schema": {
+        "name": "AgentDashboardTask",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "task_id",
+          "assignment_id",
+          "run_id",
+          "title",
+          "key_number",
+          "state",
+          "message",
+          "queue_position",
+          "queued_at"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "type": "string"
+          },
+          {
+            "name": "assignment_id",
+            "type": "string"
+          },
+          {
+            "name": "run_id",
+            "type": "string"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "key_number",
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "type": "string"
+          },
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "confirmation_reason",
+            "type": "string"
+          },
+          {
+            "name": "queue_position",
+            "type": "integer"
+          },
+          {
+            "name": "queued_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "started_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "ended_at",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "duration_seconds",
+            "type": "integer"
+          },
+          {
+            "name": "created_by",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDashboardDay",
+      "schema": {
+        "name": "AgentDashboardDay",
+        "type": "object",
+        "required": [
+          "date",
+          "completed"
+        ],
+        "properties": [
+          {
+            "name": "date",
+            "type": "string"
+          },
+          {
+            "name": "completed",
+            "type": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDashboardResponse",
+      "schema": {
+        "name": "AgentDashboardResponse",
+        "type": "object",
+        "required": [
+          "schema_version",
+          "agent_id",
+          "work_status",
+          "queue",
+          "waiting_count",
+          "confirmation_count",
+          "completed_runs",
+          "history",
+          "page",
+          "page_size",
+          "total",
+          "has_next_page",
+          "activity",
+          "activity_start",
+          "activity_end",
+          "activity_completed",
+          "active_days",
+          "time_zone",
+          "history_durable",
+          "scope"
+        ],
+        "properties": [
+          {
+            "name": "schema_version",
+            "type": "string"
+          },
+          {
+            "name": "agent_id",
+            "type": "string"
+          },
+          {
+            "name": "work_status",
+            "type": "string"
+          },
+          {
+            "name": "current",
+            "ref": "AgentDashboardTask"
+          },
+          {
+            "name": "queue",
+            "type": "array",
+            "items": {
+              "ref": "AgentDashboardTask"
+            }
+          },
+          {
+            "name": "waiting_count",
+            "type": "integer"
+          },
+          {
+            "name": "confirmation_count",
+            "type": "integer"
+          },
+          {
+            "name": "completed_runs",
+            "type": "integer"
+          },
+          {
+            "name": "history",
+            "type": "array",
+            "items": {
+              "ref": "AgentDashboardTask"
+            }
+          },
+          {
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "name": "page_size",
+            "type": "integer"
+          },
+          {
+            "name": "total",
+            "type": "integer"
+          },
+          {
+            "name": "has_next_page",
+            "type": "boolean"
+          },
+          {
+            "name": "activity",
+            "type": "array",
+            "items": {
+              "ref": "AgentDashboardDay"
+            }
+          },
+          {
+            "name": "activity_start",
+            "type": "string"
+          },
+          {
+            "name": "activity_end",
+            "type": "string"
+          },
+          {
+            "name": "activity_completed",
+            "type": "integer"
+          },
+          {
+            "name": "active_days",
+            "type": "integer"
+          },
+          {
+            "name": "time_zone",
+            "type": "string"
+          },
+          {
+            "name": "observed_since",
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "history_durable",
+            "type": "boolean"
+          },
+          {
+            "name": "scope",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CompleteAIAgentOnboardingTaskRequest",
+      "schema": {
+        "name": "CompleteAIAgentOnboardingTaskRequest",
+        "description": "앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.",
+        "type": "object",
+        "required": [
+          "agent_id",
+          "template_key"
+        ],
+        "properties": [
+          {
+            "name": "agent_id",
+            "type": "string",
+            "description": "온보딩으로 깨운 agent의 안정 식별자입니다."
+          },
+          {
+            "name": "template_key",
+            "description": "완료 결과 템플릿입니다.",
+            "ref": "AIAgentOnboardingTaskTemplateKey"
+          },
+          {
+            "name": "request_id",
+            "type": "string",
+            "description": "같은 완료 요청을 다시 보낼 때 쓰는 idempotency key입니다. 같은 값이면 기존 결과를 돌려줍니다."
+          },
+          {
+            "name": "locale",
+            "description": "완료 문구 언어입니다. 생략하면 ko입니다.",
+            "ref": "AIAgentOnboardingLocale"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AIAgentDesktopPresenceResponse",
+      "schema": {
+        "name": "AIAgentDesktopPresenceResponse",
+        "description": "같은 계정의 데스크톱 앱 마지막 접속 시각과 서버 응답 시각입니다. 웹 온보딩이 앱 연결을 확인할 때 씁니다.",
+        "type": "object",
+        "required": [
+          "checked_at"
+        ],
+        "properties": [
+          {
+            "name": "last_seen_at",
+            "type": "string",
+            "description": "같은 계정이 데스크톱 앱에 마지막으로 접속한 서버 시각입니다. 접속 기록이 없으면 생략합니다.",
+            "format": "date-time"
+          },
+          {
+            "name": "checked_at",
+            "type": "string",
+            "description": "서버가 이 응답을 만든 시각입니다. 클라이언트는 브라우저 시계 대신 이 값으로 비교합니다.",
+            "format": "date-time"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateOnboardingAgentRequest",
+      "schema": {
+        "name": "CreateOnboardingAgentRequest",
+        "description": "Fixture 전용 agent 생성 요청입니다. 기존 agent 설정 7개 필드를 그대로 사용하고, 응답 유실에 대비한 optional request_id만 추가합니다. 같은 소유자·workspace·operation 범위에서 같은 request_id와 전체 payload/fixture를 서버의 최초 생성 시도 timestamp부터 24시간 동안 재전송하면 같은 agent_id를 HTTP 201로 반환합니다. 일반 생성 요청에는 request_id를 추가하지 않습니다.",
+        "type": "object",
+        "required": [
+          "name",
+          "visibility",
+          "runtime_id"
+        ],
+        "properties": [
+          {
+            "name": "name",
+            "type": "string",
+            "description": "agent 추가 화면의 이름 입력값입니다."
+          },
+          {
+            "name": "profile_thumbnail_url",
+            "type": "string",
+            "description": "agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.",
+            "format": "uri"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "description": "agent 추가 화면의 설명 입력값입니다.",
+            "max_length": 160
+          },
+          {
+            "name": "instruction",
+            "type": "string",
+            "description": "agent 추가 화면의 지침 textarea 입력값입니다.",
+            "max_length": 1000
+          },
+          {
+            "name": "visibility",
+            "description": "agent 공개 범위 radio 입력값입니다.",
+            "ref": "AgentVisibility"
+          },
+          {
+            "name": "runtime_id",
+            "type": "string",
+            "description": "agent가 사용할 런타임 dropdown 선택값입니다."
+          },
+          {
+            "name": "model_id",
+            "type": "string",
+            "description": "선택 runtime의 RuntimeRecord.models[]에서 고르는 모델 dropdown 선택값입니다. 생략하면 runtime 기본 모델로 저장됩니다."
+          },
+          {
+            "name": "request_id",
+            "type": "string",
+            "description": "선택적인 생성 재시도 식별자입니다. ASCII 영숫자와 . _ : - 만 1~128바이트 허용합니다. 클라이언트는 동일 생성 의도와 전체 payload에 같은 값을 유지하며 최초 생성 요청을 시작한 시점부터 24시간 이내에만 재시도 보장을 사용합니다. 생략 시 기존처럼 각 요청이 별도의 agent를 생성합니다.",
+            "min_length": 1,
+            "max_length": 128,
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        ]
+      }
     }
   ],
   "operations": [
@@ -2938,7 +4023,7 @@
       },
       "rbac_policy": "agent_onboarding_fixtures.v1",
       "request": {
-        "ref": "CreateAgentConfigurationRequest",
+        "ref": "CreateOnboardingAgentRequest",
         "required": true
       },
       "response": {
@@ -2948,7 +4033,11 @@
       "scenario_ids": [
         "createAIAgentFromOnboardingFixture.fixture-creates-normal-agent",
         "createAIAgentFromOnboardingFixture.fixture-created-duplicate-name-stays-normal",
-        "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model"
+        "createAIAgentFromOnboardingFixture.fixture-create-validates-runtime-and-model",
+        "createAIAgentFromOnboardingFixture.lost-response-retries-same-creation",
+        "createAIAgentFromOnboardingFixture.changed-creation-intent-conflicts",
+        "createAIAgentFromOnboardingFixture.unkeyed-create-preserves-duplicate-names",
+        "createAIAgentFromOnboardingFixture.receipt-capacity-fails-closed"
       ]
     },
     {
@@ -3464,7 +4553,8 @@
         "ref": "AIAgentTaskActionResponse"
       },
       "scenario_ids": [
-        "unassignAIAgentTask.participant-removal-stops-agent-work"
+        "unassignAIAgentTask.participant-removal-stops-agent-work",
+        "unassignAIAgentTask.interleaved-execution-prevents-participant-removal"
       ]
     },
     {
@@ -3971,7 +5061,7 @@
       },
       "rbac_policy": "agent_onboarding_fixtures.v1",
       "request": {
-        "ref": "CreateAgentConfigurationRequest",
+        "ref": "CreateOnboardingAgentRequest",
         "required": true
       },
       "response": {
@@ -3981,7 +5071,11 @@
       "scenario_ids": [
         "createAIAgentFromOnboardingFixtureV2.workspace-scoped-fixture-agent-creation",
         "createAIAgentFromOnboardingFixtureV2.workspace-fixture-duplicate-name-stays-normal",
-        "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope"
+        "createAIAgentFromOnboardingFixtureV2.onboarding-draft-order-does-not-bypass-workspace-scope",
+        "createAIAgentFromOnboardingFixtureV2.lost-response-retries-same-creation",
+        "createAIAgentFromOnboardingFixtureV2.changed-creation-intent-conflicts",
+        "createAIAgentFromOnboardingFixtureV2.unkeyed-create-preserves-duplicate-names",
+        "createAIAgentFromOnboardingFixtureV2.receipt-capacity-fails-closed"
       ]
     },
     {
@@ -4014,6 +5108,41 @@
         "status": 200,
         "ref": "DeviceRuntimeListResponse"
       }
+    },
+    {
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence",
+      "resource": "device",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "desktopPresence"
+        ],
+        "generated_path": "v2.aiAgent.desktopPresence",
+        "cache_tag": "v2.aiAgent.desktopPresence"
+      },
+      "summary": "같은 계정의 데스크톱 앱 마지막 접속 시각을 조회합니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:device:read"
+        ]
+      },
+      "rbac_policy": "desktop_presence.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentDesktopPresenceResponse"
+      },
+      "scenario_ids": [
+        "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",
+        "getAIAgentDesktopPresenceV2.no-desktop-connection-yet",
+        "getAIAgentDesktopPresenceV2.other-account-does-not-count"
+      ]
     },
     {
       "operation_id": "getAIAgentDaemonV2",
@@ -4381,7 +5510,8 @@
       "scenario_ids": [
         "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
         "listWorkspaceAssignedAgentProfilesV2.terminal-participants-persist-independently-of-legacy-active-hints",
-        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history"
+        "listWorkspaceAssignedAgentProfilesV2.explicit-removal-preserves-execution-history",
+        "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state"
       ]
     },
     {
@@ -4501,7 +5631,10 @@
       "response": {
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
-      }
+      },
+      "scenario_ids": [
+        "unassignAIAgentTaskV2.interleaved-execution-prevents-participant-removal"
+      ]
     },
     {
       "operation_id": "listAIAgentTaskThreadsV2",
@@ -4932,6 +6065,58 @@
       ]
     },
     {
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "kind": "command",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/onboarding-completion",
+      "resource": "agent",
+      "action": "assign",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "onboardingCompletion",
+          "create"
+        ],
+        "generated_path": "v2.aiAgent.tasks.onboardingCompletion.create",
+        "invalidates": [
+          "v2.aiAgent.bootstrap",
+          "v2.aiAgent.tasks.assignableAgents",
+          "v2.aiAgent.tasks.threads",
+          "v2.aiAgent.tasks.assignedAgentProfiles",
+          "v2.aiAgent.tasks.threadStreamSubscription",
+          "v3.aiAgent.tasks.threads"
+        ]
+      },
+      "summary": "온보딩 첫 작업 완료 결과를 task에 기록합니다. 실행 배정을 만들지 않습니다 (v2 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:write",
+          "task:{task_id}:assign",
+          "task:{task_id}:write"
+        ]
+      },
+      "rbac_policy": "ai_agent_onboarding_completion.v1",
+      "request": {
+        "ref": "CompleteAIAgentOnboardingTaskRequest",
+        "required": true
+      },
+      "response": {
+        "status": 202,
+        "ref": "AIAgentTaskActionResponse"
+      },
+      "scenario_ids": [
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-records-a-participant-and-a-completed-agent-comment-without-execution",
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent",
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-requires-an-onboarding-created-owned-agent",
+        "completeAIAgentOnboardingTaskV2.onboarding-completion-is-one-time-per-agent",
+        "completeAIAgentOnboardingTaskV2.onboarding-request-id-rejects-reuse-for-another-target"
+      ]
+    },
+    {
       "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
       "kind": "command",
       "method": "DELETE",
@@ -4955,7 +6140,7 @@
           "v2.aiAgent.tasks.threadStreamSubscription"
         ]
       },
-      "summary": "task의 특정 AI agent assignment를 제거하고 해당 agent 작업만 중단합니다 (v2 workspace-scoped)",
+      "summary": "task의 특정 AI Agent 참여자를 제거하고 해당 Agent의 관측 active 실행을 모두 중단합니다 (v2 workspace-scoped)",
       "auth": {
         "scheme": "apiKey",
         "header": "X-Riido-AI-Agent-Token",
@@ -4966,12 +6151,16 @@
         ]
       },
       "rbac_policy": "api_codegen_safety.v1",
+      "request": {
+        "ref": "DeleteAIAgentTaskAgentAssignmentRequest"
+      },
       "response": {
         "status": 202,
         "ref": "AIAgentTaskActionResponse"
       },
       "scenario_ids": [
-        "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment"
+        "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
+        "deleteAIAgentTaskAgentAssignmentV2.interleaved-execution-prevents-participant-removal"
       ]
     },
     {
@@ -5052,6 +6241,120 @@
         "getAIAgentTaskThreadStreamSubscriptionV2.multi-active-task-threads-use-filters",
         "getAIAgentTaskThreadStreamSubscriptionV2.cold-task-returns-empty-filters"
       ]
+    },
+    {
+      "query_parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      ],
+      "operation_id": "getAgentDashboardV2",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "agents",
+          "dashboard"
+        ],
+        "generated_path": "v2.aiAgent.agents.dashboard",
+        "cache_tag": "v2.agents.dashboard"
+      },
+      "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentDashboardResponse"
+      }
+    },
+    {
+      "query_parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      ],
+      "operation_id": "getAgentDashboard",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/dashboard",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "agents",
+          "dashboard"
+        ],
+        "generated_path": "aiAgent.agents.dashboard",
+        "cache_tag": "aiAgent.agents.dashboard"
+      },
+      "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:agent:read",
+          "ai-agent:agent:{agent_id}:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AgentDashboardResponse"
+      }
+    },
+    {
+      "operation_id": "listAIAgentTaskThreadHistoryV3",
+      "kind": "query",
+      "method": "GET",
+      "path": "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads",
+      "resource": "agent",
+      "action": "read",
+      "client": {
+        "module": "v3",
+        "facade_path": [
+          "aiAgent",
+          "tasks",
+          "threads"
+        ],
+        "generated_path": "v3.aiAgent.tasks.threads",
+        "cache_tag": "v3.aiAgent.tasks.threads"
+      },
+      "summary": "AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)",
+      "auth": {
+        "scheme": "apiKey",
+        "header": "X-Riido-AI-Agent-Token",
+        "scopes": [
+          "ai-agent:read",
+          "task:{task_id}:read"
+        ]
+      },
+      "rbac_policy": "task_thread_history_collection.v1",
+      "response": {
+        "status": 200,
+        "ref": "AIAgentTaskThreadHistoryCollectionResponse"
+      },
+      "scenario_ids": [
+        "listAIAgentTaskThreadHistoryV3.user-follow-up-survives-refresh",
+        "listAIAgentTaskThreadHistoryV3.agent-snapshot-is-referenced-once",
+        "listAIAgentTaskThreadHistoryV3.follow-up-and-reassignment-keep-separate-conversations"
+      ]
     }
   ],
   "scenarios": [
@@ -5126,6 +6429,38 @@
       "given": "the client copied fixture defaults but selected a runtime and optional model from devices.runtimes",
       "when": "the client creates an agent from the fixture",
       "then": "the API applies the same runtime_id and model_id validation as createAIAgent before saving"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.lost-response-retries-same-creation",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "lost response retries same creation",
+      "given": "a fixture create with request_id was durably committed but its HTTP response was lost",
+      "when": "the same authorized principal retries the same workspace operation, request_id, fixture_id, and complete creation payload before the original server-recorded creation-attempt timestamp + 24 hours, including after server restart",
+      "then": "HTTP 201 returns the original agent_id and no second agent or create event is recorded"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.changed-creation-intent-conflicts",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "changed creation intent conflicts",
+      "given": "an unexpired receipt exists for this principal, workspace, operation, and request_id",
+      "when": "the caller changes fixture_id or any submitted creation field, or the original agent has been deleted",
+      "then": "HTTP 409 creates nothing; a deleted agent is never recreated by the replay"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.unkeyed-create-preserves-duplicate-names",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "unkeyed create preserves duplicate names",
+      "given": "two fixture create commands have identical display names and no request_id",
+      "when": "the caller submits both independently",
+      "then": "each successful command returns its own agent_id and preserves the submitted non-unique display name"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixture.receipt-capacity-fails-closed",
+      "operation_id": "createAIAgentFromOnboardingFixture",
+      "name": "receipt capacity fails closed",
+      "given": "the bounded private receipt store cannot admit this request without removing an unexpired receipt",
+      "when": "the caller sends a new keyed fixture create",
+      "then": "HTTP 503 creates no agent and no unexpired receipt is evicted"
     },
     {
       "scenario_id": "listAIAgentDeviceRuntimes.missing-runtime-with-assigned-agent-is-offline",
@@ -5326,6 +6661,14 @@
       "given": "AI Agent가 task participant로 active 또는 queued 상태입니다",
       "when": "client가 해당 agent를 task participant에서 제거합니다",
       "then": "response와 event stream은 stopped_by_user_request를 사용하고, 중지된 row를 숨길지는 client presentation이 결정합니다"
+    },
+    {
+      "scenario_id": "unassignAIAgentTask.interleaved-execution-prevents-participant-removal",
+      "operation_id": "unassignAIAgentTask",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a participant removal observes retained execution A while a newer durable execution B exists before removal commits, including B not yet published to the task-thread read model",
+      "when": "the DELETE commits membership removal with or without assignment_id, regardless of the new execution status",
+      "then": "the DELETE returns 409 and preserves membership and B; any already-cancelled A stays cancelled and other task/Agent executions are unaffected"
     },
     {
       "scenario_id": "listAIAgentTaskThreads.completed-task-does-not-open-stream",
@@ -5592,6 +6935,62 @@
       "then": "riido.v2.aiAgent.onboarding.fixtures.createAgent still requires workspace_id in the URL path and runtime_id in the create request body before any durable agent is saved"
     },
     {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.lost-response-retries-same-creation",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "lost response retries same creation",
+      "given": "a fixture create with request_id was durably committed but its HTTP response was lost",
+      "when": "the same authorized principal retries the same workspace operation, request_id, fixture_id, and complete creation payload before the original server-recorded creation-attempt timestamp + 24 hours, including after server restart",
+      "then": "HTTP 201 returns the original agent_id and no second agent or create event is recorded"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.changed-creation-intent-conflicts",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "changed creation intent conflicts",
+      "given": "an unexpired receipt exists for this principal, workspace, operation, and request_id",
+      "when": "the caller changes fixture_id or any submitted creation field, or the original agent has been deleted",
+      "then": "HTTP 409 creates nothing; a deleted agent is never recreated by the replay"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.unkeyed-create-preserves-duplicate-names",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "unkeyed create preserves duplicate names",
+      "given": "two fixture create commands have identical display names and no request_id",
+      "when": "the caller submits both independently",
+      "then": "each successful command returns its own agent_id and preserves the submitted non-unique display name"
+    },
+    {
+      "scenario_id": "createAIAgentFromOnboardingFixtureV2.receipt-capacity-fails-closed",
+      "operation_id": "createAIAgentFromOnboardingFixtureV2",
+      "name": "receipt capacity fails closed",
+      "given": "the bounded private receipt store cannot admit this request without removing an unexpired receipt",
+      "when": "the caller sends a new keyed fixture create",
+      "then": "HTTP 503 creates no agent and no unexpired receipt is evicted"
+    },
+    {
+      "scenario_id": "getAIAgentDesktopPresenceV2.web-onboarding-detects-the-desktop-app-opened-with-the-same-account",
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "name": "web onboarding detects the desktop app opened with the same account",
+      "given": "the user is on the web onboarding install or waiting screen and then signs in to the desktop app with the same account",
+      "when": "the client polls riido.v2.aiAgent.desktopPresence",
+      "then": "last_seen_at becomes later than the server-time watch start derived from checked_at and the client moves to the connected state"
+    },
+    {
+      "scenario_id": "getAIAgentDesktopPresenceV2.no-desktop-connection-yet",
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "name": "no desktop connection yet",
+      "given": "the principal has never connected a desktop app",
+      "when": "the client reads desktop presence",
+      "then": "the response contains checked_at only and omits last_seen_at"
+    },
+    {
+      "scenario_id": "getAIAgentDesktopPresenceV2.other-account-does-not-count",
+      "operation_id": "getAIAgentDesktopPresenceV2",
+      "name": "other account does not count",
+      "given": "the desktop app is signed in with a different account than the web session",
+      "when": "the client reads desktop presence for the web session principal",
+      "then": "last_seen_at does not advance, so the client keeps waiting and may show account guidance"
+    },
+    {
       "scenario_id": "listWorkspaceAssignedAgentProfilesV2.component-id-keyed-assigned-profile-map",
       "operation_id": "listWorkspaceAssignedAgentProfilesV2",
       "name": "component id keyed assigned profile map",
@@ -5616,12 +7015,28 @@
       "then": "only the removed Agent is absent from task_agent_participants; its completed result, failure diagnostics, and thread history remain unchanged"
     },
     {
+      "scenario_id": "listWorkspaceAssignedAgentProfilesV2.latest-removal-guard-is-independent-of-historical-waiting-state",
+      "operation_id": "listWorkspaceAssignedAgentProfilesV2",
+      "name": "latest removal guard is independent of historical waiting state",
+      "given": "a retained waiting-for-user execution A is followed by the same Agent execution B, which may be running, completed, or failed",
+      "when": "the client reads the workspace task Agent participants",
+      "then": "membership stays selected and latest_assignment_id is B; is_stop_required reflects only current active execution; no retained history omits the optional ID"
+    },
+    {
       "scenario_id": "assignAIAgentTaskV2.workspace-scoped-assignment-excludes-team-and-openapi-key",
       "operation_id": "assignAIAgentTaskV2",
       "name": "workspace scoped assignment excludes team and OpenAPI key",
       "given": "the client has workspace_id from the existing workspace route, task_id from the task route, and selected a visible agent_id",
       "when": "client calls riido.v2.aiAgent.tasks.assign",
       "then": "the URL scopes workspace_id and task_id while the request body carries agent_id only; team_id, teamId, OpenAPI task-context paths, Open API keys, and X-Workspace-Api-Key are not generated assignment inputs"
+    },
+    {
+      "scenario_id": "unassignAIAgentTaskV2.interleaved-execution-prevents-participant-removal",
+      "operation_id": "unassignAIAgentTaskV2",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a participant removal observes retained execution A while a newer durable execution B exists before removal commits, including B not yet published to the task-thread read model",
+      "when": "the DELETE commits membership removal with or without assignment_id, regardless of the new execution status",
+      "then": "the DELETE returns 409 and preserves membership and B; any already-cancelled A stays cancelled and other task/Agent executions are unaffected"
     },
     {
       "scenario_id": "createAIAgentProfileThumbnailUploadV2.workspace-scoped-profile-image-upload-precedes-agent-save",
@@ -5656,12 +7071,60 @@
       "then": "control-plane keeps existing active task threads and creates or returns the selected agent's task thread"
     },
     {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-completion-records-a-participant-and-a-completed-agent-comment-without-execution",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding completion records a participant and a completed agent comment without execution",
+      "given": "an onboarding-created agent is visible in the workspace and the task has no active execution for it",
+      "when": "client calls riido.v2.aiAgent.tasks.onboardingCompletion.create with a template_key",
+      "then": "control-plane adds the agent as a task participant and records one completed task_completed agent message; no queued or leasable assignment is created"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-completion-is-idempotent",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding completion is idempotent",
+      "given": "the same task and agent, or the same request_id, already has an onboarding completion",
+      "when": "client repeats the completion request",
+      "then": "control-plane returns the existing completion response without adding participants or messages"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-completion-requires-an-onboarding-created-owned-agent",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding completion requires an onboarding-created owned agent",
+      "given": "the agent was not created through the onboarding fixture path, or it is owned by another principal",
+      "when": "client calls the onboarding completion for that agent",
+      "then": "control-plane rejects the request and records nothing; non-owned agents are reported as not found"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-completion-is-one-time-per-agent",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding completion is one-time per agent",
+      "given": "the agent already completed onboarding on another task, or the target task already has assignment, thread, or membership history for the agent",
+      "when": "client submits a completion",
+      "then": "control-plane rejects the request with 409 conflict and records nothing"
+    },
+    {
+      "scenario_id": "completeAIAgentOnboardingTaskV2.onboarding-request-id-rejects-reuse-for-another-target",
+      "operation_id": "completeAIAgentOnboardingTaskV2",
+      "name": "onboarding request_id rejects reuse for another target",
+      "given": "the principal already used a request_id in this workspace for one task and agent",
+      "when": "client reuses that request_id for a different task or agent",
+      "then": "control-plane rejects the request with 409 conflict instead of returning the other record"
+    },
+    {
       "scenario_id": "deleteAIAgentTaskAgentAssignmentV2.path-agent-id-selects-removed-assignment",
       "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
       "name": "path agent id selects removed assignment",
-      "given": "a task has multiple active AI Agent threads",
+      "given": "a task has multiple active executions for one Agent and other Agent participants",
       "when": "client removes one agent through riido.v2.aiAgent.tasks.agentAssignments.delete",
-      "then": "only the path agent_id target is stopped and other active thread filters remain active"
+      "then": "all observed active executions for the path agent_id are cancelled and its membership is removed; other task/Agent executions and terminal results, failure diagnostics, and thread history remain unchanged"
+    },
+    {
+      "scenario_id": "deleteAIAgentTaskAgentAssignmentV2.interleaved-execution-prevents-participant-removal",
+      "operation_id": "deleteAIAgentTaskAgentAssignmentV2",
+      "name": "interleaved execution prevents participant removal",
+      "given": "a participant removal observes retained execution A while a newer durable execution B exists before removal commits, including B not yet published to the task-thread read model",
+      "when": "the DELETE commits membership removal with or without assignment_id, regardless of the new execution status",
+      "then": "the DELETE returns 409 and preserves membership and B; any already-cancelled A stays cancelled and other task/Agent executions are unaffected"
     },
     {
       "scenario_id": "stopAIAgentTaskAgentAssignmentV2.path-agent-id-selects-stopped-assignment",
@@ -5686,6 +7149,30 @@
       "given": "a task has no active AI Agent task thread",
       "when": "client calls riido.v2.aiAgent.tasks.threadStreamSubscription",
       "then": "the response keeps the stream handoff shape but returns an empty active_thread_filters array"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreadHistoryV3.user-follow-up-survives-refresh",
+      "operation_id": "listAIAgentTaskThreadHistoryV3",
+      "name": "user follow-up survives refresh",
+      "given": "a user posts a next instruction to an AI Agent thread and reloads the task screen",
+      "when": "the client calls riido.v3.aiAgent.tasks.threads",
+      "then": "the target thread messages array contains the user message and the agent projection messages in observed_at order"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreadHistoryV3.agent-snapshot-is-referenced-once",
+      "operation_id": "listAIAgentTaskThreadHistoryV3",
+      "name": "agent snapshot is referenced once",
+      "given": "several historical threads share the same captured agent settings",
+      "when": "the client reads the v3 thread history collection",
+      "then": "each thread carries agent_snapshot_id and the repeated snapshot body is available once in agent_snapshots"
+    },
+    {
+      "scenario_id": "listAIAgentTaskThreadHistoryV3.follow-up-and-reassignment-keep-separate-conversations",
+      "operation_id": "listAIAgentTaskThreadHistoryV3",
+      "name": "follow-up and reassignment keep separate conversations",
+      "given": "the same agent is assigned again from the participant dropdown and also receives a follow-up reply on an older thread",
+      "when": "the client calls riido.v3.aiAgent.tasks.threads",
+      "then": "the reassignment thread has a different conversation_id, while the follow-up thread inherits the original conversation_id and carries parent_thread_id"
     }
   ]
 }

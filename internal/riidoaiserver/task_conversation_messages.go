@@ -1,8 +1,6 @@
 package riidoaiserver
 
-import (
-	"sort"
-)
+import "sort"
 
 func taskConversationMessages(thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history []AIAgentTaskThreadHistoryRecord) []AIAgentTaskThreadHistoryMessage {
 	var messages []AIAgentTaskThreadHistoryMessage
@@ -20,6 +18,9 @@ func taskConversationMessages(thread AIAgentTaskThreadRecord, req CreateAIAgentT
 		}
 		for _, message := range record.Messages {
 			if message.Role != AIAgentTaskThreadMessageRoleUser && message.Role != AIAgentTaskThreadMessageRoleAgent {
+				continue
+			}
+			if taskConversationMessageText(message, 2000) == "" {
 				continue
 			}
 			if req.SourceMessageID != "" && message.SourceMessageID == req.SourceMessageID {

@@ -10,7 +10,7 @@ func (s Server) handleAIAgentClientTaskThreads(w http.ResponseWriter, r *http.Re
 		return
 	}
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	response, err := s.aiAgent.ListAIAgentTaskThreads(r.Context(), principal, taskID)
@@ -31,7 +31,7 @@ func (s Server) handleAIAgentClientTaskThreadStreamSubscription(w http.ResponseW
 		return
 	}
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	response, err := s.aiAgent.GetAIAgentTaskThreadStreamSubscription(r.Context(), principal, taskID)

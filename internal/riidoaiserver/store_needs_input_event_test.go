@@ -31,7 +31,7 @@ func TestNeedsInputCompletesLeaseAndUnblocksNextAssignment(t *testing.T) {
 	result := mustRecordActorEvent(t, store, ctx, first.AgentID, AgentEventRequest{
 		AssignmentID: first.ID, DaemonID: "daemon-1", RuntimeID: "runtime-1",
 		State: AssignmentRunning, EventType: EventAssignmentStateUpdated,
-		Message:  "어떤 작업부터 진행할까요?",
+		Message:  "비교할 A안의 가격 정보가 없어 비용을 계산할 수 없습니다. A안의 월 요금을 알려주세요.",
 		Metadata: map[string]string{metadatakeys.AssignmentResultStatus.String(): "needs_input"},
 	})
 	if result.Assignment.State != AssignmentCompleted || result.Event.State != AssignmentCompleted {
@@ -40,7 +40,7 @@ func TestNeedsInputCompletesLeaseAndUnblocksNextAssignment(t *testing.T) {
 	projection := assignmentEventActionResponse(AIAgentTaskThreadRecord{
 		TaskID: first.TaskID, AssignmentID: first.ID, AgentID: first.AgentID,
 	}, result.Event.State, result.Event.Message, result.Event.Metadata)
-	if projection.WorkStatus != AgentWorkStatusWaitingForUser ||
+	if projection.Message != result.Event.Message || projection.WorkStatus != AgentWorkStatusWaitingForUser ||
 		projection.AssignmentState != AgentAssignmentStateWaiting || projection.ActiveStream != nil {
 		t.Fatalf("needs-input client projection = %+v", projection)
 	}

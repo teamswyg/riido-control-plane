@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -11,29 +12,38 @@ func (s *Store) appendEvent(state *storeState, taskID, assignmentID, agentID, ev
 		recordEventAppendLatency(state, time.Since(startedAt))
 	}()
 	state.nextEventSeq++
+	assignment := state.assignments[assignmentID]
 	event := TaskEvent{
-		Seq:          state.nextEventSeq,
-		TaskID:       taskID,
-		AssignmentID: assignmentID,
-		AgentID:      agentID,
-		Type:         eventType,
-		State:        assignmentState,
-		Message:      message,
-		Metadata:     cloneMetadata(metadata),
-		At:           at,
+		EventID:            fmt.Sprintf("%s:%d", assignmentID, state.nextEventSeq),
+		WorkspaceID:        assignment.WorkspaceID,
+		TeamID:             assignment.TeamID,
+		CreatedBy:          assignment.CreatedBy,
+		ConfirmationReason: assignment.ConfirmationReason,
+		Seq:                state.nextEventSeq,
+		TaskID:             taskID,
+		AssignmentID:       assignmentID,
+		AgentID:            agentID,
+		Type:               eventType,
+		State:              assignmentState,
+		Message:            message,
+		Metadata:           cloneMetadata(metadata),
+		At:                 at,
 	}
 	state.events[taskID] = append(state.events[taskID], event)
-	logAssignmentFailure(state, event)
+	s.publishTaskEvent(state, event)
+	return event
+}
+
+func (s *Store) publishTaskEvent(state *storeState, event TaskEvent) {
 	if s.outbox != nil {
 		s.appendTaskEventToOutbox(state, event)
 	}
-	for _, ch := range state.subscribers[taskID] {
+	for _, ch := range state.subscribers[event.TaskID] {
 		select {
 		case ch <- event:
 		default:
 		}
 	}
-	return event
 }
 
 func (s *Store) appendTaskEventToOutbox(state *storeState, event TaskEvent) {

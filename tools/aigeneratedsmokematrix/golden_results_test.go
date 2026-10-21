@@ -15,10 +15,10 @@ func assertGeneratedSmokeMatrixGolden(t *testing.T, got evidence) {
 		!got.MatrixSorted {
 		t.Fatalf("unexpected evidence identity/status: %+v", got)
 	}
-	if got.Counts.Total != 57 || got.Counts.V1 != 26 || got.Counts.V2 != 31 {
+	if got.Counts.Total != 62 || got.Counts.V1 != 27 || got.Counts.V2 != 34 {
 		t.Fatalf("operation counts drifted: %+v", got.Counts)
 	}
-	if got.SourceChecks != 4 || got.EvidenceTests != 2 {
+	if got.SourceChecks != 5 || got.EvidenceTests != 3 {
 		t.Fatalf("evidence counters drifted: %+v", got)
 	}
 	if got.Loop.Observation == "" ||

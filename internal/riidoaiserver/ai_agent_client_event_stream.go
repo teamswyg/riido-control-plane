@@ -6,22 +6,25 @@ import (
 	"time"
 )
 
-func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, events []ClientStreamEvent, live <-chan ClientStreamEvent) {
+func serveAIAgentClientEventStream(w http.ResponseWriter, r *http.Request, events []ClientStreamEvent, live <-chan ClientStreamEvent, authorize ...func(ClientStreamEvent) bool) {
 	writeAIAgentClientStreamHeaders(w)
 	logAIAgentClientStreamOpen(r, len(events))
 	for _, event := range events {
+		if event.EventType == AgentClientEventTaskNotification {
+			continue
+		}
 		if err := writeAIAgentClientSSE(w, event); err != nil {
 			logAIAgentClientStreamClose(r, "replay_write_error", err)
 			return
 		}
-		logAIAgentClientTerminalDelivery("replay_written", event, aiAgentWorkspaceIDFromRequest(r))
+		logAIAgentClientTerminalDelivery("replay_written", event, aiAgentWorkspaceIDFromRequest(r), r.Context())
 	}
 	flushAIAgentClientStream(w)
 	if r.URL.Query().Get("replay") == "1" {
 		logAIAgentClientStreamClose(r, "replay_complete", nil)
 		return
 	}
-	streamLiveAIAgentClientEvents(w, r, live)
+	streamLiveAIAgentClientEvents(w, r, live, authorize...)
 }
 
 func writeAIAgentClientStreamHeaders(w http.ResponseWriter) {
@@ -30,7 +33,7 @@ func writeAIAgentClientStreamHeaders(w http.ResponseWriter) {
 	w.Header().Set("Connection", "keep-alive")
 }
 
-func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live <-chan ClientStreamEvent) {
+func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live <-chan ClientStreamEvent, authorize ...func(ClientStreamEvent) bool) {
 	keepalive := time.NewTicker(sseKeepaliveInterval)
 	defer keepalive.Stop()
 	for {
@@ -40,11 +43,14 @@ func streamLiveAIAgentClientEvents(w http.ResponseWriter, r *http.Request, live 
 				logAIAgentClientStreamClose(r, "subscriber_closed", nil)
 				return
 			}
+			if event.EventType == AgentClientEventTaskNotification && (len(authorize) == 0 || !authorize[0](event)) {
+				continue
+			}
 			if err := writeAIAgentClientSSE(w, event); err != nil {
 				logAIAgentClientStreamClose(r, "event_write_error", err)
 				return
 			}
-			logAIAgentClientTerminalDelivery("live_written", event, aiAgentWorkspaceIDFromRequest(r))
+			logAIAgentClientTerminalDelivery("live_written", event, aiAgentWorkspaceIDFromRequest(r), r.Context())
 			flushAIAgentClientStream(w)
 		case <-keepalive.C:
 			if _, err := io.WriteString(w, ": keepalive\n\n"); err != nil {

@@ -45,6 +45,14 @@
       ]
     },
     {
+      "generated_path": "aiAgent.agents.dashboard",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/agents/{agent_id}/dashboard",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
       "generated_path": "aiAgent.agents.delete",
       "method": "DELETE",
       "path": "/v1/client/ai-agent/agents/{agent_id}",
@@ -253,6 +261,14 @@
       ]
     },
     {
+      "generated_path": "v2.aiAgent.agents.dashboard",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
       "generated_path": "v2.aiAgent.agents.delete",
       "method": "DELETE",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}",
@@ -280,6 +296,14 @@
       "generated_path": "v2.aiAgent.bootstrap",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/bootstrap",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.desktopPresence",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/desktop-presence",
       "evidence_tests": [
         "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
       ]
@@ -413,6 +437,14 @@
       ]
     },
     {
+      "generated_path": "v2.aiAgent.tasks.onboardingCompletion.create",
+      "method": "POST",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/onboarding-completion",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
       "generated_path": "v2.aiAgent.tasks.stop",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/stop",
@@ -458,6 +490,14 @@
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/assignment",
       "evidence_tests": [
         "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v3.aiAgent.tasks.threads",
+      "method": "GET",
+      "path": "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientV3ThreadHistory"
       ]
     }
   ]

@@ -3,8 +3,9 @@ package riidoaiserver
 import "strings"
 
 type composedAssignRequest struct {
-	Request            AssignRequest
-	IntentGateRequired bool
+	Request               AssignRequest
+	IntentGateRequired    bool
+	AgentOwnerPrincipalID string
 }
 
 func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignRequest, contextSnapshot AIAgentTaskContext) (AssignRequest, error) {
@@ -21,13 +22,15 @@ func composeAssignRequestWithTaskContextResult(
 	contextSnapshot AIAgentTaskContext,
 ) (composedAssignRequest, error) {
 	composed, err := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
-		TaskID:  taskID,
-		Context: contextSnapshot,
+		TaskID:          taskID,
+		UserInstruction: req.Prompt,
+		Context:         contextSnapshot,
 	})
 	if err != nil {
 		return composedAssignRequest{}, err
 	}
 	req.Prompt = composed.Prompt
+	req.TeamID = contextSnapshot.TeamID
 	if composed.HasRepository {
 		req.Worktree = assignmentWorktreeFromTaskContext(contextSnapshot, composed.SelectedRepository)
 	}

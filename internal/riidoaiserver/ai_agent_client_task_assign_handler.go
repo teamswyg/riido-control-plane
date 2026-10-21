@@ -19,8 +19,14 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	release, err := s.taskAgentExecutionGate.beginPublication(r.Context(), taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	defer release()
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
 		return
 	}
 	composedReq, err := s.assignRequestFromAIAgentClientTaskResult(r.Context(), principal, bearerToken, taskID, req)
@@ -43,14 +49,19 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		return
 	}
 	assignmentReq := composedReq.Request
-	assignment, err := s.assignment.AssignTaskReplacement(r.Context(), taskID, assignmentReq)
+	creationContext, creationReceipt := withTaskAgentCreationReceipt(r.Context())
+	assignment, err := s.assignment.AssignTaskReplacement(creationContext, taskID, assignmentReq)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
 	req.AssignmentID, req.durableState = assignment.ID, assignmentClientResponseDurableState(assignment)
+	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() && assignmentSequence(assignment.ID) == 0 {
+		req.membershipPublicationGeneration = taskAgentAssignmentGeneration(assignment)
+	}
 	response, err := s.aiAgent.AssignAIAgentTask(r.Context(), principal, taskID, req)
 	if err != nil {
+		s.recoverTaskAgentPublication(r.Context(), assignment, creationReceipt)
 		writeAIAgentClientError(w, err)
 		return
 	}

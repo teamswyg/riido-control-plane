@@ -40,6 +40,7 @@ const (
 	envAgentProfileThumbnailMaxBytes      = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_MAX_BYTES"
 	envAgentProfileThumbnailExpires       = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_UPLOAD_EXPIRES_SECONDS"
 	envAgentProfileThumbnailS3Endpoint    = "RIIDO_AI_SERVER_AGENT_PROFILE_THUMBNAIL_S3_ENDPOINT"
+	envTaskContextGraphQLURL              = "RIIDO_AI_SERVER_TASK_CONTEXT_GRAPHQL_URL"
 	envTaskContextBaseURL                 = "RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL"
 	envTaskContextWorkspaceID             = "RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID"
 	envTaskContextTeamID                  = "RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID"

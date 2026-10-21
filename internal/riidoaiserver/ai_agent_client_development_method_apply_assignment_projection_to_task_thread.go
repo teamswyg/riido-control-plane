@@ -18,19 +18,27 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 		previous := threads[i]
 		s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
 		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "", nil)
+
+		if projection.Assignment.State == AssignmentRunning && projection.Assignment.ConfirmationReason.Valid() {
+			response.WorkStatus = AgentWorkStatusWaitingForUser
+			response.ConfirmationReason = string(projection.Assignment.ConfirmationReason)
+		}
 		response.AssignmentID = projection.Assignment.ID
 		if previous.AssignmentID == response.AssignmentID &&
 			previous.WorkStatus == response.WorkStatus &&
 			previous.AssignmentState == response.AssignmentState &&
 			previous.CommentKind == response.CommentKind &&
+			previous.ConfirmationReason == response.ConfirmationReason &&
 			queueDiagnosticsEqual(previous.QueueDiagnostics, diagnostics) {
 			return false
 		}
 		threads[i].AssignmentID = response.AssignmentID
 		threads[i].WorkStatus = response.WorkStatus
+		threads[i].ConfirmationReason = response.ConfirmationReason
 		threads[i].AssignmentState = response.AssignmentState
 		threads[i].QueueDiagnostics = copyQueueDiagnostics(diagnostics)
 		threads[i].FailureDiagnostics = copyFailureDiagnostics(response.FailureDiagnostics)
+		threads[i].ExecutionContext = copyExecutionContext(response.ExecutionContext)
 		threads[i].CommentKind = response.CommentKind
 		threads[i].Message = response.Message
 		threads[i].ResultMessage = response.ResultMessage

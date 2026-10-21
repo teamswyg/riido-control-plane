@@ -20,6 +20,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV1(t *testing.T) {
 	}})
 
 	token := "user-token"
+	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/agents/agent-owned-codex/dashboard", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, "/v1/client/ai-agent/devices", token, "", http.StatusOK)
@@ -140,18 +141,12 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 
 	token := "user-token"
 	base := "/v2/client/workspaces/workspace-dev-riid/ai-agent"
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/agents/agent-owned-codex/dashboard", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/bootstrap", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/onboarding/fixtures", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/devices", token, "", http.StatusOK)
-	profileUploadBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/profile-thumbnails/uploads", token, `{"content_type":"image/jpeg","content_length_bytes":2048}`, http.StatusCreated)
-	var profileUpload AgentProfileThumbnailUploadResponse
-	aiAgentSmokeDecode(t, profileUploadBytes, &profileUpload)
-	if profileUpload.Method != http.MethodPost ||
-		profileUpload.FormFileField != "file" ||
-		!strings.HasPrefix(profileUpload.ProfileThumbnailURL, "https://cdn.example.test/thumbnail/ai/profile/") ||
-		!strings.HasSuffix(profileUpload.ProfileThumbnailURL, ".jpg") {
-		t.Fatalf("v2 profile thumbnail upload intent = %+v", profileUpload)
-	}
+	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/desktop-presence", token, "", http.StatusOK)
+	assertAIAgentV2SmokeProfileUpload(t, server, base, token)
 
 	fixtureCreateBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
 		Name:       "v2 smoke fixture agent",
@@ -282,6 +277,18 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/restart", token, `{"reason":"smoke restart"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/stop", token, `{"reason":"smoke stop"}`, http.StatusAccepted)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/devices/device-dev-macbook/daemon/start", token, `{"reason":"smoke start"}`, http.StatusAccepted)
+	onboardingAgentBytes := aiAgentSmokeRequest(t, server, http.MethodPost, base+"/onboarding/fixtures/riido_pm/agents", token, aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{
+		Name:       "v2 smoke onboarding agent",
+		Visibility: AgentVisibilityPrivate,
+		RuntimeID:  "runtime-cursor-dev",
+		ModelID:    stringPtr("cursor-auto"),
+	}), http.StatusCreated)
+	var onboardingAgent AgentClientRecordResponse
+	aiAgentSmokeDecode(t, onboardingAgentBytes, &onboardingAgent)
+	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/task-smoke-onboarding/onboarding-completion", token, aiAgentSmokeJSON(t, CompleteAIAgentOnboardingTaskRequest{
+		AgentID:     onboardingAgent.Agent.AgentID,
+		TemplateKey: AIAgentOnboardingTemplateSchedule,
+	}), http.StatusAccepted)
 }
 
 func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {
@@ -290,6 +297,7 @@ func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {
 	knownEvidenceTests := map[string]struct{}{
 		"TestHTTPAIAgentClientGeneratedEndpointSmokeV1": {},
 		"TestHTTPAIAgentClientGeneratedEndpointSmokeV2": {},
+		"TestHTTPAIAgentClientV3ThreadHistory":          {},
 	}
 
 	if matrix.SchemaVersion != "riido-ai-agent-generated-endpoint-smoke-matrix.v1" {
@@ -318,12 +326,7 @@ func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {
 				t.Fatalf("unknown matrix evidence test %q for %s", evidence, entry.GeneratedPath)
 			}
 		}
-		if strings.HasPrefix(entry.GeneratedPath, "v2.") && !containsString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV2") {
-			t.Fatalf("v2 matrix entry must cite v2 smoke evidence: %+v", entry)
-		}
-		if !strings.HasPrefix(entry.GeneratedPath, "v2.") && !containsString(entry.EvidenceTests, "TestHTTPAIAgentClientGeneratedEndpointSmokeV1") {
-			t.Fatalf("v1 matrix entry must cite v1 smoke evidence: %+v", entry)
-		}
+		verifyGeneratedSmokeVersionEvidence(t, entry)
 		matrixByGeneratedPath[entry.GeneratedPath] = entry
 	}
 

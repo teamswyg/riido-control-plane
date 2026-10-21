@@ -19,11 +19,18 @@ func (s *DynamoDBAssignmentOperationStore) putAssignmentProjectionPayload(record
 		Item                      map[string]map[string]string `json:"Item"`
 	}{
 		TableName:           s.tableName,
-		ConditionExpression: "attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq",
+		ConditionExpression: "(attribute_not_exists(last_event_seq) OR last_event_seq <= :last_event_seq) AND attribute_not_exists(recovery_watermark_json) AND attribute_not_exists(event_ack_receipts_json)",
 		ExpressionAttributeValues: map[string]map[string]string{
 			":last_event_seq": {"N": strconv.FormatInt(lastEventSeq, 10)},
 		},
 		Item: item,
+	}
+	if record.ExpectedProjection != nil {
+		payload.ConditionExpression = "last_event_seq = :expected_seq AND assignment_state = :expected_state"
+		payload.ExpressionAttributeValues = map[string]map[string]string{
+			":expected_seq":   {"N": strconv.FormatInt(record.ExpectedProjection.LastEventSeq, 10)},
+			":expected_state": {"S": string(record.ExpectedProjection.Assignment.State)},
+		}
 	}
 	return json.Marshal(payload)
 }
@@ -35,7 +42,11 @@ func assignmentProjectionDynamoDBItem(record AssignmentOperationRecord) (map[str
 	}
 	item := assignmentProjectionBaseItem(record, string(assignmentJSON))
 	assignmentProjectionOptionalFields(item, record.Assignment)
-	return item, nil
+	item, err = assignmentProjectionRecoveryField(item, record)
+	if err != nil {
+		return nil, err
+	}
+	return assignmentProjectionEventACKField(item, record)
 }
 
 func assignmentProjectionBaseItem(record AssignmentOperationRecord, assignmentJSON string) map[string]map[string]string {

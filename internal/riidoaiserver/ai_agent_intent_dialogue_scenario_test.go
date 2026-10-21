@@ -7,7 +7,7 @@ import (
 
 func TestAIAgentIntentDialogueScenarioStaysInConversation(t *testing.T) {
 	t.Parallel()
-	assertMarketingPromptAsksForIntent(t)
+	assertMarketingPromptAllowsExecution(t)
 	ctx := context.Background()
 	store := NewDevelopmentAIAgentClientStore()
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}

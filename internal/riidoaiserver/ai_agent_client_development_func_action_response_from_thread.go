@@ -15,6 +15,7 @@ func actionResponseFromThread(thread AIAgentTaskThreadRecord, workspaceID string
 		Message:            clientVisibleTaskThreadMessage(thread),
 		ResultMessage:      clientVisibleTaskThreadResultMessage(thread),
 		FailureDiagnostics: clientVisibleFailureDiagnostics(thread.FailureDiagnostics),
+		ExecutionContext:   copyExecutionContext(thread.ExecutionContext),
 	}
 	return clientVisibleQueuedActionResponse(actionResponseWithActiveStream(response, workspaceID))
 }

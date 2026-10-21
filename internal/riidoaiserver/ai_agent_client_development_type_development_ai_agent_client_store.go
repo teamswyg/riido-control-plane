@@ -5,6 +5,9 @@ import (
 )
 
 type DevelopmentAIAgentClientStore struct {
+	onboardingCreateMu      sync.Mutex
+	onboardingAgentCreates  map[string]onboardingAgentCreateReceipt
+	taskRequestReceipts     map[string]AIAgentTaskActionResponse
 	mu                      sync.Mutex
 	workspaceID             string
 	expectedDaemonProfile   string
@@ -26,4 +29,10 @@ type DevelopmentAIAgentClientStore struct {
 	events                  []ClientStreamEvent
 	subscribers             map[int]aiAgentClientSubscriber
 	nextSubscriberID        int
+	profileColorIndex       func(n int) int
+	onboardingCreated       map[string]bool
+	onboardingCompletions   map[string]string
+	// onboardingCompletionThreads keeps the completion thread per agent, so a repeat
+	// completion can be answered after the task thread list is truncated.
+	onboardingCompletionThreads map[string]AIAgentTaskThreadRecord
 }

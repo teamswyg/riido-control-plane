@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"net/http"
+	"time"
 )
 
 func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID string) {
@@ -17,14 +18,21 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	receivedAt := time.Now()
 	response, err := s.assignment.RecordAgentEvent(r.Context(), agentID, req)
 	if err != nil {
-		logAgentEventRejected(agentID, req, err)
-		writeError(w, http.StatusBadRequest, err.Error())
+		status, message := agentEventErrorResponse(err)
+		logAgentEventRejected(agentID, req, err, status)
+		writeError(w, status, message)
 		return
 	}
+	committedAt := time.Now()
 	if recorder, ok := s.aiAgent.(AIAgentAssignmentEventRecorder); ok {
-		_ = recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, req, response.Event)
+		if err := recorder.RecordAIAgentAssignmentEvent(r.Context(), agentID, req, response.Event); err != nil {
+			writeError(w, http.StatusServiceUnavailable, "assignment event committed but client projection is pending; retry the same event")
+			return
+		}
 	}
+	logAgentResponseDelivery(req, response, receivedAt, committedAt, time.Now())
 	writeJSON(w, http.StatusOK, response)
 }

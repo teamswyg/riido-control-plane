@@ -50,6 +50,7 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | `connected-workspaces` | - | workspace connections are unioned across enroll/snapshot/connect paths |
 | `account-connection-grants` | - | each authenticated account and workspace connection is preserved as a device grant without replacing device ownership or credentials |
 | `cross-account-binding-routing` | - | an agent created by a connected account routes through the existing physical daemon by stable device and runtime ids |
+| `cross-account-native-followup` | - | a follow-up validates the selected Agent snapshot owner against the authorized current Agent profile owner, separately from physical runtime ownership; assignment workspace/task/agent and runtime binding checks remain required |
 | `legacy-grant-backfill` | - | snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants |
 | `cross-workspace-bindings` | - | daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids |
 | `legacy-runtime-prune` | - | agentd-local runtimes are pruned from restored snapshots |

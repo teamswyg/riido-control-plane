@@ -24,16 +24,17 @@ func newStoreWithConfig(config StoreConfig, initial storeState) *Store {
 		activeLeaseDuration = time.Duration(DefaultAssignmentActiveLeaseSeconds) * time.Second
 	}
 	s := &Store{
-		commands:            make(chan any, 64),
-		done:                make(chan struct{}),
-		now:                 now,
-		activeLeaseDuration: activeLeaseDuration,
-		outbox:              config.Outbox,
-		snapshotStore:       config.SnapshotStore,
-		operationStore:      config.OperationStore,
-		agentRegistry:       config.AgentRegistry,
-		operationMetrics:    config.OperationMetrics,
-		traceRecorder:       config.TraceRecorder,
+		commands:               make(chan any, 64),
+		done:                   make(chan struct{}),
+		now:                    now,
+		activeLeaseDuration:    activeLeaseDuration,
+		outbox:                 config.Outbox,
+		snapshotStore:          config.SnapshotStore,
+		operationStore:         config.OperationStore,
+		agentRegistry:          config.AgentRegistry,
+		operationMetrics:       config.OperationMetrics,
+		traceRecorder:          config.TraceRecorder,
+		taskAgentExecutionGate: newTaskAgentExecutionGates(),
 	}
 	if s.operationMetrics == nil {
 		s.operationMetrics = NewStoreOperationMetrics()

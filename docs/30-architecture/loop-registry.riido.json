@@ -62,7 +62,8 @@
         "stop_action_response",
         "active_stream",
         "needs_input_result_status",
-        "durable_assignment_state"
+        "durable_assignment_state",
+        "onboarding_completion_record"
       ],
       "verifies": [
         "deleted_agent_thread_retention",
@@ -76,7 +77,8 @@
         "assignment_run_uniqueness",
         "message_ordering",
         "stop_reassign_strong_consistency",
-        "frontend_handoff_v3_contract"
+        "frontend_handoff_v3_contract",
+        "onboarding_completion_durable_idempotency"
       ],
       "evidence": [
         {
@@ -723,11 +725,11 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0c833a8f52bda66c4cbf7a79fa5494563f5255bfcb6e065770530950833c139c"
+      "semantic_hash": "07ab50ec626d4ee89c7fe4a7051639f9413421f16d1567bf6864acb2fcfd8331"
     },
     {
       "id": "thread_history_must_keep_user_followups",
-      "statement": "AI thread history must preserve user follow-up messages with their author identity, including execution-approval replies consumed by same-assignment pending tool approvals, and restore them after persistence reloads.",
+      "statement": "AI thread history must preserve user follow-up messages with their author identity, including execution-approval replies consumed by same-assignment pending tool approvals, and restore them after persistence reloads. Run-scoped execution context survives cold v1/v3 history and SSE reads as bounded codes; legacy progress retains existing evidence and a new run clears previous checks. Conversation prompt budgets exclude messages with empty readable text, including empty editor HTML, before selecting recent messages; eligibility and rendering share normalization. Explicit same-thread follow-ups carry only the authorized selected terminal assignment native session under exact provider/model/worktree and current owner/runtime binding; changed requester is not changed provider ownership. Dependency failures preserve retryability and no native pin is silently replaced. Generic startup queues do not assert another task is running. Ready/running history cannot retain exact queue-only status copy, including persisted snapshots and cold/live progress, while real provider output remains visible.",
       "loop": "ai_thread_history",
       "covers_observes": [
         "task_thread_messages"
@@ -750,7 +752,37 @@
         "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go",
         "internal/riidoaiserver/ai_agent_client_development_method_submit_ai_agent_task_comment.go",
         "internal/riidoaiserver/ai_agent_client_thread_history_api.go",
-        "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go"
+        "internal/riidoaiserver/ai_agent_client_thread_history_author_test.go",
+        "internal/riidoaiserver/ai_agent_client_execution_context_test.go",
+        "internal/riidoaiserver/execution_context_projection.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_projection.go",
+        "internal/riidoaiserver/task_conversation_messages.go",
+        "internal/riidoaiserver/task_conversation_context.go",
+        "internal/riidoaiserver/readable_empty_history_test.go",
+        "internal/riidoaiserver/server_thread_message_native_resume.go",
+        "internal/riidoaiserver/server_thread_message_assignment.go",
+        "internal/riidoaiserver/task_conversation_selection.go",
+        "internal/riidoaiserver/server_json.go",
+        "internal/riidoaiserver/thread_native_resume_http_fixture_test.go",
+        "internal/riidoaiserver/thread_native_resume_http_test.go",
+        "internal/riidoaiserver/thread_native_resume_scope_fixture_test.go",
+        "internal/riidoaiserver/thread_native_resume_scope_test.go",
+        "internal/riidoaiserver/thread_native_resume_dependency_test.go",
+        "docs/20-domain/ai-agent-client-api.riido.json",
+        "docs/20-domain/ai-agent-client-api.md",
+        "internal/riidoaiserver/server_ai_agent_client_error.go",
+        "internal/riidoaiserver/thread_native_resume_connected_account_test.go",
+        "internal/riidoaiserver/thread_native_resume_owner_scope_test.go",
+        "internal/riidoaiserver/ai_agent_client_development_assignment_state_action_response.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_message.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_client_visible_task_thread_text.go",
+        "internal/riidoaiserver/ai_agent_client_development_func_copy_client_visible_progress_lines.go",
+        "internal/riidoaiserver/ai_agent_client_thread_history_builder.go",
+        "internal/riidoaiserver/ai_agent_client_visible_messages.go",
+        "internal/riidoaiserver/assignment_queue_message_test.go",
+        "internal/riidoaiserver/thread_followup_queue_status_http_test.go",
+        "internal/riidoaiserver/thread_history_queue_progress_test.go",
+        "internal/riidoaiserver/ai_agent_client_queued_progress_projection_test.go"
       ],
       "verifiers": [
         "TestAIAgentTaskThreadHistoryKeepsUserFollowupMessages",
@@ -759,12 +791,30 @@
         "TestHTTPThreadMessageApprovesPendingToolApproval",
         "TestHTTPThreadMessageApprovesPendingToolApprovalExecutionReply",
         "TestThreadMessageApprovesToolApprovalExecutionPhrases",
-        "TestThreadMessageRejectsToolApprovalExecutionNegations"
+        "TestThreadMessageRejectsToolApprovalExecutionNegations",
+        "TestExecutionContextSurvivesTaskHistoryAndEventProjections",
+        "TestExecutionContextRetainsLegacyProgressAndRejectsUnboundedMetadata",
+        "TestNewRunDoesNotInheritExecutionEvidence",
+        "TestAcceptanceRenderedEmptyHistoryPreservesEarlierRequirement",
+        "TestHTTPThreadFollowupReusesAuthoritativeNativeSessionAcrossTerminalStates",
+        "TestHTTPSharedAgentFollowupKeepsNativeSessionWhenRequesterChanges",
+        "TestNativeFollowupSelectsOnlyAuthorizedPersistedSession",
+        "TestNativeFollowupProjectionFailureRemainsRetryableAndPrivate",
+        "TestHTTPConnectedAccountAgentCanContinueItsOwnNativeSession",
+        "TestNativeFollowupUsesAgentOwnershipSeparatelyFromRuntimeOwnership",
+        "TestAssignmentStartupQueueDoesNotAssertAnotherTaskIsRunning",
+        "TestAssignmentStartReplacesQueueStatusButPreservesAgentOutput",
+        "TestRunningSnapshotDoesNotRestoreLegacyQueueStatus",
+        "TestSingleFollowupDoesNotCarryBusyMessageIntoRunningHistory",
+        "TestV3RunningHistoryHidesPersistedQueueStatusAndKeepsProgress",
+        "TestClientVisibleProgressLinesHideBusyQueueStatus",
+        "TestListTaskThreadsHidesStaleBusyLineAfterRunning",
+        "TestLiveProgressFanoutHidesStaleBusyLine"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c683363688f9685899c163cca7037aa6298906bf4870ab894ad74d1ade9e4603"
+      "semantic_hash": "7044f641f8d9698022d80040c98b59f5d889a777a28bd8f0ce8db8f5bdadda65"
     },
     {
       "id": "same_provider_agents_must_keep_distinct_threads",
@@ -798,7 +848,7 @@
     },
     {
       "id": "sse_reconnect_must_resume_after_last_event_id",
-      "statement": "AI Agent SSE reconnects must honor the numeric Last-Event-ID cursor and replay only events with a greater SSE sequence, while missing, invalid, or negative cursors preserve the existing bounded replay behavior; stream-open logs must expose cursor presence and replay count without recording credentials, cursor values, or message bodies.",
+      "statement": "AI Agent SSE reconnects must honor the numeric Last-Event-ID cursor and replay only events with a greater SSE sequence, while missing, invalid, or negative cursors preserve the existing bounded replay behavior; stream-open logs must expose cursor presence and replay count without recording credentials, cursor values, or message bodies. Lifecycle/terminal logs use bounded routes, reasons and state, opaque references and valid OTel correlation; request authorization and history reconciliation failure observations preserve cancellation/deadline categories without raw URLs, host paths or arbitrary errors. Runtime snapshot failures identify decode versus sync stages with bounded timeout/cancellation/body categories without inferring a datastore outage. Valid runtime snapshots preserve typed input/authentication errors, classify storage/dependency failures as HTTP 503 and deadline expiry as 504 without inferring the historical timeout cause. Selected fallback inventory checks are cancellable and bounded outside the global actor; fresh actor/lease/policy and CAS fences reject stale approval. Stable-key Ready and terminal events retain bounded private durable payload receipts for identical original ACKs and changed-payload rejection across replicas; Ready ACKs authorize only a still-leased/ready unexpired execution, never Running or a stopped execution, while legacy daemon keys remain accepted. SSE lifecycle logs identify short completed observation spans before the HTTP connection ends; v3 projection cancellation, deadlines and dependency failures remain distinct with fixed response messages.",
       "loop": "ai_thread_history",
       "covers_observes": [
         "active_stream"
@@ -817,20 +867,79 @@
         "internal/riidoaiserver/ai_agent_client_sse_logging.go",
         "internal/riidoaiserver/ai_agent_client_event_replay_cursor_test.go",
         "internal/riidoaiserver/ai_agent_client_sse_logging_test.go",
-        ".github/workflows/ai-agent-client-api.yml"
+        ".github/workflows/ai-agent-client-api.yml",
+        "internal/riidoaiserver/ai_agent_client_sse_delivery.go",
+        "internal/riidoaiserver/server_path.go",
+        "internal/riidoaiserver/tracing.go",
+        "cmd/riido_ai_server/tracing_recorder.go",
+        "internal/riidoaiserver/request_failure_observation.go",
+        "internal/riidoaiserver/request_failure_observation_test.go",
+        "internal/riidoaiserver/server_authorization_http.go",
+        "internal/riidoaiserver/server_ai_agent_client_task_v3.go",
+        "internal/riidoaiserver/tracing_context.go",
+        "internal/riidoaiserver/tracing_correlation.go",
+        "internal/riidoaiserver/tracing_correlation_test.go",
+        "internal/riidoaiserver/runtime_snapshot_failure_observation_test.go",
+        "internal/riidoaiserver/server_daemon_http.go",
+        "internal/riidoaiserver/ai_agent_client_terminal_progress_compensation.go",
+        "docs/20-domain/assignment-operation-journal.riido.json",
+        "internal/riidoaiserver/assignment_event_ack.go",
+        "internal/riidoaiserver/assignment_event_ack_check.go",
+        "internal/riidoaiserver/assignment_event_ack_projection.go",
+        "internal/riidoaiserver/assignment_event_ack_receipt.go",
+        "internal/riidoaiserver/assignment_event_ack_request.go",
+        "internal/riidoaiserver/assignment_projection.go",
+        "internal/riidoaiserver/store_assignment_event_ack.go",
+        "internal/riidoaiserver/store_ready_event_lease.go",
+        "internal/riidoaiserver/provider_recovery_preflight.go",
+        "internal/riidoaiserver/provider_recovery_preflight_approval.go",
+        "internal/riidoaiserver/provider_recovery_candidate_fence.go",
+        "internal/riidoaiserver/provider_recovery_event.go",
+        "internal/riidoaiserver/store_event_api.go",
+        "internal/riidoaiserver/store_handle_event.go",
+        "internal/riidoaiserver/durable_assignment_mutation.go",
+        "internal/riidoaiserver/runtime_snapshot_error.go",
+        "internal/riidoaiserver/ai_agent_client_operation_lock.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_list_ai_agent_devices.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_list_ai_agent_task_assignable_agents.go",
+        "internal/riidoaiserver/assignment_event_ack_durable_terminal_ack_replays_across_replicas_and_restart_test.go",
+        "internal/riidoaiserver/assignment_event_ack_durable_ready_ack_does_not_authorize_running_or_terminal_execution_test.go",
+        "internal/riidoaiserver/assignment_event_ack_ready_ack_preserves_legacy_v88_key_without_lease_metadata_test.go",
+        "internal/riidoaiserver/assignment_event_ack_durable_ack_refuses_changed_payload_without_replacing_receipt_test.go",
+        "internal/riidoaiserver/provider_recovery_preflight_inventory_cancellation_does_not_block_assignment_actor_test.go",
+        "internal/riidoaiserver/provider_recovery_preflight_inventory_approval_rejects_stop_during_lookup_test.go",
+        "internal/riidoaiserver/runtime_snapshot_error_test.go",
+        "internal/riidoaiserver/ai_agent_client_sse_tracing.go",
+        "internal/riidoaiserver/ai_agent_client_sse_span_completion_test.go",
+        "internal/riidoaiserver/request_failure_snapshot_validation_test.go",
+        "internal/riidoaiserver/ai_agent_client_http_v3_reconcile_status_test.go"
       ],
       "verifiers": [
         "TestAIAgentClientReplayEventsAfterLastEventID",
         "TestAIAgentClientReplayEventsIgnoreInvalidLastEventID",
         "TestAIAgentClientReplayEventsAfterLatestIDReturnsEmpty",
         "TestHTTPAIAgentClientEventsHonorsLastEventID",
-        "TestAIAgentClientSSELifecycleLogsReasonWithoutQuery"
+        "TestAIAgentClientSSELifecycleLogsReasonWithoutQuery",
+        "TestAIAgentClientSSELifecycleRejectsRawPathReasonAndError",
+        "TestRequestFailureObservationBoundsCauseAndCorrelates",
+        "TestRuntimeSnapshotFailuresObserveDecodeAndSyncSeparately",
+        "TestDurableTerminalACKReplaysAcrossReplicasAndRestart",
+        "TestDurableReadyACKDoesNotAuthorizeRunningOrTerminalExecution",
+        "TestReadyACKPreservesLegacyV88KeyWithoutLeaseMetadata",
+        "TestDurableACKRefusesChangedPayloadWithoutReplacingReceipt",
+        "TestRecoveryInventoryCancellationDoesNotBlockAssignmentActor",
+        "TestRecoveryInventoryApprovalRejectsStopDuringLookup",
+        "TestRuntimeSnapshotTypedFailureHTTPStatus",
+        "TestRuntimeSnapshotProductionValidationIsTyped",
+        "TestSSELifecycleLogReferencesCompletedEventSpanWhileConnectionRemainsOpen",
+        "TestRequestFailureSeparatesSnapshotValidationFromUnknownDependency",
+        "TestV3ThreadReconcileSeparatesCancellationDeadlineAndDependency"
       ],
       "generated_docs": [
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "de644d28ed84b021247b31aec4d148abb7a88abb3b255654ea908eaea5392876"
+      "semantic_hash": "ffda47f082da264c0b9564542c275093ab4a2b7113835d7ef9578c5a3e0600c8"
     },
     {
       "id": "thread_history_v3_must_expose_stable_conversation_grouping",
@@ -920,7 +1029,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "26ff37a2d3e55ecbd3bfc2cf039a3bce4612a9d32a1ef8cab6dbd797114d1d19"
+      "semantic_hash": "84098e18877967a9d5d22e17a2aac2a64c2b3d2c661d646c5e31ca207b7b1a4c"
     },
     {
       "id": "thread_history_v3_must_preserve_run_identity_and_message_order",
@@ -955,7 +1064,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "7c62b2406a2b9ba93c491f6e45bfc79e658465149c78c2aeac0848c17043050a"
+      "semantic_hash": "8fa38cf6b24b557d39f43c50529812eee0abbab7a74d6e936d021d958142891f"
     },
     {
       "id": "stop_reassign_must_not_revive_or_mutate_inactive_threads",
@@ -1008,7 +1117,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "ec1238564f4ac8d0116d592337368948053acdab23b8aac82ff92c5c59606181"
+      "semantic_hash": "f47553803907b6e49d5a8fd50d82a25a8be3b7fffab26788fc9df15fd3c48466"
     },
     {
       "id": "expired_harness_evidence_must_not_promote_candidates",
@@ -1160,11 +1269,11 @@
         "docs/30-architecture/harness-promotion.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "4a49fd30bef816e72c4b96a807089704b3028d299f39df9fc4284264cf64a8a8"
+      "semantic_hash": "91ce03ec1424d7628bc107bce29b5b00dac73776bc045d51f0d6e5106a1d5a54"
     },
     {
       "id": "control_plane_performance_hot_paths_must_emit_evidence",
-      "statement": "Control-plane high-traffic risk work must keep endpoint, store, assignment journal startup replay, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, live load, architecture component surfaces, generated file architecture indexes, hot-path-to-file routing, executable target verifier commands, exact and directory-fallback file-level architecture query evidence, component role summaries, direct/fallback/miss query counts, and repo benchmark history records bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, OTel/X-Ray/CloudWatch signal names, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths and measured capacity/latency/allocation/cpu summaries without changing public API contracts.",
+      "statement": "Control-plane high-traffic risk work must keep endpoint, store, assignment journal startup replay, SSE, subscriber fanout, assignment/tool-approval waiters, runtime progress, actor shutdown, local pressure, pprof, live load, architecture component surfaces, generated file architecture indexes, hot-path-to-file routing, executable target verifier commands, exact and directory-fallback file-level architecture query evidence, component role summaries, direct/fallback/miss query counts, and repo benchmark history records bound to lightweight benchmark evidence, local resource delta evidence, local CPU/heap/goroutine profile metadata, OTel/X-Ray/CloudWatch signal names, per-scenario capacity estimates, measured pressure findings, loopback-only profiling commands, redacted live-load commands, and explicit optimization candidates with closed-loop adoption paths and measured capacity/latency/allocation/cpu summaries without changing public API contracts. Provider health spans are emitted only on health/diagnostic transitions, including recovery, so unchanged runtime polls do not multiply observations. Exported OTel exception/status text is fixed and error.type is bounded; wrapped dependency error bodies and credential-like markers never enter telemetry while cancellation classification is preserved.",
       "loop": "control_plane_performance_harness",
       "covers_observes": [
         "endpoint_hot_path",
@@ -1462,7 +1571,14 @@
         "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_context_test.go",
         "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_load.go",
         "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing.go",
-        "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go"
+        "internal/riidoaiserver/dynamodb_assignment_operation_store_replay_pacing_test.go",
+        "internal/riidoaiserver/provider_health_tracing.go",
+        "internal/riidoaiserver/provider_health_observation_values.go",
+        "internal/riidoaiserver/provider_health_transition_trace_test.go",
+        "cmd/riido_ai_server/tracing_span.go",
+        "cmd/riido_ai_server/tracing_privacy_test.go",
+        "cmd/riido_ai_server/tracing_privacy_aws_test.go",
+        "internal/riidoaiserver/agent_response_timing_fractional_test.go"
       ],
       "verifiers": [
         "TestControlPlanePerformanceBehaviorGolden",
@@ -1531,7 +1647,12 @@
         "TestDynamoDBAIAgentClientSnapshotRepliesCanceledContextBeforeCommandSend",
         "TestDynamoDBAssignmentOperationReplayKeepsBoundedStrongReadPages",
         "TestPaceDynamoDBAssignmentOperationReplayHonorsCancellation",
-        "TestPaceDynamoDBAssignmentOperationReplayHonorsDeadline"
+        "TestPaceDynamoDBAssignmentOperationReplayHonorsDeadline",
+        "TestProviderHealthTraceSuppressesUnchangedPollAndRecordsRecovery",
+        "TestOtelTraceErrorDoesNotExportPrivateMessages",
+        "TestOtelTraceErrorDoesNotEvaluateArbitraryMessage",
+        "TestOtelAWSResponseBodyRemainsPrivateAcrossAdapter",
+        "TestResponseTimingSplitRemainsAdditiveAfterRounding"
       ],
       "generated_docs": [
         "docs/30-architecture/control-plane-performance.md",
@@ -1541,7 +1662,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "d146c8b356a53f7e67ff4a72c2fe1e56aced61f32275151ce4b26673c47eb53d"
+      "semantic_hash": "8bf27b889c278f14f5d8351bd7e9daeb301710f991a52bf1b88d88460c0c2fe5"
     },
     {
       "id": "control_plane_meta_evidence_must_self_expire",
@@ -1591,7 +1712,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "cb83a3123d8f32b7c0d6be30c4086e3b791f11d89b11ca12b94080c99ee6346a"
+      "semantic_hash": "cdbe6fe0caa4dea1d4aafe954f72a9c1d6c9ad67650406fc5d54efc356fc0dc4"
     },
     {
       "id": "harness_promotion_must_run_after_failure",
@@ -1704,7 +1825,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "6564ed0ada3c77851ad434fcec3bc16cca5c56b92a5bf3c1440317b766b4880d"
+      "semantic_hash": "e9f853aa70dd4e6231a6413489fe665ba25bed3970fa2d5fd22e068c9951a4dd"
     },
     {
       "id": "loop_closure_audit_must_prove_human_exit_requirements",
@@ -1856,7 +1977,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "77f5495dbda1bbbe17937f73895719bd3f04ab8b51b6ef321cea40f67156b8d1"
+      "semantic_hash": "50a326e3cb77b79cc09681a436ab8a7fc85c5231b00bfd2de287c1a3ffac3cdc"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
@@ -1913,7 +2034,7 @@
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "24f9ef08a51f2ed305ed36bd11d6ab93888bc49a682437440ff22546199f31a8"
+      "semantic_hash": "278a9e3d841c32f6cdb7ce396575ff45468eb50ae0385142dc7fd3deff89be33"
     },
     {
       "id": "closed_loop_candidates_must_carry_promotion_edge",
@@ -1980,7 +2101,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "bd334223d2c5ee5ac01045b37b45383ecfaac2fffd3be3e528ff785ad5a1c356"
+      "semantic_hash": "9ed5b2a95bbb2552f5e869f9fcf02c998206991af47fc4f7af93a623a8ee56f0"
     },
     {
       "id": "closed_loop_candidates_must_carry_source_ref",
@@ -2040,7 +2161,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "41df27a0c9a814b481d430f9373dd8bec8ec763c8b5fd7a120bb917056a2d4dc"
+      "semantic_hash": "e9fcdd9089ca49d3a22804b741ae0bceb87f874b8eba10e1179789d82e2e3817"
     },
     {
       "id": "closed_loop_candidates_must_carry_subject",
@@ -2092,7 +2213,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "473c6f0f285b77632b0d4f9a96ed5c9ef5dff684e64f5b218ab6818927248897"
+      "semantic_hash": "37d50dfe221a622737a9f19ee0e80158860eba616ec04ecf6cc30072ad20e64c"
     },
     {
       "id": "loop_verifiers_must_accept_verify_intent",
@@ -2194,7 +2315,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a812ffe6f1c26c80fd6e1f1f8d04708f54264838754f07781204e04fb42dc421"
+      "semantic_hash": "0060f6f97aec2c4be9cfc3fd06014e7ed0e68d420778d1d542e87db14f9c9b62"
     },
     {
       "id": "loop_evidence_artifacts_must_have_refresh_owners",
@@ -2238,11 +2359,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ea742eee78b3950ae17a13ce154ca794f014ddcca8071ab7cb976eb2811ec043"
+      "semantic_hash": "156d631ad36805acbb3b3eeb719ae6daf78922a53b4274e3c4e4ebc04862d0e2"
     },
     {
       "id": "ambiguous_task_context_must_ask_before_work",
-      "statement": "When task context is marketing, analysis, planning, or otherwise intent-oriented rather than an explicit instruction, the assignment prompt must emit intent_gate_required=true and require the agent to ask for intent in the existing thread before producing deliverables; provider token, quota, cloud-credit exhaustion, local approval-dialog wording, local command-permission wording, or runtime cancellation wording must render as a user-facing thread result without changing API shape; file/shell/tool permission must use the structured approval channel rather than conversational permission loops; an affirmative approval reply in the existing thread may approve only a same-assignment pending tool approval without creating a new assignment, and assigning another agent after the limit must create a separate conversation without hiding the prior thread history.",
+      "statement": "Agent assignment must publish task context and explicit user instructions to the existing provider turn without keyword-based intent gating. Intent labels are advisory only. The model acts on the requested outcome and asks only about specific missing information blocking progress. Real provider needs_input, legacy waiting threads, structured tool approval, usage-limit results and separate reassignment conversations retain their contracts. No classifier/reviewer model turn is added.",
       "loop": "ai_thread_history",
       "covers_observes": [
         "v3_threads_response",
@@ -2349,19 +2470,22 @@
         "tools/aiagentclientapi/render_thread_history_v3.go",
         "internal/riidoaiserver/ai_agent_client_development_assignment_event_input_from_request.go",
         "internal/riidoaiserver/tool_approval_thread_match_test.go",
-        "internal/riidoaiserver/assignment_event_input_test.go"
+        "internal/riidoaiserver/assignment_event_input_test.go",
+        "internal/riidoaiserver/assignment_direct_execution_test.go",
+        "internal/riidoaiserver/comment_delivery_test.go",
+        "internal/riidoaiserver/store_needs_input_event_test.go"
       ],
       "verifiers": [
-        "TestAssignmentPromptAsksForIntentOnAmbiguousMarketingDocument",
-        "TestAssignmentPromptAsksFromIntentMetadataWhenDocumentMissing",
+        "TestAssignmentPromptExecutesMarketingOutcomeInSameTurn",
+        "TestAssignmentPromptActsFromMetadataWhenDocumentMissing",
         "TestAssignmentPromptKeepsMetadataOnlyWhenDocumentAndIntentMarkersMissing",
         "TestAssignmentPromptClassifiesIntentFromMetadataWhenDocumentMissing",
         "TestAssignmentPromptClassifiesIntentComponentTypes",
         "TestAssignmentPromptKeepsExplicitInstructionExecutable",
-        "TestAssignmentPromptAsksForIntentOnNonCommandComponentDocument",
+        "TestAssignmentPromptDoesNotGateNonCommandComponentDocument",
         "TestAssignmentPromptKeepsExplicitTitleWithPreferenceDocumentExecutable",
         "TestFollowupPromptKeepsLatestUserInstructionAuthoritative",
-        "TestHTTPAIAgentIntentGateWaitsForUserBeforeDurableAssignment",
+        "TestHTTPAIAgentAssignmentExecutesWithoutIntentGate",
         "TestHTTPAIAgentIntentGateExecutesExplicitMetadataTitle",
         "TestAIAgentIntentDialogueScenarioStaysInConversation",
         "TestAIAgentIntentDialogueScenarioKeepsProgressAndLimitResult",
@@ -2379,19 +2503,22 @@
         "TestFailureDiagnosticsConvertsLocalApprovalDialog",
         "TestHTTPThreadMessageApprovesPendingToolApproval",
         "TestHTTPToolApprovalRoundTrip",
-        "TestHTTPAIAgentIntentGateUsesMetadataWhenDocumentMissing",
+        "TestHTTPAIAgentAssignmentDeliversMetadataWhenDocumentMissing",
         "TestHTTPAIAgentIntentDialogueV3KeepsScenarioTimeline",
         "TestVerifyAliasChecksGeneratedDoc",
         "TestGeneratedDocMatchesManifest",
         "TestToolApprovalMatchesThreadRequiresPendingFreshSameAssignmentAgent",
         "TestNewAssignmentEventInputPrefersEventValuesAndDefaultsRunning",
-        "TestNewAssignmentEventInputFallsBackAndRequiresIdentities"
+        "TestNewAssignmentEventInputFallsBackAndRequiresIdentities",
+        "TestAssignmentDirectExecutionPreservesRequest",
+        "TestCommentDeliveryVerifiedEvidenceAndRetry",
+        "TestNeedsInputCompletesLeaseAndUnblocksNextAssignment"
       ],
       "generated_docs": [
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "bdfee81b21f1ccb01fc2ba9aebea5da0dec43263aefaadc8e4db07a362731e73"
+      "semantic_hash": "673553d708f1de1520ff60b31fdc09331127dd0be49caefeef9fa0786dadef65"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -2438,7 +2565,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e2f5efff1783f96434f6177a611c6b2a62308988aaf9a513d708506dc347aa60"
+      "semantic_hash": "aeb7d765e05a3f48a85f4492e9543bb92b495201f95ebe747ae156f4f4492091"
     },
     {
       "id": "loop_registry_evidence_must_expose_loop_surfaces",
@@ -2474,7 +2601,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "910ef89a38a0bdb3e65468676781efe3fb97188864c1b3c5bdc1a4b93ded7d86"
+      "semantic_hash": "fdc10f07060a2dc13dd5a080d409765f021c6dc4c0dc3b127ee5c76d8f50fcf5"
     },
     {
       "id": "loop_registry_evidence_must_expose_architecture_index",
@@ -2527,7 +2654,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "19afd9e9815c50c51d9071a2de4260ba5e15b78ca852d5930e96abca32c28970"
+      "semantic_hash": "59ca7b65d9c361704c9fc576b853a4890d6561cfc3b3bae29573214c92ffe8fc"
     },
     {
       "id": "loop_registry_impact_must_expose_target_verifier_plan",
@@ -2643,7 +2770,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "04fbcc5b0114b9251a62956173d166f27295859d8494cfd268b076c24a59bce5"
+      "semantic_hash": "6903012d820a8b85c4b8e9038cad23ae145fc3aa119b6cf733f51bb9d784b5e9"
     },
     {
       "id": "loop_coverage_dimensions_must_use_static_registry",
@@ -2697,7 +2824,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c4af2fbcc1c96ea4f19ac92947bb713a4734e0283c16fe3c8e4efdaac92c30be"
+      "semantic_hash": "290740e60dae77b7d87913b305757c8a344fd03d433d3c46e2b638bf0ff7c366"
     },
     {
       "id": "loop_verify_tokens_must_be_claim_covered",
@@ -2887,7 +3014,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e519ee604a412644a2c0f381201d0d3a366c66e3fe942b1608d7a5f6cbb4409f"
+      "semantic_hash": "49e73409f6c5c4690049bc19396fa5af1af17345999ed6c08c65e4bd8beb31a4"
     },
     {
       "id": "claim_verifier_commands_must_surface_as_ci_annotations",
@@ -2931,7 +3058,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "19d513f4d8e687c16cf17d676e853da782430c1d1d9132b3081b36463310441c"
+      "semantic_hash": "9bad703135ffb86d7222d192559f8bf605a96db2b3fbc259e7de43074082de8d"
     },
     {
       "id": "evidence_graph_impact_must_surface_as_ci_annotations",
@@ -2971,7 +3098,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "99a2b109f731e1618b04008dd8ca4bcb6d31e6011c92bf6f4ae62bfe6f90484d"
+      "semantic_hash": "1ea9faa0eaa70cd5ada448f62938bf1ae38c77fbe37a599eb4aa04ce134053e1"
     },
     {
       "id": "claim_meaning_changes_require_code_or_test_surface",
@@ -3020,7 +3147,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "8615345e57fc3e4367c74b22538681a9a0624f7309361132b6f2c37bb836c855"
+      "semantic_hash": "db2148e5c8fd8f36d9d65c7213587218c356412edd23dabd45c4d7dce9fa3563"
     },
     {
       "id": "claim_meaning_changes_require_reasoning_chain",
@@ -3178,7 +3305,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3c09cacba2316a43792c40fc3cd7930e0df1190b0aac3ff12f30825672098cd5"
+      "semantic_hash": "fa1c3bbd9e646a408fde69e29ab3160fa81d0dd9995c8b6d3e360a931ce77ad7"
     },
     {
       "id": "pre_commit_must_run_evidence_graph_impact",
@@ -3217,7 +3344,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "85bd30f035f615812e3f22b63461d28ebaa5206d5d9e51f711c74853b628aac2"
+      "semantic_hash": "c8f2d9cd38c1f36dab6911ab94cbd8f648234357d545f27d745d2cab89416022"
     },
     {
       "id": "pre_commit_baseline_evidence_must_self_expire",
@@ -3367,7 +3494,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "7fefd8747cb4d4f8e7b3b294221454739c7e161511e13eb70f6b41bf8afa935b"
+      "semantic_hash": "8091a2a57b4dae2f388c95278511b6a6fb5c6c05e983c780560208d17a426dc8"
     },
     {
       "id": "evidence_graph_must_cover_loop_registry_claims",
@@ -3413,7 +3540,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "1a79930e4ea77a7ea3a4bc05ff723c615b8486a55bc08b9dcea3e063fd1c0403"
+      "semantic_hash": "ecc593e9ff24b6036a57e281531650d5198b8823fd7c8f4478d876f80a957512"
     },
     {
       "id": "evidence_graph_refs_must_trigger_evidence_workflow",
@@ -3452,7 +3579,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "5f7c619433b4021652fc9f64316649c5f6b3a3433d9ce1bc7ff37a950812a739"
+      "semantic_hash": "e0864d765d66ad6375e114683002c46dd9dc4f4a3bf4530b60c0076eaa718139"
     },
     {
       "id": "evidence_graph_evidence_must_expose_full_chain",
@@ -3495,7 +3622,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "73e108bd5e6fec7f54a44d11f81517f7cb37f8bf6533596d2fc12fdfe37989e6"
+      "semantic_hash": "f20ab09a865bd3a40b04875743c53dd808d87a62614aa9e93ee2b9484c020134"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
@@ -3556,7 +3683,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e93e54636791b05ce275b51a6976f8434ebed384cce31b84b8f9a0c5b893f238"
+      "semantic_hash": "7080491ce2a2a707bb102eef9a9c212df5907ab8b9c307b0de25478c6b21bb15"
     },
     {
       "id": "loop_evidence_artifacts_must_self_expire",
@@ -3608,7 +3735,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "64b48f937836750181cfbf61cb6b9bff5e1ed7c67d712989907fa4f1d5fe4f25"
+      "semantic_hash": "3caff5515abbe1dd1629233849c3a3fe0677a649f7495db6ce4687c2379ccdc2"
     },
     {
       "id": "closed_loop_candidate_evidence_must_self_expire",
@@ -3650,7 +3777,7 @@
         "docs/30-architecture/closed-loop-candidate-intake.md",
         "docs/30-architecture/closed-loop-candidate-decision.md"
       ],
-      "semantic_hash": "1db1aa6bc3870140300dea7a3c6957d53462f7e42d41ded2bc4b1bf7deca2cb1"
+      "semantic_hash": "070b015c5b8fca8fc773d8a4839a89a0198af09d2dbd0c5d2264a2dfbf05b293"
     },
     {
       "id": "closed_loop_candidate_consumers_must_reject_expired_candidates",
@@ -3695,7 +3822,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c7aa2f18258dd7423928181836d4914c543d49755c1406785241226105a60790"
+      "semantic_hash": "da5df5c815f1c168564c613afe144364190c8204bca3011590b933ceb52ed3ae"
     },
     {
       "id": "candidate_intake_must_consume_candidate_artifact",
@@ -3840,7 +3967,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "c12feda5c53866509cfa4e9334ca24639b58f1555da8730df974378b923a6313"
+      "semantic_hash": "a449f9dd174cd9ce821a28c76e48d06518e1536ab5be5ae938fe58bb7d5c0101"
     },
     {
       "id": "loop_registry_evidence_must_expose_refresh_plans",
@@ -3942,7 +4069,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d59c3c7089d59ace432fd3b212eb45b9deef8046432ba2af58fa6278541b86e5"
+      "semantic_hash": "513075350cfba6833c801ac12cf485318848b46dbc197acb321d5d81f40beda1"
     },
     {
       "id": "expired_loop_refresh_commands_must_dispatch_safe_workflows",
@@ -4085,7 +4212,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "4c6c4bcdb24b374c8be0bd5f89f308723166c34fe5864bc7d7862664398e8891"
+      "semantic_hash": "00d28b093ec783c90f7dc9c1dd6e6cfbf5d26fb0041ba5fa46716a428c743b8f"
     },
     {
       "id": "loop_registry_evidence_must_expose_graph_edges",
@@ -4164,7 +4291,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "633a8d98ff375e902bb7dc7c05037bed8bfab9c222b7b91141a223d91b05f95c"
+      "semantic_hash": "a75d6245e27a8994b72465e78b5adb6d100f0332eed6a7844228a758aea50200"
     },
     {
       "id": "candidate_decisions_must_match_consumed_candidates",
@@ -4244,7 +4371,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ef8619af70c567c3ae9d8fc3ea27521717d6ecede5bb57e42cd326baf9341c7e"
+      "semantic_hash": "7625981b6b53ec133661d9d7a856645d72bfe9341492938c49821d7397619899"
     },
     {
       "id": "candidate_decision_next_artifact_must_be_required",
@@ -4290,11 +4417,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "67d449e1be49c28c9d55810d09182b1817125e3ff19bc3495272455827c95c5f"
+      "semantic_hash": "903e500cd6ad64eb6b4c9a524f0b3707fd9e2a6e9fde65cf09f520d862efe590"
     },
     {
       "id": "candidate_decision_evidence_must_expose_next_command",
-      "statement": "Closed-loop candidate decision evidence must expose the owner, priority, disposition, review_by, decision_source, optional decision_template_subject_kind, executable next_command, and decision summary counts for registered decisions, consumed decisions, dispositions, priorities, next artifacts, and decision sources selected from the consumed candidate adoption_plan for the chosen next_artifact; generated docs must expose the stable registered decision summary, and the verifier must export selected commands as loop refresh command evidence while preserving source candidate id, subject kind, and decision provenance through a static refresh-command binding registry for copied, derived, and candidate-subject lookup fields.",
+      "statement": "Closed-loop candidate decision evidence must expose the owner, priority, disposition, review_by, decision_source, optional decision_template_subject_kind, executable next_command, and decision summary counts for registered decisions, consumed decisions, dispositions, priorities, next artifacts, and decision sources selected from the consumed candidate adoption_plan for the chosen next_artifact; generated docs must expose the stable registered decision summary, and the verifier must export selected commands as loop refresh command evidence while preserving source candidate id, subject kind, and decision provenance through a static refresh-command binding registry for copied, derived, and candidate-subject lookup fields. Pending decision renewals must cite an item-level source/evidence review that preserves owner, priority, disposition, and next artifact; the current UTC wall-clock policy and subsequent expiry boundary must both be tested.",
       "loop": "closed_loop_candidate_decision",
       "covers_observes": [
         "closed_loop_candidate_intake_evidence",
@@ -4343,7 +4470,11 @@
         "tools/closedloopcandidatedecision/summary_count.go",
         "tools/closedloopcandidatedecision/summary_count_test.go",
         "tools/closedloopcandidatedecision/types_decision_resolution.go",
-        "tools/closedloopcandidatedecision/types_more.go"
+        "tools/closedloopcandidatedecision/types_more.go",
+        "tools/closedloopcandidatedecision/current_review_types_test.go",
+        "tools/closedloopcandidatedecision/current_review_test.go",
+        "tools/closedloopcandidatedecision/current_review_coverage_test.go",
+        "tools/closedloopcandidatedecision/current_review_boundary_test.go"
       ],
       "verifiers": [
         "TestCandidateDecisionEvidenceBindsNextArtifactCommand",
@@ -4358,14 +4489,17 @@
         "TestRefreshCommandBindingsCoverCommandFields",
         "TestRefreshCommandBindingsPointToArtifactFields",
         "TestRefreshCommandBindingsPreserveValues",
-        "TestCandidateDecisionCommandsOutWritesRefreshEvidence"
+        "TestCandidateDecisionCommandsOutWritesRefreshEvidence",
+        "TestPendingDecisionReviewPassesCurrentWallClock",
+        "TestRenewedReviewStillExpiresDecisionsAndTemplates",
+        "TestRenewedReviewDeadlineUsesUTCDayAtKSTBoundary"
       ],
       "generated_docs": [
         "docs/30-architecture/closed-loop-candidate-decision.md",
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3769cc47b5b450472bd94be6b63bc26fa9cd2be10587552c0ed45d035cb43af7"
+      "semantic_hash": "72b9d14a4a7e5a0ff09de101b184197dfa2fcd3398012f36560235bc097770d0"
     },
     {
       "id": "open_decision_questions_must_bind_owner_next_artifact_and_reader",
@@ -4674,11 +4808,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "556a48d7fa476d179a315780566d22893a4904e92d84102ce7bd8d688b40e9dc"
+      "semantic_hash": "febadf67c7340c149f4e7c7333bbeda13db33af1ba8613b4e2bfcf7f909fbb44"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",
-      "statement": "The public container image contract must bind Dockerfile parsing, required contract fields, build cache mounts, final image entrypoint, exposed port, non-root user, optional Fargate task IR checks, and module-decomposition ratchets to code, tests, and generated evidence so the runtime artifact shape cannot drift by prose or memory.",
+      "statement": "The public container image contract must bind Dockerfile parsing, required contract fields, build cache mounts, final image entrypoint, exposed port, non-root user, optional Fargate task IR checks, and module-decomposition ratchets to code, tests, and generated evidence so the runtime artifact shape cannot drift by prose or memory. The source SHA supplied by the runtime workflow must reach the binary through its build argument and linker symbol so trace attribution follows the immutable build source.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "regression_pattern",
@@ -4719,7 +4853,8 @@
         "tools/containercontract/verify.go",
         "tools/containercontract/verify_build_stage.go",
         "tools/containercontract/verify_more.go",
-        "tools/containercontract/verify_test.go"
+        "tools/containercontract/verify_test.go",
+        "tools/containercontract/source_revision_test.go"
       ],
       "verifiers": [
         "TestContainerContractBehaviorGolden",
@@ -4727,7 +4862,8 @@
         "TestRunWritesEvidenceOutJSON",
         "TestVerifyContractPassesWithoutPrivateInfraIR",
         "TestVerifyContractPassesAndChecksOptionalTaskIR",
-        "TestVerifyContractRejectsRootUser"
+        "TestVerifyContractRejectsRootUser",
+        "TestRuntimeImageBuildBindsTraceVersionToWorkflowSource"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md",
@@ -4735,7 +4871,7 @@
         "docs/30-architecture/module-decomposition.md",
         "docs/30-architecture/integration-matrix.md"
       ],
-      "semantic_hash": "215bd4af4a819ef0873e44878a33701d5b6dbb3bbded53b2e5b705c62e4f3fb6"
+      "semantic_hash": "9339706fe8f0eef830fa45510f76174658c522fc422380533c97451ad724968f"
     },
     {
       "id": "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
@@ -4803,11 +4939,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "0b74be7a54dc6ba28b2519d4715d91b210054b08cb88aa5467a4d19369ea4220"
+      "semantic_hash": "a1d3538385a3e9b09e7435b706c7cc4675fd161b93862eaf99ddd06b4304175a"
     },
     {
       "id": "server_route_handlers_must_stay_semantically_split",
-      "statement": "HTTP route handlers must remain split by client bootstrap, AI Agent assignment, thread-message, SSE stream, daemon agent, component-task, progress-ingest, and provider-status concepts, and top-level route registration must stay data-driven through a verified static route registry, so endpoint behavior is preserved while agents can inspect one route surface without loading the full server entrypoint.",
+      "statement": "HTTP route handlers must remain split by client bootstrap, AI Agent assignment, thread-message, SSE stream, daemon agent, component-task, progress-ingest, and provider-status concepts, and top-level route registration must stay data-driven through a verified static route registry, so endpoint behavior is preserved while agents can inspect one route surface without loading the full server entrypoint. Shared projection error responses preserve private408/504/502 classification and bounded diagnostics on legacy/v3 handlers without changing successful payloads.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "regression_pattern",
@@ -4881,7 +5017,9 @@
         "internal/riidoaiserver/ai_agent_client_http_delete_error_helpers_test.go",
         "internal/riidoaiserver/ai_agent_client_http_workspace_agent_stop_error_test.go",
         "internal/riidoaiserver/http_route_core_test.go",
-        "internal/riidoaiserver/http_route_ai_agent_v1_test.go"
+        "internal/riidoaiserver/http_route_ai_agent_v1_test.go",
+        "internal/riidoaiserver/thread_projection_error_response.go",
+        "internal/riidoaiserver/ai_agent_client_projection_error_privacy_test.go"
       ],
       "verifiers": [
         "TestTargetVerifierSummaryUsesImpactPlan",
@@ -4910,14 +5048,15 @@
         "TestHTTPAIAgentClientDeleteErrors",
         "TestHTTPAIAgentClientWorkspaceAgentStopErrors",
         "TestTraceHTTPRouteClassifiesV1AIAgentClientRoutes",
-        "TestAIAgentClientV1RouteRejectsNonAIAgentClientPaths"
+        "TestAIAgentClientV1RouteRejectsNonAIAgentClientPaths",
+        "TestLegacyClientProjectionErrorsArePrivateAndTyped"
       ],
       "generated_docs": [
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "f9d3d6a80ddca75c75dbb07bb0ff07dfb83c4ef3964e187741531ec3aead5148"
+      "semantic_hash": "a03dcbb5c75c81b3b3e953ed7722984e8e9e0006cf23792da52529e75245b6ea"
     },
     {
       "id": "public_aws_adapter_facade_must_preserve_contract",
@@ -4965,7 +5104,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c76a840b03cb52ccb04b8a6d69e753dff8cccbda96c573ceee46d1387d064ed4"
+      "semantic_hash": "1a0da3d72d4099c07f83856e609c817089f2ae41736ea557fd3902866c9162c5"
     },
     {
       "id": "review_account_seed_must_preserve_redacted_seed_evidence",
@@ -5039,11 +5178,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "583af3da33cdf2acc006262995e17ee196c7494be128041c9b6d3fbe48ee07b5"
+      "semantic_hash": "03125bb3886639f2cb181aab127006c9f4f0e4a569f3dd12cd56a32524ee91d2"
     },
     {
       "id": "runtime_adapter_config_must_preserve_public_env_contract",
-      "statement": "The riido_ai_server runtime adapter configuration must preserve its public environment-variable contract for address, shutdown timing, observability, tracing, web origins, long-poll timing, and AI Agent client development mode while syntax hash graphing expands only after the runtime config behavior golden is locked.",
+      "statement": "The riido_ai_server runtime adapter configuration must preserve its public environment-variable contract for address, shutdown timing, observability, tracing, web origins, long-poll timing, and AI Agent client development mode while syntax hash graphing expands only after the runtime config behavior golden is locked. Tracing rejects non-finite sampling ratios and attributes spans to a validated embedded source revision through service.version; invalid, dirty or unversioned builds report unknown. A separate private monolith GraphQL endpoint must serve Agent Records metadata and onboarding provenance with the same viewer Bearer scope while existing REST context/document endpoints, default fallback, timeout and redirect policy remain unchanged.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "regression_pattern",
@@ -5134,7 +5273,16 @@
         "cmd/riido_ai_server/tracing_span.go",
         "cmd/riido_ai_server/tracing_test.go",
         "cmd/riido_ai_server/web_origin_config.go",
-        "cmd/riido_ai_server/web_origin_normalize.go"
+        "cmd/riido_ai_server/web_origin_normalize.go",
+        "cmd/riido_ai_server/tracing_resource.go",
+        "cmd/riido_ai_server/tracing_resource_test.go",
+        "cmd/riido_ai_server/tracing_sample_ratio_finite_test.go",
+        "cmd/riido_ai_server/agent_dashboard_endpoint_test.go",
+        "cmd/riido_ai_server/onboarding_graphql_endpoint_test.go",
+        "internal/riidoaiserver/ai_agent_private_task_context_config.go",
+        "internal/riidoaiserver/ai_agent_private_task_context_config_test.go",
+        "internal/riidoaiserver/agent_dashboard_task_context.go",
+        "internal/riidoaiserver/ai_agent_task_context_client.go"
       ],
       "verifiers": [
         "TestRuntimeConfigBehaviorGolden",
@@ -5150,15 +5298,23 @@
         "TestEnvOptionalBoolParsesAcceptedValues",
         "TestParseAuthzTokensJSONBlankAndValid",
         "TestProfileThumbnailUploadRejectsPartialConfig",
-        "TestTracingConfigAllowsSampleRatioBoundaries"
+        "TestTracingConfigAllowsSampleRatioBoundaries",
+        "TestTracingConfigRejectsNonFiniteSampleRatio",
+        "TestTracingSourceRevisionRejectsUnboundedOrDirtyValues",
+        "TestTraceExporterCarriesBuiltSourceInServiceVersion",
+        "TestAgentDashboardUsesSeparateGraphQLEndpoint",
+        "TestOnboardingProvenanceUsesSeparateGraphQLEndpoint",
+        "TestPrivateTaskContextGraphQLEndpointValidation"
       ],
       "generated_docs": [
         "docs/20-domain/context-map.md",
         "docs/20-domain/saas-control-plane.md",
         "docs/30-architecture/syntax-hash.md",
-        "docs/30-architecture/loop-registry.md"
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/config-reference.md",
+        "docs/30-architecture/agent-task-context.md"
       ],
-      "semantic_hash": "b3f8e8befa39e619fe5820aca6bc2ef61aa5d5c60dad3c69f71ebd13c8ac8f22"
+      "semantic_hash": "558f7c1e6835045f00e4955e0b8866954323fd0db6be0b2901e032e22be270a6"
     },
     {
       "id": "repo_identity_must_anchor_public_module_boundary",
@@ -5192,7 +5348,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "22919b0eaf0ba776ba7d30b10344f64bc2376920d7bb0bdb00ad15da491dcaf4"
+      "semantic_hash": "6c2984702b39ab4d349b3aecbcb55afe18badca00187550fc8d9b76678a5a0ef"
     },
     {
       "id": "shared_contract_compat_must_preserve_generated_contract_surface",
@@ -5240,11 +5396,11 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "0212526a145b61e92b67a3b7324f210a65889cc5589c48eebb8534b6c1e0dde1"
+      "semantic_hash": "2aa8900a0da368b93b0ca2925e61a216cd7f6e930f7b740bfc178f5f093ace89"
     },
     {
       "id": "request_authorization_must_preserve_security_boundary",
-      "statement": "The request authorization SSOT and verifier must preserve static token, device principal, explicit legacy_v1 and auth_service_v2 provider ownership, issuer-routed dual authentication, resource/profile-bound Auth JWT, exact ES256 JWKS caching, introspection, Auth-issuer no-downgrade, foreign-issuer legacy fallback, consumer domain PDP, external authorizer, coalescing, CORS, token transport, runtime config, and fail-closed security semantics.",
+      "statement": "The request authorization SSOT and verifier must preserve static token, device principal, explicit legacy_v1 and auth_service_v2 provider ownership, issuer-routed dual authentication, resource/profile-bound Auth JWT, exact ES256 JWKS caching, introspection, Auth-issuer no-downgrade, foreign-issuer legacy fallback, consumer domain PDP, external authorizer, coalescing, CORS, token transport, runtime config, and fail-closed security semantics. External authorization diagnostics expose only bounded typed failure kind, invalid-response classification and numeric upstream status; Unwrap preserves existing cancellation/deadline and401/403 sentinels. Generic503responses never reflect upstream URL/schema/error material; authorization decisions, timeout and retry behavior remain unchanged. Denied-request logs may expose only finite token source/shape/unverified-expiry/header-relation hints, with bounded parsing and no raw credential, hash, claim value or path identity; these hints never authorize, change header precedence, retry or renew credentials. In-flight coalescing isolates each caller cancellation, retains shared work only while waiters remain, preserves provider timeout and no-retry/no-TTL behavior, and fences late abandoned completion by call identity. Shared panics fail closed without exposing details. Finite HTTP phases and observed elapsed milestones distinguish connection/DNS/TCP/TLS/write/headers/body without addresses, hosts, payload or errors; unobserved timings remain -1 and losing parallel dial callbacks cannot regress response phase. Timeout and retry budgets remain unchanged; historical root cause remains unconfirmed.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "regression_pattern",
@@ -5270,32 +5426,63 @@
         "cmd/riido_ai_server/authorizer_config_test.go",
         "cmd/riido_ai_server/authorizer_scheme.go",
         "cmd/riido_ai_server/env_names.go",
-        "docs/20-domain/request-authorization.riido.json",
         "docs/20-domain/request-authorization.md",
-        "docs/30-architecture/config-reference.riido.json",
+        "docs/20-domain/request-authorization.riido.json",
         "docs/30-architecture/config-reference.md",
-        "docs/50-roadmap/open-questions.riido.json",
-        "docs/50-roadmap/open-questions.md",
-        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/30-architecture/config-reference.riido.json",
         "docs/30-architecture/syntax-hash.md",
-        "internal/riidoaiserver/authorization.go",
-        "internal/riidoaiserver/authorization_scheme.go",
-        "internal/riidoaiserver/authorization_scheme_test.go",
+        "docs/30-architecture/syntax-hash.riido.json",
+        "docs/50-roadmap/open-questions.md",
+        "docs/50-roadmap/open-questions.riido.json",
+        "internal/authpep/authorization_jwks_http.go",
+        "internal/authpep/authorization_jwks_http_test.go",
         "internal/authpep/authorization_jwt.go",
         "internal/authpep/authorization_jwt_routing.go",
         "internal/authpep/authorization_jwt_routing_test.go",
         "internal/authpep/authorization_jwt_test.go",
         "internal/authpep/authorization_scheme_selector.go",
         "internal/authpep/authorization_scheme_selector_test.go",
-        "internal/authpep/authorization_jwks_http.go",
-        "internal/authpep/authorization_jwks_http_test.go",
         "internal/authpep/domain_aliases.go",
         "internal/authpep/introspection_http.go",
         "internal/authpep/introspection_http_test.go",
+        "internal/riidoaiserver/authorization.go",
+        "internal/riidoaiserver/authorization_coalescing.go",
+        "internal/riidoaiserver/authorization_coalescing_context_test.go",
+        "internal/riidoaiserver/authorization_coalescing_http_test.go",
+        "internal/riidoaiserver/authorization_coalescing_key.go",
+        "internal/riidoaiserver/authorization_coalescing_lifecycle.go",
+        "internal/riidoaiserver/authorization_coalescing_lifecycle_test.go",
+        "internal/riidoaiserver/authorization_coalescing_owner_cancel_test.go",
+        "internal/riidoaiserver/authorization_coalescing_result.go",
+        "internal/riidoaiserver/authorization_coalescing_result_test.go",
+        "internal/riidoaiserver/authorization_coalescing_run.go",
+        "internal/riidoaiserver/authorization_coalescing_test.go",
+        "internal/riidoaiserver/authorization_coalescing_test_helpers.go",
+        "internal/riidoaiserver/authorization_coalescing_timeout_test.go",
+        "internal/riidoaiserver/authorization_dependency_response_test.go",
+        "internal/riidoaiserver/authorization_jwt_payload_observation.go",
+        "internal/riidoaiserver/authorization_scheme.go",
+        "internal/riidoaiserver/authorization_scheme_test.go",
+        "internal/riidoaiserver/authorization_token_observation.go",
+        "internal/riidoaiserver/authorization_token_observation_bounds_test.go",
+        "internal/riidoaiserver/authorization_token_observation_test.go",
+        "internal/riidoaiserver/external_authorizer.go",
+        "internal/riidoaiserver/external_authorizer_canary_fixture_test.go",
+        "internal/riidoaiserver/external_authorizer_failure.go",
+        "internal/riidoaiserver/external_authorizer_failure_privacy_test.go",
+        "internal/riidoaiserver/external_authorizer_failure_semantics_test.go",
+        "internal/riidoaiserver/external_authorizer_http_callbacks_test.go",
+        "internal/riidoaiserver/external_authorizer_http_observation.go",
+        "internal/riidoaiserver/external_authorizer_http_observation_test.go",
+        "internal/riidoaiserver/external_authorizer_http_reuse_test.go",
+        "internal/riidoaiserver/external_authorizer_http_trace.go",
+        "internal/riidoaiserver/external_authorizer_observation.go",
+        "internal/riidoaiserver/external_authorizer_outcome.go",
+        "internal/riidoaiserver/request_failure_observation.go",
         "internal/riidoaiserver/server_authorization_http.go",
         "tools/requestauth/constants.go",
-        "tools/requestauth/constants_auth_scheme.go",
         "tools/requestauth/constants_auth_jwt.go",
+        "tools/requestauth/constants_auth_scheme.go",
         "tools/requestauth/evidence.go",
         "tools/requestauth/io.go",
         "tools/requestauth/main.go",
@@ -5328,14 +5515,30 @@
         "TestHTTPJWKSProviderRejectsAlgorithmCoordinateAndCacheDrift",
         "TestHTTPIntrospectionStatusResolverBindsClientPathBodyAndProfile",
         "TestHTTPIntrospectionStatusResolverFailsClosedOnUntrustedResponse",
-        "TestHTTPIntrospectionStatusResolverRejectsRedirectAndDoesNotLeakSecrets"
+        "TestHTTPIntrospectionStatusResolverRejectsRedirectAndDoesNotLeakSecrets",
+        "TestExternalAuthorizerFailureDiagnosticsAreTypedBoundedAndPrivate",
+        "TestExternalAuthorizerTypedFailurePreservesCancellationDeadlineAndDenial",
+        "TestExternalAuthorizerDiagnosticAllowlistRejectsInjectedValues",
+        "TestAuthorizationDependencyResponseIsPrivateAndPreservesStatus",
+        "TestAuthorizationDenialLogsFiniteTokenHintsWithoutChangingDecision",
+        "TestAuthorizationTokenDiagnosticsBoundUntrustedInput",
+        "TestCoalescingAuthorizerOwnerCancelDoesNotCancelLiveWaiter",
+        "TestCoalescingAuthorizerLastWaiterCancelsAndLateFinishCannotEvictNewCall",
+        "TestCoalescingAuthorizerPanicReleasesWaitersWithoutDetails",
+        "TestHTTPSharedAuthorizationSurvivesFirstClientDisconnect",
+        "TestCoalescingAuthorizerKeepsExternalTimeoutAndSingleAttempt",
+        "TestCoalescingAuthorizationCancelledWaiterCannotConsumeReadySuccess",
+        "TestCoalescingAuthorizerPreservesValuesAndDoesNotCacheCompletedResults",
+        "TestExternalHTTPAuthorizerDistinguishesHeaderAndBodyDeadline",
+        "TestExternalHTTPAuthorizerObservesReusedConnection",
+        "TestExternalAuthorizerHTTPCallbacksArePrivateAndConcurrent"
       ],
       "generated_docs": [
         "docs/20-domain/request-authorization.md",
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3ed6d0b566ea7136e4aca38d9648938ac00a959be4e0633c21df082ed1f1d5d2"
+      "semantic_hash": "7acd5bc50b1413278595a712c88e8407ba1d0ad965b6a2de08006c5148109023"
     },
     {
       "id": "health_ready_command_must_preserve_public_runtime_probe",
@@ -5391,7 +5594,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "f696b5841178f27cdfe5c0ba62f3bdd3f11152c77b69a83d3d537c14350d8604"
+      "semantic_hash": "75db50769a747efae8078806b63e5119a7f4153d4565b820a7a19e28ea891c8c"
     },
     {
       "id": "runtime_deployment_boundary_must_preserve_public_private_ownership",
@@ -5464,7 +5667,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3f3c4c09188da856da13903845650452c18ea86c64936c117b7ab5a20bb96ba7"
+      "semantic_hash": "41ff6f341ccdf1f05b36728154a36e4b31c520ce168f5a79d5e8a0b830c971c5"
     },
     {
       "id": "config_reference_must_preserve_env_manifest_parity",
@@ -5535,7 +5738,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "998a36deadd363b484777b923bf36e48ab7a846b98e1103ef3763c82b4b39223"
+      "semantic_hash": "5a6a918d7e9000334789993cd8b6aac58e2548df27571a788d74b34274beee7b"
     },
     {
       "id": "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
@@ -5592,11 +5795,11 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "eb09a4b732a2703cffb0058f1999d26f19c6b7acac0e9775d9d2ef35fd440b62"
+      "semantic_hash": "384933686762873a8415896b006aa6ea424a371366d08b315aed2685907344fe"
     },
     {
       "id": "assignment_operation_journal_must_preserve_replay_and_claim_ports",
-      "statement": "The assignment operation journal SSOT and verifier must preserve required assignment operation ports, projection and active lease records, replay ordering and dedupe rules, version constants, source anchors, generated reader freshness, and focused evidence counts so agents cannot infer durable assignment replay behavior from prose or collapse claim, lease, projection, and replay semantics into unchecked code movement.",
+      "statement": "The assignment operation journal SSOT and verifier must preserve required assignment operation ports, projection and active lease records, replay ordering and dedupe rules, version constants, source anchors, generated reader freshness, and focused evidence counts so agents cannot infer durable assignment replay behavior from prose or collapse claim, lease, projection, and replay semantics into unchecked code movement. RIID-5823 recovery policies remain finite, independently copied and immutable per RequestID; fallback authority is verified from the same owner/device/daemon healthy model inventory. Recovery journal events require current execution/lease/event-key fences, redact lease tokens and raw messages, and emit one observation only after a successful conditional commit. A private projection watermark retains at most sixteen hashed recovery receipts, CAS-preserved across replicas and legacy repairs, so delayed retries echo their original ACK without duplicating observations or rolling the latest context backwards. Only the selected fallback is rechecked before checking/switching; final diagnostics do not require a new healthy probe. Only committed execution failures create an ERROR child span for error-tail retention, excluding cancellation and needs_input; its provider attribute refers to the original assignment lease, while the recovery journal identifies any actual fallback provider. Event dependency failures retain retryable 503/504/408 semantics with safe messages. Legacy single-authority events use copy-on-write and publish only after persistence; non-projection dual-store configuration fails before either non-atomic write. Stale active-lease lookup has a two-second total deadline so a blocking dependency cannot hold the assignment actor indefinitely.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "regression_pattern",
@@ -5634,13 +5837,82 @@
         "tools/assignmentjournal/run.go",
         "tools/assignmentjournal/verify.go",
         "tools/assignmentjournal/verify_domain.go",
-        "tools/assignmentjournal/verify_source.go"
+        "tools/assignmentjournal/verify_source.go",
+        "internal/riidoaiserver/provider_recovery_policy.go",
+        "internal/riidoaiserver/provider_recovery_policy_test.go",
+        "internal/riidoaiserver/provider_recovery_event.go",
+        "internal/riidoaiserver/provider_recovery_event_test.go",
+        "internal/riidoaiserver/provider_recovery_observation.go",
+        "internal/riidoaiserver/durable_assignment_mutation.go",
+        "internal/riidoaiserver/durable_assignment_mutation_test.go",
+        "internal/riidoaiserver/provider_recovery_policy_storage_test.go",
+        "internal/riidoaiserver/provider_recovery_generic_test.go",
+        "internal/riidoaiserver/provider_recovery_event_fence_test.go",
+        "internal/riidoaiserver/durable_assignment_failure_observation_test.go",
+        "internal/riidoaiserver/task_request_receipt_lookup.go",
+        "internal/riidoaiserver/provider_recovery_candidate_fence.go",
+        "internal/riidoaiserver/provider_recovery_candidate_fence_test.go",
+        "internal/riidoaiserver/provider_recovery_terminal_http_test.go",
+        "internal/riidoaiserver/committed_event_observation.go",
+        "internal/riidoaiserver/provider_recovery_candidate_liveness_test.go",
+        "internal/riidoaiserver/provider_recovery_replica_test.go",
+        "internal/riidoaiserver/provider_recovery_watermark.go",
+        "internal/riidoaiserver/provider_recovery_watermark_check.go",
+        "internal/riidoaiserver/provider_recovery_watermark_decode.go",
+        "internal/riidoaiserver/provider_recovery_watermark_test.go",
+        "internal/riidoaiserver/dynamodb_assignment_projection_recovery.go",
+        "internal/riidoaiserver/dynamodb_assignment_recovery_preserve_test.go",
+        "internal/riidoaiserver/dynamodb_assignment_projection_item.go",
+        "internal/riidoaiserver/dynamodb_assignment_projection_decode.go",
+        "internal/riidoaiserver/dynamodb_assignment_operation_store_schema.go",
+        "internal/riidoaiserver/store_type.go",
+        "internal/riidoaiserver/store_handle_event.go",
+        "internal/riidoaiserver/store.go",
+        "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go",
+        "internal/riidoaiserver/committed_assignment_failure_trace.go",
+        "internal/riidoaiserver/committed_assignment_failure_trace_test.go",
+        "internal/riidoaiserver/assignment_dependency_error.go",
+        "internal/riidoaiserver/agent_event_dependency_http_test.go",
+        "internal/riidoaiserver/store_event_legacy_commit.go",
+        "internal/riidoaiserver/legacy_agent_event_commit_test.go",
+        "internal/riidoaiserver/store_event_api.go",
+        "internal/riidoaiserver/store_event_append.go",
+        "internal/riidoaiserver/store_event_replay.go",
+        "internal/riidoaiserver/legacy_agent_event_fixture_test.go",
+        "internal/riidoaiserver/legacy_ready_snapshot_commit_test.go",
+        "internal/riidoaiserver/agent_event_dependency_target_validation_test.go",
+        "internal/riidoaiserver/ready_active_lease_dependency_test.go",
+        "internal/riidoaiserver/store_assignment_lease.go",
+        "internal/riidoaiserver/ready_active_lease_deadline_test.go"
       ],
       "verifiers": [
         "TestAssignmentJournalBehaviorGolden",
         "TestGeneratedDocMatchesManifest",
         "TestAssignmentOperationRecordValidation",
-        "TestAssignmentOperationReplayOrdersAndDedupesEvents"
+        "TestAssignmentOperationReplayOrdersAndDedupesEvents",
+        "TestRecoveryPolicyRequiresOwnedSameDeviceHealthyModelInventory",
+        "TestRecoveryPolicyPersistedCopiedAndRequestCannotChangeAuthority",
+        "TestRecoveryEventFencedSanitizedPersistedAndObservedOnce",
+        "TestRecoveryEventRejectsMissingLeaseUnauthorizedSwitchAndInvalidState",
+        "TestDurableFailureLogsOnlyCommittedTransition",
+        "TestGenericAssignmentCannotBypassRecoveryInventoryAuthorization",
+        "TestRecoveryPhaseDoesNotProjectIntoAnotherTaskRun",
+        "TestRecoveryCandidateFenceRechecksHealthBeforeDispatch",
+        "TestRecoveryJournalThenTerminalHTTPPreservesTaskCompletion",
+        "TestRejectedNonConditionalFailureWriteDoesNotLogCommit",
+        "TestRecoveryCandidateChecksOnlySelectedProviderBeforeDispatch",
+        "TestRecoveryJournalDeduplicatesAcrossReplicasAndOldRetries",
+        "TestRecoveryWatermarkRoundtripBoundAndPublicIsolation",
+        "TestDynamoDBRecoveryWatermarkSurvivesLegacyTerminalRepair",
+        "TestCommittedAssignmentFailureTracePreservesOnlyDurableFailures",
+        "TestReadyPersistenceFailureReturnsRetryableStatusAndSameKeyCommitsOnce",
+        "TestAgentEventDependencyClassificationPreservesAuthorizationAndConflict",
+        "TestAgentEventMissingTargetStaysValidationBeforeDependencyLookup",
+        "TestLegacyReadySnapshotFailureDoesNotCommitReceiptStateOrPublication",
+        "TestLegacyReadyOperationFailureRetriesPersistenceWithoutFalseACK",
+        "TestLegacyDualStorageFailsClosedBeforeEitherNonAtomicWrite",
+        "TestReadyActiveLeaseReadFailureKeepsRetryableStatusAndNoACK",
+        "TestReadyActiveLeaseReadHasBoundedActorWaitAndSameKeyRetry"
       ],
       "generated_docs": [
         "docs/20-domain/assignment-operation-journal.md",
@@ -5648,7 +5920,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "de9adb213bb22cdb8dedfb181982255ed84567f816d97c199a5e6d778d40328d"
+      "semantic_hash": "7f55745c6285638307461ab2834a9b48a3dddc1dc10c8540993d000347bb38a3"
     },
     {
       "id": "cloudwatch_emf_shape_must_preserve_metric_scope_evidence",
@@ -5714,7 +5986,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "425ce324826dcd175c1bfe9a712c7bb3ce5c85b99e1390af3c007d18009f4043"
+      "semantic_hash": "eab9b3bb998b9e45910a9706fb234de1abc1afa8752a4b5717f5d4701c3df261"
     },
     {
       "id": "saas_control_plane_boundaries_must_remain_executable",
@@ -5769,7 +6041,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "47503abca2e385ed15e0ea2bd1070f31598d881f6dc1fee5577e05f0abcb4cc2"
+      "semantic_hash": "b296142006614eca35cce88e82d9ef1ddb56720a817a81d7450122fb28f7dc36"
     },
     {
       "id": "snapshot_cqrs_gate_must_scope_store_split_decisions",
@@ -5817,7 +6089,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "ca366f90fa1a3e572e275e080a3985c3353d66fd2699a4caef72c502f062fa2a"
+      "semantic_hash": "bbeb3b6aef3dfeeea66fe94c27296933ab7d8f26a440bf2fd84a733547a2eda6"
     },
     {
       "id": "store_safe_routing_must_preserve_provider_status_decisions",
@@ -5903,7 +6175,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "7633bd3eac12a39eb8b7bece7d31aabc8f77dc45a1eab54554839127e83e8ff6"
+      "semantic_hash": "167d1b7ffd42ceefa11df18221cb27cbc24ffcbf315883d76eb0be70d1f69c66"
     },
     {
       "id": "go_ci_baseline_must_preserve_broad_ci_contract",
@@ -5956,7 +6228,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "d4baa43b8a3d877a3684cbb7e9ea5b9bd7ebb459fdeacfeb8e9d42c8cfdd20c2"
+      "semantic_hash": "c2f64d36a46907b9803f655b90dfbc7066fe54bed099ee2f4fdfd1539f29645a"
     },
     {
       "id": "module_decomposition_must_preserve_surface_area_ratchet",
@@ -6046,7 +6318,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "69003773c04996742b39528955499c3b9d9c11532ef76432b6fbd6cadc0eda0f"
+      "semantic_hash": "83f59f019f59a613fa2ea256cbb6442f4cf39640d2f6f5d586b6de2a49e2e54f"
     },
     {
       "id": "web_frontend_api_must_preserve_cors_contract",
@@ -6102,7 +6374,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c56ba5f75e7978fc6f1b431b8e5febdec8509ce66d5817e358c573389efa98de"
+      "semantic_hash": "6324ede52de64ef629c42ca6186a83bfa8a9abd090a87e0a4637b8f381ff516f"
     },
     {
       "id": "ai_agent_risk_evidence_must_preserve_boundary_manifest",
@@ -6157,7 +6429,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "b4e8b282953588429e26dcc0778ff79c11f47f8a2f4f12949ef41470e69844a9"
+      "semantic_hash": "3e07bf3d9e2772d38e2d18e267fc67790fef02de6f53f221a5a3577fc49aac52"
     },
     {
       "id": "migration_ledger_must_preserve_historical_evidence",
@@ -6211,11 +6483,11 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "2a22ee7ca63f039ae882f83aaf38a7f45382d6dd9439fb61e0002b32345215d5"
+      "semantic_hash": "f2f43a0c59d1130e4f24be3271e0b055cc615fa938e6d4885c0c4e3df6d9bfaf"
     },
     {
       "id": "metrics_http_adapter_must_preserve_public_metrics_contract",
-      "statement": "The metrics HTTP adapter SSOT and verifier must preserve the GET /metrics public route, scoped authorization result, fail-closed missing-scope and store-unconfigured statuses, required metrics JSON fields, source anchors, generated reader freshness, and focused workflow evidence so agents cannot infer observability contract shape from prose or expose runtime counters without the executable adapter test.",
+      "statement": "The metrics HTTP adapter SSOT and verifier must preserve the GET /metrics public route, scoped authorization result, fail-closed missing-scope and store-unconfigured statuses, required metrics JSON fields, source anchors, generated reader freshness, and focused workflow evidence so agents cannot infer observability contract shape from prose or expose runtime counters without the executable adapter test. SSE connection lifetimes remain counted as requests but are excluded from aggregate request latency and retained as duration_kind=stream_lifetime per-route observations. Intentional daemon poll_wait and SSE stream_lifetime durations remain separate from ordinary request latency and from each other without losing request counts.",
       "loop": "closed_loop_candidate",
       "covers_observes": [
         "regression_pattern",
@@ -6258,14 +6530,25 @@
         "tools/metricshttpadapter/sourcechecks/verify.go",
         "tools/metricshttpadapter/statuscheck/verify.go",
         "tools/metricshttpadapter/verify.go",
-        "tools/metricshttpadapter/verify_doc.go"
+        "tools/metricshttpadapter/verify_doc.go",
+        "internal/riidoaiserver/http_transaction_metrics_stream_test.go",
+        "internal/riidoaiserver/http_transaction_metrics_observe.go",
+        "internal/riidoaiserver/http_transaction_metrics_state.go",
+        "internal/riidoaiserver/http_transaction_metrics_types.go",
+        "internal/riidoaiserver/http_transaction_metrics_poll_wait_test.go",
+        "internal/riidoaiserver/http_transaction_metrics_duration_kind_test.go",
+        "internal/riidoaiserver/http_transaction_metrics_sort.go"
       ],
       "verifiers": [
         "TestMetricsHTTPAdapterBehaviorGolden",
         "TestGeneratedDocMatchesManifest",
         "TestHTTPMetricsReturnsAssignmentSnapshot",
         "TestHTTPMetricsRequiresScopedAuthorization",
-        "TestHTTPMetricsStoreNotConfiguredFailsClosed"
+        "TestHTTPMetricsStoreNotConfiguredFailsClosed",
+        "TestHTTPStreamLifetimeDoesNotInflateRequestLatency",
+        "TestHTTPMiddlewareClassifiesSSEFromResponseContentType",
+        "TestDaemonPollWaitDoesNotInflateInteractiveRequestLatency",
+        "TestHTTPTransactionDurationKindsDoNotMergeForSameRouteAndStatus"
       ],
       "generated_docs": [
         "docs/30-architecture/metrics-http-adapter.md",
@@ -6273,7 +6556,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "d243d97a3c31692a2613cbcf8f57019a56f5b23a9b5b6255edf461a4f4510ac8"
+      "semantic_hash": "01c94b7c3604fa716de754edc6b604c8d02cf99d2e9763c46d8adba16197714c"
     },
     {
       "id": "agent_catalog_rbac_must_preserve_catalog_authorization_contract",
@@ -6361,7 +6644,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e4e52b6d648da5a83edf863747cd965bfd43452779515560b738644c7d60854a"
+      "semantic_hash": "274852043398cee68ca8fb36f75c78352c4bdc009f4b8251a7d700d26a8ec4fa"
     },
     {
       "id": "integration_matrix_must_preserve_public_private_boundary",
@@ -6416,7 +6699,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "db1cca725e47661b5e6e96a9b354ce3b3d686112da97e1e5128eea21635b9199"
+      "semantic_hash": "d68396d7d929f2296a7fb4ba3807ca3f9ef3f90a6a3814465fdb4163455895e5"
     },
     {
       "id": "context_map_must_guard_public_boundaries",
@@ -6498,7 +6781,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "f4804ec41cb0f3d572536fce6b2dc65d7dd21c2c77b498968e05b17b70326df5"
+      "semantic_hash": "ee79d5168206404e4ef248327a3da694908c769e7583cc5105b01299143c94c9"
     },
     {
       "id": "api_client_delivery_must_preserve_generated_handoff_boundary",
@@ -6597,7 +6880,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "6a7b6dce41248d928e805dd7282dad2c1ee47183493b112118d38738702f3ef7"
+      "semantic_hash": "c54f0a3e6b0e3399ef297253c3af60a59f37fd3c7bde4711c2b883ec834a68e8"
     },
     {
       "id": "react_query_generator_must_preserve_generated_client_surface",
@@ -6735,7 +7018,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "544be2fb3ab85963a3488e48024fe8d149428040ca05a5f416131db50b26d54e"
+      "semantic_hash": "56950440921b240f6f56291d00c84e62a39ecc63e9a39aa39b5a6391befea51b"
     },
     {
       "id": "device_client_status_must_distinguish_install_update_and_ready",
@@ -6775,7 +7058,205 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "be6e38044d88e288f87feec8642443b687eb42903c40cbe98930733b1609c21f"
+      "semantic_hash": "68b58e46ea2b11242d39fc244220613a744e3005f2dfd19ac458b598469729d8"
+    },
+    {
+      "id": "onboarding_completion_must_be_durable_and_idempotent",
+      "statement": "Onboarding completion requires the owned fixture agent and matching viewer bundle, creates no execution, commits one-time state and scoped receipts before SSE delivery, survives stale ordinary replica writes, and clears incarnation state on agent deletion while retaining historical comments. Fixture Agent creation accepts an optional principal/workspace/operation scoped request_id, binds the full fixture/configuration fingerprint and original Agent incarnation to a private bounded 24-hour receipt, and atomically commits AGENTS/receipt/CURRENT before publication. Identical retries return the same Agent with 201; changed payload, deleted or reused identity returns 409. Separate intents without a key remain independent. Fresh CAS retries and ordinary cached writers preserve other committed profiles and receipts; uncertain commits require exact durable readback or a fresh-read fence.",
+      "loop": "ai_thread_history",
+      "covers_observes": [
+        "onboarding_completion_record"
+      ],
+      "covers_verifies": [
+        "onboarding_completion_durable_idempotency"
+      ],
+      "covers_fails_when": [
+        "semantic_drift",
+        "evidence_missing"
+      ],
+      "files": [
+        "internal/riidoaiserver/ai_agent_client_development_method_complete_onboarding_task.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_complete_onboarding_task.go",
+        "internal/riidoaiserver/ai_agent_onboarding_completion_guard.go",
+        "internal/riidoaiserver/ai_agent_onboarding_completion_publication.go",
+        "internal/riidoaiserver/ai_agent_onboarding_task_provenance.go",
+        "internal/riidoaiserver/ai_agent_onboarding_agent_delete.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_onboarding_state.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_onboarding_merge.go",
+        "internal/riidoaiserver/ai_agent_onboarding_stale_writer_test.go",
+        "internal/riidoaiserver/ai_agent_onboarding_commit_publication_test.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_onboarding_parts.go",
+        "internal/riidoaiserver/ai_agent_onboarding_seed_thread.go",
+        "internal/riidoaiserver/ai_agent_client_development_onboarding_completion.go",
+        "internal/riidoaiserver/ai_agent_onboarding_stale_delete_test.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_onboarding_delete.go",
+        "internal/riidoaiserver/ai_agent_onboarding_delete_commit_race_test.go",
+        "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json",
+        "tools/reactquerygen/onboarding_history_invalidation_test.go",
+        "internal/riidoaiserver/onboarding_agent_create.go",
+        "internal/riidoaiserver/onboarding_agent_create_merge.go",
+        "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_from_onboarding_fixture.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_create_ai_agent_from_onboarding_fixture.go",
+        "internal/riidoaiserver/ai_agent_client_onboarding_handler.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_encode.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot_split_unmarshal.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go",
+        "internal/riidoaiserver/ai_agent_client_persistence.go",
+        "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go",
+        "internal/riidoaiserver/server_json.go",
+        "docs/20-domain/ai-agent-client-api.riido.json",
+        "internal/riidoaiserver/onboarding_agent_create_capacity_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_dynamo_replicas_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_dynamo_stale_writer_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_dynamo_strict_cas_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_fault_snapshot_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_http_helpers_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_http_key_validation_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_http_response_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_incarnation_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_persistent_rejected_commit_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_persistent_restart_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_replay_runtime_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_scope_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_ttl_test.go",
+        "internal/riidoaiserver/onboarding_agent_create_commit.go",
+        "internal/riidoaiserver/onboarding_agent_create_identity.go",
+        "internal/riidoaiserver/onboarding_agent_create_readback.go",
+        "internal/riidoaiserver/onboarding_agent_create_receipt.go",
+        "internal/riidoaiserver/server_ai_agent_client_error.go",
+        "internal/riidoaiserver/ai_agent_client_persistence_device_credential.go"
+      ],
+      "verifiers": [
+        "TestOnboardingCompletionSurvivesStaleOrdinarySnapshotWriter",
+        "TestOnboardingDeleteReloadsCompletionUnknownToItsReplica",
+        "TestOnboardingCompletionDoesNotPublishBeforeDurableCommit",
+        "TestOnboardingCompletionRejectsAgentOwnedByAnotherPrincipal",
+        "TestOnboardingCompletionStateSurvivesRestart",
+        "TestOnboardingDeleteClearsCompletionCommittedAfterItsSnapshotLoad",
+        "TestOnboardingCompletionInvalidatesExistingV3ThreadHistory",
+        "TestOnboardingAgentCreateDynamoConcurrentReplicasConverge",
+        "TestOnboardingAgentCreateDynamoSurvivesStaleOrdinaryWriter",
+        "TestOnboardingAgentCreateDynamoDeleteDoesNotReleaseRequestKey",
+        "TestOnboardingAgentCreateDynamoStrictCASPreservesConcurrentOrdinaryProfile",
+        "TestOnboardingAgentCreateHTTPResponseLossReplaysOneAgent",
+        "TestOnboardingAgentCreateHTTPRejectsKeyConflictAndInvalidKeys",
+        "TestOnboardingAgentCreateHTTPPreservesUnkeyedAndNewKeyCreates",
+        "TestOnboardingAgentCreateHTTPRejectsExplicitEmptyKey",
+        "TestOnboardingAgentCreateHTTPV1AndV2ReplaySameOperation",
+        "TestOnboardingAgentCreateHTTPRejectsNullKey",
+        "TestOnboardingAgentCreateReceiptCapacityFailsClosedWithoutEviction",
+        "TestOnboardingAgentCreateExpiredReceiptDoesNotBlockNewIntent",
+        "TestOnboardingAgentCreateDynamoOrdinaryWriterDoesNotRestoreExpiredReceipts",
+        "TestOnboardingAgentCreatePersistentSurvivesRestartAndCommitResponseLoss",
+        "TestOnboardingAgentCreatePersistentRejectedCommitDoesNotPublishPhantom",
+        "TestOnboardingAgentCreateReplayWorksWithoutRuntimeAndRejectsDeletedAgent",
+        "TestOnboardingAgentCreateRequestKeyIsolatedByPrincipalAndWorkspace",
+        "TestOnboardingAgentCreateReplayRejectsReusedAgentIDIncarnation"
+      ],
+      "generated_docs": [
+        "docs/30-architecture/loop-registry.md",
+        "docs/20-domain/ai-agent-client-api.md"
+      ],
+      "semantic_hash": "3eeb1ec3c375851971c53b0ca7de44ffdeac67f7745ce7774f1162c268ae2952"
+    },
+    {
+      "id": "desktop_presence_must_observe_committed_account_connections",
+      "statement": "Desktop presence uses existing DeviceRead authorization and same-principal historical connect/enroll facts across workspaces. Committed readers override memory and fail safely on dependency/integrity errors; one atomic-written grant part is bounded and validated without modifying snapshot fences. Cached credential refresh allows cancellation; stale ordinary writers preserve append-only grants and failed connect/enroll grant changes cannot reappear through later saves or modern empty-array restart. Historical presence does not prove current liveness, credentials, membership or clock correctness. Enrollment credential/device/grant changes are isolated until committed; failed re-enrollment must preserve the old credential across later saves/restarts. Uncertain responses require matching authoritative readback or a fresh-read fence. Ordinary snapshot writers preserve committed credential ownership and enrollment metadata; only a one-device expected-credential mutation may rotate it under the existing CURRENT CAS. A stale old read cannot overwrite a later enrollment commit. Existing-device enrollment cannot write runtime inventory or advance daemon heartbeat time; committed heartbeat updates survive stale enrollment and its next ordinary save, while ordinary heartbeat writers retain their inventory ownership.",
+      "loop": "closed_loop_candidate",
+      "covers_observes": [
+        "regression_pattern"
+      ],
+      "covers_verifies": [
+        "claim_binding_created",
+        "verifier_created",
+        "ci_gate_created"
+      ],
+      "covers_fails_when": [
+        "claim_without_verifier"
+      ],
+      "covers_evidence": [
+        "loop-registry-evidence"
+      ],
+      "files": [
+        "internal/riidoaiserver/ai_agent_desktop_presence.go",
+        "internal/riidoaiserver/ai_agent_client_desktop_presence_handler.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_desktop_presence.go",
+        "internal/riidoaiserver/desktop_presence_grants.go",
+        "internal/riidoaiserver/desktop_presence_grant_commit.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_device_connection_grants_read.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_credentials.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_decode.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_inline.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_legacy.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_merge.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read_keys.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_connect_ai_agent_device.go",
+        "internal/riidoaiserver/ai_agent_client_persistent_method_enroll_device_credential.go",
+        "internal/riidoaiserver/ai_agent_client_persistence.go",
+        "internal/riidoaiserver/ai_agent_client_generated_smoke_profile_test.go",
+        "internal/riidoaiserver/ai_agent_desktop_presence_committed_test.go",
+        "internal/riidoaiserver/ai_agent_desktop_presence_error_test.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_credentials_test.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_integrity_test.go",
+        "internal/riidoaiserver/dynamodb_desktop_presence_legacy_test.go",
+        "internal/riidoaiserver/desktop_presence_failed_commit_test.go",
+        "internal/riidoaiserver/desktop_presence_empty_restart_test.go",
+        "internal/riidoaiserver/dynamodb_ai_agent_client_snapshot.go",
+        "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_handle_test.go",
+        "docs/20-domain/ai-agent-client-api.riido.json",
+        "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json",
+        "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json",
+        ".github/workflows/deploy-ai-agent-testnet.yml",
+        "internal/riidoaiserver/device_enrollment_outcome_test.go",
+        "internal/riidoaiserver/device_enrollment_legacy_merge_test.go",
+        "internal/riidoaiserver/device_enrollment_dynamo_test.go",
+        "internal/riidoaiserver/device_enrollment_snapshot_mutation.go",
+        "internal/riidoaiserver/device_enrollment_concurrent_test.go",
+        "internal/riidoaiserver/device_enrollment_late_commit_test.go",
+        "internal/riidoaiserver/device_enrollment_trial.go",
+        "internal/riidoaiserver/device_enrollment_commit_test.go",
+        "internal/riidoaiserver/device_enrollment_publish.go",
+        "internal/riidoaiserver/dynamodb_device_enrollment_merge.go",
+        "internal/riidoaiserver/dynamodb_device_enrollment_devices.go",
+        "internal/riidoaiserver/device_credential_device_upsert.go",
+        "internal/riidoaiserver/device_credential_machine_test.go",
+        "internal/riidoaiserver/device_enrollment_inventory_test.go",
+        "internal/riidoaiserver/device_enrollment_inventory_fixture_test.go",
+        "internal/riidoaiserver/ai_agent_client_persistence_device_credential.go"
+      ],
+      "verifiers": [
+        "TestHTTPDesktopPresenceReportsOnlyTheSameAccount",
+        "TestPersistentDesktopPresenceSeesConnectionsFromAnotherInstance",
+        "TestDesktopPresenceDoesNotPublishUncommittedMemory",
+        "TestDesktopPresenceSurvivesStaleOrdinarySnapshotWriter",
+        "TestHTTPDesktopPresenceDependencyErrorsAreSafeAndRetryable",
+        "TestDesktopPresenceValidatesIdentityAndLegacyTime",
+        "TestDesktopPresenceCredentialWaitHonorsCancellation",
+        "TestDesktopPresenceRefreshFailureDoesNotUseExpiredCache",
+        "TestDesktopPresenceRejectsInvalidPartEnvelopeAndPayload",
+        "TestDesktopPresenceReadsLegacyInlineAndRejectsMissingCommittedPart",
+        "TestDesktopPresenceFailedConnectionDoesNotPublishOnLaterSave",
+        "TestDesktopPresenceEmptyGrantCommitRemainsEmptyAfterRestart",
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2",
+        "TestFailedEnrollmentPreservesCommittedDeviceState",
+        "TestEnrollmentResolvesCommitResponseLossAndFencesUnknownReadback",
+        "TestDynamoEnrollmentPreservesRotationAcrossStaleOrdinaryWrites",
+        "TestDynamoEnrollmentLateCommitSurvivesOlderReadbackAndOrdinarySave",
+        "TestEnrollmentPublicationPreservesHeartbeatAndOtherPrincipalGrant",
+        "TestEnrollmentCredentialOwnershipPreservesInlineLegacyRows",
+        "TestDynamoConcurrentDisjointEnrollmentsKeepBothCredentials",
+        "TestDynamoEnrollmentPreservesCommittedHeartbeatInventory",
+        "TestEnrollDeviceCredentialReEnrollPreservesRuntimes"
+      ],
+      "generated_docs": [
+        "docs/20-domain/ai-agent-client-api.md",
+        "docs/30-architecture/loop-registry.md",
+        "docs/30-architecture/evidence-graph.md"
+      ],
+      "semantic_hash": "8894aa8358321b6f9ef25c6189da7e74dc4a17e04ab9b0782fae4dd4f6beb643"
     }
   ],
   "evidence_graph": [
@@ -7297,6 +7778,16 @@
     {
       "from": "closed_loop_candidate",
       "to": "device_client_status_must_distinguish_install_update_and_ready",
+      "relation": "enforces"
+    },
+    {
+      "from": "ai_thread_history",
+      "to": "onboarding_completion_must_be_durable_and_idempotent",
+      "relation": "enforces"
+    },
+    {
+      "from": "closed_loop_candidate",
+      "to": "desktop_presence_must_observe_committed_account_connections",
       "relation": "enforces"
     }
   ],

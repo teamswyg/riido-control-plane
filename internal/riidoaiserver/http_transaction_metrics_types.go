@@ -11,6 +11,8 @@ const (
 )
 
 type HTTPTransactionMetric struct {
+	DurationKind string `json:"duration_kind,omitempty"`
+
 	Method                   string `json:"method"`
 	Route                    string `json:"route"`
 	ClientSurface            string `json:"client_surface,omitempty"`
@@ -23,6 +25,8 @@ type HTTPTransactionMetric struct {
 }
 
 type HTTPTransactionObservation struct {
+	Stream bool
+
 	Method        string
 	Route         string
 	ClientSurface string
@@ -41,6 +45,7 @@ type httpTransactionKey struct {
 	route         string
 	clientSurface string
 	statusCode    int
+	durationKind  string
 }
 
 type httpTransactionBucket struct {

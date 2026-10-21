@@ -31,15 +31,20 @@ func (s *DynamoDBAIAgentClientSnapshot) save(ctx context.Context, snapshot AIAge
 	if snapshot.SavedAt.IsZero() {
 		snapshot.SavedAt = s.now()
 	}
+	if preserve, _ := ctx.Value(taskAgentPreserveMembershipContextKey{}).(bool); preserve {
+		stats, snapshotBytes, err = s.saveMembershipOwnedSnapshot(ctx, snapshot, credentials)
+		return err
+	}
 	items, hashes, encodedBytes, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, s.partHashes)
 	if err != nil {
 		return err
 	}
 	snapshotBytes = encodedBytes
 	stats = dynamoDBAIAgentClientSnapshotWritePressure(items)
-	if err := s.putSnapshotItems(ctx, items, credentials); err != nil {
+	if err := s.putSnapshotTransaction(ctx, items, snapshot.ExpectedVersion, credentials); err != nil {
 		return err
 	}
 	s.partHashes = hashes
+	s.onboardingBaseline = onboardingOwnedSnapshot(snapshot)
 	return nil
 }

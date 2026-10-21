@@ -1,7 +1,9 @@
 package riidoaiserver
 
+import "strings"
+
 func clientVisibleQueuedActionResponse(response AIAgentTaskActionResponse) AIAgentTaskActionResponse {
-	if !actionResponseIsQueuedForClient(response) {
+	if strings.HasPrefix(response.AssignmentID, "asn-request-") || !actionResponseIsQueuedForClient(response) {
 		return response
 	}
 	response.WorkStatus = AgentWorkStatusIdle
@@ -13,7 +15,7 @@ func clientVisibleQueuedActionResponse(response AIAgentTaskActionResponse) AIAge
 }
 
 func clientVisibleQueuedTaskThread(thread AIAgentTaskThreadRecord) AIAgentTaskThreadRecord {
-	if !taskThreadIsQueuedForClient(thread) {
+	if strings.HasPrefix(thread.AssignmentID, "asn-request-") || !taskThreadIsQueuedForClient(thread) {
 		return thread
 	}
 	thread.WorkStatus = AgentWorkStatusIdle

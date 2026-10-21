@@ -1,8 +1,9 @@
 package riidoaiserver
 
 import (
-	"encoding/json"
 	"time"
+
+	"github.com/teamswyg/riido-contracts/assignment"
 
 	"github.com/teamswyg/riido-contracts/hostintegration"
 )
@@ -257,25 +258,26 @@ type DeviceDaemonCommandResponse struct {
 }
 
 type AgentClientRecord struct {
-	AgentID             string           `json:"agent_id"`
-	OwnerPrincipalID    string           `json:"owner_principal_id"`
-	WorkspaceID         string           `json:"workspace_id,omitempty"`
-	IsOwnedByViewer     bool             `json:"is_owned_by_viewer"`
-	Name                string           `json:"name"`
-	ProfileThumbnailURL string           `json:"profile_thumbnail_url,omitempty"`
-	TmpColor            string           `json:"tmp_color,omitempty"`
-	Description         string           `json:"description,omitempty"`
-	Instruction         string           `json:"instruction,omitempty"`
-	Visibility          AgentVisibility  `json:"visibility"`
-	RuntimeID           string           `json:"runtime_id,omitempty"`
-	RuntimeKind         RuntimeKind      `json:"runtime_kind,omitempty"`
-	ModelID             string           `json:"model_id,omitempty"`
-	ModelLabel          string           `json:"model_label,omitempty"`
-	WorkStatus          AgentWorkStatus  `json:"work_status"`
-	Editability         AgentEditability `json:"editability"`
-	AssignedTaskCount   int              `json:"assigned_task_count"`
-	CreatedAt           time.Time        `json:"created_at"`
-	UpdatedAt           time.Time        `json:"updated_at"`
+	AgentID             string            `json:"agent_id"`
+	OwnerPrincipalID    string            `json:"owner_principal_id"`
+	WorkspaceID         string            `json:"workspace_id,omitempty"`
+	IsOwnedByViewer     bool              `json:"is_owned_by_viewer"`
+	Name                string            `json:"name"`
+	ProfileThumbnailURL string            `json:"profile_thumbnail_url,omitempty"`
+	TmpColor            string            `json:"tmp_color,omitempty"`
+	ProfileColor        AgentProfileColor `json:"profile_color"`
+	Description         string            `json:"description,omitempty"`
+	Instruction         string            `json:"instruction,omitempty"`
+	Visibility          AgentVisibility   `json:"visibility"`
+	RuntimeID           string            `json:"runtime_id,omitempty"`
+	RuntimeKind         RuntimeKind       `json:"runtime_kind,omitempty"`
+	ModelID             string            `json:"model_id,omitempty"`
+	ModelLabel          string            `json:"model_label,omitempty"`
+	WorkStatus          AgentWorkStatus   `json:"work_status"`
+	Editability         AgentEditability  `json:"editability"`
+	AssignedTaskCount   int               `json:"assigned_task_count"`
+	CreatedAt           time.Time         `json:"created_at"`
+	UpdatedAt           time.Time         `json:"updated_at"`
 }
 
 type AgentClientListResponse struct {
@@ -306,8 +308,9 @@ type AgentOnboardingFixtureListResponse struct {
 }
 
 type AssignedAgentProfile struct {
-	AvatarURL string `json:"avatar_url,omitempty"`
-	TmpColor  string `json:"tmp_color,omitempty"`
+	AvatarURL    string            `json:"avatar_url,omitempty"`
+	TmpColor     string            `json:"tmp_color,omitempty"`
+	ProfileColor AgentProfileColor `json:"profile_color"`
 }
 
 type AssignedAgentProfileMapResponse struct {
@@ -371,13 +374,15 @@ type CreateAgentConfigurationRequest struct {
 }
 
 type UpdateAgentConfigurationRequest struct {
-	Name                string          `json:"name,omitempty"`
-	ProfileThumbnailURL *string         `json:"profile_thumbnail_url,omitempty"`
-	Description         *string         `json:"description,omitempty"`
-	Instruction         *string         `json:"instruction,omitempty"`
-	Visibility          AgentVisibility `json:"visibility,omitempty"`
-	RuntimeID           string          `json:"runtime_id,omitempty"`
-	ModelID             *string         `json:"model_id,omitempty"`
+	// ProfileColor is accepted for compatibility and ignored: the color is fixed at creation.
+	ProfileColor        AgentProfileColor `json:"profile_color,omitempty"`
+	Name                string            `json:"name,omitempty"`
+	ProfileThumbnailURL *string           `json:"profile_thumbnail_url,omitempty"`
+	Description         *string           `json:"description,omitempty"`
+	Instruction         *string           `json:"instruction,omitempty"`
+	Visibility          AgentVisibility   `json:"visibility,omitempty"`
+	RuntimeID           string            `json:"runtime_id,omitempty"`
+	ModelID             *string           `json:"model_id,omitempty"`
 }
 
 type DeleteAgentResponse struct {
@@ -388,22 +393,32 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	AgentID            string `json:"agent_id"`
-	AssignmentID       string `json:"-"`
-	durableState       AssignmentState
-	intentGateRequired bool
+	RecoveryPolicy *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
+
+	RequestID                       string              `json:"request_id,omitempty"`
+	Instruction                     string              `json:"instruction,omitempty"`
+	SourceCommentID                 string              `json:"-"`
+	VerifiedTaskContext             *AIAgentTaskContext `json:"-"`
+	membershipPublicationGeneration string
+	AgentID                         string `json:"agent_id"`
+	AssignmentID                    string `json:"-"`
+	durableState                    AssignmentState
+	intentGateRequired              bool
 }
 
 type UnassignAIAgentTaskRequest struct {
 	AgentID      string `json:"agent_id"`
 	AssignmentID string `json:"assignment_id,omitempty"`
 	Reason       string `json:"reason,omitempty"`
+
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type AgentAssignmentActionRequest struct {
-	AssignmentID string `json:"assignment_id,omitempty"`
-	Reason       string `json:"reason,omitempty"`
-	durableState AssignmentState
+	AssignmentID           string `json:"assignment_id,omitempty"`
+	Reason                 string `json:"reason,omitempty"`
+	durableState           AssignmentState
+	membershipRemovalFence *taskAgentMembershipRemovalFence
 }
 
 type SubmitAIAgentTaskCommentRequest struct {
@@ -413,12 +428,13 @@ type SubmitAIAgentTaskCommentRequest struct {
 }
 
 type CreateAIAgentTaskThreadMessageRequest struct {
-	Body                       string `json:"body"`
-	SourceMessageID            string `json:"source_message_id,omitempty"`
-	AssignmentID               string `json:"-"`
-	toolApproval               bool
-	toolApprovalWithoutPending bool
-	durableState               AssignmentState
+	membershipPublicationGeneration string
+	Body                            string `json:"body"`
+	SourceMessageID                 string `json:"source_message_id,omitempty"`
+	AssignmentID                    string `json:"-"`
+	toolApproval                    bool
+	toolApprovalWithoutPending      bool
+	durableState                    AssignmentState
 }
 
 type StopAIAgentTaskRequest struct {
@@ -429,6 +445,7 @@ type StopAIAgentTaskRequest struct {
 }
 
 type AIAgentTaskActionResponse struct {
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	SchemaVersion      string                               `json:"schema_version"`
 	TaskID             string                               `json:"task_id"`
 	AssignmentID       string                               `json:"assignment_id,omitempty"`
@@ -442,6 +459,7 @@ type AIAgentTaskActionResponse struct {
 	Message            string                               `json:"message"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
 	ActiveStream       *AIAgentTaskThreadStreamLink         `json:"active_stream,omitempty"`
 }
 
@@ -482,6 +500,7 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 }
 
 type AIAgentTaskThreadRecord struct {
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	ThreadID           string                               `json:"thread_id"`
 	ConversationID     string                               `json:"conversation_id,omitempty"`
 	ParentThreadID     string                               `json:"parent_thread_id,omitempty"`
@@ -497,6 +516,7 @@ type AIAgentTaskThreadRecord struct {
 	AssignmentState    AgentAssignmentState                 `json:"assignment_state"`
 	QueueDiagnostics   *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
 	CommentKind        AgentTaskCommentKind                 `json:"comment_kind"`
 	Message            string                               `json:"message"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
@@ -506,10 +526,11 @@ type AIAgentTaskThreadRecord struct {
 }
 
 type AIAgentTaskThreadCollectionResponse struct {
-	SchemaVersion string                       `json:"schema_version"`
-	TaskID        string                       `json:"task_id"`
-	Threads       []AIAgentTaskThreadRecord    `json:"threads"`
-	ActiveStream  *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
+	AssignedAgentIDs []string                     `json:"assigned_agent_ids"`
+	SchemaVersion    string                       `json:"schema_version"`
+	TaskID           string                       `json:"task_id"`
+	Threads          []AIAgentTaskThreadRecord    `json:"threads"`
+	ActiveStream     *AIAgentTaskThreadStreamLink `json:"active_stream,omitempty"`
 }
 
 type AIAgentTaskThreadStreamSubscriptionResponse struct {
@@ -540,6 +561,7 @@ type AgentEditabilityChangedEvent struct {
 }
 
 type AgentWorkStatusChangedEvent struct {
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	EventType          string                               `json:"event_type"`
 	SchemaVersion      string                               `json:"schema_version"`
 	AgentID            string                               `json:"agent_id"`
@@ -552,53 +574,7 @@ type AgentWorkStatusChangedEvent struct {
 	CommentKind        AgentTaskCommentKind                 `json:"comment_kind,omitempty"`
 	ResultMessage      string                               `json:"result_message,omitempty"`
 	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
-}
-
-type AgentThreadProgressLine struct {
-	Seq         int               `json:"seq"`
-	Message     string            `json:"message"`
-	MessageCode int               `json:"message_code,omitempty"`
-	MessageKey  string            `json:"message_key,omitempty"`
-	MessageArgs map[string]string `json:"message_args,omitempty"`
-	ObservedAt  time.Time         `json:"observed_at,omitempty"`
-}
-
-func (line *AgentThreadProgressLine) UnmarshalJSON(data []byte) error {
-	var wire struct {
-		Seq         int               `json:"seq"`
-		Message     string            `json:"message"`
-		MessageCode int               `json:"message_code,omitempty"`
-		MessageKey  string            `json:"message_key,omitempty"`
-		MessageArgs map[string]string `json:"message_args,omitempty"`
-		ObservedAt  time.Time         `json:"observed_at,omitempty"`
-	}
-	if err := json.Unmarshal(data, &wire); err != nil {
-		return err
-	}
-	line.Seq = wire.Seq
-	line.Message = wire.Message
-	line.MessageCode = wire.MessageCode
-	line.MessageKey = wire.MessageKey
-	line.MessageArgs = wire.MessageArgs
-	line.ObservedAt = wire.ObservedAt
-	return nil
-}
-
-func (line AgentThreadProgressLine) MarshalJSON() ([]byte, error) {
-	wire := struct {
-		MessageKey string    `json:"message_key,omitempty"`
-		Seq        int       `json:"seq"`
-		Message    string    `json:"message"`
-		ObservedAt time.Time `json:"observed_at,omitempty"`
-	}{
-		Seq:        line.Seq,
-		Message:    line.Message,
-		ObservedAt: line.ObservedAt,
-	}
-	if line.MessageKey == "assistant.partial" || line.MessageKey == "runtime.activity" {
-		wire.MessageKey = line.MessageKey
-	}
-	return json.Marshal(wire)
+	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
 }
 
 type AgentThreadProgressEvent struct {

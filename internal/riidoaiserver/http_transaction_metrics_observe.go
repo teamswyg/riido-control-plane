@@ -22,7 +22,8 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	observedAt := metricsObservedAt(obs.ObservedAt)
 	bucketStart := metricsBucketStart(observedAt)
 	elapsedMS := durationMilliseconds(obs.Duration)
-	key := httpTransactionKey{method: method, route: route, clientSurface: clientSurface, statusCode: statusCode}
+	durationKind := httpTransactionDurationKind(obs)
+	key := httpTransactionKey{method: method, route: route, clientSurface: clientSurface, statusCode: statusCode, durationKind: durationKind}
 
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -30,12 +31,15 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 	bucket := m.bucketLocked(bucketStart)
 	bucket.requestsTotal++
 	bucket.responsesByStatus[statusCode]++
-	bucket.latency.observe(elapsedMS)
-	if observedAt.After(bucket.lastObservedAt) {
-		bucket.lastObservedAt = observedAt
+	if durationKind == "" {
+		bucket.latency.observe(elapsedMS)
+		if observedAt.After(bucket.lastObservedAt) {
+			bucket.lastObservedAt = observedAt
+		}
 	}
 	state := bucket.byKey[key]
 	metric := state.metric
+	metric.DurationKind = durationKind
 	metric.Method = method
 	metric.Route = route
 	metric.ClientSurface = clientSurface
@@ -52,4 +56,14 @@ func (m *HTTPTransactionMetrics) ObserveHTTPTransaction(obs HTTPTransactionObser
 		state.lastObservedAt = observedAt
 	}
 	bucket.byKey[key] = state
+}
+
+func httpTransactionDurationKind(obs HTTPTransactionObservation) string {
+	if obs.Stream {
+		return "stream_lifetime"
+	}
+	if obs.Method == http.MethodPost && obs.Route == "/v1/agents/{agent_id}/poll" {
+		return "poll_wait"
+	}
+	return ""
 }

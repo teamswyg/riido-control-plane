@@ -23,8 +23,23 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	release, err := s.taskAgentExecutionGate.beginPublication(r.Context(), taskID)
+	if err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
+	defer release()
 	if err := s.reconcileAIAgentTaskThreadProjections(r.Context(), principal, taskID); err != nil {
-		writeError(w, http.StatusBadGateway, err.Error())
+		writeThreadProjectionError(w, r, err)
+		return
+	}
+	response, found, lookupErr := s.findTaskRequestReceipt(r.Context(), principal, taskID, req)
+	if lookupErr != nil {
+		writeAIAgentClientError(w, lookupErr)
+		return
+	}
+	if found {
+		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
 	composedReq, err := s.assignRequestFromAIAgentClientTaskResult(r.Context(), principal, bearerToken, taskID, req)
@@ -34,7 +49,7 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 	}
 	if composedReq.IntentGateRequired {
 		req.intentGateRequired = true
-		response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
+		response, err = s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
 		if err != nil {
 			writeAIAgentClientError(w, err)
 			return
@@ -43,14 +58,19 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		return
 	}
 	assignmentReq := composedReq.Request
-	assignment, err := s.assignment.AssignTaskAdditive(r.Context(), taskID, assignmentReq)
+	creationContext, creationReceipt := withTaskAgentCreationReceipt(r.Context())
+	assignment, err := s.assignment.AssignTaskAdditive(creationContext, taskID, assignmentReq)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
 	req.AssignmentID, req.durableState = assignment.ID, assignmentClientResponseDurableState(assignment)
-	response, err := s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
+	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() && assignmentSequence(assignment.ID) == 0 {
+		req.membershipPublicationGeneration = taskAgentAssignmentGeneration(assignment)
+	}
+	response, err = s.aiAgent.CreateAIAgentTaskAgentAssignment(r.Context(), principal, taskID, req)
 	if err != nil {
+		s.recoverTaskAgentPublication(r.Context(), assignment, creationReceipt)
 		writeAIAgentClientError(w, err)
 		return
 	}

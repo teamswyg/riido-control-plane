@@ -16,6 +16,9 @@ func sortHTTPTransactionMetrics(transactions []HTTPTransactionMetric) {
 		if transactions[i].Method != transactions[j].Method {
 			return transactions[i].Method < transactions[j].Method
 		}
-		return transactions[i].StatusCode < transactions[j].StatusCode
+		if transactions[i].StatusCode != transactions[j].StatusCode {
+			return transactions[i].StatusCode < transactions[j].StatusCode
+		}
+		return transactions[i].DurationKind < transactions[j].DurationKind
 	})
 }

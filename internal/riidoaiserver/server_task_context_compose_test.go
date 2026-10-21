@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestComposeAssignRequestWithTaskContextResultPreservesIntentGate(t *testing.T) {
+func TestComposeAssignRequestWithTaskContextResultDoesNotGateIntent(t *testing.T) {
 	t.Parallel()
 	composed, err := composeAssignRequestWithTaskContextResult("task-1", "component-fallback", AssignRequest{
 		AgentID:         "agent-a",
@@ -25,15 +25,15 @@ func TestComposeAssignRequestWithTaskContextResultPreservesIntentGate(t *testing
 	if err != nil {
 		t.Fatalf("compose assignment request: %v", err)
 	}
-	if !composed.IntentGateRequired {
-		t.Fatal("intent gate flag should survive request composition")
+	if composed.IntentGateRequired {
+		t.Fatal("keyword classification must not block request composition")
 	}
 	if got := composed.Request.ComponentID; got != "component-context" {
 		t.Fatalf("component id = %q, want context component id", got)
 	}
 	assertPromptHasAll(t, composed.Request.Prompt, []string{
 		"- intent_class: intent_oriented",
-		"- intent_gate_required: true",
+		"- intent_gate_required: false",
 	})
 }
 

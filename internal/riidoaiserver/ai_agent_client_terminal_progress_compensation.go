@@ -26,8 +26,8 @@ func (s *DevelopmentAIAgentClientStore) compensateRecentTerminalProgressLocked()
 			s.appendClientEventLocked(event.EventType, event)
 			published[identity] = struct{}{}
 			log.Printf(
-				"riido_ai_agent_sse event=terminal_replay_compensated assignment_id=%q thread_id=%q run_id=%q state=%q",
-				thread.AssignmentID, thread.ThreadID, thread.RunID, thread.AssignmentState,
+				"riido_ai_agent_sse event=terminal_replay_compensated assignment_ref=%q thread_ref=%q run_ref=%q state=%q",
+				providerHealthDeviceRef(thread.AssignmentID), providerHealthDeviceRef(thread.ThreadID), providerHealthDeviceRef(thread.RunID), boundedTerminalState(thread.AssignmentState),
 			)
 		}
 	}

@@ -6,17 +6,17 @@ func applyAssignmentStateActionResponse(response *AIAgentTaskActionResponse, sta
 		response.WorkStatus = AgentWorkStatusQueued
 		response.AssignmentState = AgentAssignmentStateQueued
 		response.CommentKind = AgentTaskCommentQueuedByBusyAgent
-		ensureAssignmentResponseMessage(response, clientMessageAgentBusyQueued)
+		ensureAssignmentResponseMessage(response, clientMessageTaskQueued)
 	case AssignmentStateCodeReady:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateRunning
 		response.CommentKind = AgentTaskCommentAssignmentStarted
-		ensureAssignmentResponseMessage(response, clientMessageTaskRunning)
+		ensureAssignmentRunningResponseMessage(response)
 	case AssignmentStateCodeRunning:
 		response.WorkStatus = AgentWorkStatusRunning
 		response.AssignmentState = AgentAssignmentStateRunning
 		response.CommentKind = AgentTaskCommentRuntimeProgress
-		ensureAssignmentResponseMessage(response, clientMessageTaskRunning)
+		ensureAssignmentRunningResponseMessage(response)
 	case AssignmentStateCodeCancelling:
 		response.WorkStatus = AgentWorkStatusIdle
 		response.AssignmentState = AgentAssignmentStateStopped
@@ -45,5 +45,22 @@ func applyAssignmentStateActionResponse(response *AIAgentTaskActionResponse, sta
 func ensureAssignmentResponseMessage(response *AIAgentTaskActionResponse, fallback string) {
 	if response.Message == "" {
 		response.Message = fallback
+	}
+}
+
+// Queue status is not provider output and must not become the next run's progress.
+func ensureAssignmentRunningResponseMessage(response *AIAgentTaskActionResponse) {
+	if assignmentMessageIsQueueStatus(response.Message) {
+		response.Message = ""
+	}
+	ensureAssignmentResponseMessage(response, clientMessageTaskRunning)
+}
+
+func assignmentMessageIsQueueStatus(message string) bool {
+	switch clientVisibleTaskThreadText(message) {
+	case clientMessageAgentBusyQueued, clientMessageTaskQueued:
+		return true
+	default:
+		return false
 	}
 }
