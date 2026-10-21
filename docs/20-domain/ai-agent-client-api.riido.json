@@ -408,7 +408,7 @@
       },
       {
         "name": "task-document-snapshot-input",
-        "detail": "Assignment and followup accept optional document_snapshot:{content,content_format:\"html\"}. Required content accepts explicit empty HTML and at most 262144 UTF-8 bytes; the snapshot is an execution input and never writes or flushes document history. The client 30-second history cadence is unchanged. Invalid raw UTF-8 bytes are rejected before JSON decoding can replace them, before creating any execution or history."
+        "detail": "Assignment and followup accept optional document_snapshot:{content,content_format:\"html\"}. Required content accepts explicit empty HTML and at most 262144 UTF-8 bytes; the snapshot is an execution input and never writes or flushes document history. The client 30-second history cadence is unchanged. Invalid raw UTF-8 bytes are rejected before JSON decoding can replace them, before creating any execution or history. A keyed followup whose unpublished execution was cancelled or is cancelling returns HTTP 503 without publishing an accepted message; the existing execution identity and cancellation remain intact, without automatic reactivation or a replacement request ID. Previously published receipts still replay normally."
       },
       {
         "name": "task-document-snapshot-verification",

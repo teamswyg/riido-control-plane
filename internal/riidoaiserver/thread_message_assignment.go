@@ -1,10 +1,19 @@
 package riidoaiserver
 
-import "context"
+import (
+	"context"
+	"errors"
+)
+
+var errThreadMessageExecutionCancelled = errors.New("thread message execution was cancelled before publication")
 
 func (s Server) assignThreadMessage(ctx context.Context, taskID string, req AssignRequest, startsNewExecution bool) (Assignment, error) {
 	if startsNewExecution && req.RequestID != "" {
-		return s.assignment.AssignTaskAdditive(ctx, taskID, req)
+		assignment, err := s.assignment.AssignTaskAdditive(ctx, taskID, req)
+		if err == nil && (assignment.State == AssignmentCancelled || assignment.State == AssignmentCancelling) {
+			return Assignment{}, errThreadMessageExecutionCancelled
+		}
+		return assignment, err
 	}
 	return s.assignment.AssignTask(ctx, taskID, req)
 }

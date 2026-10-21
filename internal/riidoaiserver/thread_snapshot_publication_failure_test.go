@@ -9,10 +9,12 @@ import (
 
 type snapshotFailOnceThreadPublisher struct {
 	*DevelopmentAIAgentClientStore
-	fail bool
+	fail  bool
+	calls int
 }
 
 func (s *snapshotFailOnceThreadPublisher) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
+	s.calls++
 	if s.fail {
 		s.fail = false
 		return AIAgentTaskActionResponse{}, errors.New("injected thread publication failure")
