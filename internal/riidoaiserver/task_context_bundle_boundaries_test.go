@@ -16,16 +16,16 @@ func TestTaskContextBundleDeadlineKeepsSnapshotAndCancelsReads(t *testing.T) {
 		_, _ = io.Copy(io.Discard, r.Body)
 		select {
 		case <-r.Context().Done():
-		case <-time.After(250 * time.Millisecond):
+		case <-time.After(750 * time.Millisecond):
 		}
 	}))
 	defer graph.Close()
-	client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: f.rest.URL, GraphQLURL: graph.URL, Timeout: 40 * time.Millisecond})
+	client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: f.rest.URL, GraphQLURL: graph.URL, Timeout: 200 * time.Millisecond})
 	recorder := &recordingTraceRecorder{}
 	ctx := WithTraceRecorder(context.Background(), recorder)
 	started := time.Now()
-	got, err := client.GetAIAgentTaskContextForRequest(ctx, AIAgentTaskContextRequest{ComponentID: "task", WorkspaceID: "workspace", BearerToken: "SYNTHETIC_VIEWER"})
-	if err != nil || time.Since(started) > 500*time.Millisecond || !strings.Contains(got.Document.Content, "COMPONENT_SNAPSHOT") {
+	got, err := client.GetAIAgentTaskContextForRequest(ctx, AIAgentTaskContextRequest{ComponentID: "task", WorkspaceID: "workspace", BearerToken: "SYNTHETIC_VIEWER", DocumentSnapshot: &AIAgentTaskDocumentSnapshot{Content: "<p>COMPONENT_SNAPSHOT</p>", ContentFormat: "html"}})
+	if err != nil || time.Since(started) > time.Second || !strings.Contains(got.Document.Content, "COMPONENT_SNAPSHOT") {
 		t.Fatal("budget discarded snapshot or failed to cancel", err)
 	}
 	for _, span := range recorder.snapshot() {

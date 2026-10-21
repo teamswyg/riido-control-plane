@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"sort"
@@ -43,7 +44,7 @@ func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentJSON(t *testing.T
 	}
 }
 
-func TestAIAgentPrivateTaskContextClientFallsBackWhenProviderDocumentUnavailable(t *testing.T) {
+func TestAIAgentPrivateTaskContextClientFailsClosedWhenProviderDocumentUnavailable(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/documents/providers/team-a/component-a" {
 			http.NotFound(w, r)
@@ -53,8 +54,9 @@ func TestAIAgentPrivateTaskContextClientFallsBackWhenProviderDocumentUnavailable
 	}))
 	defer server.Close()
 
-	contextSnapshot := readProviderDocumentContextFixture(t, server.URL)
-	if contextSnapshot.Document.Content != "<p>stale component document</p>" {
-		t.Fatalf("context snapshot document = %+v", contextSnapshot.Document)
+	client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: server.URL})
+	contextSnapshot, err := client.GetAIAgentTaskContextForRequest(context.Background(), AIAgentTaskContextRequest{ComponentID: "component-a", WorkspaceID: "workspace-a", BearerToken: "user-jwt"})
+	if err == nil || contextSnapshot.Document.Content != "" {
+		t.Fatalf("failed latest read used stale document: %+v err=%v", contextSnapshot, err)
 	}
 }

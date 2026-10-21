@@ -89,6 +89,12 @@ func TestAIAgentPrivateTaskContextClientResolvesTeamAndComponentWithBearer(t *te
 					},
 				},
 			})
+		case "/documents/providers/team-a/component-a":
+			if r.URL.Query().Get("format") == "json" {
+				_ = json.NewEncoder(w).Encode(map[string]any{"tiptapJson": nil})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"html": "<p>Use the private component document.</p>"})
 		case "/teams/team-a/components/component-a":
 			gotDetailPath = r.URL.Path
 			if got := r.URL.Query().Get("getDocument"); got != "true" {
@@ -146,8 +152,8 @@ func TestAIAgentPrivateTaskContextClientResolvesTeamAndComponentWithBearer(t *te
 		}
 	}
 	if contextSnapshot.Component.Title != "Implement JWT task context" ||
-		contextSnapshot.Document.Content != "<p>Use the private component document.</p>" ||
-		contextSnapshot.Document.ContentFormat != "html" ||
+		contextSnapshot.Document.Content != "Use the private component document." ||
+		contextSnapshot.Document.ContentFormat != "markdown" ||
 		contextSnapshot.Hierarchy.Project.Title != "AI Agent" ||
 		contextSnapshot.Hierarchy.Milestone.Title != "Control plane" ||
 		len(contextSnapshot.Repositories) != 0 {

@@ -396,10 +396,11 @@ type DeleteAgentResponse struct {
 type AssignAIAgentTaskRequest struct {
 	RecoveryPolicy *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
 
-	RequestID                       string              `json:"request_id,omitempty"`
-	Instruction                     string              `json:"instruction,omitempty"`
-	SourceCommentID                 string              `json:"-"`
-	VerifiedTaskContext             *AIAgentTaskContext `json:"-"`
+	RequestID                       string                       `json:"request_id,omitempty"`
+	DocumentSnapshot                *AIAgentTaskDocumentSnapshot `json:"document_snapshot,omitempty"`
+	Instruction                     string                       `json:"instruction,omitempty"`
+	SourceCommentID                 string                       `json:"-"`
+	VerifiedTaskContext             *AIAgentTaskContext          `json:"-"`
 	membershipPublicationGeneration string
 	AgentID                         string `json:"agent_id"`
 	AssignmentID                    string `json:"-"`
@@ -430,9 +431,11 @@ type SubmitAIAgentTaskCommentRequest struct {
 
 type CreateAIAgentTaskThreadMessageRequest struct {
 	membershipPublicationGeneration string
-	Body                            string `json:"body"`
-	SourceMessageID                 string `json:"source_message_id,omitempty"`
-	AssignmentID                    string `json:"-"`
+	RequestID                       string                       `json:"request_id,omitempty"`
+	DocumentSnapshot                *AIAgentTaskDocumentSnapshot `json:"document_snapshot,omitempty"`
+	Body                            string                       `json:"body"`
+	SourceMessageID                 string                       `json:"source_message_id,omitempty"`
+	AssignmentID                    string                       `json:"-"`
 	toolApproval                    bool
 	toolApprovalWithoutPending      bool
 	durableState                    AssignmentState

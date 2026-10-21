@@ -30,7 +30,9 @@ func newNativeResumeHTTPFixture(t *testing.T) *nativeResumeHTTPFixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler := NewServer(ServerConfig{Assignment: store, AIAgentClient: client, TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: aiAgentTaskContextHTTPFixture()}, Authorizer: auth}).Handler()
+	taskContext := aiAgentTaskContextHTTPFixture()
+	taskContext.Component.ID = "task-new"
+	handler := NewServer(ServerConfig{Assignment: store, AIAgentClient: client, TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: taskContext}, Authorizer: auth}).Handler()
 	return &nativeResumeHTTPFixture{handler: handler, store: store, client: client, base: "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent", token: "native-owner-token"}
 }
 

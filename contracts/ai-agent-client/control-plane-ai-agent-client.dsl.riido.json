@@ -2241,6 +2241,28 @@
       ]
     },
     {
+      "name": "AIAgentTaskDocumentSnapshot",
+      "description": "Click-time task body only. Does not save a document history version. Applied only after authorized workspace/task lookup; explicit empty content clears the body. Maximum 262144 UTF-8 bytes.",
+      "type": "object",
+      "required": [
+        "content",
+        "content_format"
+      ],
+      "properties": [
+        {
+          "name": "content",
+          "type": "string"
+        },
+        {
+          "name": "content_format",
+          "type": "string",
+          "enum": [
+            "html"
+          ]
+        }
+      ]
+    },
+    {
       "name": "AssignAIAgentTaskRequest",
       "description": "작업 배정 요청. recovery_policy는 실행 전 검증에 한정된 유한 복구 예산이며 명시적 fallback은 서버가 같은 소유자의 같은 device/model inventory 및 권한을 검증한 경우에만 허용한다.",
       "type": "object",
@@ -2263,6 +2285,10 @@
         {
           "name": "recovery_policy",
           "ref": "ProviderRecoveryPolicy"
+        },
+        {
+          "name": "document_snapshot",
+          "ref": "AIAgentTaskDocumentSnapshot"
         }
       ]
     },
@@ -2327,6 +2353,15 @@
         {
           "name": "source_message_id",
           "type": "string"
+        },
+        {
+          "name": "request_id",
+          "type": "string",
+          "description": "Stable execution identity scoped to task, agent, authorized principal and workspace. Retry the same request with the same body and document snapshot; the first committed execution wins."
+        },
+        {
+          "name": "document_snapshot",
+          "ref": "AIAgentTaskDocumentSnapshot"
         }
       ]
     },
@@ -2703,7 +2738,6 @@
           "name": "message_key",
           "type": "string"
         },
-
         {
           "name": "display_message",
           "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
@@ -3251,7 +3285,6 @@
           "type": "string",
           "format": "date-time"
         },
-
         {
           "name": "display_message",
           "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",

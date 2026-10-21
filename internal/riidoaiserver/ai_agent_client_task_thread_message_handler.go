@@ -19,6 +19,10 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if len(req.RequestID) > 256 {
+		writeError(w, http.StatusBadRequest, "request_id maximum is 256 bytes")
+		return
+	}
 	release, err := s.taskAgentExecutionGate.beginPublication(r.Context(), taskID)
 	if err != nil {
 		writeAIAgentClientError(w, err)
@@ -34,13 +38,17 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
-	assignmentReq, err := s.assignRequestFromAIAgentTaskThreadMessage(r.Context(), principal, bearerToken, taskID, threadID, req)
+	prepared, err := s.prepareThreadMessage(r.Context(), principal, bearerToken, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
+	if prepared.Replay != nil {
+		writeJSON(w, http.StatusAccepted, *prepared.Replay)
+		return
+	}
 	creationContext, creationReceipt := withTaskAgentCreationReceipt(r.Context())
-	assignment, err := s.assignment.AssignTask(creationContext, taskID, assignmentReq)
+	assignment, err := s.assignThreadMessage(creationContext, taskID, prepared.Request, prepared.StartsNewExecution)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return

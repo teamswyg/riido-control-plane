@@ -4,6 +4,8 @@ import "strings"
 
 func writeTaskContextDocumentBody(out *strings.Builder, document AIAgentTaskContextDocument) {
 	switch {
+	case document.Source == "editor_snapshot" && document.Status == "empty":
+		out.WriteString("[Document was empty when this execution was requested.]\n")
 	case document.Status == "empty":
 		out.WriteString("[Document is empty in this stored projection; freshness is unconfirmed.]\n")
 	case document.Content == "":

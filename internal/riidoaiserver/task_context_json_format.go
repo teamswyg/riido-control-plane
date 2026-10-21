@@ -31,20 +31,15 @@ func (r *taskContextJSONRenderer) prefix(n taskContextJSONNode) {
 	case "table", "tableHeader", "tableCell":
 	case "horizontalRule":
 		r.out.WriteString("\n---\n")
-	case "image", "imageBlock", "video", "videoBlock":
+	case "image", "imageBlock", "video", "videoBlock", "customVideo":
 		r.out.WriteString("[Media: " + taskContextJSONAttribute(n.Attrs, "alt") + "]")
 		if u := safeTaskContextLink(taskContextJSONAttribute(n.Attrs, "src")); u != "" {
 			r.out.WriteString(" (" + u + ")")
 		}
+	case "riidoMention", "mentionedComponent":
+		r.out.WriteString(taskContextRiidoMentionLabel(n))
 	case "mention":
-		label := taskContextJSONAttribute(n.Attrs, "label")
-		if label == "" {
-			label = taskContextJSONAttribute(n.Attrs, "name")
-		}
-		if label == "" {
-			label = "Mention"
-		}
-		r.out.WriteString("[" + label + "]")
+		r.out.WriteString("[" + taskContextStandardMentionLabel(n) + "]")
 	default:
 		r.complete = false
 		r.out.WriteString("[Unsupported document element; nested text follows.]")

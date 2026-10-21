@@ -5062,6 +5062,25 @@
         ],
         "type": "object"
       },
+      "AIAgentTaskDocumentSnapshot": {
+        "description": "Click-time task body only. Does not save a document history version. Applied only after authorized workspace/task lookup; explicit empty content clears the body. Maximum 262144 UTF-8 bytes.",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "content_format": {
+            "enum": [
+              "html"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "content_format"
+        ],
+        "type": "object"
+      },
       "AIAgentTaskEventStreamLink": {
         "description": "활성 thread filter들과 함께 사용하는 공통 client SSE stream handoff link입니다.",
         "properties": {
@@ -6454,6 +6473,9 @@
           "agent_id": {
             "type": "string"
           },
+          "document_snapshot": {
+            "$ref": "#/components/schemas/AIAgentTaskDocumentSnapshot"
+          },
           "instruction": {
             "type": "string"
           },
@@ -6673,6 +6695,13 @@
         "description": "task thread에 사용자의 다음 작업 지시 메시지를 남기는 정식 요청입니다. thread_id가 target agent를 결정하므로 agent_id를 받지 않습니다.",
         "properties": {
           "body": {
+            "type": "string"
+          },
+          "document_snapshot": {
+            "$ref": "#/components/schemas/AIAgentTaskDocumentSnapshot"
+          },
+          "request_id": {
+            "description": "Stable execution identity scoped to task, agent, authorized principal and workspace. Retry the same request with the same body and document snapshot; the first committed execution wins.",
             "type": "string"
           },
           "source_message_id": {

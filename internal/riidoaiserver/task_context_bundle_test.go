@@ -45,8 +45,8 @@ func TestTaskContextBundlesNeverReplayDenialAgainstREST(t *testing.T) {
 			f.bundleStatus = code
 			client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: f.rest.URL, GraphQLURL: f.graph.URL})
 			got, err := client.GetAIAgentTaskContextForRequest(context.Background(), AIAgentTaskContextRequest{ComponentID: "task", WorkspaceID: "workspace", BearerToken: "SYNTHETIC_VIEWER"})
-			if err != nil || got.Document.Source != "component_snapshot" || got.ResourceStatus != "unavailable" {
-				t.Fatal("degradation changed task availability", err)
+			if err == nil || got.Document.Content != "" {
+				t.Fatal("latest document failure must prevent stale execution", err)
 			}
 			f.mu.Lock()
 			defer f.mu.Unlock()
@@ -66,8 +66,8 @@ func TestTaskContextBundleGraphQLDenialsHaveSafeTrace(t *testing.T) {
 	recorder := &recordingTraceRecorder{}
 	ctx := WithTraceRecorder(context.Background(), recorder)
 	_, err := client.GetAIAgentTaskContextForRequest(ctx, AIAgentTaskContextRequest{ComponentID: "task", WorkspaceID: "workspace", BearerToken: "SYNTHETIC_VIEWER"})
-	if err != nil {
-		t.Fatal(err)
+	if err == nil {
+		t.Fatal("denied latest document must not execute")
 	}
 	spans := recorder.snapshot()
 	if len(spans) != 4 {
