@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	defaultAIAgentClientSnapshotReloadInterval        = time.Minute
-	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 5 * time.Minute
+	defaultAIAgentClientSnapshotReloadInterval        = 15 * time.Second
+	defaultAIAgentClientHeartbeatSnapshotSaveInterval = 15 * time.Second
 )
 
 type AIAgentClientSnapshotStore interface {
@@ -63,7 +63,7 @@ type PersistentAIAgentClientStore struct {
 	snapshotReloadInterval        time.Duration
 	snapshotHeartbeatSaveInterval time.Duration
 	snapshotLastReloadAt          time.Time
-	snapshotLastSavedAt           time.Time
+	snapshotDaemonLastSeen        map[string]time.Time
 	snapshotClock                 func() time.Time
 	snapshotReloadRequired        bool
 }
@@ -94,37 +94,17 @@ func OpenPersistentAIAgentClientStore(ctx context.Context, base *DevelopmentAIAg
 		profilePruned := base.pruneUnexpectedDaemonProfiles("snapshot_restore")
 		repaired := base.repairStaleActiveTaskThreads(store.snapshotNow().UTC())
 		store.version = snapshot.Version
-		store.markSnapshotObserved(snapshot.SavedAt)
+		store.markSnapshotObserved(snapshot)
 		if repaired || profilePruned {
 			return store, store.saveSnapshot(ctx)
 		}
 		return store, nil
 	}
+	store.snapshotLastReloadAt = store.snapshotNow()
 	if err := store.saveSnapshot(ctx); err != nil {
 		return nil, err
 	}
 	return store, nil
-}
-
-func (s *PersistentAIAgentClientStore) ConfigureSnapshotCadence(reloadInterval, heartbeatSaveInterval time.Duration) error {
-	if s == nil {
-		return nil
-	}
-	if reloadInterval < 0 {
-		return errors.New("riidoaiserver: AI Agent client snapshot reload interval must not be negative")
-	}
-	if heartbeatSaveInterval < 0 {
-		return errors.New("riidoaiserver: AI Agent client heartbeat snapshot save interval must not be negative")
-	}
-	s.snapshotReloadMu.Lock()
-	defer s.snapshotReloadMu.Unlock()
-	if reloadInterval > 0 {
-		s.snapshotReloadInterval = reloadInterval
-	}
-	if heartbeatSaveInterval > 0 {
-		s.snapshotHeartbeatSaveInterval = heartbeatSaveInterval
-	}
-	return nil
 }
 
 func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error {
@@ -152,6 +132,7 @@ func (s *PersistentAIAgentClientStore) reloadSnapshot(ctx context.Context) error
 	repaired := s.repairStaleActiveTaskThreads(s.snapshotNow().UTC())
 	s.snapshotReloadRequired = false
 	s.snapshotLastReloadAt = s.snapshotNow()
+	s.recordSnapshotDaemonLastSeenLocked(snapshot)
 	s.snapshotReloadMu.Unlock()
 	if repaired {
 		return s.saveSnapshot(ctx)
@@ -180,49 +161,8 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 		return err
 	}
 	s.version = snapshot.Version
-	s.markSnapshotObserved(snapshot.SavedAt)
+	s.markSnapshotSaved(snapshot)
 	return nil
-}
-
-func (s *PersistentAIAgentClientStore) shouldSaveHeartbeatSnapshot() bool {
-	if s == nil {
-		return true
-	}
-	s.snapshotReloadMu.Lock()
-	defer s.snapshotReloadMu.Unlock()
-	if s.snapshotHeartbeatSaveInterval <= 0 || s.snapshotLastSavedAt.IsZero() {
-		return true
-	}
-	return !s.snapshotNow().Before(s.snapshotLastSavedAt.Add(s.snapshotHeartbeatSaveInterval))
-}
-
-func (s *PersistentAIAgentClientStore) shouldReloadSnapshotLocked() bool {
-	if s.snapshotReloadInterval <= 0 || s.snapshotLastReloadAt.IsZero() {
-		return true
-	}
-	return !s.snapshotNow().Before(s.snapshotLastReloadAt.Add(s.snapshotReloadInterval))
-}
-
-func (s *PersistentAIAgentClientStore) markSnapshotObserved(savedAt time.Time) {
-	if s == nil {
-		return
-	}
-	s.snapshotReloadMu.Lock()
-	defer s.snapshotReloadMu.Unlock()
-	now := s.snapshotNow()
-	s.snapshotLastReloadAt = now
-	if !savedAt.IsZero() {
-		s.snapshotLastSavedAt = savedAt.UTC()
-		return
-	}
-	s.snapshotLastSavedAt = now
-}
-
-func (s *PersistentAIAgentClientStore) snapshotNow() time.Time {
-	if s != nil && s.snapshotClock != nil {
-		return s.snapshotClock()
-	}
-	return time.Now()
 }
 
 func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClientSnapshot, error) {

@@ -81,8 +81,8 @@ Current trace evidence identifies AI Agent client snapshot load/save as the CQRS
 
 | Step | Statement |
 | --- | --- |
-| Observe | Development traces showed snapshot load/save operations on runtime-snapshot and agent-bindings paths, while broader Store CQRS had no matching evidence. |
-| Hypothesis | A narrow snapshot CQRS gate can keep optimization scoped to the observed hot item until post-cadence measurements prove a split is needed. |
-| Execute | Record route-to-store-operation evidence, cadence rules, measurement signals, decision thresholds, and forbidden trace attributes in this manifest. |
-| Evaluate | The snapshot CQRS verifier checks operations, signals, decision rules, and forbidden public trace attributes before the reader can be trusted. |
-| Retrospective | This keeps cost optimization evidence-driven: cadence changes are measured first, and only the AI Agent snapshot becomes a CQRS candidate. |
+| Observe | Cross-server regression tests reproduced an online shared runtime being projected offline and excluded from assignable agents: a five-minute heartbeat save window and one-minute reload cache exceeded the 45-second liveness timeout, and unrelated snapshot saves postponed unsaved daemon heartbeats. |
+| Hypothesis | Fifteen-second save and reload windows, measured against each daemon's committed LastSeenAt rather than the global snapshot SavedAt, preserve cross-server availability while still coalescing hot heartbeats. |
+| Execute | Restore both documented 15-second defaults, reject configured save-plus-reload windows at or above the runtime liveness timeout, and rebuild per-daemon committed heartbeat timestamps after successful snapshot saves and loads. Failed saves do not advance the committed heartbeat checkpoint. Local saves do not postpone the next cross-server reload. |
+| Evaluate | Shared-agent tests cover cold and cached readers, unrelated recent snapshot saves, online runtime display, the HTTP assignable list, and accepted assignment by another workspace member; existing heartbeat coalescing and meaningful-change tests remain required. |
+| Retrospective | Persistence cost optimization must fit within the liveness deadline across writer and reader servers. Global snapshot freshness is not evidence that every daemon heartbeat was persisted; broader CQRS remains subject to the measured decision rules above. |

@@ -19,7 +19,7 @@ func (s *PersistentAIAgentClientStore) SyncAIAgentDaemonRuntimeSnapshot(ctx cont
 		}
 		return response, err
 	}
-	if !changed && !s.shouldSaveHeartbeatSnapshot() {
+	if !changed && !s.shouldSaveHeartbeatSnapshot(response.Daemon) {
 		return response, nil
 	}
 	return response, s.saveSnapshot(ctx)

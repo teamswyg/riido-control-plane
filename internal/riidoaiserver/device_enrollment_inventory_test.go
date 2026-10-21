@@ -18,9 +18,8 @@ func TestDynamoEnrollmentPreservesCommittedHeartbeatInventory(t *testing.T) {
 				t.Fatal(err)
 			}
 			stale, _ := openEnrollmentInventoryStore(t, fixture.server.URL)
-			if err := stale.ConfigureSnapshotCadence(time.Hour, time.Hour); err != nil {
-				t.Fatal(err)
-			}
+			// Keep this replica deliberately stale to exercise the storage merge.
+			stale.snapshotReloadInterval = time.Hour
 			before, _ := stale.deviceByIDLocked(enrollment.DeviceID)
 			committed, found, err := native.LoadAIAgentClientSnapshot(ctx)
 			if err != nil || !found {

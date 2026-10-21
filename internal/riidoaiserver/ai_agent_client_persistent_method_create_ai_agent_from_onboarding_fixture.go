@@ -45,7 +45,7 @@ func (s *PersistentAIAgentClientStore) CreateAIAgentFromOnboardingFixture(ctx co
 		}
 		s.publishOnboardingAgentCreate(snapshot, response.Agent.AgentID)
 		s.version = snapshot.Version
-		s.markSnapshotObserved(snapshot.SavedAt)
+		s.markSnapshotSaved(snapshot)
 		return response, nil
 	}
 	return AgentClientRecordResponse{}, onboardingAgentCreateDependencyError{cause: errTaskAgentSnapshotChanged}
