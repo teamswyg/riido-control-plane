@@ -21760,8 +21760,8 @@
     },
     {
       "id": "runtime_liveness_heartbeat_jitter_loop",
-      "observation": "Staging emitted binding_agent_not_registered at roughly 21-second intervals for an agent whose daemon and runtime snapshots stayed online. Each rejection occurred immediately before the next supported legacy daemon heartbeat because the previous 20-second stale threshold was shorter than the observed heartbeat cadence.",
-      "hypothesis": "Keeping two observed legacy heartbeat windows before declaring a runtime stale will remove false binding rejection and repeated poll work without changing endpoint payloads, credentials, runtime identity, or the daemon heartbeat contract.",
+      "observation": "Staging emitted binding_agent_not_registered at roughly 21-second intervals for an agent whose daemon and runtime snapshots stayed online. Each rejection occurred immediately before the next supported legacy daemon heartbeat because the previous 20-second stale threshold was shorter than the observed heartbeat cadence. Subsequent shared-runtime regressions reproduced a live daemon becoming stale on another reader when unrelated saves advanced the global save timestamp or local writes postponed reload. A separate contended-reader regression exhausted every 150ms heartbeat deadline with TryLock polling (5/5 runs). Staging requests also hit the daemon caller's 5-second cancellation budget.",
+      "hypothesis": "Keeping two observed legacy heartbeat windows before declaring a runtime stale will remove false binding rejection and repeated poll work without changing endpoint payloads, credentials, runtime identity, or the daemon heartbeat contract. Track committed heartbeat timestamps per daemon, keep reload cadence independent of local saves, and make cancellable heartbeat operations join the same waiting queue as ordinary snapshot readers. These changes should preserve visibility after durable refresh and prevent polling starvation without changing authorization or the 45-second liveness threshold.",
       "claims": [
         "agent_runtime_binding_must_preserve_identity_and_visibility_contract",
         "control_plane_performance_hot_paths_must_emit_evidence"
@@ -21782,6 +21782,22 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_operation_lock.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_sync_ai_agent_daemon_runtime_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_snapshot_cadence.go"
         }
       ],
       "verifiers": [
@@ -21800,6 +21816,18 @@
         {
           "kind": "tool",
           "path": "tools/loopregistry"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/shared_agent_online_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_snapshot_cadence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_heartbeat_contention_test.go"
         }
       ],
       "evidence": [
@@ -21813,7 +21841,7 @@
           "redacted": true
         }
       ],
-      "decision": "Set runtime and daemon snapshot staleness to 45 seconds, covering two roughly 21-second legacy heartbeat windows plus jitter. Preserve the existing greater-than stale comparison and all public contracts. Re-run staging after deployment and require the periodic binding rejection to disappear while heartbeat and binding polls remain healthy.",
+      "decision": "Set runtime and daemon snapshot staleness to 45 seconds, covering two roughly 21-second legacy heartbeat windows plus jitter. Preserve the existing greater-than stale comparison and all public contracts. Re-run staging after deployment and require the periodic binding rejection to disappear while heartbeat and binding polls remain healthy. Preserve the threshold while bounding default reload and heartbeat persistence to 15 seconds each and rejecting unsafe combined cadence. Failed saves must remain retryable. Shared-member bootstrap, assignable-list and assignment regressions exercise cold/cached readers and unrelated writes; the contention case passed 20/20 after queueing all callers. Cancellation must not consume the next available lock. Full Go and focused race suites passed. Staging verified a non-owner shared agent returned the requested marker; intermittent request cancellation and live UI delivery still require separate observation, so this is not a zero-timeout guarantee.",
       "next_loop": "closed_loop_candidate"
     },
     {
