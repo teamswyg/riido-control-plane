@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -50,4 +51,9 @@ func (s *AIAgentTaskDocumentSnapshot) apply(document *AIAgentTaskContextDocument
 		return
 	}
 	document.Content, document.ContentFormat, document.Source = s.Content, s.ContentFormat, "editor_snapshot"
+	document.Status = "available"
+	if strings.TrimSpace(readableTaskContextHTML(s.Content)) == "" {
+		document.Status = "empty"
+	}
+	document.AlternateContent, document.AlternateFormat, document.AlternateSource = "", "", ""
 }

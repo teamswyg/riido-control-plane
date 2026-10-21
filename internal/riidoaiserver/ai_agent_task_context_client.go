@@ -197,7 +197,7 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	}
 	workspaceID := strings.TrimSpace(req.WorkspaceID)
 	if workspaceID != "" && location.Team.Workspace.ID != workspaceID {
-		return AIAgentTaskContext{}, fmt.Errorf("riidoaiserver: task context workspace mismatch %q", location.Team.Workspace.ID)
+		return AIAgentTaskContext{}, errors.New("riidoaiserver: task context workspace mismatch")
 	}
 	if location.Team.ID == "" {
 		return AIAgentTaskContext{}, errors.New("riidoaiserver: task context team_id is missing")
@@ -221,51 +221,22 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	return contextSnapshot, nil
 }
 
-func (c *AIAgentPrivateTaskContextClient) getComponentWorkspace(ctx context.Context, componentID, bearerToken string) (privateComponentWorkspaceResponse, error) {
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.privateComponentWorkspaceEndpoint(componentID), nil)
-	if err != nil {
-		return privateComponentWorkspaceResponse{}, fmt.Errorf("riidoaiserver: create task context workspace request: %w", err)
-	}
-	httpReq.Header.Set("Accept", "application/json")
-	httpReq.Header.Set("Authorization", "Bearer "+bearerToken)
-	var out privateComponentWorkspaceResponse
-	if err := c.doPrivateTaskContextJSON(httpReq, &out); err != nil {
-		return privateComponentWorkspaceResponse{}, err
-	}
-	return out.normalized(), nil
-}
-
-func (c *AIAgentPrivateTaskContextClient) getComponentDetail(ctx context.Context, teamID, componentID, bearerToken string) (privateComponentDetailResponse, error) {
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.privateComponentDetailEndpoint(teamID, componentID), nil)
-	if err != nil {
-		return privateComponentDetailResponse{}, fmt.Errorf("riidoaiserver: create task context component request: %w", err)
-	}
-	httpReq.Header.Set("Accept", "application/json")
-	httpReq.Header.Set("Authorization", "Bearer "+bearerToken)
-	var out privateComponentDetailResponse
-	if err := c.doPrivateTaskContextJSON(httpReq, &out); err != nil {
-		return privateComponentDetailResponse{}, err
-	}
-	return out.normalized(), nil
-}
-
 func (c *AIAgentPrivateTaskContextClient) doPrivateTaskContextJSON(req *http.Request, out any) error {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("riidoaiserver: private task context request failed: %w", err)
+		return taskContextTransportFailure(req.Context(), err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 1024))
-		return fmt.Errorf("riidoaiserver: private task context returned HTTP %d", resp.StatusCode)
+		return taskContextHTTPFailure(resp.StatusCode)
 	}
-	dec := json.NewDecoder(io.LimitReader(resp.Body, 1<<20))
-	if err := dec.Decode(out); err != nil {
-		return fmt.Errorf("riidoaiserver: decode private task context response: %w", err)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, (1<<20)+1))
+	if err != nil {
+		return taskContextTransportFailure(req.Context(), err)
 	}
-	var extra struct{}
-	if err := dec.Decode(&extra); err != io.EOF {
-		return errors.New("riidoaiserver: decode private task context response: trailing data")
+	if len(body) > 1<<20 || json.Unmarshal(body, out) != nil {
+		return taskContextReadError{"invalid"}
 	}
 	return nil
 }

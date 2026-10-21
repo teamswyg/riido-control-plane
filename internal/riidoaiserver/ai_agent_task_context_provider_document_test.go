@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T) {
+func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentJSON(t *testing.T) {
 	gotPaths := []string{}
 	var mu sync.Mutex
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,15 +25,14 @@ func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T
 	defer server.Close()
 
 	contextSnapshot := readProviderDocumentContextFixture(t, server.URL)
-	if contextSnapshot.Document.Content != "<p>fresh provider document says Bye World.</p>" ||
-		contextSnapshot.Document.ContentFormat != "html" ||
+	if contextSnapshot.Document.Content != "fresh provider document says Bye World." ||
+		contextSnapshot.Document.ContentFormat != "markdown" ||
 		contextSnapshot.Document.TiptapDocumentID != "doc-a" {
 		t.Fatalf("context snapshot document = %+v", contextSnapshot.Document)
 	}
 	wantPaths := []string{
 		"/public/components/component-a/workspace",
 		"/teams/team-a/components/component-a?getDocument=true",
-		"/documents/providers/team-a/component-a?format=html",
 		"/documents/providers/team-a/component-a?format=json",
 		"/teams/team-a/components/component-a/files",
 		"/teams/team-a/components/component-a/web-links",
@@ -45,7 +44,7 @@ func TestAIAgentPrivateTaskContextClientPrefersProviderDocumentHTML(t *testing.T
 	}
 }
 
-func TestAIAgentPrivateTaskContextClientRejectsUnavailableProviderDocument(t *testing.T) {
+func TestAIAgentPrivateTaskContextClientFailsClosedWhenProviderDocumentUnavailable(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/documents/providers/team-a/component-a" {
 			http.NotFound(w, r)
@@ -56,8 +55,8 @@ func TestAIAgentPrivateTaskContextClientRejectsUnavailableProviderDocument(t *te
 	defer server.Close()
 
 	client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: server.URL})
-	_, err := client.GetAIAgentTaskContextForRequest(context.Background(), AIAgentTaskContextRequest{ComponentID: "component-a", WorkspaceID: "workspace-a", BearerToken: "user-jwt"})
-	if err == nil {
-		t.Fatal("provider failure must not resurrect stale component HTML")
+	contextSnapshot, err := client.GetAIAgentTaskContextForRequest(context.Background(), AIAgentTaskContextRequest{ComponentID: "component-a", WorkspaceID: "workspace-a", BearerToken: "user-jwt"})
+	if err == nil || contextSnapshot.Document.Content != "" {
+		t.Fatalf("failed latest read used stale document: %+v err=%v", contextSnapshot, err)
 	}
 }

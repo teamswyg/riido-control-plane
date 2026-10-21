@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestLatestProviderDocumentLegacyEmptyJSONStringUsesAuthoritativeHTML(t *testing.T) {
+func TestLatestProviderDocumentLegacyEmptyJSONStringPreservesHTMLProjectionEvidence(t *testing.T) {
 	for _, legacy := range []any{nil, ""} {
 		htmlReads := 0
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +24,7 @@ func TestLatestProviderDocumentLegacyEmptyJSONStringUsesAuthoritativeHTML(t *tes
 		}))
 		got := readProviderDocumentContextFixture(t, server.URL)
 		server.Close()
-		if htmlReads != 1 || got.Document.Content != "<p>Latest agent HTML-only edit</p>" || got.Document.Source != "provider_document" {
+		if htmlReads != 1 || got.Document.AlternateContent != "Latest agent HTML-only edit" || got.Document.AlternateSource != "provider_html_projection" {
 			t.Fatalf("HTML-only document lost: %+v reads=%d", got.Document, htmlReads)
 		}
 	}

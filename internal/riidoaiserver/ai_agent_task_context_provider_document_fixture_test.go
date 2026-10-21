@@ -33,15 +33,10 @@ func writeProviderDocumentContextFixture(t *testing.T, w http.ResponseWriter, r 
 		writeProviderDocumentComponent(w)
 	case "/documents/providers/team-a/component-a":
 		if r.URL.Query().Get("format") == "json" {
-			_ = json.NewEncoder(w).Encode(map[string]any{"tiptapJson": nil})
-			return
+			_ = json.NewEncoder(w).Encode(map[string]any{"tiptapJson": `{"default":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"fresh provider document says Bye World."}]}]}}`})
+		} else {
+			_ = json.NewEncoder(w).Encode(map[string]any{"html": "<p>fresh provider document says Bye World.</p>"})
 		}
-		if got := r.URL.Query().Get("format"); got != "html" {
-			t.Fatalf("format = %q", got)
-		}
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"html": "<p>fresh provider document says Bye World.</p>",
-		})
 	default:
 		http.NotFound(w, r)
 	}

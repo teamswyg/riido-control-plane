@@ -2,12 +2,9 @@ package riidoaiserver
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
 	"strings"
 )
 
-// A latest-document failure must never become a successful run with stale HTML.
 type latestTaskDocumentError struct{ cause error }
 
 func (e latestTaskDocumentError) Error() string {
@@ -15,44 +12,32 @@ func (e latestTaskDocumentError) Error() string {
 }
 func (e latestTaskDocumentError) Unwrap() error { return e.cause }
 
-func (c *AIAgentPrivateTaskContextClient) getLatestProviderDocument(ctx context.Context, teamID, componentID, bearer string) (AIAgentTaskContextDocument, error) {
-	endpoint := strings.TrimSuffix(c.privateProviderDocumentEndpoint(teamID, componentID), "html") + "json"
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+func (c *AIAgentPrivateTaskContextClient) getLatestProviderDocument(ctx context.Context, team, id, bearer string) (*AIAgentTaskContextDocument, error) {
+	ctx, finish := observeTaskContextRead(ctx, "document_projection")
+	outcome, source, jsonState := "unavailable", "none", "missing"
+	defer func() {
+		finish(outcome, StringTraceAttribute("riido.task_context.source", source), StringTraceAttribute("riido.task_context.json_state", jsonState))
+	}()
+	projections, err := c.fetchProviderProjections(ctx, team, id, bearer)
 	if err != nil {
-		return AIAgentTaskContextDocument{}, latestTaskDocumentError{err}
+		outcome = taskContextReadOutcome(ctx, err)
+		return nil, latestTaskDocumentError{err}
 	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+bearer)
-	var response struct {
-		TiptapJSON json.RawMessage `json:"tiptapJson"`
+	if projections.JSON != nil {
+		jsonState = "invalid"
 	}
-	if err := c.doPrivateTaskContextJSON(req, &response); err != nil {
-		return AIAgentTaskContextDocument{}, latestTaskDocumentError{err}
-	}
-	if !providerTiptapJSONAbsent(response.TiptapJSON) {
-		content, err := readableTaskContextTiptapJSON(response.TiptapJSON)
-		if err != nil {
-			return AIAgentTaskContextDocument{}, latestTaskDocumentError{err}
+	if projections.JSON != nil && strings.TrimSpace(*projections.JSON) != "" {
+		if _, _, err := readableTaskContextJSON(*projections.JSON); err != nil {
+			return nil, latestTaskDocumentError{err}
 		}
-		return AIAgentTaskContextDocument{Content: content, ContentFormat: "text", Source: "provider_document_json"}, nil
 	}
-	// Older documents may not have JSON yet. Only that explicit absence permits HTML.
-	htmlReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.privateProviderDocumentEndpoint(teamID, componentID), nil)
-	if err != nil {
-		return AIAgentTaskContextDocument{}, latestTaskDocumentError{err}
+	document := projections.document()
+	if document == nil {
+		return nil, nil
 	}
-	htmlReq.Header = req.Header.Clone()
-	var responseHTML privateProviderDocumentResponse
-	if err := c.doPrivateTaskContextJSON(htmlReq, &responseHTML); err != nil {
-		return AIAgentTaskContextDocument{}, latestTaskDocumentError{err}
+	outcome, source = document.Status, document.Source
+	if source == "provider_json_projection" {
+		jsonState = outcome
 	}
-	return AIAgentTaskContextDocument{Content: responseHTML.HTML, ContentFormat: "html", Source: "provider_document"}, nil
-}
-
-func providerTiptapJSONAbsent(raw json.RawMessage) bool {
-	if len(raw) == 0 || strings.TrimSpace(string(raw)) == "null" {
-		return true
-	}
-	var serialized string
-	return json.Unmarshal(raw, &serialized) == nil && serialized == ""
+	return document, nil
 }

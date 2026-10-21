@@ -152,8 +152,8 @@ func TestAIAgentPrivateTaskContextClientResolvesTeamAndComponentWithBearer(t *te
 		}
 	}
 	if contextSnapshot.Component.Title != "Implement JWT task context" ||
-		contextSnapshot.Document.Content != "<p>Use the private component document.</p>" ||
-		contextSnapshot.Document.ContentFormat != "html" ||
+		contextSnapshot.Document.Content != "Use the private component document." ||
+		contextSnapshot.Document.ContentFormat != "markdown" ||
 		contextSnapshot.Hierarchy.Project.Title != "AI Agent" ||
 		contextSnapshot.Hierarchy.Milestone.Title != "Control plane" ||
 		len(contextSnapshot.Repositories) != 0 {

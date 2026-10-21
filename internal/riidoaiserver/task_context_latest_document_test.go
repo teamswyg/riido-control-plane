@@ -25,7 +25,7 @@ func TestLatestProviderDocumentJSONIsAuthoritative(t *testing.T) {
 			}))
 			defer server.Close()
 			got := readProviderDocumentContextFixture(t, server.URL)
-			if htmlReads != 0 || got.Document.Source != "provider_document_json" || strings.Contains(got.Document.Content, "stale") {
+			if htmlReads != 0 || got.Document.Source != "provider_json_projection" || strings.Contains(got.Document.Content, "stale") {
 				t.Fatalf("document = %+v, html reads=%d", got.Document, htmlReads)
 			}
 			if strings.Contains(document, "Fresh") && !strings.Contains(got.Document.Content, "Fresh before history save") {

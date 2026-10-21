@@ -45,7 +45,6 @@ func TestConfigFromEnvParsesPrivateTaskContextReader(t *testing.T) {
 	wantPaths := []string{
 		"/public/components/component-a/workspace",
 		"/teams/team-a/components/component-a?getDocument=true",
-		"/documents/providers/team-a/component-a?format=html",
 		"/documents/providers/team-a/component-a?format=json",
 		"/teams/team-a/components/component-a/files",
 		"/teams/team-a/components/component-a/web-links",
@@ -61,7 +60,7 @@ func TestConfigFromEnvParsesPrivateTaskContextReader(t *testing.T) {
 		}
 	}
 	if contextSnapshot.Component.Title != "Private task context from existing API server" ||
-		contextSnapshot.Document.Content != "<p>Provider document from PostgreSQL.</p>" {
+		contextSnapshot.Document.Content != "Provider projection from existing document API." {
 		t.Fatalf("task context snapshot = %+v", contextSnapshot)
 	}
 }

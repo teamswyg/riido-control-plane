@@ -11,10 +11,10 @@ func TestLatestProviderDocumentPreservesRealRiidoAtomicNodes(t *testing.T) {
 		{`{"type":"riidoMention","attrs":{"mentionId":"member","kind":"member","label":"김유래"}}`, "@김유래"},
 		{`{"type":"mentionedComponent","attrs":{"componentId":"task","type":"task","label":"본문 참조"}}`, "@본문 참조"},
 		{`{"type":"mentionedComponent","attrs":{"componentId":"task-no-label"}}`, "@task-no-label"},
-		{`{"type":"mention","attrs":{"id":"member-no-label"}}`, "@member-no-label"},
-		{`{"type":"imageBlock","attrs":{"src":"https://cdn.example.test/image.png","alt":"설명 이미지"}}`, "[Image: 설명 이미지] (https://cdn.example.test/image.png)"},
-		{`{"type":"customVideo","attrs":{"src":"https://cdn.example.test/demo.mp4"}}`, "[Video] (https://cdn.example.test/demo.mp4)"},
-		{`{"type":"imageBlock","attrs":{"src":"https://cdn.example.test/private?token=secret"}}`, "[Image: ]"},
+		{`{"type":"mention","attrs":{"id":"member-no-label"}}`, "[member-no-label]"},
+		{`{"type":"imageBlock","attrs":{"src":"https://cdn.example.test/image.png","alt":"설명 이미지"}}`, "[Media: 설명 이미지] (https://cdn.example.test/image.png)"},
+		{`{"type":"customVideo","attrs":{"src":"https://cdn.example.test/demo.mp4"}}`, "[Media: ] (https://cdn.example.test/demo.mp4)"},
+		{`{"type":"imageBlock","attrs":{"src":"https://cdn.example.test/private?token=secret"}}`, "[Media: ]"},
 	} {
 		raw := `{"default":{"type":"doc","content":[` + fixture.node + `]}}`
 		stored, err := json.Marshal(raw)
