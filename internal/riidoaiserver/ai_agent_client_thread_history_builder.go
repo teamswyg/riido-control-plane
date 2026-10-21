@@ -33,14 +33,15 @@ func appendTaskThreadProgressMessages(
 			continue
 		}
 		out = append(out, AIAgentTaskThreadHistoryMessage{
-			MessageID:    taskThreadProgressMessageID(thread.ThreadID, line.Seq),
-			Role:         AIAgentTaskThreadMessageRoleProgress,
-			CommentKind:  AgentTaskCommentRuntimeProgress,
-			AssignmentID: thread.AssignmentID,
-			RunID:        thread.RunID,
-			Seq:          line.Seq,
-			Body:         body,
-			ObservedAt:   taskThreadProgressObservedAt(thread, line),
+			DisplayMessage: taskProgressDisplayMessage(line),
+			MessageID:      taskThreadProgressMessageID(thread.ThreadID, line.Seq),
+			Role:           AIAgentTaskThreadMessageRoleProgress,
+			CommentKind:    AgentTaskCommentRuntimeProgress,
+			AssignmentID:   thread.AssignmentID,
+			RunID:          thread.RunID,
+			Seq:            line.Seq,
+			Body:           body,
+			ObservedAt:     taskThreadProgressObservedAt(thread, line),
 		})
 	}
 	return out

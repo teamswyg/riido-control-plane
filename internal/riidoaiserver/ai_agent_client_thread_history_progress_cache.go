@@ -3,13 +3,14 @@ package riidoaiserver
 import "time"
 
 type taskThreadProgressMessageCache struct {
-	assignmentID string
-	runID        string
-	lineCount    int
-	lastSeq      int
-	lastMessage  string
-	lastObserved time.Time
-	visibleLines []AIAgentTaskThreadHistoryMessage
+	assignmentID       string
+	runID              string
+	lineCount          int
+	lastSeq            int
+	lastMessage        string
+	lastDisplayMessage string
+	lastObserved       time.Time
+	visibleLines       []AIAgentTaskThreadHistoryMessage
 }
 
 func (s *DevelopmentAIAgentClientStore) cachedTaskThreadProgressMessagesLocked(
@@ -45,22 +46,6 @@ func (s *DevelopmentAIAgentClientStore) dropTaskThreadHistoryCacheLocked(threadI
 	delete(s.taskThreadHistoryCache, threadID)
 }
 
-func newTaskThreadProgressMessageCache(
-	thread AIAgentTaskThreadRecord,
-	messages []AIAgentTaskThreadHistoryMessage,
-) taskThreadProgressMessageCache {
-	last := thread.Lines[len(thread.Lines)-1]
-	return taskThreadProgressMessageCache{
-		assignmentID: thread.AssignmentID,
-		runID:        thread.RunID,
-		lineCount:    len(thread.Lines),
-		lastSeq:      last.Seq,
-		lastMessage:  last.Message,
-		lastObserved: last.ObservedAt,
-		visibleLines: messages,
-	}
-}
-
 func (cached taskThreadProgressMessageCache) matches(thread AIAgentTaskThreadRecord) bool {
 	if len(thread.Lines) == 0 {
 		return false
@@ -71,5 +56,6 @@ func (cached taskThreadProgressMessageCache) matches(thread AIAgentTaskThreadRec
 		cached.lineCount == len(thread.Lines) &&
 		cached.lastSeq == last.Seq &&
 		cached.lastMessage == last.Message &&
+		cached.lastDisplayMessage == taskProgressDisplayMessage(last) &&
 		cached.lastObserved.Equal(last.ObservedAt)
 }
