@@ -57,7 +57,7 @@ type AIAgentClientEventSnapshot struct {
 type PersistentAIAgentClientStore struct {
 	*DevelopmentAIAgentClientStore
 	snapshotStore                 AIAgentClientSnapshotStore
-	operationMu                   sync.Mutex
+	operationMu                   snapshotOperationMutex
 	version                       int64
 	snapshotReloadMu              sync.Mutex
 	snapshotReloadInterval        time.Duration
