@@ -2336,6 +2336,31 @@
       }
     },
     {
+      "name": "AIAgentTaskDocumentSnapshot",
+      "schema": {
+        "name": "AIAgentTaskDocumentSnapshot",
+        "description": "Click-time task body only. Does not save a document history version. Applied only after authorized workspace/task lookup; explicit empty content clears the body. Maximum 262144 UTF-8 bytes.",
+        "type": "object",
+        "required": [
+          "content",
+          "content_format"
+        ],
+        "properties": [
+          {
+            "name": "content",
+            "type": "string"
+          },
+          {
+            "name": "content_format",
+            "type": "string",
+            "enum": [
+              "html"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "AssignAIAgentTaskRequest",
       "schema": {
         "name": "AssignAIAgentTaskRequest",
@@ -2360,6 +2385,10 @@
           {
             "name": "recovery_policy",
             "ref": "ProviderRecoveryPolicy"
+          },
+          {
+            "name": "document_snapshot",
+            "ref": "AIAgentTaskDocumentSnapshot"
           }
         ]
       }
@@ -2433,6 +2462,15 @@
           {
             "name": "source_message_id",
             "type": "string"
+          },
+          {
+            "name": "request_id",
+            "type": "string",
+            "description": "Stable execution identity scoped to task, agent, authorized principal and workspace. Retry the same request with the same body and document snapshot; the first committed execution wins."
+          },
+          {
+            "name": "document_snapshot",
+            "ref": "AIAgentTaskDocumentSnapshot"
           }
         ]
       }

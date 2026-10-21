@@ -62,6 +62,14 @@ export interface AIAgentTaskActionResponse {
 }
 
 /**
+ * Click-time task body only. Does not save a document history version. Applied only after authorized workspace/task lookup; explicit empty content clears the body. Maximum 262144 UTF-8 bytes.
+ */
+export interface AIAgentTaskDocumentSnapshot {
+  content: string;
+  content_format: "html";
+}
+
+/**
  * 활성 thread filter들과 함께 사용하는 공통 client SSE stream handoff link입니다.
  */
 export interface AIAgentTaskEventStreamLink {
@@ -636,6 +644,7 @@ export interface AgentWorkStatusChangedEvent {
  */
 export interface AssignAIAgentTaskRequest {
   agent_id: string;
+  document_snapshot?: AIAgentTaskDocumentSnapshot;
   instruction?: string;
   recovery_policy?: ProviderRecoveryPolicy;
   request_id?: string;
@@ -747,6 +756,11 @@ export interface ControlDeviceDaemonRequest {
  */
 export interface CreateAIAgentTaskThreadMessageRequest {
   body: string;
+  document_snapshot?: AIAgentTaskDocumentSnapshot;
+  /**
+   * Stable execution identity scoped to task, agent, authorized principal and workspace. Retry the same request with the same body and document snapshot; the first committed execution wins.
+   */
+  request_id?: string;
   source_message_id?: string;
 }
 

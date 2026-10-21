@@ -61,7 +61,9 @@
     "agent_supported",
     "update_required",
     "download_url",
-    "request_id"
+    "request_id",
+    "document_snapshot",
+    "content_format"
   ],
   "deployment_evidence": [
     "not from a manual",
@@ -334,12 +336,30 @@
       }
     ],
     "ordering_rules": [
-      {"name": "contextual-progress-1", "detail": "User-visible progress describes actual work on the current task. The daemon's existing structured progress codes supply a short `description` (1101/1103) or `summary` (1104); no additional model call or execution state is introduced."},
-      {"name": "contextual-progress-2", "detail": "The server projects only those known arguments into optional `display_message` on SSE/legacy progress lines and v3 history progress rows. The public response does not expose raw progress arguments. Unknown/unclassified output, assistant drafts, lifecycle/queue announcements, empty or oversized descriptions do not gain a display message. Existing raw message/body fields, sequence, assignment identity, final results and stop/follow-up behavior stay compatible."},
-      {"name": "contextual-progress-3", "detail": "Descriptions are plain text, one line, at most 180 Unicode characters. The daemon instruction asks for one task-specific sentence in the user's language, with no internal tool transcript, repeated status or unobserved success claims. This is a presentation boundary, not an authorization or execution decision."},
-      {"name": "contextual-progress-4", "detail": "The client uses `display_message` for recent progress and expandable history; generic waiting/working/responding labels are fallback only. Older clients and older daemons remain compatible, but old unclassified logs cannot be converted into specific progress by guessing their meaning."},
-      {"name": "contextual-progress-5", "detail": "Persisted thread records and outbound SSE replay events restore the saved projection so a server restart does not erase contextual history. Ingest line decoding ignores incoming `display_message`; normalization clears any restored projection before accepting a new batch. Only classified arguments can create a new public summary. History caches include the projected summary in their identity to avoid reusing stale descriptions."},
-      {"name": "contextual-progress-6", "detail": "Verify JSON projection for live and cold history, unknown/malformed inputs, unchanged private metadata, and distinct descriptions across different tasks. Server deployment is required; improved report quality also requires the daemon instruction update. Local fixtures are not proof of a real provider run. "},
+      {
+        "name": "contextual-progress-1",
+        "detail": "User-visible progress describes actual work on the current task. The daemon's existing structured progress codes supply a short `description` (1101/1103) or `summary` (1104); no additional model call or execution state is introduced."
+      },
+      {
+        "name": "contextual-progress-2",
+        "detail": "The server projects only those known arguments into optional `display_message` on SSE/legacy progress lines and v3 history progress rows. The public response does not expose raw progress arguments. Unknown/unclassified output, assistant drafts, lifecycle/queue announcements, empty or oversized descriptions do not gain a display message. Existing raw message/body fields, sequence, assignment identity, final results and stop/follow-up behavior stay compatible."
+      },
+      {
+        "name": "contextual-progress-3",
+        "detail": "Descriptions are plain text, one line, at most 180 Unicode characters. The daemon instruction asks for one task-specific sentence in the user's language, with no internal tool transcript, repeated status or unobserved success claims. This is a presentation boundary, not an authorization or execution decision."
+      },
+      {
+        "name": "contextual-progress-4",
+        "detail": "The client uses `display_message` for recent progress and expandable history; generic waiting/working/responding labels are fallback only. Older clients and older daemons remain compatible, but old unclassified logs cannot be converted into specific progress by guessing their meaning."
+      },
+      {
+        "name": "contextual-progress-5",
+        "detail": "Persisted thread records and outbound SSE replay events restore the saved projection so a server restart does not erase contextual history. Ingest line decoding ignores incoming `display_message`; normalization clears any restored projection before accepting a new batch. Only classified arguments can create a new public summary. History caches include the projected summary in their identity to avoid reusing stale descriptions."
+      },
+      {
+        "name": "contextual-progress-6",
+        "detail": "Verify JSON projection for live and cold history, unknown/malformed inputs, unchanged private metadata, and distinct descriptions across different tasks. Server deployment is required; improved report quality also requires the daemon instruction update. Local fixtures are not proof of a real provider run. "
+      },
       {
         "name": "conversation-card-ordering",
         "detail": "First group by conversation_id. Inside a group, render root threads before records whose parent_thread_id points at that root."
@@ -385,6 +405,30 @@
       {
         "name": "delete-agent",
         "detail": "DELETE the task-scoped v2 assignment endpoint. Historical v3 thread history must stay visible even when the current agent profile is removed. The server observes the latest retained thread from the same snapshot used to cancel this task/Agent's executions. Task-scoped client assignment and follow-up publication hold a shared gate from durable creation through client projection publication; membership removal waits for that publication before checking its private thread observation under the client-store lock. A concurrent new execution, including one created after an empty-history observation, returns 409 without removing membership or stopping the unobserved execution. Persistent participants may expose latest_assignment_id from their latest retained thread regardless of execution state; this optional removal observation does not occupy runtime capacity."
+      },
+      {
+        "name": "task-document-snapshot-input",
+        "detail": "Assignment and followup accept optional document_snapshot:{content,content_format:\"html\"}. Required content accepts explicit empty HTML and at most 262144 UTF-8 bytes; the snapshot is an execution input and never writes or flushes document history. The client 30-second history cadence is unchanged."
+      },
+      {
+        "name": "task-document-snapshot-verification",
+        "detail": "Before applying editor_snapshot, the server verifies the request-token task workspace and component identity. Only body content, format and provenance are replaced; server document identity, title, hierarchy, resources, repository and runtime ownership remain authoritative. Verified editor snapshots bypass provider-body reads. Context-fetch failures remain retryable HTTP 503."
+      },
+      {
+        "name": "latest-task-document-source",
+        "detail": "Without an editor snapshot, format=json reads current tiptapJson. Decode the PostgreSQL serialized JSON string and default fragment; direct document objects and fragment maps remain compatible. Valid empty documents are authoritative. Only absent/null tiptapJson or legacy empty-string HTML-only documents permit format=html fallback. Invalid latest JSON or failed lookups return HTTP 503 rather than silently running with stale component HTML."
+      },
+      {
+        "name": "snapshot-request-first-wins",
+        "detail": "Capture one request_id and body snapshot per click; preserve both on retries. Existing receipts are first-wins even when a retry changes content: the first committed execution prompt is retained. A new instruction needs a new request_id. Assignment identity includes workspace/principal/task/Agent; followup additionally namespaces source thread and operation. Receipt replay validates thread identity before returning the original result without rereading mutable task context."
+      },
+      {
+        "name": "snapshot-followup-compatibility",
+        "detail": "Terminal and waiting-for-user followups with request_id use durable identified additive execution and preserve native session selection. Active direct-API followups retain legacy execution reuse; normal client working/stopping cards do not show a reply input. Scoped followup publication receipts and stable source-message IDs prevent duplicate history. Callers omitting request_id retain legacy behavior without a new idempotency guarantee."
+      },
+      {
+        "name": "snapshot-deployment-order",
+        "detail": "Deploy control-plane before client snapshot capture because old servers reject unknown fields. Verify deployed provider serialized-default JSON, explicit empty documents and legacy HTML-only fallback first. Then QA immediate editing/assignment/followup, response-lost retries and route/workspace changes, confirming no additional document versions. Daemon and provider schema/history cadence require no change."
       }
     ],
     "sse_handling_rules": [
