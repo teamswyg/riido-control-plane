@@ -19,10 +19,10 @@ func writeParentTaskContextDocuments(out *strings.Builder, hierarchy AIAgentTask
 		if item.ref.Document != nil {
 			writeTaskContextDocumentSource(out, *item.ref.Document)
 		}
-		if item.ref.Document == nil || item.ref.Document.Content == "" {
+		if item.ref.Document == nil {
 			out.WriteString("[Document unavailable: do not invent its contents.]\n")
 		} else {
-			out.WriteString(item.ref.Document.Content + "\n")
+			writeTaskContextDocumentBody(out, *item.ref.Document)
 		}
 		writeTaskContextResources(out, item.ref.Resources, item.ref.ResourceStatus, 1000)
 	}

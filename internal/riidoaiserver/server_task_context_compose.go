@@ -47,7 +47,7 @@ func composeAssignRequestWithTaskContextResult(
 }
 
 func composeAssignRequestWithoutTaskContext(taskID, componentID string, req AssignRequest) (AssignRequest, error) {
-	composed, err := ComposeAIAgentAssignmentPromptWithoutTaskContext(taskID, componentID)
+	composed, err := composeAIAgentAssignmentFallback(taskID, componentID, req.Prompt)
 	if err != nil {
 		return AssignRequest{}, err
 	}

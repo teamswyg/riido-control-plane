@@ -15,7 +15,8 @@ const (
 	taskContextPromptFallbackNotProvided              = "not provided"
 	taskContextUnavailableDocumentContent             = "Task context was not available when this assignment was created. " +
 		"Use the task_id as the stable work item reference, avoid assuming repository state, " +
-		"and ask for missing repository or product context before making code changes."
+		"and act on the explicit user instruction within the authorized scope. " +
+		"Ask for missing repository or product context only when it is necessary for the requested action."
 )
 
 type AIAgentAssignmentPromptInput struct {
@@ -90,11 +91,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 		writePromptLine(&builder, "content_format", document.ContentFormat)
 		builder.WriteString("\n")
 	}
-	if document.Content == "" {
-		builder.WriteString(taskContextPromptFallbackNotProvided)
-	} else {
-		builder.WriteString(document.Content)
-	}
+	writeTaskContextDocumentBody(&builder, document)
 	if !strings.HasSuffix(builder.String(), "\n") {
 		builder.WriteString("\n")
 	}
@@ -114,28 +111,6 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 		// Retained for legacy consumers; heuristic labels never gate new work.
 		IntentGateRequired: false,
 	}, nil
-}
-
-func ComposeAIAgentAssignmentPromptWithoutTaskContext(taskID, componentID string) (AIAgentAssignmentPrompt, error) {
-	taskID = strings.TrimSpace(taskID)
-	componentID = strings.TrimSpace(componentID)
-	if componentID == "" {
-		componentID = taskID
-	}
-	return ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{
-		TaskID: taskID,
-		Context: AIAgentTaskContext{
-			Component: AIAgentTaskContextComponent{
-				ID:            componentID,
-				ComponentType: "task",
-				Title:         componentID,
-			},
-			Document: AIAgentTaskContextDocument{
-				Content:       taskContextUnavailableDocumentContent,
-				ContentFormat: "markdown",
-			},
-		},
-	})
 }
 
 func SelectAIAgentTaskContextRepository(repositories []AIAgentTaskContextRepository) (AIAgentTaskContextRepository, bool) {
@@ -198,7 +173,7 @@ func normalizeAIAgentTaskContextComponent(component AIAgentTaskContextComponent)
 func normalizeAIAgentTaskContextDocument(document AIAgentTaskContextDocument) AIAgentTaskContextDocument {
 	document.ID = strings.TrimSpace(document.ID)
 	document.TiptapDocumentID = strings.TrimSpace(document.TiptapDocumentID)
-	document.Content = taskContextText(document.Content, document.ContentFormat, taskDocumentContextLimit)
+	document = normalizeTaskContextAlternate(document, taskDocumentContextLimit)
 	document.ContentFormat = strings.TrimSpace(document.ContentFormat)
 	if strings.EqualFold(document.ContentFormat, "html") {
 		document.ContentFormat = "markdown"
@@ -219,7 +194,7 @@ func normalizeAIAgentTaskContextReference(reference AIAgentTaskContextReference)
 	reference.KeyNumber = strings.TrimSpace(reference.KeyNumber)
 	if reference.Document != nil {
 		document := *reference.Document
-		document.Content = taskContextText(document.Content, document.ContentFormat, parentDocumentContextLimit)
+		document = normalizeTaskContextAlternate(document, parentDocumentContextLimit)
 		document.ContentFormat = "markdown"
 		reference.Document = &document
 	}

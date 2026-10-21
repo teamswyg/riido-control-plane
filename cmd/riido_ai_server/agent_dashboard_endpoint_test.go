@@ -29,9 +29,14 @@ func TestAgentDashboardUsesSeparateGraphQLEndpoint(t *testing.T) {
 			Query string `json:"query"`
 		}
 		_ = json.NewDecoder(r.Body).Decode(&body)
-		if strings.Contains(body.Query, "AgentDashboardLocation") {
+		switch {
+		case strings.Contains(body.Query, "AgentDashboardLocation"):
 			_, _ = w.Write([]byte(`{"data":{"getComponentWorkspace":{"id":"component-a","componentType":"task","team":{"id":"team-a","workspace":{"id":"workspace-a"}}}}}`))
-		} else {
+		case strings.Contains(body.Query, "AgentTaskProjection"):
+			_, _ = w.Write([]byte(`{"data":{"structured":{"tiptapJson":"{\"type\":\"doc\",\"content\":[{\"type\":\"text\",\"text\":\"Monolith JSON projection\"}]}"},"rendered":{"html":null}}}`))
+		case strings.Contains(body.Query, "AgentTaskResources"):
+			_, _ = w.Write([]byte(`{"data":{"files":[],"links":[]}}`))
+		default:
 			_, _ = w.Write([]byte(`{"data":{"getComponent":{"id":"component-a","componentType":"task","title":"Dashboard task","keyNumber":"RIID-5830"}}}`))
 		}
 	}))
@@ -48,7 +53,7 @@ func TestAgentDashboardUsesSeparateGraphQLEndpoint(t *testing.T) {
 		t.Fatalf("dashboard task=%+v error=%v", task, err)
 	}
 	normal, err := client.GetAIAgentTaskContextForRequest(context.Background(), privateTaskContextRequest())
-	if err != nil || normal.Document.Content != "<p>Provider document from Mongo.</p>" {
+	if err != nil || normal.Document.Content != "Monolith JSON projection" {
 		t.Fatalf("legacy task context must remain available: %+v, %v", normal, err)
 	}
 }

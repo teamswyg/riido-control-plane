@@ -8,6 +8,9 @@ import (
 )
 
 func (c *AIAgentPrivateTaskContextClient) readTaskContextResources(ctx context.Context, teamID, componentID, bearer string) ([]AIAgentTaskContextResource, string) {
+	if c.projectionBundles {
+		return c.readTaskContextResourceBundle(ctx, teamID, componentID, bearer)
+	}
 	var resources []AIAgentTaskContextResource
 	status := "available"
 	for _, item := range []struct{ path, kind string }{{"files", "file"}, {"web-links", "link"}} {

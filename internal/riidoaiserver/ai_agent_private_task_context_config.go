@@ -16,10 +16,11 @@ type AIAgentPrivateTaskContextClientConfig struct {
 }
 
 type AIAgentPrivateTaskContextClient struct {
-	graphqlURL string
-	baseURL    string
-	timeout    time.Duration
-	httpClient *http.Client
+	graphqlURL        string
+	projectionBundles bool
+	baseURL           string
+	timeout           time.Duration
+	httpClient        *http.Client
 }
 
 func NewAIAgentPrivateTaskContextClient(config AIAgentPrivateTaskContextClientConfig) (*AIAgentPrivateTaskContextClient, error) {
@@ -43,9 +44,10 @@ func NewAIAgentPrivateTaskContextClient(config AIAgentPrivateTaskContextClientCo
 		return nil, errors.New("riidoaiserver: private task context timeout must be positive")
 	}
 	return &AIAgentPrivateTaskContextClient{
-		graphqlURL: graphqlURL,
-		baseURL:    baseURL,
-		timeout:    timeout,
-		httpClient: aiAgentTaskContextHTTPClient(config.HTTPClient, timeout),
+		graphqlURL:        graphqlURL,
+		projectionBundles: strings.TrimSpace(config.GraphQLURL) != "",
+		baseURL:           baseURL,
+		timeout:           timeout,
+		httpClient:        aiAgentTaskContextHTTPClient(config.HTTPClient, timeout),
 	}, nil
 }
