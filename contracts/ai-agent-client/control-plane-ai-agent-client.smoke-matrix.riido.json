@@ -165,6 +165,14 @@
       ]
     },
     {
+      "generated_path": "aiAgent.runs.reads",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/runs/{run_id}/reads",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV1"
+      ]
+    },
+    {
       "generated_path": "aiAgent.tasks.assign",
       "method": "POST",
       "path": "/v1/client/ai-agent/tasks/{task_id}/assignment",
@@ -384,6 +392,14 @@
       "generated_path": "v2.aiAgent.profileThumbnails.uploads.create",
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/profile-thumbnails/uploads",
+      "evidence_tests": [
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
+      ]
+    },
+    {
+      "generated_path": "v2.aiAgent.runs.reads",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/runs/{run_id}/reads",
       "evidence_tests": [
         "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
       ]

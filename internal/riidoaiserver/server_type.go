@@ -31,6 +31,9 @@ type ServerConfig struct {
 	// AIAgentGlobalReconcileMinInterval coalesces workspace-wide AI Agent
 	// projection repair. Task-scoped action/read repair still runs per request.
 	AIAgentGlobalReconcileMinInterval time.Duration
+	// AssignmentContext stores per-assignment task context snapshots and read
+	// records for the Riido CLI. Nil disables capture and the daemon endpoint.
+	AssignmentContext AssignmentContextStore
 }
 
 type Server struct {

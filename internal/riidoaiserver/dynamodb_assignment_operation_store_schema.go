@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 const (
 	dynamoDBAssignmentOperationPK  = "ASSIGNMENT_OPERATION"
@@ -11,10 +14,11 @@ const (
 )
 
 type assignmentProjectionRecord struct {
-	Assignment   Assignment
-	LastEventSeq int64
-	Recovery     *recoveryWatermark          `json:"-"`
-	EventACKs    []assignmentEventACKReceipt `json:"-"`
+	Assignment        Assignment
+	LastEventSeq      int64
+	Recovery          *recoveryWatermark          `json:"-"`
+	EventACKs         []assignmentEventACKReceipt `json:"-"`
+	ContextTerminalAt time.Time                   `json:"-"`
 }
 
 func dynamoDBAssignmentProjectionPK(assignmentID string) string {

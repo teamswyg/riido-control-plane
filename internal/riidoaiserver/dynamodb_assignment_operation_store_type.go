@@ -6,26 +6,28 @@ import (
 )
 
 type DynamoDBAssignmentOperationStoreConfig struct {
-	EnableAgentHistory  bool
-	Region              string
-	TableName           string
-	Endpoint            string
-	HTTPClient          *http.Client
-	Now                 func() time.Time
-	ActiveLeaseDuration time.Duration
-	CredentialsProvider AWSCredentialsProvider
+	EnableAssignmentContextRetention bool
+	EnableAgentHistory               bool
+	Region                           string
+	TableName                        string
+	Endpoint                         string
+	HTTPClient                       *http.Client
+	Now                              func() time.Time
+	ActiveLeaseDuration              time.Duration
+	CredentialsProvider              AWSCredentialsProvider
 }
 
 type DynamoDBAssignmentOperationStore struct {
-	enableAgentHistory  bool
-	commands            chan dynamoDBAssignmentOperationCommand
-	done                chan struct{}
-	region              string
-	tableName           string
-	endpoint            string
-	endpointHost        string
-	httpClient          *http.Client
-	now                 func() time.Time
-	activeLeaseDuration time.Duration
-	credentialsProvider AWSCredentialsProvider
+	enableAssignmentContextRetention bool
+	enableAgentHistory               bool
+	commands                         chan dynamoDBAssignmentOperationCommand
+	done                             chan struct{}
+	region                           string
+	tableName                        string
+	endpoint                         string
+	endpointHost                     string
+	httpClient                       *http.Client
+	now                              func() time.Time
+	activeLeaseDuration              time.Duration
+	credentialsProvider              AWSCredentialsProvider
 }

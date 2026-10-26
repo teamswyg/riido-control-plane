@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 func (s *Store) applyClaimedAssignment(state *storeState, claim AssignmentClaimResult) error {
@@ -42,10 +43,15 @@ func handleLoadAssignmentProjection(state *storeState, assignmentID string) (Ass
 		return AssignmentProjection{}, false, nil
 	}
 	lastEventSeq := int64(0)
+	terminalSeq := int64(0)
+	var terminalAt time.Time
 	for _, event := range state.events[assignment.TaskID] {
+		if event.AssignmentID == assignmentID && isTerminal(event.State) && (terminalSeq == 0 || event.Seq < terminalSeq) {
+			terminalSeq, terminalAt = event.Seq, event.At
+		}
 		if event.AssignmentID == assignmentID && event.Seq > lastEventSeq {
 			lastEventSeq = event.Seq
 		}
 	}
-	return AssignmentProjection{Assignment: *copyAssignment(assignment), LastEventSeq: lastEventSeq}, true, nil
+	return AssignmentProjection{Assignment: *copyAssignment(assignment), LastEventSeq: lastEventSeq, ContextTerminalAt: terminalAt}, true, nil
 }

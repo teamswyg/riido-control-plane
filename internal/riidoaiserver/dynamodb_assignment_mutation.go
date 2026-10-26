@@ -52,7 +52,7 @@ func (s *DynamoDBAssignmentOperationStore) saveConditionalAssignment(ctx context
 	if err != nil {
 		return err
 	}
-	_, err = doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
+	_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 	if err != nil && isDynamoDBTransactionContention(err) {
 		return errAssignmentProjectionConflict
 	}

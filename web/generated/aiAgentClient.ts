@@ -38,6 +38,35 @@ export type AIAgentOnboardingLocale = "ko" | "en";
 export type AIAgentOnboardingTaskTemplateKey = "schedule" | "interview" | "launch";
 
 /**
+ * 현재 viewer가 확인할 수 있는 실행별 읽기 메타데이터입니다. 과거 본문·URL·요청자 정보는 반환하지 않습니다.
+ */
+export interface AIAgentRunRead {
+  id?: string;
+  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target";
+  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments";
+  served_at: string;
+  status: "served" | "truncated" | "denied" | "unavailable";
+  updated_at?: string;
+  version?: string;
+  via: "prompt" | "cli";
+}
+
+/**
+ * AIAgentRunReadsResponse 타입입니다.
+ */
+export interface AIAgentRunReadsResponse {
+  assignment_id: string;
+  has_more: boolean;
+  page: number;
+  page_size: number;
+  reads: AIAgentRunRead[];
+  run_id: string;
+  schema_version: string;
+  task_id: string;
+  thread_id: string;
+}
+
+/**
  * task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.
  */
 export interface AIAgentTaskActionResponse {
@@ -371,6 +400,36 @@ export interface AgentClientRecordV2 {
    * agent가 소속된 workspace id입니다. v2에서는 URL path의 workspace_id로 서버가 stamp합니다.
    */
   workspace_id: string;
+}
+
+/**
+ * 실행 중 에이전트가 읽은 자료를 client SSE로 전달하는 event입니다. 프롬프트로 넘긴 자료(via=prompt)는 실행 시작 때 한 번, 에이전트가 직접 조회한 자료(via=cli)는 조회할 때마다 전달됩니다.
+ */
+export interface AgentContextReadEvent {
+  agent_id: string;
+  assignment_id: string;
+  event_type: "agent_context_read";
+  omitted_sources?: number;
+  run_id: string;
+  schema_version: string;
+  served_at: string;
+  sources: AgentContextReadSource[];
+  task_id: string;
+  thread_id: string;
+  trigger_kind?: "assign" | "thread_message" | "comment";
+  via: "prompt" | "cli";
+}
+
+/**
+ * 에이전트가 이번 실행에서 읽은 Riido 자료 한 건입니다. 본문 내용, URL, 토큰은 담지 않습니다.
+ */
+export interface AgentContextReadSource {
+  id?: string;
+  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target";
+  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments";
+  status: "served" | "truncated" | "denied" | "unavailable";
+  updated_at?: string;
+  version?: string;
 }
 
 /**
@@ -720,7 +779,7 @@ export type ClientKind = "web" | "desktop_webview";
 /**
  * web과 desktop webview client가 소비하는 SSE event union입니다.
  */
-export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent;
+export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent | AgentContextReadEvent;
 
 /**
  * 앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.
@@ -2130,6 +2189,56 @@ export function createAIAgentProfileThumbnailUploadMutationOptions(config: Riido
 }
 
 /**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentRunReadsPathParams {
+  run_id: string;
+  page?: number;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ */
+export async function listAIAgentRunReads(config: RiidoClientConfig, params: ListAIAgentRunReadsPathParams, options: RiidoRequestOptions = {}): Promise<AIAgentRunReadsResponse> {
+  const path = `/v1/client/ai-agent/runs/${params.run_id}/reads`;
+  const query = new URLSearchParams();
+  if (params.page !== undefined) query.set("page", String(params.page));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRequest<AIAgentRunReadsResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * cache tag: `v1.runs.reads`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentRunReadsQueryKeyRoot(): readonly unknown[] {
+  return ["v1.runs.reads"] as const;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentRunReadsQueryKey(params: ListAIAgentRunReadsPathParams): readonly unknown[] {
+  return [...listAIAgentRunReadsQueryKeyRoot(), params] as const;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentRunReadsQueryOptions(config: RiidoClientConfig, params: ListAIAgentRunReadsPathParams, options: RiidoQueryOptions<AIAgentRunReadsResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentRunReadsQueryKey(params),
+    queryFn: () => listAIAgentRunReads(config, params, { signal }),
+  };
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * 경로 파라미터입니다.
  */
@@ -3432,6 +3541,57 @@ export function createAIAgentProfileThumbnailUploadV2MutationOptions(config: Rii
     ...options,
     mutationKey: createAIAgentProfileThumbnailUploadV2MutationKey(),
     mutationFn: (variables: CreateAIAgentProfileThumbnailUploadV2MutationVariables) => createAIAgentProfileThumbnailUploadV2(config, variables.params, variables.body, variables.options ?? {}),
+  };
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 경로 파라미터입니다.
+ */
+export interface ListAIAgentRunReadsV2PathParams {
+  workspace_id: string;
+  run_id: string;
+  page?: number;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ */
+export async function listAIAgentRunReadsV2(config: RiidoClientConfig, params: ListAIAgentRunReadsV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentRunReadsResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/runs/${params.run_id}/reads`;
+  const query = new URLSearchParams();
+  if (params.page !== undefined) query.set("page", String(params.page));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRequest<AIAgentRunReadsResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * cache tag: `v2.runs.reads`
+ * 이 endpoint cache 전체를 무효화할 때 사용하는 root query key입니다.
+ */
+export function listAIAgentRunReadsV2QueryKeyRoot(): readonly unknown[] {
+  return ["v2.runs.reads"] as const;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 이 호출에 사용하는 React Query 키입니다.
+ */
+export function listAIAgentRunReadsV2QueryKey(params: ListAIAgentRunReadsV2PathParams): readonly unknown[] {
+  return [...listAIAgentRunReadsV2QueryKeyRoot(), params] as const;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * useQuery 또는 queryClient.prefetchQuery에 전달할 수 있는 옵션입니다.
+ */
+export function listAIAgentRunReadsV2QueryOptions(config: RiidoClientConfig, params: ListAIAgentRunReadsV2PathParams, options: RiidoQueryOptions<AIAgentRunReadsResponse> = {}) {
+  const { signal, ...queryOptions } = options;
+  return {
+    ...queryOptions,
+    queryKey: listAIAgentRunReadsV2QueryKey(params),
+    queryFn: () => listAIAgentRunReadsV2(config, params, { signal }),
   };
 }
 
@@ -4958,6 +5118,48 @@ export interface CreateAIAgentProfileThumbnailUploadEndpoint {
 }
 
 /**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 계약 generated path: `aiAgent.runs.reads`
+ * 검색용 generated 경로: `runs.reads`
+ * 접근 예시: `riido.aiAgent.runs.reads`
+ * cache tag: `v1.runs.reads`
+ */
+export interface ListAIAgentRunReadsEndpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentRunReadsPathParams, options?: RiidoRequestOptions) => Promise<AIAgentRunReadsResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentRunReadsPathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentRunReadsPathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => ReturnType<typeof listAIAgentRunReadsQueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentRunReadsPathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => ReturnType<typeof listAIAgentRunReadsQueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentRunReadsPathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentRunReadsPathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => Promise<void>;
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * 계약 generated path: `aiAgent.tasks.assignableAgents`
  * 검색용 generated 경로: `tasks.assignableAgents`
@@ -6186,6 +6388,48 @@ export interface CreateAIAgentProfileThumbnailUploadV2Endpoint {
 }
 
 /**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 계약 generated path: `v2.aiAgent.runs.reads`
+ * 검색용 generated 경로: `aiAgent.runs.reads`
+ * 접근 예시: `riido.v2.aiAgent.runs.reads`
+ * cache tag: `v2.runs.reads`
+ */
+export interface ListAIAgentRunReadsV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: ListAIAgentRunReadsV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentRunReadsResponse>;
+  /**
+   * 이 endpoint cache 전체를 가리키는 root query key입니다.
+   */
+  readonly queryKeyRoot: () => readonly unknown[];
+  /**
+   * 특정 호출을 가리키는 query key입니다.
+   */
+  readonly queryKey: (params: ListAIAgentRunReadsV2PathParams) => readonly unknown[];
+  /**
+   * useQuery에 전달할 수 있는 query option입니다.
+   */
+  readonly query: (params: ListAIAgentRunReadsV2PathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => ReturnType<typeof listAIAgentRunReadsV2QueryOptions>;
+  /**
+   * query와 동일합니다. prefetchQuery 등 명시적인 React Query API에 넘길 때 사용합니다.
+   */
+  readonly queryOptions: (params: ListAIAgentRunReadsV2PathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => ReturnType<typeof listAIAgentRunReadsV2QueryOptions>;
+  /**
+   * 특정 query key만 무효화합니다. 화면 정책에 맞춰 client 코드가 호출 여부를 결정합니다.
+   */
+  readonly invalidate: (queryClient: QueryClient, params: ListAIAgentRunReadsV2PathParams) => Promise<void>;
+  /**
+   * 이 endpoint의 root cache tag 전체를 무효화합니다.
+   */
+  readonly invalidateAll: (queryClient: QueryClient) => Promise<void>;
+  /**
+   * 현재 endpoint를 prefetch합니다.
+   */
+  readonly prefetch: (queryClient: QueryClient, params: ListAIAgentRunReadsV2PathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => Promise<void>;
+}
+
+/**
  * workspace task/card에서 기존 active profile 힌트와 지속 Agent 참여자를 별도 맵으로 조회합니다 (v2 workspace-scoped)
  * 계약 generated path: `v2.aiAgent.tasks.assignedAgentProfiles`
  * 검색용 generated 경로: `aiAgent.tasks.assignedAgentProfiles`
@@ -7098,6 +7342,20 @@ export interface RiidoAIAgentProfileThumbnailsNamespace {
 }
 
 /**
+ * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+ */
+export interface RiidoAIAgentRunsNamespace {
+  /**
+   * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+   * 계약 generated path: `aiAgent.runs.reads`
+   * 검색용 generated 경로: `runs.reads`
+   * 접근 예시: `riido.aiAgent.runs.reads`
+   * cache tag: `v1.runs.reads`
+   */
+  readonly reads: ListAIAgentRunReadsEndpoint;
+}
+
+/**
  * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
  */
 export interface RiidoAIAgentTasksThreadMessagesNamespace {
@@ -7201,6 +7459,10 @@ export interface RiidoAIAgentModule {
    * aiAgent.profileThumbnails namespace입니다.
    */
   readonly profileThumbnails: RiidoAIAgentProfileThumbnailsNamespace;
+  /**
+   * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+   */
+  readonly runs: RiidoAIAgentRunsNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -7431,6 +7693,20 @@ export interface RiidoV2AIAgentProfileThumbnailsNamespace {
 }
 
 /**
+ * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+ */
+export interface RiidoV2AIAgentRunsNamespace {
+  /**
+   * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+   * 계약 generated path: `v2.aiAgent.runs.reads`
+   * 검색용 generated 경로: `aiAgent.runs.reads`
+   * 접근 예시: `riido.v2.aiAgent.runs.reads`
+   * cache tag: `v2.runs.reads`
+   */
+  readonly reads: ListAIAgentRunReadsV2Endpoint;
+}
+
+/**
  * 선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다.
  */
 export interface RiidoV2AIAgentTasksAgentAssignmentsNamespace {
@@ -7610,6 +7886,10 @@ export interface RiidoV2AIAgentNamespace {
    * v2.aiAgent.profileThumbnails namespace입니다.
    */
   readonly profileThumbnails: RiidoV2AIAgentProfileThumbnailsNamespace;
+  /**
+   * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+   */
+  readonly runs: RiidoV2AIAgentRunsNamespace;
   /**
    * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -7915,6 +8195,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
             invalidates: {
             },
           },
+        },
+      },
+      runs: {
+        reads: {
+          request: (params: ListAIAgentRunReadsPathParams, options?: RiidoRequestOptions) => listAIAgentRunReads(config, params, options),
+          queryKeyRoot: listAIAgentRunReadsQueryKeyRoot,
+          queryKey: listAIAgentRunReadsQueryKey,
+          query: (params: ListAIAgentRunReadsPathParams, options: RiidoQueryOptions<AIAgentRunReadsResponse> = {}) => listAIAgentRunReadsQueryOptions(config, params, options),
+          queryOptions: (params: ListAIAgentRunReadsPathParams, options: RiidoQueryOptions<AIAgentRunReadsResponse> = {}) => listAIAgentRunReadsQueryOptions(config, params, options),
+          invalidate: (queryClient: QueryClient, params: ListAIAgentRunReadsPathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentRunReadsQueryKey(params) }),
+          invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentRunReadsQueryKeyRoot() }),
+          prefetch: (queryClient: QueryClient, params: ListAIAgentRunReadsPathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => queryClient.prefetchQuery(listAIAgentRunReadsQueryOptions(config, params, options)),
         },
       },
       tasks: {
@@ -8245,6 +8537,18 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
               invalidates: {
               },
             },
+          },
+        },
+        runs: {
+          reads: {
+            request: (params: ListAIAgentRunReadsV2PathParams, options?: RiidoRequestOptions) => listAIAgentRunReadsV2(config, params, options),
+            queryKeyRoot: listAIAgentRunReadsV2QueryKeyRoot,
+            queryKey: listAIAgentRunReadsV2QueryKey,
+            query: (params: ListAIAgentRunReadsV2PathParams, options: RiidoQueryOptions<AIAgentRunReadsResponse> = {}) => listAIAgentRunReadsV2QueryOptions(config, params, options),
+            queryOptions: (params: ListAIAgentRunReadsV2PathParams, options: RiidoQueryOptions<AIAgentRunReadsResponse> = {}) => listAIAgentRunReadsV2QueryOptions(config, params, options),
+            invalidate: (queryClient: QueryClient, params: ListAIAgentRunReadsV2PathParams) => queryClient.invalidateQueries({ queryKey: listAIAgentRunReadsV2QueryKey(params) }),
+            invalidateAll: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentRunReadsV2QueryKeyRoot() }),
+            prefetch: (queryClient: QueryClient, params: ListAIAgentRunReadsV2PathParams, options?: RiidoQueryOptions<AIAgentRunReadsResponse>) => queryClient.prefetchQuery(listAIAgentRunReadsV2QueryOptions(config, params, options)),
           },
         },
         tasks: {

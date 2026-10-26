@@ -25248,6 +25248,231 @@
       ],
       "decision": "Reuse408 cancellation/504 deadline/502 dependency fixed messages for the8reconcile call sites, with safe finite stage logs. RED/green HTTP tests prove wrapped sentinel handling and absence of an upstream canary. Existing successful assignment/read/SSE behavior remains unchanged. Refresh generated docs and their changed golden outputs without relaxing gates. API evidence source checks grow70to71; strict counter/golden expectations are refreshed for the added verifier while endpoint counts and gates remain unchanged.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_assignment_context_5900",
+      "observation": "Agents received every task, parent and resource body in the prompt and could not read more during a run; the server kept no record of which Riido sources an answer used. The monolith accepts only short-lived user JWTs, so the control-plane cannot read on the user's behalf after the request ends.",
+      "hypothesis": "Store the task context the server already composes with the requester Bearer per assignment, let only the leased daemon read it back with its device credential, and record every prompt or CLI read so clients can show what an answer read without any user token being stored.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_thread_message_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_preparation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_cli_prompt.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_trigger_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_stream_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/config-reference.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_visibility.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_lookup.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_boundaries_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_payload_write.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_terminal_write.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_terminal_actions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_comment_keys.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_size_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_projection_condition_failure.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_retention.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_races_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_terminal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_query_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_size_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_delayed_capture_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_available_context.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_unavailable_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_assignment_projection_handlers.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_memory_terminal_clock_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_trigger_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_stream_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_boundaries_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_races_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_terminal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_query_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_size_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_delayed_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_unavailable_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_memory_terminal_clock_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT (default off) thread-message, assign and comment-delivered assignments capture their composed context after publication; thread follow-up composition and history are unchanged when the flag is off. Reads stream as agent_context_read under the thread's existing visibility. GET run reads reauthorizes the current viewer with Bearer-only identity, workspace-scoped run lookup, current task and source-part visibility. Only redacted records surviving that intersection are paginated (100/page); missing or unavailable sources are omitted, and hidden row counts are never exposed. RED missing-route regressions passed after implementation; no retained body is used to authorize historical reads. The current store still scans retained assignment reads before filtering. Approved retention is terminal+24h for snapshot/comments and existing execution-history lifetime for READ. Lifecycle and projection CAS fence captures against all terminal projection writers; retries preserve first expiry, TTL affects payload rows only, and logical reads refuse expired payloads before DynamoDB physical deletion. Byte-bounded capture and one-terminal/six-original-action guards keep aggregate transaction items under 4 MB; Query pagination is bounded and validated. Regression covers RED expired-read leak, both capture/terminal races, conflict exhaustion without false ACK, unchanged READ, one body-free lifecycle marker before capture and no empty snapshot/comment payload rows, and comment-budget unavailable status. Runtime retains independently of capture flag; local memory prunes on access. Preexisting unbounded rows and physical TTL enablement/deletion require staging preflight, not a unit-test completion claim. A delayed capture after repeated terminal projection UpdatedAt changes keeps the first terminal+24h marker expiry. Unavailable current sections never authorize stale fallback arrays. Development memory retention uses the first terminal event timestamp, so later provider-session metadata cannot extend the 24-hour window.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

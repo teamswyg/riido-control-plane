@@ -32,6 +32,7 @@ type runtimeConfig struct {
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
 	AssignmentOutbox         riidoaiserver.EventSink
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
+	AssignmentContext        riidoaiserver.AssignmentContextStore
 }
 
 func closeRuntimeConfig(config runtimeConfig) {

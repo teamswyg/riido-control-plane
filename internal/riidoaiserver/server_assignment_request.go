@@ -61,6 +61,7 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 			WorkspaceID:      principal.WorkspaceID,
 			BearerToken:      bearerToken,
 			DocumentSnapshot: req.DocumentSnapshot,
+			Extended:         s.config.AssignmentContext != nil,
 		})
 	}
 	// Profile ownership is distinct from the connected physical runtime ownership.

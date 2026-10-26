@@ -26,6 +26,7 @@ type AIAgentTaskContextRequest struct {
 	WorkspaceID      string
 	BearerToken      string
 	DocumentSnapshot *AIAgentTaskDocumentSnapshot
+	Extended         bool // also read related work, meetings and comments (extra upstream reads)
 }
 
 type AIAgentTaskContextRequestReader interface {
@@ -215,7 +216,7 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err := req.DocumentSnapshot.validate(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	if err := c.enrichTaskContext(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req.DocumentSnapshot); err != nil {
+	if err := c.enrichTaskContextFor(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req); err != nil {
 		return AIAgentTaskContext{}, err
 	}
 	return contextSnapshot, nil
@@ -281,6 +282,7 @@ type privateComponentDetailResponse struct {
 	Title         string                     `json:"title"`
 	KeyNumber     string                     `json:"keyNumber"`
 	BranchName    string                     `json:"branchName"`
+	UpdatedAt     string                     `json:"updatedAt"`
 	Document      *privateComponentDocument  `json:"document"`
 	Project       *privateComponentReference `json:"project"`
 	Milestone     *privateComponentMilestone `json:"milestone"`
@@ -313,6 +315,7 @@ func (r privateComponentDetailResponse) normalized() privateComponentDetailRespo
 	r.ComponentType = strings.TrimSpace(r.ComponentType)
 	r.Title = strings.TrimSpace(r.Title)
 	r.KeyNumber = strings.TrimSpace(r.KeyNumber)
+	r.UpdatedAt = normalizedTaskContextTime(r.UpdatedAt)
 	if r.Document != nil {
 		r.Document.ID = strings.TrimSpace(r.Document.ID)
 		r.Document.TiptapDocumentID = strings.TrimSpace(r.Document.TiptapDocumentID)
@@ -355,6 +358,7 @@ func (r privateComponentDetailResponse) toAIAgentTaskContext() AIAgentTaskContex
 			Title:         r.Title,
 			KeyNumber:     r.KeyNumber,
 			BranchName:    strings.TrimSpace(r.BranchName),
+			UpdatedAt:     r.UpdatedAt,
 		},
 		Document: document,
 		Hierarchy: AIAgentTaskContextHierarchy{

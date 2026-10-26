@@ -4,6 +4,9 @@ import "time"
 
 func NewServer(config ServerConfig) Server {
 	config = normalizeServerConfigNilInterfaces(config)
+	if memory, ok := config.AssignmentContext.(*MemoryAssignmentContextStore); ok {
+		memory.bindRetention(config.Assignment)
+	}
 	config.WebAllowedOrigins = normalizeWebAllowedOrigins(config.WebAllowedOrigins)
 	if config.LongPollMaxHold <= 0 {
 		config.LongPollMaxHold = 25 * time.Second

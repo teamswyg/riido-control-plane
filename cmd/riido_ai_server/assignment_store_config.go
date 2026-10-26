@@ -18,12 +18,13 @@ func assignmentOperationStoreFromEnv(enabled bool, activeLeaseDuration time.Dura
 		return nil, err
 	}
 	store, err := riidoaiserver.NewDynamoDBAssignmentOperationStore(riidoaiserver.DynamoDBAssignmentOperationStoreConfig{
-		Region:              base.region,
-		EnableAgentHistory:  true,
-		TableName:           strings.TrimSpace(os.Getenv(envAIAgentClientTable)),
-		Endpoint:            base.endpoint,
-		ActiveLeaseDuration: activeLeaseDuration,
-		CredentialsProvider: base.provider,
+		EnableAssignmentContextRetention: true,
+		Region:                           base.region,
+		EnableAgentHistory:               true,
+		TableName:                        strings.TrimSpace(os.Getenv(envAIAgentClientTable)),
+		Endpoint:                         base.endpoint,
+		ActiveLeaseDuration:              activeLeaseDuration,
+		CredentialsProvider:              base.provider,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("%s assignment operation store: %w", envAIAgentClientTable, err)

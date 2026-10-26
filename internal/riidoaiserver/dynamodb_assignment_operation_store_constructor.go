@@ -27,17 +27,18 @@ func NewDynamoDBAssignmentOperationStore(config DynamoDBAssignmentOperationStore
 		activeLeaseDuration = time.Duration(DefaultAssignmentActiveLeaseSeconds) * time.Second
 	}
 	store := &DynamoDBAssignmentOperationStore{
-		enableAgentHistory:  config.EnableAgentHistory,
-		commands:            make(chan dynamoDBAssignmentOperationCommand),
-		done:                make(chan struct{}),
-		region:              region,
-		tableName:           tableName,
-		endpoint:            endpoint,
-		endpointHost:        endpointHost,
-		httpClient:          dynamoDBHTTPClient(config.HTTPClient),
-		now:                 dynamoDBClock(config.Now),
-		activeLeaseDuration: activeLeaseDuration,
-		credentialsProvider: config.CredentialsProvider,
+		enableAssignmentContextRetention: config.EnableAssignmentContextRetention,
+		enableAgentHistory:               config.EnableAgentHistory,
+		commands:                         make(chan dynamoDBAssignmentOperationCommand),
+		done:                             make(chan struct{}),
+		region:                           region,
+		tableName:                        tableName,
+		endpoint:                         endpoint,
+		endpointHost:                     endpointHost,
+		httpClient:                       dynamoDBHTTPClient(config.HTTPClient),
+		now:                              dynamoDBClock(config.Now),
+		activeLeaseDuration:              activeLeaseDuration,
+		credentialsProvider:              config.CredentialsProvider,
 	}
 	go store.loop()
 	return store, nil

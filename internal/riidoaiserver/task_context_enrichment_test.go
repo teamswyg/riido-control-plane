@@ -36,15 +36,15 @@ func TestTaskContextEnrichmentUsesAuthorizedParentsAndResourceMetadataOnly(t *te
 			return
 		}
 		if r.URL.Path == "/teams/team/components/task" {
-			writeTaskContextFixture(t, w, map[string]any{"id": "task", "componentType": "subtask", "title": "Fix regression", "task": map[string]any{"id": "parent", "title": "Parent"}, "document": map[string]any{"HTMLContent": "<p>Task criteria</p>"}})
+			writeTaskContextFixture(t, w, map[string]any{"id": "task", "componentType": "subtask", "title": "Fix regression", "updatedAt": "2026-10-25T09:00:00.000Z", "task": map[string]any{"id": "parent", "title": "Parent"}, "document": map[string]any{"HTMLContent": "<p>Task criteria</p>"}})
 			return
 		}
 		if r.URL.Path == "/teams/team/components/parent" {
-			writeTaskContextFixture(t, w, map[string]any{"id": "parent", "componentType": "task", "title": "Parent", "project": map[string]any{"id": "project", "title": "Product"}, "milestone": map[string]any{"id": "milestone", "title": "Goal"}, "document": map[string]any{"HTMLContent": "<p>Parent criteria</p>"}})
+			writeTaskContextFixture(t, w, map[string]any{"id": "parent", "componentType": "task", "title": "Parent", "updatedAt": "2026-10-24T00:00:00+09:00", "project": map[string]any{"id": "project", "title": "Product"}, "milestone": map[string]any{"id": "milestone", "title": "Goal"}, "document": map[string]any{"HTMLContent": "<p>Parent criteria</p>"}})
 			return
 		}
 		if r.URL.Path == "/teams/team/components/project" {
-			writeTaskContextFixture(t, w, map[string]any{"id": "project", "document": map[string]any{"HTMLContent": "<p>Product constraints</p>"}})
+			writeTaskContextFixture(t, w, map[string]any{"id": "project", "updatedAt": "not a time", "document": map[string]any{"HTMLContent": "<p>Product constraints</p>"}})
 			return
 		}
 		if r.URL.Path == "/teams/team/components/milestone" {
@@ -69,6 +69,9 @@ func TestTaskContextEnrichmentUsesAuthorizedParentsAndResourceMetadataOnly(t *te
 	}
 	if got.Hierarchy.Project.Document == nil || !strings.Contains(got.Hierarchy.Project.Document.Content, "Product constraints") || got.Hierarchy.Milestone.Document != nil || got.Hierarchy.Milestone.DocumentStatus != "unavailable" {
 		t.Fatalf("parent availability = %+v", got.Hierarchy)
+	}
+	if got.Component.UpdatedAt != "2026-10-25T09:00:00Z" || got.Hierarchy.ParentTask.UpdatedAt != "2026-10-23T15:00:00Z" || got.Hierarchy.Project.UpdatedAt != "" {
+		t.Fatalf("source modification times = %q %q %q", got.Component.UpdatedAt, got.Hierarchy.ParentTask.UpdatedAt, got.Hierarchy.Project.UpdatedAt)
 	}
 	if len(got.Resources) != 2 || got.ResourceStatus != "available" {
 		t.Fatalf("resources = %+v, status=%s", got.Resources, got.ResourceStatus)

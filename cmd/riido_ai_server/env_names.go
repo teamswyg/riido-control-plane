@@ -25,6 +25,7 @@ const (
 	envAssignmentActiveLease              = "RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS"
 	envAIAgentClientDev                   = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
 	envAIAgentClientTable                 = "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE"
+	envAssignmentContext                  = "RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT"
 	envAIAgentDaemonProfile               = "RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE"
 	envMinimumDaemonVersion               = "RIIDO_AI_SERVER_MINIMUM_DAEMON_VERSION"
 	envLatestDaemonVersion                = "RIIDO_AI_SERVER_LATEST_DAEMON_VERSION"

@@ -74,6 +74,12 @@
             "threadMessages"
           ],
           "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."
+        },
+        {
+          "path": [
+            "runs"
+          ],
+          "description": "실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다."
         }
       ]
     },
@@ -184,6 +190,13 @@
             "threadStreamSubscription"
           ],
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "runs"
+          ],
+          "description": "실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다."
         }
       ]
     },
@@ -917,6 +930,10 @@
         {
           "kind": "agent_task_notification",
           "schema": "AgentTaskNotificationEvent"
+        },
+        {
+          "kind": "agent_context_read",
+          "schema": "AgentContextReadEvent"
         }
       ]
     }
@@ -2827,6 +2844,157 @@
       ]
     },
     {
+      "name": "AgentContextReadSource",
+      "description": "에이전트가 이번 실행에서 읽은 Riido 자료 한 건입니다. 본문 내용, URL, 토큰은 담지 않습니다.",
+      "type": "object",
+      "required": [
+        "kind",
+        "part",
+        "status"
+      ],
+      "properties": [
+        {
+          "name": "kind",
+          "type": "string",
+          "enum": [
+            "task",
+            "project",
+            "milestone",
+            "parent_task",
+            "link",
+            "attachment",
+            "related_task",
+            "related_backlog",
+            "related_intake",
+            "related_meeting",
+            "comment",
+            "target"
+          ]
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "part",
+          "type": "string",
+          "enum": [
+            "body",
+            "summary",
+            "title",
+            "metadata",
+            "base",
+            "task",
+            "tree",
+            "resources",
+            "comments"
+          ]
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "enum": [
+            "served",
+            "truncated",
+            "denied",
+            "unavailable"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AgentContextReadEvent",
+      "description": "실행 중 에이전트가 읽은 자료를 client SSE로 전달하는 event입니다. 프롬프트로 넘긴 자료(via=prompt)는 실행 시작 때 한 번, 에이전트가 직접 조회한 자료(via=cli)는 조회할 때마다 전달됩니다.",
+      "type": "object",
+      "required": [
+        "event_type",
+        "schema_version",
+        "agent_id",
+        "task_id",
+        "assignment_id",
+        "thread_id",
+        "run_id",
+        "via",
+        "served_at",
+        "sources"
+      ],
+      "properties": [
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_context_read"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "assignment_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "via",
+          "type": "string",
+          "enum": [
+            "prompt",
+            "cli"
+          ]
+        },
+        {
+          "name": "trigger_kind",
+          "type": "string",
+          "enum": [
+            "assign",
+            "thread_message",
+            "comment"
+          ]
+        },
+        {
+          "name": "served_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "sources",
+          "type": "array",
+          "items": {
+            "ref": "AgentContextReadSource"
+          }
+        },
+        {
+          "name": "omitted_sources",
+          "type": "integer"
+        }
+      ]
+    },
+    {
       "name": "AIAgentTaskThreadStreamLink",
       "description": "활성 task thread가 있을 때 client가 연결할 SSE stream handoff link입니다.",
       "type": "object",
@@ -3761,6 +3929,145 @@
           "max_length": 128,
           "pattern": "^[A-Za-z0-9._:-]{1,128}$",
           "description": "선택적인 생성 재시도 식별자입니다. ASCII 영숫자와 . _ : - 만 1~128바이트 허용합니다. 클라이언트는 동일 생성 의도와 전체 payload에 같은 값을 유지하며 최초 생성 요청을 시작한 시점부터 24시간 이내에만 재시도 보장을 사용합니다. 생략 시 기존처럼 각 요청이 별도의 agent를 생성합니다."
+        }
+      ]
+    },
+    {
+      "name": "AIAgentRunRead",
+      "description": "현재 viewer가 확인할 수 있는 실행별 읽기 메타데이터입니다. 과거 본문·URL·요청자 정보는 반환하지 않습니다.",
+      "type": "object",
+      "required": [
+        "kind",
+        "part",
+        "status",
+        "via",
+        "served_at"
+      ],
+      "properties": [
+        {
+          "name": "kind",
+          "type": "string",
+          "enum": [
+            "task",
+            "project",
+            "milestone",
+            "parent_task",
+            "link",
+            "attachment",
+            "related_task",
+            "related_backlog",
+            "related_intake",
+            "related_meeting",
+            "comment",
+            "target"
+          ]
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "part",
+          "type": "string",
+          "enum": [
+            "body",
+            "summary",
+            "title",
+            "metadata",
+            "base",
+            "task",
+            "tree",
+            "resources",
+            "comments"
+          ]
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "enum": [
+            "served",
+            "truncated",
+            "denied",
+            "unavailable"
+          ]
+        },
+        {
+          "name": "via",
+          "type": "string",
+          "enum": [
+            "prompt",
+            "cli"
+          ]
+        },
+        {
+          "name": "served_at",
+          "type": "string",
+          "format": "date-time"
+        }
+      ]
+    },
+    {
+      "name": "AIAgentRunReadsResponse",
+      "type": "object",
+      "required": [
+        "schema_version",
+        "run_id",
+        "task_id",
+        "thread_id",
+        "assignment_id",
+        "reads",
+        "page",
+        "page_size",
+        "has_more"
+      ],
+      "properties": [
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "assignment_id",
+          "type": "string"
+        },
+        {
+          "name": "reads",
+          "type": "array",
+          "items": {
+            "ref": "AIAgentRunRead"
+          }
+        },
+        {
+          "name": "page",
+          "type": "integer"
+        },
+        {
+          "name": "page_size",
+          "type": "integer"
+        },
+        {
+          "name": "has_more",
+          "type": "boolean"
         }
       ]
     }
@@ -5127,6 +5434,12 @@
           "given": "the Figma task thread flow shows a queued or stopped agent update",
           "when": "the assignment state changes",
           "then": "the event stream includes task_id, assignment_state, and a typed comment_kind for the client thread"
+        },
+        {
+          "name": "agent context read",
+          "given": "an agent run reads Riido sources from its assignment context, through the prompt at start or the riido CLI during the run",
+          "when": "the server records the read",
+          "then": "the event stream emits agent_context_read with thread_id, via, served_at and sources carrying kind, id, part, version, updated_at and status, without bodies, URLs or requester identity"
         }
       ]
     },
@@ -6649,6 +6962,79 @@
           "given": "the same agent is assigned again from the participant dropdown and also receives a follow-up reply on an older thread",
           "when": "the client calls riido.v3.aiAgent.tasks.threads",
           "then": "the reassignment thread has a different conversation_id, while the follow-up thread inherits the original conversation_id and carries parent_thread_id"
+        }
+      ]
+    },
+    {
+      "operation_id": "listAIAgentRunReads",
+      "kind": "query",
+      "summary": "실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.",
+      "description": "Requires the current viewer Bearer token. Resolve run identity within the authenticated workspace and reauthorize its task. Intersect historical reads with currently visible source identities and parts from request-scoped task context. Unavailable, removed, denied or unverified sources are omitted. No source bodies, URLs, requester, trigger or CLI request IDs are returned. page is a positive integer (default 1), page_size is 100; filter before pagination. has_more only counts visible reads. A changed permission/source set can change pages; this is not a complete historical inventory.",
+      "method": "GET",
+      "path": "/v1/client/ai-agent/runs/{run_id}/reads",
+      "resource": "task",
+      "action": "read",
+      "client": {
+        "module": "aiAgent",
+        "facade_path": [
+          "runs",
+          "reads"
+        ],
+        "cache_tag": "v1.runs.reads"
+      },
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AIAgentRunReadsResponse"
+      },
+      "query_parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      ]
+    },
+    {
+      "operation_id": "listAIAgentRunReadsV2",
+      "kind": "query",
+      "summary": "실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.",
+      "description": "Requires the current viewer Bearer token. Resolve run identity within the authenticated workspace and reauthorize its task. Intersect historical reads with currently visible source identities and parts from request-scoped task context. Unavailable, removed, denied or unverified sources are omitted. No source bodies, URLs, requester, trigger or CLI request IDs are returned. page is a positive integer (default 1), page_size is 100; filter before pagination. has_more only counts visible reads. A changed permission/source set can change pages; this is not a complete historical inventory.",
+      "method": "GET",
+      "path": "/v2/client/workspaces/{workspace_id}/ai-agent/runs/{run_id}/reads",
+      "resource": "task",
+      "action": "read",
+      "client": {
+        "module": "v2",
+        "facade_path": [
+          "aiAgent",
+          "runs",
+          "reads"
+        ],
+        "cache_tag": "v2.runs.reads"
+      },
+      "auth": {
+        "scheme": "bearer",
+        "scopes": [
+          "ai-agent:read"
+        ]
+      },
+      "response": {
+        "status": 200,
+        "ref": "AIAgentRunReadsResponse"
+      },
+      "query_parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
         }
       ]
     }

@@ -13,10 +13,10 @@
   "generated_core": "web/generated/aiAgentClient.ts",
   "generated_react": "web/generated/aiAgentClient.react.ts",
   "operation_counts": {
-    "total": 62,
-    "v1": 27,
-    "v2": 34,
-    "smoke_matrix": 62
+    "total": 64,
+    "v1": 28,
+    "v2": 35,
+    "smoke_matrix": 64
   },
   "required_generated_paths": [
     "aiAgent.bootstrap",
@@ -31,7 +31,9 @@
     "v2.aiAgent.tasks.assignedAgentProfiles",
     "v2.aiAgent.tasks.agentAssignments.create",
     "v2.aiAgent.tasks.threadStreamSubscription",
-    "v3.aiAgent.tasks.threads"
+    "v3.aiAgent.tasks.threads",
+    "aiAgent.runs.reads",
+    "v2.aiAgent.runs.reads"
   ],
   "runtime_config_keys": [
     "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT"
@@ -110,7 +112,9 @@
       "Ordinary DynamoDB snapshot writers merge append-only committed grant keys and maximum LastSeenAt under the existing atomic CURRENT hash CAS. Enrollment stages credential/device/grant changes privately and publishes only after durable commit or matching authoritative readback; unresolved readback requires a fresh snapshot before later auth/write. Ordinary saves preserve committed credentials and enrollment-owned device fields; only a device-scoped expected-credential mutation may rotate one credential under the same CURRENT CAS. Connect failures retain scoped grant rollback. Explicit empty grant arrays survive inline/file JSON and suppress credential legacy backfill. No old readback is treated as proof an in-flight write cannot later commit; concurrent credential changes fail closed and require a fresh retry. Existing-device enrollment preserves daemon-owned runtime inventory and heartbeat time; enrollment time is not a new daemon heartbeat. New-device initial timestamps remain unchanged. Server clock skew is not corrected by this endpoint.",
       "RIID-5866 fixture creation: optional request_id is a 1–128 byte ASCII token scoped to the authenticated principal, workspace and create operation. The full fixture/configuration fingerprint and original Agent incarnation are committed with AGENTS and CURRENT before publication. Within 24 hours, identical retries return the same Agent with 201 even if the runtime is now unavailable; changed payload/fixture or a deleted/reused Agent identity returns 409. Each retry still passes current authorization. No key or a new key remains an independent creation.",
       "Fixture-create receipts are private hashed records, capped at 128 KiB without eviction of unexpired entries. Capacity and persistence uncertainty fail closed with sanitized 503 and require retrying the same key; canceled or failed commits cannot publish phantom Agents. Snapshot CAS, replica restart, concurrent ordinary profile writes and stale writers preserve committed receipts and Agent incarnations. Expired receipts are pruned from both durable and local state.",
-      "Projection reconciliation failures on v1/v2/v3 client bootstrap, thread reads/subscriptions, assignable/assigned profiles and assignment preflight use fixed private messages:408 caller cancellation,504 deadline,502 other dependency failure. Finite projection_reconcile diagnostics omit upstream error text; authorization and successful responses are unchanged."
+      "Projection reconciliation failures on v1/v2/v3 client bootstrap, thread reads/subscriptions, assignable/assigned profiles and assignment preflight use fixed private messages:408 caller cancellation,504 deadline,502 other dependency failure. Finite projection_reconcile diagnostics omit upstream error text; authorization and successful responses are unchanged.",
+      "RIID-5900 run reads: GET /v2/client/workspaces/{workspace_id}/ai-agent/runs/{run_id}/reads (v1 compatibility path available) requires the current viewer Bearer. Workspace-scoped run lookup and current task authorization precede request-scoped source visibility checks. Return only metadata for source kind/id/part still present in the current viewer context; no source body, URL, requester, trigger or CLI request ID. Unavailable/removed/unverified sources are omitted. Positive page defaults to 1; page_size=100 and has_more are computed after filtering. Pages may change as permissions and related sources change. The current read repository loads retained assignment records before filtering, so response pagination is not a storage-scan bound.",
+      "RIID-5900 retention: SNAPSHOT and COMMENTS expire 24 hours after the first committed terminal assignment time; READ audit rows retain the existing execution-history lifetime. DynamoDB context capture fences lifecycle revision and assignment projection; terminal projection, lifecycle and payload TTL updates commit atomically across event/cancellation, legacy, stale queue/blocker and publication-recovery writers. Capture and terminal retries are bounded to three and cannot extend the original expiry. Every terminal commit retains one body-free lifecycle marker, including executions not yet captured, so replayed UpdatedAt values cannot extend a late capture; no empty snapshot/comment rows are created. Expired payload reads fail closed while asynchronous DynamoDB deletion is pending. Runtime retention stays enabled independently of the capture flag. Memory development storage prunes payloads on access using the terminal projection; it is not durable physical deletion evidence. Capture caps stored JSON at 256 KiB/snapshot, 96 KiB/comment page (max 10) and 1 KiB/lifecycle; oversized context is unavailable before persistence. Terminal transactions permit one terminal assignment and at most six original actions, keeping new bounded contexts plus DynamoDB 400 KiB/item allowances below 4 MB, including Update/ConditionCheck item sizes. Comment key queries follow bounded LastEvaluatedKey pages and reject duplicate/out-of-scope/nonprogressing keys. Staging preflight must inspect or backfill legacy context rows without these bounds and confirm the assignment_context_expires_at_epoch DynamoDB TTL setting before acceptance; these code tests do not prove deployment, physical deletion or absence of legacy rows."
     ]
   },
   "thread_history_v3_frontend": {

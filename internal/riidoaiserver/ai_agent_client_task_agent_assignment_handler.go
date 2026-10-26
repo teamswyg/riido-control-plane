@@ -74,5 +74,6 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeAIAgentClientError(w, err)
 		return
 	}
+	s.captureAssignmentContext(r.Context(), assignment, composedReq.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerAssign, ID: req.RequestID})
 	writeJSON(w, http.StatusAccepted, response)
 }

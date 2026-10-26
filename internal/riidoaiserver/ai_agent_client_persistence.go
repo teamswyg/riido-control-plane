@@ -537,6 +537,9 @@ func restoreSnapshotEventPayload(eventType string, raw json.RawMessage) (any, er
 	case AgentClientEventThreadProgress:
 		var payload AgentThreadProgressEvent
 		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventContextRead:
+		var payload AgentContextReadEvent
+		return payload, json.Unmarshal(raw, &payload)
 	default:
 		var payload map[string]any
 		return payload, json.Unmarshal(raw, &payload)
