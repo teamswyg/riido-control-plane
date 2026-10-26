@@ -1402,7 +1402,8 @@
           "streamAIAgentClientEvents.editability-updates-before-mutation",
           "streamAIAgentClientEvents.runtime-parse-status",
           "streamAIAgentClientEvents.runtime-progress-batch",
-          "streamAIAgentClientEvents.task-thread-status-update"
+          "streamAIAgentClientEvents.task-thread-status-update",
+          "streamAIAgentClientEvents.agent-context-read"
         ]
       }
     },
@@ -5799,6 +5800,130 @@
         ],
         "type": "object"
       },
+      "AgentContextReadEvent": {
+        "description": "실행 중 에이전트가 읽은 자료를 client SSE로 전달하는 event입니다. 프롬프트로 넘긴 자료(via=prompt)는 실행 시작 때 한 번, 에이전트가 직접 조회한 자료(via=cli)는 조회할 때마다 전달됩니다.",
+        "properties": {
+          "agent_id": {
+            "type": "string"
+          },
+          "assignment_id": {
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "agent_context_read"
+            ],
+            "type": "string"
+          },
+          "omitted_sources": {
+            "type": "integer"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "served_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/AgentContextReadSource"
+            },
+            "type": "array"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "trigger_kind": {
+            "enum": [
+              "assign",
+              "thread_message",
+              "comment"
+            ],
+            "type": "string"
+          },
+          "via": {
+            "enum": [
+              "prompt",
+              "cli"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_type",
+          "schema_version",
+          "agent_id",
+          "task_id",
+          "assignment_id",
+          "thread_id",
+          "run_id",
+          "via",
+          "served_at",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "AgentContextReadSource": {
+        "description": "에이전트가 이번 실행에서 읽은 Riido 자료 한 건입니다. 본문 내용, URL, 토큰은 담지 않습니다.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "task",
+              "project",
+              "milestone",
+              "parent_task",
+              "link",
+              "attachment",
+              "target"
+            ],
+            "type": "string"
+          },
+          "part": {
+            "enum": [
+              "body",
+              "title",
+              "metadata",
+              "base",
+              "task",
+              "tree",
+              "resources"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "served",
+              "truncated",
+              "denied",
+              "unavailable"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "part",
+          "status"
+        ],
+        "type": "object"
+      },
       "AgentDashboardDay": {
         "properties": {
           "completed": {
@@ -6626,6 +6751,7 @@
         "description": "web과 desktop webview client가 소비하는 SSE event union입니다.",
         "discriminator": {
           "mapping": {
+            "agent_context_read": "#/components/schemas/AgentContextReadEvent",
             "agent_editability_changed": "#/components/schemas/AgentEditabilityChangedEvent",
             "agent_task_notification": "#/components/schemas/AgentTaskNotificationEvent",
             "agent_thread_progress": "#/components/schemas/AgentThreadProgressEvent",
@@ -6653,6 +6779,9 @@
           },
           {
             "$ref": "#/components/schemas/AgentTaskNotificationEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AgentContextReadEvent"
           }
         ]
       },

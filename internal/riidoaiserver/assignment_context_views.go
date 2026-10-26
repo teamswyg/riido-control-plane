@@ -20,9 +20,9 @@ func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any
 			Component AIAgentTaskContextComponent `json:"component"`
 			Hierarchy AIAgentTaskContextHierarchy `json:"hierarchy"`
 		}{c.Component, assignmentContextTitlesOnly(c.Hierarchy)}
-		sources := []AssignmentContextSource{{Kind: "task", ID: c.Component.ID, Part: "title"}}
+		sources := []AssignmentContextSource{assignmentContextTaskSource(c, "title")}
 		for _, ref := range assignmentContextHierarchyRefs(c.Hierarchy) {
-			sources = append(sources, AssignmentContextSource{Kind: ref.kind, ID: ref.ref.ID, Part: "title"})
+			sources = append(sources, AssignmentContextSource{Kind: ref.kind, ID: ref.ref.ID, Part: "title", UpdatedAt: normalizedTaskContextTime(ref.ref.UpdatedAt)})
 		}
 		return tree, sources, true
 	case AssignmentContextViewResources:
@@ -42,7 +42,7 @@ func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any
 
 func selectAssignmentContextTask(c AIAgentTaskContext, target string) (any, []AssignmentContextSource, bool) {
 	if target == "" || assignmentContextTargetMatches(target, c.Component.ID, c.Component.KeyNumber) {
-		sources := append([]AssignmentContextSource{{Kind: "task", ID: c.Component.ID, Part: "body", Version: assignmentContextVersion(c.Document.Content)}}, assignmentContextResourceSources(c.Resources)...)
+		sources := append([]AssignmentContextSource{assignmentContextTaskSource(c, "body")}, assignmentContextResourceSources(c.Resources)...)
 		return struct {
 			Component AIAgentTaskContextComponent  `json:"component"`
 			Document  AIAgentTaskContextDocument   `json:"document"`

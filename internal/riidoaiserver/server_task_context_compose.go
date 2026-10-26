@@ -6,8 +6,7 @@ type composedAssignRequest struct {
 	Request               AssignRequest
 	IntentGateRequired    bool
 	AgentOwnerPrincipalID string
-	// TaskContext is the context composed into Request.Prompt, kept so the
-	// assignment can store it as its CLI snapshot. Nil when composed without it.
+	// TaskContext is the context composed into Request.Prompt (nil without one).
 	TaskContext *AIAgentTaskContext
 }
 

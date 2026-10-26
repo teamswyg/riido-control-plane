@@ -57,10 +57,12 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		status = AssignmentContextReadTruncated
 	}
 	// Fail closed: an answer the server could not record is not served.
-	if store.AppendAssignmentContextReads(r.Context(), assignmentContextReadRecords(snapshot, sources, AssignmentContextViaCLI, status, req.RequestID, now)) != nil {
+	reads := assignmentContextReadRecords(snapshot, sources, AssignmentContextViaCLI, status, req.RequestID, now)
+	if store.AppendAssignmentContextReads(r.Context(), reads) != nil {
 		writeError(w, http.StatusServiceUnavailable, "assignment context read record unavailable")
 		return
 	}
+	s.publishAssignmentContextReads(r.Context(), reads)
 	writeJSON(w, http.StatusOK, AgentAssignmentContextResponse{
 		SchemaVersion: SchemaVersion, AssignmentID: snapshot.AssignmentID, TaskID: snapshot.TaskID, View: req.View,
 		CapturedAt: snapshot.CapturedAt, Truncated: snapshot.Truncated, Data: data, Sources: sources,

@@ -32,3 +32,13 @@ func assignmentContextResourcesOnly(h AIAgentTaskContextHierarchy) AIAgentTaskCo
 	}
 	return h
 }
+
+// assignmentContextTaskSource names the assigned task; a body read carries the
+// content hash, a title read only the modification time.
+func assignmentContextTaskSource(c AIAgentTaskContext, part string) AssignmentContextSource {
+	source := AssignmentContextSource{Kind: "task", ID: c.Component.ID, Part: part, UpdatedAt: normalizedTaskContextTime(c.Component.UpdatedAt)}
+	if part == "body" {
+		source.Version = assignmentContextVersion(c.Document.Content)
+	}
+	return source
+}

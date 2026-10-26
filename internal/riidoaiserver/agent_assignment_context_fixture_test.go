@@ -22,7 +22,7 @@ type assignmentContextFixture struct {
 // a request-scoped task context, then leases it with the daemon poll.
 func newAssignmentContextFixture(t *testing.T, contexts *MemoryAssignmentContextStore) *assignmentContextFixture {
 	t.Helper()
-	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{{PrincipalID: "user-1", Token: "user-token", Scopes: []string{"ai-agent:*", "task:task-private:assign", "agent:agent-owned-codex:poll"}}})
+	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{{PrincipalID: "user-1", Token: "user-token", Scopes: []string{"ai-agent:*", "task:task-private:assign", "agent:agent-owned-codex:poll"}}, {PrincipalID: "user-2", Token: "other-token", Scopes: []string{"ai-agent:*"}}})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -11,14 +11,14 @@ type AssignmentContextSource struct {
 	ID      string `json:"id,omitempty"`
 	Part    string `json:"part"`
 	Version string `json:"version,omitempty"`
+	// UpdatedAt is the source's modification time when the server read it.
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
-// assignmentContextSources lists every source carried by a task context, in
-// the vocabulary of the read-record contract (task, project, milestone,
-// parent_task, link, attachment; part body/title/metadata).
+// assignmentContextSources lists every source in a task context using the
+// read-record vocabulary (task, project, milestone, parent_task, link, attachment).
 func assignmentContextSources(c AIAgentTaskContext) []AssignmentContextSource {
-	sources := []AssignmentContextSource{{Kind: "task", ID: c.Component.ID, Part: "body", Version: assignmentContextVersion(c.Document.Content)}}
-	sources = append(sources, assignmentContextResourceSources(c.Resources)...)
+	sources := append([]AssignmentContextSource{assignmentContextTaskSource(c, "body")}, assignmentContextResourceSources(c.Resources)...)
 	for _, ref := range assignmentContextHierarchyRefs(c.Hierarchy) {
 		sources = append(sources, assignmentContextReferenceSources(ref.kind, ref.ref)...)
 	}
@@ -41,7 +41,7 @@ func assignmentContextHierarchyRefs(h AIAgentTaskContextHierarchy) []assignmentC
 }
 
 func assignmentContextReferenceSources(kind string, ref AIAgentTaskContextReference) []AssignmentContextSource {
-	source := AssignmentContextSource{Kind: kind, ID: ref.ID, Part: "title"}
+	source := AssignmentContextSource{Kind: kind, ID: ref.ID, Part: "title", UpdatedAt: normalizedTaskContextTime(ref.UpdatedAt)}
 	if ref.Document != nil {
 		source.Part, source.Version = "body", assignmentContextVersion(ref.Document.Content)
 	}

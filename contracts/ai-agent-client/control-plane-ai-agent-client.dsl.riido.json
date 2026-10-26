@@ -917,6 +917,10 @@
         {
           "kind": "agent_task_notification",
           "schema": "AgentTaskNotificationEvent"
+        },
+        {
+          "kind": "agent_context_read",
+          "schema": "AgentContextReadEvent"
         }
       ]
     }
@@ -2823,6 +2827,150 @@
           "items": {
             "ref": "AgentThreadProgressLine"
           }
+        }
+      ]
+    },
+    {
+      "name": "AgentContextReadSource",
+      "description": "에이전트가 이번 실행에서 읽은 Riido 자료 한 건입니다. 본문 내용, URL, 토큰은 담지 않습니다.",
+      "type": "object",
+      "required": [
+        "kind",
+        "part",
+        "status"
+      ],
+      "properties": [
+        {
+          "name": "kind",
+          "type": "string",
+          "enum": [
+            "task",
+            "project",
+            "milestone",
+            "parent_task",
+            "link",
+            "attachment",
+            "target"
+          ]
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "part",
+          "type": "string",
+          "enum": [
+            "body",
+            "title",
+            "metadata",
+            "base",
+            "task",
+            "tree",
+            "resources"
+          ]
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "updated_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "enum": [
+            "served",
+            "truncated",
+            "denied",
+            "unavailable"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AgentContextReadEvent",
+      "description": "실행 중 에이전트가 읽은 자료를 client SSE로 전달하는 event입니다. 프롬프트로 넘긴 자료(via=prompt)는 실행 시작 때 한 번, 에이전트가 직접 조회한 자료(via=cli)는 조회할 때마다 전달됩니다.",
+      "type": "object",
+      "required": [
+        "event_type",
+        "schema_version",
+        "agent_id",
+        "task_id",
+        "assignment_id",
+        "thread_id",
+        "run_id",
+        "via",
+        "served_at",
+        "sources"
+      ],
+      "properties": [
+        {
+          "name": "event_type",
+          "type": "string",
+          "enum": [
+            "agent_context_read"
+          ]
+        },
+        {
+          "name": "schema_version",
+          "type": "string"
+        },
+        {
+          "name": "agent_id",
+          "type": "string"
+        },
+        {
+          "name": "task_id",
+          "type": "string"
+        },
+        {
+          "name": "assignment_id",
+          "type": "string"
+        },
+        {
+          "name": "thread_id",
+          "type": "string"
+        },
+        {
+          "name": "run_id",
+          "type": "string"
+        },
+        {
+          "name": "via",
+          "type": "string",
+          "enum": [
+            "prompt",
+            "cli"
+          ]
+        },
+        {
+          "name": "trigger_kind",
+          "type": "string",
+          "enum": [
+            "assign",
+            "thread_message",
+            "comment"
+          ]
+        },
+        {
+          "name": "served_at",
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "name": "sources",
+          "type": "array",
+          "items": {
+            "ref": "AgentContextReadSource"
+          }
+        },
+        {
+          "name": "omitted_sources",
+          "type": "integer"
         }
       ]
     },
@@ -5127,6 +5275,12 @@
           "given": "the Figma task thread flow shows a queued or stopped agent update",
           "when": "the assignment state changes",
           "then": "the event stream includes task_id, assignment_state, and a typed comment_kind for the client thread"
+        },
+        {
+          "name": "agent context read",
+          "given": "an agent run reads Riido sources from its assignment context, through the prompt at start or the riido CLI during the run",
+          "when": "the server records the read",
+          "then": "the event stream emits agent_context_read with thread_id, via, served_at and sources carrying kind, id, part, version, updated_at and status, without bodies, URLs or requester identity"
         }
       ]
     },

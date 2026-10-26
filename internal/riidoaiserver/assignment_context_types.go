@@ -50,6 +50,7 @@ type AssignmentContextRead struct {
 	SourceID             string    `json:"source_id,omitempty"`
 	SourcePart           string    `json:"source_part"`
 	SourceVersion        string    `json:"source_version,omitempty"`
+	SourceUpdatedAt      string    `json:"source_updated_at,omitempty"`
 	Via                  string    `json:"via"`
 	Status               string    `json:"status"`
 	ServedAt             time.Time `json:"served_at"`

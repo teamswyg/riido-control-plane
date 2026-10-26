@@ -6,6 +6,8 @@ func eventTaskThreadRef(payload any) (string, string, bool) {
 		return event.TaskID, event.ThreadID, event.TaskID != "" && event.ThreadID != ""
 	case AgentThreadProgressEvent:
 		return event.TaskID, event.ThreadID, event.TaskID != "" && event.ThreadID != ""
+	case AgentContextReadEvent:
+		return event.TaskID, event.ThreadID, event.TaskID != "" && event.ThreadID != ""
 	default:
 		return "", "", false
 	}

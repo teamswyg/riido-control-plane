@@ -17,6 +17,9 @@ type AIAgentTaskContextComponent struct {
 	Title         string `json:"title"`
 	KeyNumber     string `json:"keyNumber,omitempty"`
 	BranchName    string `json:"branchName,omitempty"`
+	// UpdatedAt is the work item's modification time as the server read it,
+	// so read records can tell whether the source changed after the read.
+	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
 type AIAgentTaskContextDocument struct {
@@ -41,6 +44,7 @@ type AIAgentTaskContextReference struct {
 	ID             string                       `json:"id,omitempty"`
 	Title          string                       `json:"title,omitempty"`
 	KeyNumber      string                       `json:"keyNumber,omitempty"`
+	UpdatedAt      string                       `json:"updatedAt,omitempty"`
 	Document       *AIAgentTaskContextDocument  `json:"document,omitempty"`
 	DocumentStatus string                       `json:"document_status,omitempty"`
 	Resources      []AIAgentTaskContextResource `json:"resources,omitempty"`

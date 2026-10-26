@@ -374,6 +374,36 @@ export interface AgentClientRecordV2 {
 }
 
 /**
+ * 실행 중 에이전트가 읽은 자료를 client SSE로 전달하는 event입니다. 프롬프트로 넘긴 자료(via=prompt)는 실행 시작 때 한 번, 에이전트가 직접 조회한 자료(via=cli)는 조회할 때마다 전달됩니다.
+ */
+export interface AgentContextReadEvent {
+  agent_id: string;
+  assignment_id: string;
+  event_type: "agent_context_read";
+  omitted_sources?: number;
+  run_id: string;
+  schema_version: string;
+  served_at: string;
+  sources: AgentContextReadSource[];
+  task_id: string;
+  thread_id: string;
+  trigger_kind?: "assign" | "thread_message" | "comment";
+  via: "prompt" | "cli";
+}
+
+/**
+ * 에이전트가 이번 실행에서 읽은 Riido 자료 한 건입니다. 본문 내용, URL, 토큰은 담지 않습니다.
+ */
+export interface AgentContextReadSource {
+  id?: string;
+  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "target";
+  part: "body" | "title" | "metadata" | "base" | "task" | "tree" | "resources";
+  status: "served" | "truncated" | "denied" | "unavailable";
+  updated_at?: string;
+  version?: string;
+}
+
+/**
  * AgentDashboardDay 타입입니다.
  */
 export interface AgentDashboardDay {
@@ -720,7 +750,7 @@ export type ClientKind = "web" | "desktop_webview";
 /**
  * web과 desktop webview client가 소비하는 SSE event union입니다.
  */
-export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent;
+export type ClientStreamEvent = DeviceRuntimeSnapshotEvent | DeviceDaemonStatusEvent | AgentEditabilityChangedEvent | AgentWorkStatusChangedEvent | AgentThreadProgressEvent | AgentTaskNotificationEvent | AgentContextReadEvent;
 
 /**
  * 앱 온보딩의 첫 작업 결과를 workspace task에 기록하는 요청입니다. 서버는 실행 큐에 배정을 만들지 않고, agent를 task 참여자로 추가한 뒤 agent가 남긴 완료 댓글 한 건을 기록합니다.

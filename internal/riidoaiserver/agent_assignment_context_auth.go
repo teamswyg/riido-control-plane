@@ -65,9 +65,11 @@ func (s Server) writeAssignmentContextRefusal(w http.ResponseWriter, r *http.Req
 	if target := strings.TrimSpace(req.Target); target != "" {
 		source = AssignmentContextSource{Kind: "target", ID: target, Part: req.View}
 	}
-	if s.config.AssignmentContext.AppendAssignmentContextReads(r.Context(), assignmentContextReadRecords(snapshot, []AssignmentContextSource{source}, AssignmentContextViaCLI, status, req.RequestID, at)) != nil {
+	reads := assignmentContextReadRecords(snapshot, []AssignmentContextSource{source}, AssignmentContextViaCLI, status, req.RequestID, at)
+	if s.config.AssignmentContext.AppendAssignmentContextReads(r.Context(), reads) != nil {
 		writeError(w, http.StatusServiceUnavailable, "assignment context read record unavailable")
 		return
 	}
+	s.publishAssignmentContextReads(r.Context(), reads)
 	writeError(w, httpStatus, message)
 }

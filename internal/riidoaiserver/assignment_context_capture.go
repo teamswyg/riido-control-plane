@@ -44,7 +44,9 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 	reads := assignmentContextReadRecords(snapshot, assignmentContextSources(snapshot.Context), AssignmentContextViaPrompt, status, "", now)
 	if err := store.AppendAssignmentContextReads(ctx, reads); err != nil {
 		log.Printf("event=assignment_context_capture_failed assignment_id=%q stage=reads error_type=%T", assignment.ID, err)
+		return
 	}
+	s.publishAssignmentContextReads(ctx, reads)
 }
 
 func assignmentContextReadRecords(snapshot AssignmentContextSnapshot, sources []AssignmentContextSource, via, status, requestID string, at time.Time) []AssignmentContextRead {
@@ -61,6 +63,7 @@ func assignmentContextReadRecords(snapshot AssignmentContextSnapshot, sources []
 			SourceID:             source.ID,
 			SourcePart:           source.Part,
 			SourceVersion:        source.Version,
+			SourceUpdatedAt:      source.UpdatedAt,
 			Via:                  via,
 			Status:               status,
 			ServedAt:             at,
