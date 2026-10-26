@@ -142,7 +142,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		writeCommentDeliveryError(w, err)
 		return
 	}
-	s.captureAssignmentContext(ctx, assignment, composed.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerComment, ID: evidence.CommentID})
+	s.captureAssignmentContext(ctx, assignment, composed.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerComment, ID: evidence.CommentID, RequesterAdmin: aiAgentIsAdmin(principal)})
 	writeJSON(w, http.StatusAccepted, response)
 }
 

@@ -25518,6 +25518,199 @@
       ],
       "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT (default off) thread-message, assign and comment-delivered assignments capture their composed context after publication; thread follow-up composition and history are unchanged when the flag is off. Reads stream as agent_context_read under the thread's existing visibility. GET run reads reauthorizes the current viewer with Bearer-only identity, workspace-scoped run lookup, current task and source-part visibility. Only redacted records surviving that intersection are paginated (100/page); missing or unavailable sources are omitted, and hidden row counts are never exposed. RED missing-route regressions passed after implementation; no retained body is used to authorize historical reads. The current store still scans retained assignment reads before filtering. Approved retention is terminal+24h for snapshot/comments and existing execution-history lifetime for READ. Lifecycle and projection CAS fence captures against all terminal projection writers; retries preserve first expiry, TTL affects payload rows only, and logical reads refuse expired payloads before DynamoDB physical deletion. Byte-bounded capture and one-terminal/six-original-action guards keep aggregate transaction items under 4 MB; Query pagination is bounded and validated. Regression covers RED expired-read leak, both capture/terminal races, conflict exhaustion without false ACK, unchanged READ, one body-free lifecycle marker before capture and no empty snapshot/comment payload rows, and comment-budget unavailable status. Runtime retains independently of capture flag; local memory prunes on access. Preexisting unbounded rows and physical TTL enablement/deletion require staging preflight, not a unit-test completion claim. A delayed capture after repeated terminal projection UpdatedAt changes keeps the first terminal+24h marker expiry. Unavailable current sections never authorize stale fallback arrays. Development memory retention uses the first terminal event timestamp, so later provider-session metadata cannot extend the 24-hour window.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_agent_directory_5892",
+      "observation": "RIID-5892 lets an agent start another agent by mentioning it, but a running agent only saw the agent IDs and names placed in its prompt at start. It could not check another agent's public role, work status or runtime connection before choosing, and a run started by an agent mention had no requester Bearer, so it received no assignment context snapshot and its Riido CLI reads failed.",
+      "hypothesis": "Serve agent directory views live over the existing leased-daemon assignment-context route, scoped to the original requester (public agents plus the requester's own, or every workspace agent when the requester was an admin at request time), without private instructions or owners, and let a mentioned run inherit the mentioning run's snapshot for the same task, workspace and requester. Record every directory read so viewers see only agents they can currently see.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_directory.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_directory_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_directory_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_live.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_hierarchy_views.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_inherit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_agents.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_paging_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_inherit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_agents_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/config-reference.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_assign_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_agent_assignment_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_delivery.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_admin_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_cli_prompt.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_cli_prompt_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_directory_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_type.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_policy_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_event_visibility.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_client_event_for_principal_locked.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_event_visibility_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_event.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_event_omitted_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_event_omitted_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_event_visibility_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_policy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_admin_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_paging_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_inherit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_agents_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT, views agents and agent answer from current control-plane state with live=true and fetched_at, 50 agents per cursor page. Scope is the assignment requester: public agents plus the requester's own, or every workspace agent when the snapshot recorded requester_admin from the authorized request; without that recorded fact admin is never assumed. Entries carry agent_id, name, public description with role_status, work_status, runtime kind and online/offline connection, callable and unavailable_reasons (self, runtime_offline); policy_checked stays false until RIID-5892 registers ServerConfig.AgentMentionPrecheck for its mention-time policy (budget, depth, cycles, session conflicts); when set, its reasons are added to every non-current entry and a failing precheck fails the read instead of showing unchecked agents as checked, and the server that starts a mentioned run remains the final authority. Hidden and unknown agents are refused alike with a denied read. Legacy assignments without created_by are refused. InheritAssignmentContext copies a parent snapshot and comment pages only within the same task, workspace and requester, records no prompt reads and never overwrites an existing child snapshot. Run reads expose agent profile reads only for agents the viewer can currently see and fail closed when the directory cannot be listed. The CLI-mode prompt tells agents to check riido agents list before mentioning another agent and to ask the requester when no agent clearly fits. Live and replayed agent_context_read events drop agent sources the subscriber cannot currently see, without counting them, so other viewers of the thread never learn private agent IDs or profile hashes. omitted_sources is recomputed per subscriber from unserialized cut-off bookkeeping; a directory event replayed without it reports zero instead of a count that could include hidden agents.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

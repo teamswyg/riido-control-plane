@@ -38,6 +38,9 @@ type AgentContextReadEvent struct {
 	ServedAt       time.Time                `json:"served_at"`
 	Sources        []AgentContextReadSource `json:"sources"`
 	OmittedSources int                      `json:"omitted_sources,omitempty"`
+	// Cut-off bookkeeping for per-subscriber counts; never serialized.
+	omittedAgentIDs []string
+	omittedOther    int
 }
 
 // AIAgentContextReadRecorder publishes read records to the client stream.
@@ -57,7 +60,7 @@ func newAgentContextReadEvent(reads []AssignmentContextRead) AgentContextReadEve
 	}
 	for _, read := range reads {
 		if len(event.Sources) == agentContextReadEventMaxSources {
-			event.OmittedSources++
+			event.noteOmitted(read)
 			continue
 		}
 		event.Sources = append(event.Sources, AgentContextReadSource{

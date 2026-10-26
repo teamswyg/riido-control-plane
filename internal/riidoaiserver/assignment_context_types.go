@@ -21,6 +21,9 @@ const (
 	AssignmentContextTriggerAssign        = "assign"
 	AssignmentContextTriggerThreadMessage = "thread_message"
 	AssignmentContextTriggerComment       = "comment"
+	// AssignmentContextTriggerAgentMention marks a run started by another
+	// agent's mention (RIID-5892); its snapshot is inherited, not captured.
+	AssignmentContextTriggerAgentMention = "agent_mention"
 )
 
 type AssignmentContextSnapshot struct {
@@ -29,6 +32,7 @@ type AssignmentContextSnapshot struct {
 	WorkspaceID          string             `json:"workspace_id,omitempty"`
 	AgentID              string             `json:"agent_id"`
 	RequesterPrincipalID string             `json:"requester_principal_id,omitempty"`
+	RequesterAdmin       bool               `json:"requester_admin,omitempty"`
 	TriggerKind          string             `json:"trigger_kind"`
 	TriggerID            string             `json:"trigger_id,omitempty"`
 	CapturedAt           time.Time          `json:"captured_at"`

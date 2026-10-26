@@ -66,7 +66,7 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 	}
 	// A message folded into a running assignment did not get this prompt.
 	if prepared.StartsNewExecution || creationReceipt.ownCreation(assignment) {
-		s.captureAssignmentContext(r.Context(), assignment, prepared.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID})
+		s.captureAssignmentContext(r.Context(), assignment, prepared.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)})
 	}
 	writeJSON(w, http.StatusAccepted, response)
 }

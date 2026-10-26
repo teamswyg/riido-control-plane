@@ -54,7 +54,7 @@ func writeExtendedTaskContext(out *strings.Builder, component AIAgentTaskContext
 	}
 	others := max(extended.CommentTotal, len(extended.Comments)) - triggers
 	out.WriteString(strconv.Itoa(others) + " more comment(s) not included. Read them newest first with: riido work comments " + taskContextCLIRef(component.KeyNumber, component.ID) + "\n")
-	out.WriteString("\n## Reading more Riido context\nWhen the `riido` command is available, use it instead of guessing: `riido context get`, `riido work get <key>`, `riido work tree <key>`, `riido work relations <key>`, `riido work comments <key>`. Reads are recorded and shown to the requester.\n")
+	out.WriteString("\n## Reading more Riido context\nWhen the `riido` command is available, use it instead of guessing: `riido context get`, `riido work get <key>`, `riido work tree <key>`, `riido work relations <key>`, `riido work comments <key>`. To involve another Riido agent, check `riido agents list` first (live status) and mention only a callable agent by its ID; if no agent clearly fits, ask the requester. Reads are recorded and shown to the requester.\n")
 }
 
 func taskContextCLIRef(keyNumber, id string) string {
