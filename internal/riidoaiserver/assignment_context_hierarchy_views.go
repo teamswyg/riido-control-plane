@@ -2,22 +2,31 @@ package riidoaiserver
 
 // Views mirror the daemon CLI reads: base = `riido context get`,
 // task = `riido work get [target]`, tree = `riido work tree`,
-// resources = `riido work relations`. Comments, activity and search are not
-// part of the snapshot and stay unsupported until the read scope is decided.
+// resources = `riido work relations`, comments = `riido work comments`.
+// agents/agent (`riido agents list|show`) are live reads, not snapshot views.
 const (
 	AssignmentContextViewBase      = "base"
 	AssignmentContextViewTask      = "task"
 	AssignmentContextViewTree      = "tree"
 	AssignmentContextViewResources = "resources"
 	AssignmentContextViewComments  = "comments"
+	AssignmentContextViewAgents    = "agents"
+	AssignmentContextViewAgent     = "agent"
 )
 
 func validAssignmentContextView(view string) bool {
 	switch view {
-	case AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments:
+	case AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
+		AssignmentContextViewAgents, AssignmentContextViewAgent:
 		return true
 	}
 	return false
+}
+
+// assignmentContextLiveView reports views answered from current
+// control-plane state instead of the assignment-time snapshot.
+func assignmentContextLiveView(view string) bool {
+	return view == AssignmentContextViewAgents || view == AssignmentContextViewAgent
 }
 
 func assignmentContextTitlesOnly(h AIAgentTaskContextHierarchy) AIAgentTaskContextHierarchy {

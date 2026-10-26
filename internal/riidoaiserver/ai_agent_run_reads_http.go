@@ -63,6 +63,9 @@ func (s Server) handleAIAgentClientRuns(w http.ResponseWriter, r *http.Request) 
 		writeError(w, http.StatusServiceUnavailable, "run reads unavailable")
 		return
 	}
+	if !s.addVisibleAgentReadSources(w, r, principal, thread.TaskID, reads, visible) {
+		return
+	}
 	response, err := buildAIAgentRunReads(thread, reads, visible, page)
 	if err != nil {
 		writeError(w, http.StatusServiceUnavailable, "run reads unavailable")

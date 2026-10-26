@@ -21,6 +21,9 @@ const (
 	AssignmentContextTriggerAssign        = "assign"
 	AssignmentContextTriggerThreadMessage = "thread_message"
 	AssignmentContextTriggerComment       = "comment"
+	// AssignmentContextTriggerAgentMention marks a run started by another
+	// agent's mention (RIID-5892); its snapshot is inherited, not captured.
+	AssignmentContextTriggerAgentMention = "agent_mention"
 )
 
 type AssignmentContextSnapshot struct {

@@ -2,38 +2,36 @@ package riidoaiserver
 
 import (
 	"net/http"
-	"strings"
 	"time"
 )
 
-// handleAgentAssignmentContext serves the assignment's context snapshot to
-// the daemon that holds its lease. Every answer, including refusals inside an
-// authorized lease, is written as a read record before it is returned.
+// handleAgentAssignmentContext serves the lease holder's snapshot or live views;
+// every answer, refusals included, is recorded as a read before it returns.
 func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Request, agentID string) {
 	store := s.config.AssignmentContext
 	if store == nil {
 		writeError(w, http.StatusServiceUnavailable, "assignment context is not configured")
 		return
 	}
-	var req AgentAssignmentContextRequest
 	device, ok := s.authorizeAssignmentContextDevice(w, r, agentID)
 	if !ok {
 		return
 	}
+	var req AgentAssignmentContextRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	req.View = strings.TrimSpace(req.View)
-	if req.View == "" {
-		req.View = AssignmentContextViewBase
-	}
-	if strings.TrimSpace(req.AssignmentID) == "" || strings.TrimSpace(req.LeaseToken) == "" || !validAssignmentContextView(req.View) {
+	if !normalizeAssignmentContextRequest(&req) {
 		writeError(w, http.StatusBadRequest, "assignment_id, lease_token and a supported view are required")
 		return
 	}
 	assignment, ok := s.leasedAssignmentForContext(w, r, agentID, device, req)
 	if !ok {
+		return
+	}
+	if assignmentContextLiveView(req.View) {
+		s.serveLiveAssignmentContext(w, r, assignment, req)
 		return
 	}
 	now := time.Now().UTC()
