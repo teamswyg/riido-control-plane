@@ -25250,6 +25250,51 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "riido_cli_context_cross_workspace_device_5900",
+      "observation": "Staging QA ran a real agent on a device enrolled in one workspace while the agent and its assignment belonged to another workspace. The poll path leased the assignment to that device, but every Riido CLI read was refused with 403 because the assignment-context route required the device's enrollment workspace to equal the assignment workspace.",
+      "hypothesis": "The enrollment workspace is not an authority for which agents a device may run; the agent runtime binding is. Admitting the device bound to the agent with the assignment's current lease, as the poll path already does, keeps reads limited to the lease holder without breaking cross-workspace devices.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_auth.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_cross_workspace_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_fixture_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_cross_workspace_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Assignment-context reads require a valid device credential, the device recorded in the agent's runtime binding, an active assignment for that agent and its current lease token. The device enrollment workspace is no longer compared with the assignment workspace; a wrong lease or a device that is not bound to the agent is still refused with 403.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "riido_cli_assignment_context_5900",
       "observation": "Agents received every task, parent and resource body in the prompt and could not read more during a run; the server kept no record of which Riido sources an answer used. The monolith accepts only short-lived user JWTs, so the control-plane cannot read on the user's behalf after the request ends.",
       "hypothesis": "Store the task context the server already composes with the requester Bearer per assignment, let only the leased daemon read it back with its device credential, and record every prompt or CLI read so clients can show what an answer read without any user token being stored.",
