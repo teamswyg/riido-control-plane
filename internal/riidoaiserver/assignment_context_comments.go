@@ -58,9 +58,9 @@ func assignmentContextRelatedSources(extended *AIAgentTaskContextExtended) []Ass
 // assignmentContextPromptSources: what the CLI-mode prompt contained.
 func assignmentContextPromptSources(c AIAgentTaskContext, comments []AIAgentTaskContextComment) []AssignmentContextSource {
 	if c.Extended == nil {
-		return assignmentContextSources(c)
+		return assignmentContextClassicPromptSources(c)
 	}
-	sources := append([]AssignmentContextSource{assignmentContextTaskSource(c, "body")}, assignmentContextResourceSources(c.Resources)...)
+	sources := append([]AssignmentContextSource{assignmentContextTaskSource(c, "body")}, promptResourceSources(c.Resources, c.ResourceStatus, 2500)...)
 	for _, ref := range assignmentContextHierarchyRefs(c.Hierarchy) {
 		source := AssignmentContextSource{Kind: ref.kind, ID: ref.ref.ID, Part: "title", UpdatedAt: normalizedTaskContextTime(ref.ref.UpdatedAt)}
 		if ref.ref.Document != nil && ref.ref.Document.Content != "" {

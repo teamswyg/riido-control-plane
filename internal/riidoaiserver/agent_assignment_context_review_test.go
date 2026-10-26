@@ -65,3 +65,29 @@ func TestPromptRelatedReadsMatchRenderedItems(t *testing.T) {
 		t.Fatalf("lines=%d omitted=%d", len(lines), omitted)
 	}
 }
+
+func TestPromptResourceReadsMatchRenderedEntries(t *testing.T) {
+	c := assignmentContextTestTaskContext()
+	c.Resources = nil
+	for i := range 40 {
+		c.Resources = append(c.Resources, AIAgentTaskContextResource{ID: fmt.Sprintf("r%02d", i), Kind: "link", Title: strings.Repeat("링크 ", 20), URL: "https://example.com/" + strings.Repeat("p", 60)})
+	}
+	c.ResourceStatus = "available"
+	for _, extended := range []*AIAgentTaskContextExtended{nil, extendedAssignmentContextForTest(0).Extended} {
+		c.Extended = extended
+		prompt, _ := ComposeAIAgentAssignmentPrompt(AIAgentAssignmentPromptInput{TaskID: "task-private", Context: c})
+		recorded := 0
+		for _, source := range assignmentContextPromptSources(c, nil) {
+			if source.Kind != "link" {
+				continue
+			}
+			recorded++
+			if !strings.Contains(prompt.Prompt, "[id: "+source.ID+"]") {
+				t.Fatalf("extended=%v: %s recorded but not in the prompt", extended != nil, source.ID)
+			}
+		}
+		if recorded == 0 || recorded == 40 || !strings.Contains(prompt.Prompt, "more link(s) or attachment(s) not shown") {
+			t.Fatalf("extended=%v: recorded=%d", extended != nil, recorded)
+		}
+	}
+}
