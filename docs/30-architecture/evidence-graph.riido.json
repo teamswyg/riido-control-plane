@@ -22336,8 +22336,8 @@
     },
     {
       "id": "closed_loop_candidate_review_expiry_recovery_loop",
-      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates. On 2026-10-16 both previous main 2c0a7f4a and new main 4eb11c66 failed the same unchanged July 29 policy; current redacted sources again contain nine pressure, nine readiness partial, and one stale refresh-source candidate, while four sources have none.",
-      "hypothesis": "Re-reviewing the current redacted queue and advancing only its owner-bound review deadline will restore fail-closed decision verification without hiding candidates, weakening expiry enforcement, changing dispositions, or claiming runtime readiness. Item-level observations, retained acceptance gaps, seven-day review ownership, and current UTC/expiry regression make the renewed review traceable without treating a date change as completed readiness.",
+      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates. On 2026-10-16 both previous main 2c0a7f4a and new main 4eb11c66 failed the same unchanged July 29 policy; current redacted sources again contain nine pressure, nine readiness partial, and one stale refresh-source candidate, while four sources have none. On 2026-10-26 scheduled run 40261892535 at current main bcc42ca8 fails the unchanged October 23 deadline. The latest existing scheduled source artifacts contain nine pressure, nine external/partial readiness, and two stale refresh-source candidates; smoke, load, performance and closure have zero candidates.",
+      "hypothesis": "Re-reviewing the current redacted queue and advancing only its owner-bound review deadline will restore fail-closed decision verification without hiding candidates, weakening expiry enforcement, changing dispositions, or claiming runtime readiness. Item-level observations, retained acceptance gaps, seven-day review ownership, and current UTC/expiry regression make the renewed review traceable without treating a date change as completed readiness. A reviewer-selected one-to-seven-day interval can honor the user-selected October 30 follow-up after an actual October 26 review without inventing an earlier review date or extending the seven-day upper bound.",
       "claims": [
         "candidate_decisions_must_match_consumed_candidates",
         "candidate_decision_evidence_must_expose_next_command"
@@ -22386,6 +22386,10 @@
         {
           "kind": "test",
           "path": "tools/closedloopcandidatedecision/current_review_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/closedloopcandidatedecision/current_review_window_test.go"
         }
       ],
       "verifiers": [
@@ -22437,9 +22441,14 @@
         {
           "kind": "test",
           "path": "tools/closedloopcandidatedecision/current_review_test.go"
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-review-2026-10-26",
+          "redacted": true
         }
       ],
-      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation. The 2026-10-16 source/evidence review retains all 25 pending records and three templates, leaves the adopted record untouched, and sets the next review to October 23 UTC. Current-time verification passes all 19 real redacted candidates without a clock override; the original manifest and renewed post-deadline policy still fail. Provider/model, visual, alarm apply, capacity and chaos acceptance gaps remain open; no producer rerun or workload mutation is performed.",
+      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation. The 2026-10-16 source/evidence review retains all 25 pending records and three templates, leaves the adopted record untouched, and sets the next review to October 23 UTC. Current-time verification passes all 19 real redacted candidates without a clock override; the original manifest and renewed post-deadline policy still fail. Provider/model, visual, alarm apply, capacity and chaos acceptance gaps remain open; no producer rerun or workload mutation is performed. The 2026-10-26 read-only item review preserves the same 25 pending records, three templates and historical adopted decision. It reads current main manifests, all seven latest existing producer artifacts, redacted summary claims, current local pressure measurements and the still-open visual issue 711. The user-selected next review is October 30 UTC (four days); exact interval/date matching, the seven-day maximum, real current-clock verification and post-deadline rejection remain required. Two stale refresh sources remain unresolved, not silently regenerated; no runtime/provider dispatch, merge, apply, deployment or customer mutation is performed.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {

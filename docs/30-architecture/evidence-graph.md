@@ -12,9 +12,9 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `265`
 - claim refs: `400`
-- change refs: `2687`
+- change refs: `2688`
 - verifier refs: `1574`
-- evidence refs: `817`
+- evidence refs: `818`
 
 ## Compiled Chain Summary
 
@@ -29,7 +29,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `control_plane_performance_harness` | `32` | `36` | `245` | `262` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `15` | `25` | `344` | `169` | `68` |
-| `closed_loop_candidate_decision` | `10` | `35` | `190` | `95` | `48` |
+| `closed_loop_candidate_decision` | `10` | `35` | `191` | `95` | `49` |
 | `provider_acceptance_harness` | `5` | `7` | `23` | `16` | `13` |
 | `closed_loop_candidate_intake` | `4` | `5` | `23` | `19` | `20` |
 | `ai_agent_load_harness` | `2` | `4` | `10` | `10` | `2` |
@@ -278,7 +278,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `runtime_liveness_heartbeat_jitter_loop` | `2` | `4` | `4` | `2` | `closed_loop_candidate` |
 | `daemon_poll_durable_binding_liveness_loop` | `2` | `8` | `4` | `3` | `closed_loop_candidate` |
 | `sse_last_event_id_reconnect_loop` | `4` | `40` | `25` | `23` | `closed_loop_candidate` |
-| `closed_loop_candidate_review_expiry_recovery_loop` | `2` | `11` | `5` | `6` | `closed_loop_candidate_decision` |
+| `closed_loop_candidate_review_expiry_recovery_loop` | `2` | `12` | `5` | `7` | `closed_loop_candidate_decision` |
 | `repository_readme_native_ci_parity_loop` | `1` | `5` | `3` | `4` | `closed_loop_candidate` |
 | `context_map_native_ci_parity_loop` | `1` | `5` | `3` | `4` | `closed_loop_candidate` |
 | `go_ci_quality_native_ci_parity_loop` | `1` | `5` | `3` | `5` | `closed_loop_candidate` |
