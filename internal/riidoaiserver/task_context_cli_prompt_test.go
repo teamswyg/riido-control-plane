@@ -14,7 +14,7 @@ func TestCLIModePromptSummarizesParentsAndListsRelatedTitles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"project reference summary", "riido work get RIID-4800", "API 계약 정리", "주간 회의", "- 유래: 댓글 0", "2 more comment(s) not included", "riido work comments RIID-5900"} {
+	for _, want := range []string{"project reference summary", "riido work get RIID-4800", "API 계약 정리", "주간 회의", "- 유래: 댓글 0", "2 more comment(s) not included", "riido work comments RIID-5900", "riido agents list"} {
 		if !strings.Contains(prompt.Prompt, want) {
 			t.Fatalf("CLI prompt missing %q:\n%s", want, prompt.Prompt)
 		}

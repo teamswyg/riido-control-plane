@@ -25573,6 +25573,14 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/agent_directory_admin_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_cli_prompt.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_cli_prompt_test.go"
         }
       ],
       "verifiers": [
@@ -25612,7 +25620,7 @@
           "redacted": true
         }
       ],
-      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT, views agents and agent answer from current control-plane state with live=true and fetched_at, 50 agents per cursor page. Scope is the assignment requester: public agents plus the requester's own, or every workspace agent when the snapshot recorded requester_admin from the authorized request; without that recorded fact admin is never assumed. Entries carry agent_id, name, public description with role_status, work_status, runtime kind and online/offline connection, callable and unavailable_reasons (self, runtime_offline); policy_checked stays false until RIID-5892 mention-time policy (budget, depth, cycles, session conflicts) is shared, and the server that starts a mentioned run remains the final authority. Hidden and unknown agents are refused alike with a denied read. Legacy assignments without created_by are refused. InheritAssignmentContext copies a parent snapshot and comment pages only within the same task, workspace and requester, records no prompt reads and never overwrites an existing child snapshot. Run reads expose agent profile reads only for agents the viewer can currently see and fail closed when the directory cannot be listed.",
+      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT, views agents and agent answer from current control-plane state with live=true and fetched_at, 50 agents per cursor page. Scope is the assignment requester: public agents plus the requester's own, or every workspace agent when the snapshot recorded requester_admin from the authorized request; without that recorded fact admin is never assumed. Entries carry agent_id, name, public description with role_status, work_status, runtime kind and online/offline connection, callable and unavailable_reasons (self, runtime_offline); policy_checked stays false until RIID-5892 mention-time policy (budget, depth, cycles, session conflicts) is shared, and the server that starts a mentioned run remains the final authority. Hidden and unknown agents are refused alike with a denied read. Legacy assignments without created_by are refused. InheritAssignmentContext copies a parent snapshot and comment pages only within the same task, workspace and requester, records no prompt reads and never overwrites an existing child snapshot. Run reads expose agent profile reads only for agents the viewer can currently see and fail closed when the directory cannot be listed. The CLI-mode prompt tells agents to check riido agents list before mentioning another agent and to ask the requester when no agent clearly fits.",
       "next_loop": "closed_loop_candidate"
     }
   ],
