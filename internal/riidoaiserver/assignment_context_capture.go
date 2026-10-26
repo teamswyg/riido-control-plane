@@ -13,11 +13,14 @@ type assignmentContextTrigger struct {
 }
 
 // captureAssignmentContext stores the prompt's task context and records its
-// sources as read via the prompt. Best effort: failures are logged and the CLI
-// later reports the snapshot as unavailable.
+// sources as read via the prompt; failures are logged (CLI: unavailable).
 func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignment, taskContext *AIAgentTaskContext, trigger assignmentContextTrigger) {
 	store := s.config.AssignmentContext
 	if store == nil || taskContext == nil || strings.TrimSpace(assignment.ID) == "" {
+		return
+	}
+	// A reused assignment keeps its first snapshot: what the run received.
+	if _, exists, err := store.LoadAssignmentContextSnapshot(ctx, assignment.ID); err != nil || exists {
 		return
 	}
 	now := time.Now().UTC()
@@ -48,28 +51,4 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 		return
 	}
 	s.publishAssignmentContextReads(ctx, reads)
-}
-
-func assignmentContextReadRecords(snapshot AssignmentContextSnapshot, sources []AssignmentContextSource, via, status, requestID string, at time.Time) []AssignmentContextRead {
-	reads := make([]AssignmentContextRead, 0, len(sources))
-	for _, source := range sources {
-		reads = append(reads, AssignmentContextRead{
-			AssignmentID:         snapshot.AssignmentID,
-			TaskID:               snapshot.TaskID,
-			AgentID:              snapshot.AgentID,
-			RequesterPrincipalID: snapshot.RequesterPrincipalID,
-			TriggerKind:          snapshot.TriggerKind,
-			TriggerID:            snapshot.TriggerID,
-			SourceKind:           source.Kind,
-			SourceID:             source.ID,
-			SourcePart:           source.Part,
-			SourceVersion:        source.Version,
-			SourceUpdatedAt:      source.UpdatedAt,
-			Via:                  via,
-			Status:               status,
-			ServedAt:             at,
-			RequestID:            requestID,
-		})
-	}
-	return reads
 }

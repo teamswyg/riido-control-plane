@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"testing"
 )
 
 // contextReadEvents replays the client stream as token and returns the
@@ -33,4 +34,13 @@ func (f *assignmentContextFixture) contextReadEvents(token string) []AgentContex
 		}
 	}
 	return events
+}
+
+// captureForTest replays a capture for an assignment that already has one,
+// as a message folded into a running assignment would.
+func (f *assignmentContextFixture) captureForTest(t *testing.T, assignment Assignment) {
+	t.Helper()
+	changed := assignmentContextTestTaskContext()
+	changed.Document.Content = "<p>changed after the run started</p>"
+	Server{config: ServerConfig{AssignmentContext: f.contexts}}.captureAssignmentContext(t.Context(), assignment, &changed, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: "thread"})
 }

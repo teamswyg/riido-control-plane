@@ -60,3 +60,16 @@ func TestThreadMessageCapturesAssignmentContext(t *testing.T) {
 		t.Fatalf("snapshot=%+v found=%v", snapshot, found)
 	}
 }
+
+func TestThreadMessageIntoRunningAssignmentKeepsFirstSnapshot(t *testing.T) {
+	f := newAssignmentContextFixture(t, NewMemoryAssignmentContextStore())
+	before, _, _ := f.contexts.LoadAssignmentContextSnapshot(context.Background(), f.leased.ID)
+	reads, _ := f.contexts.ListAssignmentContextReads(context.Background(), f.leased.ID)
+	contexts := f.contexts
+	f.captureForTest(t, f.leased)
+	after, _, _ := contexts.LoadAssignmentContextSnapshot(context.Background(), f.leased.ID)
+	again, _ := contexts.ListAssignmentContextReads(context.Background(), f.leased.ID)
+	if !after.CapturedAt.Equal(before.CapturedAt) || len(again) != len(reads) {
+		t.Fatal("a reused assignment must keep its first snapshot and prompt reads")
+	}
+}
