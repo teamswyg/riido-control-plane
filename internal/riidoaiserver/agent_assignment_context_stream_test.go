@@ -14,18 +14,19 @@ func TestAssignmentContextReadsStreamToClients(t *testing.T) {
 	}
 	f.read(AssignmentContextViewTask, "RIID-1", f.leased.LeaseToken)
 	events := f.contextReadEvents("user-token")
-	if len(events) != 3 {
-		t.Fatalf("want prompt, served and denied events, got %+v", events)
+	if len(events) != 2 {
+		t.Fatalf("want prompt and served events; out-of-scope denied source must stay hidden, got %+v", events)
 	}
-	prompt, served, denied := events[0], events[1], events[2]
+	prompt, served := events[0], events[1]
 	if prompt.Via != AssignmentContextViaPrompt || len(prompt.Sources) != 4 || prompt.ThreadID == "" || prompt.RunID == "" || prompt.AssignmentID != f.leased.ID || prompt.TriggerKind != AssignmentContextTriggerAssign {
 		t.Fatalf("prompt event = %+v", prompt)
 	}
 	if served.Via != AssignmentContextViaCLI || served.Sources[0].Kind != "project" || served.Sources[0].UpdatedAt != "2026-09-30T15:00:00Z" || served.Sources[0].Version == "" || served.Sources[0].Status != AssignmentContextReadServed {
 		t.Fatalf("served event = %+v", served)
 	}
-	if denied.Sources[0].Status != AssignmentContextReadDenied {
-		t.Fatalf("denied event = %+v", denied)
+	reads, err := f.contexts.ListAssignmentContextReads(t.Context(), f.leased.ID)
+	if err != nil || reads[len(reads)-1].Status != AssignmentContextReadDenied {
+		t.Fatal("hidden denied reads must remain in the server audit")
 	}
 	if encoded, _ := json.Marshal(events); strings.Contains(string(encoded), "user-1") || strings.Contains(string(encoded), "cli_1") {
 		t.Fatalf("requester and CLI request ids must stay server-side: %s", encoded)

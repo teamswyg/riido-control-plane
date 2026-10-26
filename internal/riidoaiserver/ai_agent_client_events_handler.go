@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+)
 
 func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request) {
 	if s.aiAgent == nil {
@@ -38,5 +41,7 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 		return
 	}
 	events = aiAgentClientReplayEventsAfterLastEventID(events, r.Header.Get("Last-Event-ID"))
-	serveAIAgentClientEventStream(w, r, events, live, func(event ClientStreamEvent) bool { return s.clientNotificationAuthorized(r, principal, event) })
+	serveAIAgentClientEventStream(w, r, events, live, func(ctx context.Context, event ClientStreamEvent) (ClientStreamEvent, bool) {
+		return s.clientEventForDelivery(r.WithContext(ctx), principal, event)
+	})
 }
