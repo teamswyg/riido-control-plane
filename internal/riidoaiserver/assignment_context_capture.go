@@ -7,9 +7,12 @@ import (
 	"time"
 )
 
+// RequesterAdmin is the requester's admin role at request time; roles are
+// only known while the user's request is authorized, like the snapshot.
 type assignmentContextTrigger struct {
-	Kind string
-	ID   string
+	Kind           string
+	ID             string
+	RequesterAdmin bool
 }
 
 // captureAssignmentContext stores the prompt's task context and records its
@@ -32,6 +35,7 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 		RequesterPrincipalID: assignment.CreatedBy,
 		TriggerKind:          trigger.Kind,
 		TriggerID:            trigger.ID,
+		RequesterAdmin:       trigger.RequesterAdmin,
 		CapturedAt:           now,
 	}
 	contextOnly, comments := splitAssignmentContextComments(*taskContext, trigger)

@@ -20,7 +20,7 @@ func (s Server) serveLiveAssignmentContext(w http.ResponseWriter, r *http.Reques
 	if !found {
 		snapshot = AssignmentContextSnapshot{AssignmentID: assignment.ID, TaskID: assignment.TaskID, WorkspaceID: assignment.WorkspaceID, AgentID: assignment.AgentID, RequesterPrincipalID: assignment.CreatedBy}
 	}
-	data, sources, inScope, err := s.assignmentAgentDirectoryView(r.Context(), assignment, req, now)
+	data, sources, inScope, err := s.assignmentAgentDirectoryView(r.Context(), assignment, found && snapshot.RequesterAdmin, req, now)
 	if errors.Is(err, errAgentDirectoryRequesterUnknown) {
 		s.writeAssignmentContextRefusal(w, r, snapshot, req, now, AssignmentContextReadUnavailable, http.StatusNotFound, "assignment requester unavailable")
 		return

@@ -10,18 +10,23 @@ import (
 var errAgentDirectoryRequesterUnknown = errors.New("assignment requester is unknown")
 
 // assignmentRequesterPrincipal scopes live agent reads to the person who
-// started the run. Roles are not stored on the assignment, so admin-wide
-// visibility is never assumed: public agents plus the requester's own.
-func assignmentRequesterPrincipal(assignment Assignment) (AuthorizationResult, error) {
+// started the run: public agents plus the requester's own, or every agent in
+// the workspace when the requester was an admin at request time. Roles are
+// not on the assignment, so without that recorded fact admin is not assumed.
+func assignmentRequesterPrincipal(assignment Assignment, requesterAdmin bool) (AuthorizationResult, error) {
 	requester := strings.TrimSpace(assignment.CreatedBy)
 	if requester == "" {
 		return AuthorizationResult{}, errAgentDirectoryRequesterUnknown
 	}
-	return AuthorizationResult{PrincipalID: requester, WorkspaceID: strings.TrimSpace(assignment.WorkspaceID)}, nil
+	principal := AuthorizationResult{PrincipalID: requester, WorkspaceID: strings.TrimSpace(assignment.WorkspaceID)}
+	if requesterAdmin {
+		principal.Roles = []AgentCatalogRole{AgentCatalogRoleAdmin}
+	}
+	return principal, nil
 }
 
-func (s Server) assignmentAgentDirectory(ctx context.Context, assignment Assignment) ([]AgentDirectoryEntry, error) {
-	principal, err := assignmentRequesterPrincipal(assignment)
+func (s Server) assignmentAgentDirectory(ctx context.Context, assignment Assignment, requesterAdmin bool) ([]AgentDirectoryEntry, error) {
+	principal, err := assignmentRequesterPrincipal(assignment, requesterAdmin)
 	if err != nil {
 		return nil, err
 	}

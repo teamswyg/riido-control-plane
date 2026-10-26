@@ -60,7 +60,7 @@ func TestInheritAssignmentContextRefusesOtherScopes(t *testing.T) {
 	if err := server.InheritAssignmentContext(ctx, "missing", Assignment{ID: "b4", TaskID: "task-1"}, "run"); !errors.Is(err, errAssignmentContextParentMissing) {
 		t.Fatalf("missing parent: %v", err)
 	}
-	if _, err := assignmentRequesterPrincipal(Assignment{ID: "legacy"}); !errors.Is(err, errAgentDirectoryRequesterUnknown) {
+	if _, err := assignmentRequesterPrincipal(Assignment{ID: "legacy"}, true); !errors.Is(err, errAgentDirectoryRequesterUnknown) {
 		t.Fatalf("legacy assignment without requester must not list agents: %v", err)
 	}
 }

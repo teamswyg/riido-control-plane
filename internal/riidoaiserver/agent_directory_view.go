@@ -10,8 +10,8 @@ import (
 // assignmentAgentDirectoryView answers `riido agents list|show`. ok is false
 // when `show` names an agent outside the requester's visible directory;
 // absent and hidden agents are refused alike so existence is not revealed.
-func (s Server) assignmentAgentDirectoryView(ctx context.Context, assignment Assignment, req AgentAssignmentContextRequest, now time.Time) (any, []AssignmentContextSource, bool, error) {
-	entries, err := s.assignmentAgentDirectory(ctx, assignment)
+func (s Server) assignmentAgentDirectoryView(ctx context.Context, assignment Assignment, requesterAdmin bool, req AgentAssignmentContextRequest, now time.Time) (any, []AssignmentContextSource, bool, error) {
+	entries, err := s.assignmentAgentDirectory(ctx, assignment, requesterAdmin)
 	if err != nil {
 		return nil, nil, false, err
 	}
