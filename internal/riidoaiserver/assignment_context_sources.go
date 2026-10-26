@@ -22,7 +22,7 @@ func assignmentContextSources(c AIAgentTaskContext) []AssignmentContextSource {
 	for _, ref := range assignmentContextHierarchyRefs(c.Hierarchy) {
 		sources = append(sources, assignmentContextReferenceSources(ref.kind, ref.ref)...)
 	}
-	return sources
+	return append(sources, assignmentContextRelatedSources(c.Extended)...)
 }
 
 type assignmentContextHierarchyRef struct {

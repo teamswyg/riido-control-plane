@@ -34,7 +34,8 @@ func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any
 			Resources      []AIAgentTaskContextResource `json:"resources"`
 			ResourceStatus string                       `json:"resource_status,omitempty"`
 			Hierarchy      AIAgentTaskContextHierarchy  `json:"hierarchy"`
-		}{c.Resources, c.ResourceStatus, assignmentContextResourcesOnly(c.Hierarchy)}, sources, true
+			Related        *AIAgentTaskContextExtended  `json:"related,omitempty"`
+		}{c.Resources, c.ResourceStatus, assignmentContextResourcesOnly(c.Hierarchy), assignmentContextRelatedOnly(c.Extended)}, append(sources, assignmentContextRelatedSources(c.Extended)...), true
 	default:
 		return c, assignmentContextSources(c), true
 	}

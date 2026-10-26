@@ -12,10 +12,9 @@ type assignmentContextTrigger struct {
 	ID   string
 }
 
-// captureAssignmentContext stores the task context composed into the
-// assignment prompt and records each source as read via the prompt. It is
-// best effort: the assignment is already committed, so a storage failure is
-// logged and the CLI later reports the snapshot as unavailable.
+// captureAssignmentContext stores the prompt's task context and records its
+// sources as read via the prompt. Best effort: failures are logged and the CLI
+// later reports the snapshot as unavailable.
 func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignment, taskContext *AIAgentTaskContext, trigger assignmentContextTrigger) {
 	store := s.config.AssignmentContext
 	if store == nil || taskContext == nil || strings.TrimSpace(assignment.ID) == "" {
@@ -32,7 +31,9 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 		TriggerID:            trigger.ID,
 		CapturedAt:           now,
 	}
-	snapshot.Context, snapshot.Truncated = boundAssignmentContext(*taskContext)
+	contextOnly, comments := splitAssignmentContextComments(*taskContext, trigger)
+	snapshot.Context, snapshot.Truncated = boundAssignmentContext(contextOnly)
+	snapshot.CommentPages = s.saveAssignmentContextComments(ctx, &snapshot, comments)
 	if err := store.SaveAssignmentContextSnapshot(ctx, snapshot); err != nil {
 		log.Printf("event=assignment_context_capture_failed assignment_id=%q stage=snapshot error_type=%T", assignment.ID, err)
 		return
@@ -41,7 +42,7 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 	if snapshot.Truncated {
 		status = AssignmentContextReadTruncated
 	}
-	reads := assignmentContextReadRecords(snapshot, assignmentContextSources(snapshot.Context), AssignmentContextViaPrompt, status, "", now)
+	reads := assignmentContextReadRecords(snapshot, assignmentContextPromptSources(snapshot.Context, comments), AssignmentContextViaPrompt, status, "", now)
 	if err := store.AppendAssignmentContextReads(ctx, reads); err != nil {
 		log.Printf("event=assignment_context_capture_failed assignment_id=%q stage=reads error_type=%T", assignment.ID, err)
 		return

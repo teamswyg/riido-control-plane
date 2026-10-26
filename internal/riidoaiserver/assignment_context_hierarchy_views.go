@@ -9,11 +9,12 @@ const (
 	AssignmentContextViewTask      = "task"
 	AssignmentContextViewTree      = "tree"
 	AssignmentContextViewResources = "resources"
+	AssignmentContextViewComments  = "comments"
 )
 
 func validAssignmentContextView(view string) bool {
 	switch view {
-	case AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources:
+	case AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments:
 		return true
 	}
 	return false
@@ -41,4 +42,11 @@ func assignmentContextTaskSource(c AIAgentTaskContext, part string) AssignmentCo
 		source.Version = assignmentContextVersion(c.Document.Content)
 	}
 	return source
+}
+
+func assignmentContextRelatedOnly(extended *AIAgentTaskContextExtended) *AIAgentTaskContextExtended {
+	if extended == nil {
+		return nil
+	}
+	return &AIAgentTaskContextExtended{RelatedWork: extended.RelatedWork, RelatedMeetings: extended.RelatedMeetings, RelatedStatus: extended.RelatedStatus}
 }

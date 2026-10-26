@@ -9,6 +9,7 @@ type AIAgentTaskContext struct {
 	Repositories   []AIAgentTaskContextRepository `json:"repositories"`
 	Resources      []AIAgentTaskContextResource   `json:"resources,omitempty"`
 	ResourceStatus string                         `json:"resource_status,omitempty"`
+	Extended       *AIAgentTaskContextExtended    `json:"extended,omitempty"`
 }
 
 type AIAgentTaskContextComponent struct {

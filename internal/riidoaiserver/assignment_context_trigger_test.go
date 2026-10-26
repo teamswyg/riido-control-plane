@@ -35,7 +35,7 @@ func TestCommentDeliveryCapturesAssignmentContextOnce(t *testing.T) {
 	if !found || snapshot.TriggerKind != AssignmentContextTriggerComment || snapshot.TriggerID != "comment-7" || snapshot.RequesterPrincipalID != "user-1" {
 		t.Fatalf("snapshot=%+v found=%v", snapshot, found)
 	}
-	if reads, _ := contexts.ListAssignmentContextReads(context.Background(), delivered.AssignmentID); len(reads) != 1 || reads[0].Via != AssignmentContextViaPrompt {
+	if reads, _ := contexts.ListAssignmentContextReads(context.Background(), delivered.AssignmentID); assignmentContextReadSummary(reads) != "prompt:task/body,prompt:comment/body" || reads[1].SourceID != "comment-7" {
 		t.Fatalf("retries must not duplicate prompt reads: %+v", reads)
 	}
 }

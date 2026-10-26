@@ -13,6 +13,7 @@ type MemoryAssignmentContextStore struct {
 	mu        sync.Mutex
 	snapshots map[string]AssignmentContextSnapshot
 	reads     map[string][]AssignmentContextRead
+	comments  map[string][][]AIAgentTaskContextComment
 }
 
 func NewMemoryAssignmentContextStore() *MemoryAssignmentContextStore {

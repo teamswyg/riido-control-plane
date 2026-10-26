@@ -98,6 +98,9 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	principal := AuthorizationResult{PrincipalID: evidence.PrincipalID, WorkspaceID: evidence.WorkspaceID}
+	if s.config.AssignmentContext != nil {
+		evidence.Context.Extended = commentDeliveryExtendedContext(evidence.CommentID, evidence.Body)
+	}
 	request := AssignAIAgentTaskRequest{AgentID: evidence.AgentID, RequestID: "comment:" + evidence.EventID, Instruction: evidence.Body, SourceCommentID: evidence.CommentID, VerifiedTaskContext: &evidence.Context}
 	response, found, lookupErr := s.findTaskRequestReceipt(ctx, principal, evidence.TaskID, request)
 	if lookupErr != nil {

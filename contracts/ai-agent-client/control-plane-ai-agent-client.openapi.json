@@ -5884,6 +5884,11 @@
               "parent_task",
               "link",
               "attachment",
+              "related_task",
+              "related_backlog",
+              "related_intake",
+              "related_meeting",
+              "comment",
               "target"
             ],
             "type": "string"
@@ -5891,12 +5896,14 @@
           "part": {
             "enum": [
               "body",
+              "summary",
               "title",
               "metadata",
               "base",
               "task",
               "tree",
-              "resources"
+              "resources",
+              "comments"
             ],
             "type": "string"
           },

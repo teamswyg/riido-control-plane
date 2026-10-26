@@ -22,6 +22,11 @@ type assignmentContextFixture struct {
 // a request-scoped task context, then leases it with the daemon poll.
 func newAssignmentContextFixture(t *testing.T, contexts *MemoryAssignmentContextStore) *assignmentContextFixture {
 	t.Helper()
+	return newAssignmentContextFixtureWith(t, contexts, assignmentContextTestTaskContext())
+}
+
+func newAssignmentContextFixtureWith(t *testing.T, contexts *MemoryAssignmentContextStore, taskContext AIAgentTaskContext) *assignmentContextFixture {
+	t.Helper()
 	authorizer, err := NewStaticTokenAuthorizer([]StaticTokenCredential{{PrincipalID: "user-1", Token: "user-token", Scopes: []string{"ai-agent:*", "task:task-private:assign", "agent:agent-owned-codex:poll"}}, {PrincipalID: "user-2", Token: "other-token", Scopes: []string{"ai-agent:*"}}})
 	if err != nil {
 		t.Fatal(err)
@@ -30,7 +35,7 @@ func newAssignmentContextFixture(t *testing.T, contexts *MemoryAssignmentContext
 	aiAgentStore.deviceCredentials["device-dev-macbook"] = deviceCredentialRecord{deviceID: "device-dev-macbook", secretHash: sha256.Sum256([]byte(assignmentContextTestSecret)), ownerPrincipalID: "user-1", workspaceID: "workspace-dev-riid"}
 	assignmentStore := NewStoreWithConfig(StoreConfig{AgentRegistry: aiAgentStore})
 	t.Cleanup(func() { assignmentStore.Close() })
-	config := ServerConfig{AIAgentClient: aiAgentStore, Assignment: assignmentStore, TaskContext: &assignmentHTTPRequestTaskContextReader{contextSnapshot: assignmentContextTestTaskContext()}, Authorizer: authorizer}
+	config := ServerConfig{AIAgentClient: aiAgentStore, Assignment: assignmentStore, TaskContext: &assignmentHTTPRequestTaskContextReader{contextSnapshot: taskContext}, Authorizer: authorizer}
 	if contexts != nil {
 		config.AssignmentContext = contexts
 	}

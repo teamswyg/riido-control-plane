@@ -33,6 +33,7 @@ type AssignmentContextSnapshot struct {
 	TriggerID            string             `json:"trigger_id,omitempty"`
 	CapturedAt           time.Time          `json:"captured_at"`
 	Truncated            bool               `json:"truncated,omitempty"`
+	CommentPages         int                `json:"comment_pages,omitempty"`
 	Context              AIAgentTaskContext `json:"context"`
 }
 
@@ -62,4 +63,6 @@ type AssignmentContextStore interface {
 	LoadAssignmentContextSnapshot(ctx context.Context, assignmentID string) (AssignmentContextSnapshot, bool, error)
 	AppendAssignmentContextReads(ctx context.Context, reads []AssignmentContextRead) error
 	ListAssignmentContextReads(ctx context.Context, assignmentID string) ([]AssignmentContextRead, error)
+	SaveAssignmentContextComments(ctx context.Context, assignmentID string, pages [][]AIAgentTaskContextComment) error
+	LoadAssignmentContextCommentPage(ctx context.Context, assignmentID string, page int) ([]AIAgentTaskContextComment, bool, error)
 }

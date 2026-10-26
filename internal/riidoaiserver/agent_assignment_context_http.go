@@ -47,7 +47,11 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		s.writeAssignmentContextRefusal(w, r, snapshot, req, now, AssignmentContextReadUnavailable, http.StatusNotFound, "assignment context snapshot unavailable")
 		return
 	}
-	data, sources, inScope := selectAssignmentContextView(snapshot.Context, req.View, req.Target)
+	data, sources, inScope, err := s.assignmentContextViewData(r.Context(), snapshot, req)
+	if err != nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment context store unavailable")
+		return
+	}
 	if !inScope {
 		s.writeAssignmentContextRefusal(w, r, snapshot, req, now, AssignmentContextReadDenied, http.StatusForbidden, "target is outside this assignment's context")
 		return

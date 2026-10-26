@@ -26,6 +26,7 @@ type AIAgentTaskContextRequest struct {
 	WorkspaceID      string
 	BearerToken      string
 	DocumentSnapshot *AIAgentTaskDocumentSnapshot
+	Extended         bool // also read related work, meetings and comments (extra upstream reads)
 }
 
 type AIAgentTaskContextRequestReader interface {
@@ -215,7 +216,7 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err := req.DocumentSnapshot.validate(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	if err := c.enrichTaskContext(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req.DocumentSnapshot); err != nil {
+	if err := c.enrichTaskContextFor(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req); err != nil {
 		return AIAgentTaskContext{}, err
 	}
 	return contextSnapshot, nil

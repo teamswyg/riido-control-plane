@@ -396,8 +396,8 @@ export interface AgentContextReadEvent {
  */
 export interface AgentContextReadSource {
   id?: string;
-  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "target";
-  part: "body" | "title" | "metadata" | "base" | "task" | "tree" | "resources";
+  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target";
+  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments";
   status: "served" | "truncated" | "denied" | "unavailable";
   updated_at?: string;
   version?: string;

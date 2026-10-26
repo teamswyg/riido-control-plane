@@ -7,6 +7,7 @@ type AgentAssignmentContextRequest struct {
 	LeaseToken   string `json:"lease_token"`
 	View         string `json:"view"`
 	Target       string `json:"target,omitempty"`
+	Cursor       string `json:"cursor,omitempty"`
 	RequestID    string `json:"request_id,omitempty"`
 }
 
