@@ -58,6 +58,12 @@ func selectAssignmentContextTask(c AIAgentTaskContext, target string) (any, []As
 	return nil, nil, false
 }
 
+// assignmentContextTargetMatches accepts the ID, the stored key, or the key as
+// the prompt shows it ("RIID-" prefixed), so an agent can use what it was shown.
 func assignmentContextTargetMatches(target, id, keyNumber string) bool {
-	return target == id || (keyNumber != "" && strings.EqualFold(target, keyNumber))
+	if target == id {
+		return true
+	}
+	keyNumber = strings.TrimSpace(keyNumber)
+	return keyNumber != "" && (strings.EqualFold(target, keyNumber) || strings.EqualFold(target, formatTaskContextKeyNumber(keyNumber)))
 }

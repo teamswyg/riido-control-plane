@@ -25295,6 +25295,47 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "riido_cli_context_shown_key_target_5900",
+      "observation": "Staging QA showed the prompt and CLI context listing the task's project and goal keys with a RIID- prefix (RIID-0-14) while the snapshot stores the raw key (0-14). A Codex run reused the shown goal key with riido work get and was refused as OUT_OF_RUN_SCOPE although the goal is part of the assignment hierarchy.",
+      "hypothesis": "Resolving a CLI target against the ID, the stored key and the key as the prompt shows it lets agents use exactly what they were shown, without widening the scope beyond the snapshot references.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_views.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_target_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_target_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "A target matches a snapshot reference by exact ID, by stored key case-insensitively, or by the RIID- prefixed key the prompt shows. Keys that already carry the prefix are unchanged, an empty key never matches, and references outside the snapshot hierarchy are still refused.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "riido_cli_assignment_context_5900",
       "observation": "Agents received every task, parent and resource body in the prompt and could not read more during a run; the server kept no record of which Riido sources an answer used. The monolith accepts only short-lived user JWTs, so the control-plane cannot read on the user's behalf after the request ends.",
       "hypothesis": "Store the task context the server already composes with the requester Bearer per assignment, let only the leased daemon read it back with its device credential, and record every prompt or CLI read so clients can show what an answer read without any user token being stored.",
