@@ -42,8 +42,8 @@ export type AIAgentOnboardingTaskTemplateKey = "schedule" | "interview" | "launc
  */
 export interface AIAgentRunRead {
   id?: string;
-  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target";
-  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments";
+  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target" | "agent";
+  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments" | "profile";
   served_at: string;
   status: "served" | "truncated" | "denied" | "unavailable";
   updated_at?: string;
@@ -425,8 +425,8 @@ export interface AgentContextReadEvent {
  */
 export interface AgentContextReadSource {
   id?: string;
-  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target";
-  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments";
+  kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target" | "agent";
+  part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments" | "profile";
   status: "served" | "truncated" | "denied" | "unavailable";
   updated_at?: string;
   version?: string;

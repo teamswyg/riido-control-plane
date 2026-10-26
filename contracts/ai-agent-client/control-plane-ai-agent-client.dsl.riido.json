@@ -2868,7 +2868,8 @@
             "related_intake",
             "related_meeting",
             "comment",
-            "target"
+            "target",
+            "agent"
           ]
         },
         {
@@ -2887,7 +2888,8 @@
             "task",
             "tree",
             "resources",
-            "comments"
+            "comments",
+            "profile"
           ]
         },
         {
@@ -3959,7 +3961,8 @@
             "related_intake",
             "related_meeting",
             "comment",
-            "target"
+            "target",
+            "agent"
           ]
         },
         {
@@ -3978,7 +3981,8 @@
             "task",
             "tree",
             "resources",
-            "comments"
+            "comments",
+            "profile"
           ]
         },
         {

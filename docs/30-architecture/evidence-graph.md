@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `268`
 - claim refs: `403`
-- change refs: `2750`
-- verifier refs: `1601`
+- change refs: `2752`
+- verifier refs: `1602`
 - evidence refs: `821`
 
 ## Compiled Chain Summary
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `175` | `246` | `1704` | `907` | `509` |
+| `closed_loop_candidate` | `175` | `246` | `1706` | `908` | `509` |
 | `control_plane_performance_harness` | `32` | `36` | `245` | `262` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `15` | `25` | `344` | `169` | `68` |
@@ -307,7 +307,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `riido_cli_context_cross_workspace_device_5900` | `1` | `3` | `3` | `1` | `closed_loop_candidate` |
 | `riido_cli_context_shown_key_target_5900` | `1` | `2` | `3` | `1` | `closed_loop_candidate` |
 | `riido_cli_assignment_context_5900` | `1` | `36` | `15` | `1` | `closed_loop_candidate` |
-| `riido_cli_agent_directory_5892` | `1` | `33` | `10` | `1` | `closed_loop_candidate` |
+| `riido_cli_agent_directory_5892` | `1` | `35` | `11` | `1` | `closed_loop_candidate` |
 
 ## Loop
 
