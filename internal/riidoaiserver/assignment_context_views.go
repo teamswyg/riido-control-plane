@@ -2,31 +2,19 @@ package riidoaiserver
 
 import "strings"
 
-// Views mirror the daemon CLI reads: base = `riido context get`,
-// task = `riido work get [target]`, tree = `riido work tree`,
-// resources = `riido work relations`. Comments, activity and search are not
-// part of the snapshot and stay unsupported until the read scope is decided.
-const (
-	AssignmentContextViewBase      = "base"
-	AssignmentContextViewTask      = "task"
-	AssignmentContextViewTree      = "tree"
-	AssignmentContextViewResources = "resources"
-)
-
-func validAssignmentContextView(view string) bool {
-	switch view {
-	case AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources:
-		return true
-	}
-	return false
-}
-
 // selectAssignmentContextView returns the data and sources for one view. ok
 // is false when the target is outside this assignment's snapshot.
 func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any, []AssignmentContextSource, bool) {
+	target = strings.TrimSpace(target)
+	if view == AssignmentContextViewTask {
+		return selectAssignmentContextTask(c, target)
+	}
+	// Other views describe the assigned task only; naming any other work item
+	// must not silently return this task's tree or resources.
+	if target != "" && !assignmentContextTargetMatches(target, c.Component.ID, c.Component.KeyNumber) {
+		return nil, nil, false
+	}
 	switch view {
-	case AssignmentContextViewTask:
-		return selectAssignmentContextTask(c, strings.TrimSpace(target))
 	case AssignmentContextViewTree:
 		tree := struct {
 			Component AIAgentTaskContextComponent `json:"component"`

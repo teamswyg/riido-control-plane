@@ -99,3 +99,15 @@ func (f *assignmentContextFixture) event(state AssignmentState, kind string) {
 		f.t.Fatalf("event %s status=%d body=%s", kind, code, resp)
 	}
 }
+
+func TestAssignmentContextViewsStayOnTheAssignedTask(t *testing.T) {
+	c := assignmentContextTestTaskContext()
+	for _, tc := range []struct {
+		view, target string
+		ok           bool
+	}{{AssignmentContextViewTree, "RIID-5900", true}, {AssignmentContextViewTree, "RIID-1", false}, {AssignmentContextViewResources, "task-private", true}, {AssignmentContextViewBase, "RIID-4800", false}, {AssignmentContextViewTask, "milestone-a", true}} {
+		if _, _, ok := selectAssignmentContextView(c, tc.view, tc.target); ok != tc.ok {
+			t.Fatalf("%s %s ok=%v", tc.view, tc.target, ok)
+		}
+	}
+}
