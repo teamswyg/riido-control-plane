@@ -29,6 +29,9 @@ func (s *DynamoDBAssignmentOperationStore) SaveAssignmentContextSnapshot(ctx con
 		"context_agent":  {"S": snapshot.AgentID},
 		"context_stored": {"S": snapshot.CapturedAt.Format(dynamoDBAssignmentContextTimeFormat)},
 	}
+	if s.enableAssignmentContextRetention {
+		return s.saveContextPayloads(ctx, snapshot.AssignmentID, []map[string]map[string]string{item})
+	}
 	_, err = s.assignmentContextRequest(ctx, dynamoDBPutItemTarget, struct {
 		TableName string
 		Item      map[string]map[string]string
@@ -50,6 +53,9 @@ func (s *DynamoDBAssignmentOperationStore) LoadAssignmentContextSnapshot(ctx con
 	}
 	var response struct{ Item map[string]map[string]string }
 	if err := json.Unmarshal(body, &response); err != nil || len(response.Item) == 0 {
+		return AssignmentContextSnapshot{}, false, err
+	}
+	if expired, err := assignmentContextItemExpired(response.Item, s.now()); expired || err != nil {
 		return AssignmentContextSnapshot{}, false, err
 	}
 	decoded, err := gunzipBase64(response.Item["payload_gzip"]["S"])

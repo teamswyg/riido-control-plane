@@ -26,7 +26,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 			if err != nil {
 				return AssignmentClaimResult{}, err
 			}
-			_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+			_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{
 				endpoint:     s.endpoint,
 				endpointHost: s.endpointHost,
 				region:       s.region,
@@ -90,7 +90,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 		if err != nil {
 			return AssignmentClaimResult{}, err
 		}
-		_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+		_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{
 			endpoint:     s.endpoint,
 			endpointHost: s.endpointHost,
 			region:       s.region,

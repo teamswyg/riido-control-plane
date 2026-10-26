@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	riidoAIServerRouteGoldenHash  = "fc3eb6351096043bae8a2945d4e8d40a76f1c94393c37112e920b8237a72bd34"
+	riidoAIServerRouteGoldenHash  = "6e148f0ce736aaf804620fefaa2db82e6226413beb454a6fbd8cd9dc4610f8a4"
 	riidoAIServerStatusGoldenHash = "7191fa30926ca05804763741bfb752231ea4ead921f9a58640b875001038437f"
 )
 
@@ -39,8 +39,8 @@ func riidoAIServerRouteGoldenPayload(t *testing.T) string {
 		patterns = append(patterns, route.pattern)
 	}
 	sort.Strings(patterns)
-	if len(patterns) != 25 {
-		t.Fatalf("route count = %d, want 25\n%s", len(patterns), strings.Join(patterns, "\n"))
+	if len(patterns) != 26 {
+		t.Fatalf("route count = %d, want 26\n%s", len(patterns), strings.Join(patterns, "\n"))
 	}
 	return strings.Join(patterns, "\n") + "\n"
 }

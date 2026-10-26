@@ -16,6 +16,7 @@ type dynamoDBTransactWritePut struct {
 }
 
 type dynamoDBTransactWriteItem struct {
+	Update         *dynamoDBTransactWriteUpdateAction         `json:"Update,omitempty"`
 	Put            *dynamoDBTransactWritePutAction            `json:"Put,omitempty"`
 	ConditionCheck *dynamoDBTransactWriteConditionCheckAction `json:"ConditionCheck,omitempty"`
 	Delete         *dynamoDBTransactWriteDeleteAction         `json:"Delete,omitempty"`

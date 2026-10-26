@@ -77,6 +77,12 @@
             "threadMessages"
           ],
           "description": "task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다."
+        },
+        {
+          "path": [
+            "runs"
+          ],
+          "description": "실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다."
         }
       ]
     },
@@ -187,6 +193,13 @@
             "threadStreamSubscription"
           ],
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "runs"
+          ],
+          "description": "실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다."
         }
       ]
     },
@@ -1609,6 +1622,75 @@
           "createAIAgentProfileThumbnailUpload.profile-image-upload-precedes-agent-save",
           "createAIAgentProfileThumbnailUpload.media-storage-stays-deployment-owned"
         ]
+      }
+    },
+    "/v1/client/ai-agent/runs/{run_id}/reads": {
+      "get": {
+        "operationId": "listAIAgentRunReads",
+        "summary": "실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentRunReadsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read"
+        ],
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "aiAgent",
+          "facade_path": [
+            "runs",
+            "reads"
+          ],
+          "generated_path": "aiAgent.runs.reads",
+          "cache_tag": "v1.runs.reads"
+        }
       }
     },
     "/v1/client/ai-agent/tasks/{task_id}/assignable-agents": {
@@ -3725,6 +3807,84 @@
         ]
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/runs/{run_id}/reads": {
+      "get": {
+        "operationId": "listAIAgentRunReadsV2",
+        "summary": "실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentRunReadsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:read"
+        ],
+        "x-riido-operation-kind": "query",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "runs",
+            "reads"
+          ],
+          "generated_path": "v2.aiAgent.runs.reads",
+          "cache_tag": "v2.runs.reads"
+        }
+      }
+    },
     "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/assigned-agent-profiles": {
       "get": {
         "operationId": "listWorkspaceAssignedAgentProfilesV2",
@@ -4995,6 +5155,126 @@
           "launch"
         ],
         "type": "string"
+      },
+      "AIAgentRunRead": {
+        "description": "현재 viewer가 확인할 수 있는 실행별 읽기 메타데이터입니다. 과거 본문·URL·요청자 정보는 반환하지 않습니다.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "task",
+              "project",
+              "milestone",
+              "parent_task",
+              "link",
+              "attachment",
+              "related_task",
+              "related_backlog",
+              "related_intake",
+              "related_meeting",
+              "comment",
+              "target"
+            ],
+            "type": "string"
+          },
+          "part": {
+            "enum": [
+              "body",
+              "summary",
+              "title",
+              "metadata",
+              "base",
+              "task",
+              "tree",
+              "resources",
+              "comments"
+            ],
+            "type": "string"
+          },
+          "served_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "served",
+              "truncated",
+              "denied",
+              "unavailable"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "via": {
+            "enum": [
+              "prompt",
+              "cli"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "part",
+          "status",
+          "via",
+          "served_at"
+        ],
+        "type": "object"
+      },
+      "AIAgentRunReadsResponse": {
+        "properties": {
+          "assignment_id": {
+            "type": "string"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "page_size": {
+            "type": "integer"
+          },
+          "reads": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentRunRead"
+            },
+            "type": "array"
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "run_id",
+          "task_id",
+          "thread_id",
+          "assignment_id",
+          "reads",
+          "page",
+          "page_size",
+          "has_more"
+        ],
+        "type": "object"
       },
       "AIAgentTaskActionResponse": {
         "description": "task thread action 요청 이후 client가 즉시 반영할 agent 작업 상태 응답입니다.",

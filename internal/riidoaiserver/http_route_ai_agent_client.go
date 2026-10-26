@@ -27,6 +27,11 @@ func aiAgentClientRouteFromSegments(base string, segments []string) string {
 		return aiAgentClientWorkspaceAssignmentRoute(base, segments)
 	case "threads":
 		return aiAgentClientThreadHTTPRoute(base, segments)
+	case "runs":
+		if len(segments) == 3 && segments[2] == "reads" {
+			return base + "/runs/{run_id}/reads"
+		}
+		return ""
 	case "agents":
 		return aiAgentClientAgentHTTPRoute(base, segments)
 	default:

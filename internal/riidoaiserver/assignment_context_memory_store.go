@@ -5,25 +5,35 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"time"
 )
 
 // MemoryAssignmentContextStore keeps snapshots and read records in process.
 // It backs local development and tests; production uses DynamoDB.
 type MemoryAssignmentContextStore struct {
-	mu        sync.Mutex
-	snapshots map[string]AssignmentContextSnapshot
-	reads     map[string][]AssignmentContextRead
-	comments  map[string][][]AIAgentTaskContextComment
+	retentionReader AssignmentProjectionReader
+	expiry          map[string]int64
+	now             func() time.Time
+	mu              sync.Mutex
+	snapshots       map[string]AssignmentContextSnapshot
+	reads           map[string][]AssignmentContextRead
+	comments        map[string][][]AIAgentTaskContextComment
 }
 
 func NewMemoryAssignmentContextStore() *MemoryAssignmentContextStore {
 	return &MemoryAssignmentContextStore{
+		now:       time.Now,
 		snapshots: map[string]AssignmentContextSnapshot{},
 		reads:     map[string][]AssignmentContextRead{},
 	}
 }
 
 func (m *MemoryAssignmentContextStore) SaveAssignmentContextSnapshot(ctx context.Context, snapshot AssignmentContextSnapshot) error {
+	if expired, err := m.expirePayloads(ctx, snapshot.AssignmentID); err != nil {
+		return err
+	} else if expired {
+		return errAssignmentContextExpired
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -35,16 +45,6 @@ func (m *MemoryAssignmentContextStore) SaveAssignmentContextSnapshot(ctx context
 	defer m.mu.Unlock()
 	m.snapshots[id] = snapshot
 	return nil
-}
-
-func (m *MemoryAssignmentContextStore) LoadAssignmentContextSnapshot(ctx context.Context, assignmentID string) (AssignmentContextSnapshot, bool, error) {
-	if err := ctx.Err(); err != nil {
-		return AssignmentContextSnapshot{}, false, err
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	snapshot, ok := m.snapshots[strings.TrimSpace(assignmentID)]
-	return snapshot, ok, nil
 }
 
 func (m *MemoryAssignmentContextStore) AppendAssignmentContextReads(ctx context.Context, reads []AssignmentContextRead) error {

@@ -40,6 +40,7 @@ var serverRoutes = []serverRoute{
 	{"/v1/client/ai-agent/agent-assignments/", Server.handleAIAgentClientAgentAssignments},
 	{"/v1/client/ai-agent/tasks/", Server.handleAIAgentClientTasks},
 	{"/v1/client/ai-agent/threads/", Server.handleAIAgentClientThreads},
+	{"/v1/client/ai-agent/runs/", Server.handleAIAgentClientRuns},
 	{"/v1/client/ai-agent/agents", Server.handleAIAgentClientAgents},
 	{"/v1/client/ai-agent/agents/", Server.handleAIAgentClientAgents},
 	{"/v1/client/ai-agent/events", Server.handleAIAgentClientEvents},

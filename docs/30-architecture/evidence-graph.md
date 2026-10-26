@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `265`
 - claim refs: `400`
-- change refs: `2688`
-- verifier refs: `1574`
+- change refs: `2712`
+- verifier refs: `1585`
 - evidence refs: `818`
 
 ## Compiled Chain Summary
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `172` | `243` | `1642` | `880` | `506` |
+| `closed_loop_candidate` | `172` | `243` | `1666` | `891` | `506` |
 | `control_plane_performance_harness` | `32` | `36` | `245` | `262` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `15` | `25` | `344` | `169` | `68` |
@@ -304,7 +304,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `onboarding_first_task_document_only_copy_5866` | `9` | `5` | `2` | `2` | `closed_loop_candidate` |
 | `shared_authorization_caller_cancellation_5821` | `7` | `22` | `10` | `1` | `closed_loop_candidate` |
 | `legacy_client_projection_error_privacy_5821` | `16` | `19` | `6` | `1` | `closed_loop_candidate` |
-| `riido_cli_assignment_context_5900` | `1` | `12` | `4` | `1` | `closed_loop_candidate` |
+| `riido_cli_assignment_context_5900` | `1` | `36` | `15` | `1` | `closed_loop_candidate` |
 
 ## Loop
 

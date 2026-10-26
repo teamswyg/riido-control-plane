@@ -290,6 +290,20 @@ export interface CreateAIAgentProfileThumbnailUploadReactEndpoint extends core.C
 }
 
 /**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 계약 generated path: `aiAgent.runs.reads`
+ * 검색용 generated 경로: `runs.reads`
+ * 접근 예시: `riido.aiAgent.runs.reads`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentRunReadsReactEndpoint extends core.ListAIAgentRunReadsEndpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentRunReadsPathParams, options?: core.RiidoQueryOptions<core.AIAgentRunReadsResponse>) => UseQueryResult<core.AIAgentRunReadsResponse, Error>;
+}
+
+/**
  * task participant dropdown에서 할당 가능한 agent 목록을 조회합니다
  * 계약 generated path: `aiAgent.tasks.assignableAgents`
  * 검색용 generated 경로: `tasks.assignableAgents`
@@ -679,6 +693,20 @@ export interface CreateAIAgentProfileThumbnailUploadV2ReactEndpoint extends core
    * React Query useMutation hook입니다.
    */
   readonly useMutation: (options?: core.RiidoMutationOptions<core.AgentProfileThumbnailUploadResponse, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables>) => UseMutationResult<core.AgentProfileThumbnailUploadResponse, Error, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables>;
+}
+
+/**
+ * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+ * 계약 generated path: `v2.aiAgent.runs.reads`
+ * 검색용 generated 경로: `aiAgent.runs.reads`
+ * 접근 예시: `riido.v2.aiAgent.runs.reads`
+ * client의 `@/lib/react-query` 정책을 통과하는 query hook endpoint입니다.
+ */
+export interface ListAIAgentRunReadsV2ReactEndpoint extends core.ListAIAgentRunReadsV2Endpoint {
+  /**
+   * React Query useQuery hook입니다.
+   */
+  readonly useQuery: (params: core.ListAIAgentRunReadsV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentRunReadsResponse>) => UseQueryResult<core.AIAgentRunReadsResponse, Error>;
 }
 
 /**
@@ -1101,6 +1129,20 @@ export interface RiidoAIAgentProfileThumbnailsReactNamespace {
 }
 
 /**
+ * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+ */
+export interface RiidoAIAgentRunsReactNamespace {
+  /**
+   * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+   * 계약 generated path: `aiAgent.runs.reads`
+   * 검색용 generated 경로: `runs.reads`
+   * 접근 예시: `riido.aiAgent.runs.reads`
+   * cache tag: `v1.runs.reads`
+   */
+  readonly reads: ListAIAgentRunReadsReactEndpoint;
+}
+
+/**
  * task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다. Figma의 댓글 표현은 이 thread message로 투영됩니다.
  */
 export interface RiidoAIAgentTasksThreadMessagesReactNamespace {
@@ -1204,6 +1246,10 @@ export interface RiidoAIAgentReactModule {
    * aiAgent.profileThumbnails namespace입니다.
    */
   readonly profileThumbnails: RiidoAIAgentProfileThumbnailsReactNamespace;
+  /**
+   * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+   */
+  readonly runs: RiidoAIAgentRunsReactNamespace;
   /**
    * task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
@@ -1434,6 +1480,20 @@ export interface RiidoV2AIAgentProfileThumbnailsReactNamespace {
 }
 
 /**
+ * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+ */
+export interface RiidoV2AIAgentRunsReactNamespace {
+  /**
+   * 실행에서 읽은 자료 기록을 현재 viewer 권한으로 조회합니다.
+   * 계약 generated path: `v2.aiAgent.runs.reads`
+   * 검색용 generated 경로: `aiAgent.runs.reads`
+   * 접근 예시: `riido.v2.aiAgent.runs.reads`
+   * cache tag: `v2.runs.reads`
+   */
+  readonly reads: ListAIAgentRunReadsV2ReactEndpoint;
+}
+
+/**
  * 선택된 workspace의 task에 여러 AI Agent를 병렬로 배정/해제/중지하는 additive assignment namespace입니다. v1/v2 tasks.assignment 호환 경로는 기존 단일 active 시연 흐름을 유지합니다.
  */
 export interface RiidoV2AIAgentTasksAgentAssignmentsReactNamespace {
@@ -1614,6 +1674,10 @@ export interface RiidoV2AIAgentReactNamespace {
    */
   readonly profileThumbnails: RiidoV2AIAgentProfileThumbnailsReactNamespace;
   /**
+   * 실행별 읽기 자료의 현재 viewer 권한 필터링 이력입니다.
+   */
+  readonly runs: RiidoV2AIAgentRunsReactNamespace;
+  /**
    * 선택된 workspace의 task thread에서 AI Agent assignment, thread message, compatibility comment action을 다루는 namespace입니다.
    */
   readonly tasks: RiidoV2AIAgentTasksReactNamespace;
@@ -1789,6 +1853,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
             },
           },
         },
+        runs: {
+          reads: {
+            ...coreClient.aiAgent.runs.reads,
+            useQuery: (params: core.ListAIAgentRunReadsPathParams, options?: core.RiidoQueryOptions<core.AIAgentRunReadsResponse>) => useQuery<core.AIAgentRunReadsResponse, Error>(coreClient.aiAgent.runs.reads.query(params, options)),
+          },
+        },
         tasks: {
           assign: {
             ...coreClient.aiAgent.tasks.assign,
@@ -1924,6 +1994,12 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
                 ...coreClient.v2.aiAgent.profileThumbnails.uploads.create,
                 useMutation: (options: core.RiidoMutationOptions<core.AgentProfileThumbnailUploadResponse, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables> = {}) => useMutation<core.AgentProfileThumbnailUploadResponse, Error, core.CreateAIAgentProfileThumbnailUploadV2MutationVariables>(coreClient.v2.aiAgent.profileThumbnails.uploads.create.mutation(options)),
               },
+            },
+          },
+          runs: {
+            reads: {
+              ...coreClient.v2.aiAgent.runs.reads,
+              useQuery: (params: core.ListAIAgentRunReadsV2PathParams, options?: core.RiidoQueryOptions<core.AIAgentRunReadsResponse>) => useQuery<core.AIAgentRunReadsResponse, Error>(coreClient.v2.aiAgent.runs.reads.query(params, options)),
             },
           },
           tasks: {

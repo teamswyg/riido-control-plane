@@ -6,6 +6,11 @@ import (
 )
 
 func (m *MemoryAssignmentContextStore) SaveAssignmentContextComments(ctx context.Context, assignmentID string, pages [][]AIAgentTaskContextComment) error {
+	if expired, err := m.expirePayloads(ctx, assignmentID); err != nil {
+		return err
+	} else if expired {
+		return errAssignmentContextExpired
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -19,6 +24,9 @@ func (m *MemoryAssignmentContextStore) SaveAssignmentContextComments(ctx context
 }
 
 func (m *MemoryAssignmentContextStore) LoadAssignmentContextCommentPage(ctx context.Context, assignmentID string, page int) ([]AIAgentTaskContextComment, bool, error) {
+	if expired, err := m.expirePayloads(ctx, assignmentID); expired || err != nil {
+		return nil, false, err
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, false, err
 	}

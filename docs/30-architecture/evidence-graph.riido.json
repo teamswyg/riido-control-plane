@@ -25304,6 +25304,102 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/config-reference.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_visibility.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_lookup.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_boundaries_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_payload_write.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_terminal_write.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_terminal_actions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_comment_keys.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_size_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_projection_condition_failure.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_retention.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_races_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_terminal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_query_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_size_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_delayed_capture_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_available_context.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_unavailable_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_assignment_projection_handlers.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_memory_terminal_clock_test.go"
         }
       ],
       "verifiers": [
@@ -25322,6 +25418,50 @@
         {
           "kind": "tool",
           "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_boundaries_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_races_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_terminal_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_query_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_size_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_delayed_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_unavailable_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_memory_terminal_clock_test.go"
         }
       ],
       "evidence": [
@@ -25331,7 +25471,7 @@
           "redacted": true
         }
       ],
-      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT (default off) thread-message, assign and comment-delivered assignments capture their composed context after publication; thread follow-up composition and history are unchanged when the flag is off. Reads stream as agent_context_read under the thread's existing visibility.",
+      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT (default off) thread-message, assign and comment-delivered assignments capture their composed context after publication; thread follow-up composition and history are unchanged when the flag is off. Reads stream as agent_context_read under the thread's existing visibility. GET run reads reauthorizes the current viewer with Bearer-only identity, workspace-scoped run lookup, current task and source-part visibility. Only redacted records surviving that intersection are paginated (100/page); missing or unavailable sources are omitted, and hidden row counts are never exposed. RED missing-route regressions passed after implementation; no retained body is used to authorize historical reads. The current store still scans retained assignment reads before filtering. Approved retention is terminal+24h for snapshot/comments and existing execution-history lifetime for READ. Lifecycle and projection CAS fence captures against all terminal projection writers; retries preserve first expiry, TTL affects payload rows only, and logical reads refuse expired payloads before DynamoDB physical deletion. Byte-bounded capture and one-terminal/six-original-action guards keep aggregate transaction items under 4 MB; Query pagination is bounded and validated. Regression covers RED expired-read leak, both capture/terminal races, conflict exhaustion without false ACK, unchanged READ, one body-free lifecycle marker before capture and no empty snapshot/comment payload rows, and comment-budget unavailable status. Runtime retains independently of capture flag; local memory prunes on access. Preexisting unbounded rows and physical TTL enablement/deletion require staging preflight, not a unit-test completion claim. A delayed capture after repeated terminal projection UpdatedAt changes keeps the first terminal+24h marker expiry. Unavailable current sections never authorize stale fallback arrays. Development memory retention uses the first terminal event timestamp, so later provider-session metadata cannot extend the 24-hour window.",
       "next_loop": "closed_loop_candidate"
     }
   ],

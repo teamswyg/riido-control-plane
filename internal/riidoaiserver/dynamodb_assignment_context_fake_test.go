@@ -26,9 +26,12 @@ func (f *assignmentContextFakeDynamoDB) ServeHTTP(w http.ResponseWriter, r *http
 	target := r.Header.Get("X-Amz-Target")
 	f.calls = append(f.calls, target)
 	var body struct {
-		Item                      map[string]map[string]string
-		Key                       map[string]map[string]string
-		TransactItems             []struct{ Put assignmentContextFakePut }
+		Item          map[string]map[string]string
+		Key           map[string]map[string]string
+		TransactItems []struct {
+			Put    assignmentContextFakePut
+			Update *dynamoDBTransactWriteUpdateAction
+		}
 		ExpressionAttributeValues map[string]map[string]string
 	}
 	_ = json.NewDecoder(r.Body).Decode(&body)
@@ -37,7 +40,12 @@ func (f *assignmentContextFakeDynamoDB) ServeHTTP(w http.ResponseWriter, r *http
 		f.put(body.Item)
 	case dynamoDBTransactWriteTarget:
 		for _, item := range body.TransactItems {
-			f.put(item.Put.Item)
+			if item.Put.Item != nil {
+				f.put(item.Put.Item)
+			}
+			if u := item.Update; u != nil {
+				f.items[u.Key["pk"]["S"]+"|"+u.Key["sk"]["S"]][assignmentContextTTLAttribute] = u.ExpressionAttributeValues[":expiry"]
+			}
 		}
 	case dynamoDBGetItemTarget:
 		_ = json.NewEncoder(w).Encode(map[string]any{"Item": f.items[body.Key["pk"]["S"]+"|"+body.Key["sk"]["S"]]})
@@ -59,11 +67,4 @@ func (f *assignmentContextFakeDynamoDB) ServeHTTP(w http.ResponseWriter, r *http
 		return
 	}
 	_, _ = w.Write([]byte(`{}`))
-}
-
-func (f *assignmentContextFakeDynamoDB) put(item map[string]map[string]string) {
-	if f.items == nil {
-		f.items = map[string]map[string]map[string]string{}
-	}
-	f.items[item["pk"]["S"]+"|"+item["sk"]["S"]] = item
 }
