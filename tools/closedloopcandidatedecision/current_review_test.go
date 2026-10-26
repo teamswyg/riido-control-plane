@@ -38,8 +38,7 @@ func assertPendingReviewDates(t *testing.T, review pendingReview) {
 		t.Fatal(err)
 	}
 	today, _ := time.Parse(reviewDateLayout, time.Now().UTC().Format(reviewDateLayout))
-	if reviewed.After(today) || due.Before(today) || review.IntervalDays != 7 ||
-		!due.Equal(reviewed.AddDate(0, 0, review.IntervalDays)) {
+	if !validPendingReviewWindow(reviewed, due, today, review.IntervalDays) {
 		t.Fatal("review must be real, current, and due again within seven days")
 	}
 }
