@@ -7,8 +7,7 @@ import (
 )
 
 type assignmentContextDevice struct {
-	DeviceID    string
-	WorkspaceID string
+	DeviceID string
 }
 
 // authorizeAssignmentContextDevice accepts only the daemon's device
@@ -22,11 +21,13 @@ func (s Server) authorizeAssignmentContextDevice(w http.ResponseWriter, r *http.
 	if strings.TrimSpace(result.PrincipalID) == "" {
 		return assignmentContextDevice{}, false
 	}
-	return assignmentContextDevice{DeviceID: strings.TrimSpace(r.Header.Get(deviceIDHeader)), WorkspaceID: result.WorkspaceID}, true
+	return assignmentContextDevice{DeviceID: strings.TrimSpace(r.Header.Get(deviceIDHeader))}, true
 }
 
 // leasedAssignmentForContext admits only the device bound to the agent, while
 // the assignment is active and the caller presents its current lease token.
+// The device's enrollment workspace is not compared: one device may run agents
+// of other workspaces, and the poll path leases those to it the same way.
 func (s Server) leasedAssignmentForContext(w http.ResponseWriter, r *http.Request, agentID string, device assignmentContextDevice, req AgentAssignmentContextRequest) (Assignment, bool) {
 	reader, ok := s.assignment.(AssignmentProjectionReader)
 	if !ok {
@@ -45,7 +46,6 @@ func (s Server) leasedAssignmentForContext(w http.ResponseWriter, r *http.Reques
 	}
 	binding, _, err := s.resolveAgentRuntimeFact(agentID)
 	if err != nil || binding.DeviceID == "" || binding.DeviceID != device.DeviceID ||
-		(assignment.WorkspaceID != "" && device.WorkspaceID != assignment.WorkspaceID) ||
 		subtle.ConstantTimeCompare([]byte(assignment.LeaseToken), []byte(strings.TrimSpace(req.LeaseToken))) != 1 {
 		writeError(w, http.StatusForbidden, "forbidden")
 		return Assignment{}, false
