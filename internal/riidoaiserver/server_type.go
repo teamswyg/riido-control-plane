@@ -34,6 +34,9 @@ type ServerConfig struct {
 	// AssignmentContext stores per-assignment task context snapshots and read
 	// records for the Riido CLI. Nil disables capture and the daemon endpoint.
 	AssignmentContext AssignmentContextStore
+	// AgentMentionPrecheck, when set (RIID-5892), adds mention-policy reasons
+	// to the live agent directory; the mention-time check stays authoritative.
+	AgentMentionPrecheck AgentMentionPrecheck
 }
 
 type Server struct {

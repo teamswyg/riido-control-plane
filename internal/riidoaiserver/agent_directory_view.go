@@ -19,7 +19,12 @@ func (s Server) assignmentAgentDirectoryView(ctx context.Context, assignment Ass
 		target := strings.TrimSpace(req.Target)
 		for _, entry := range entries {
 			if target != "" && entry.AgentID == target {
-				return AgentDirectoryDetail{Agent: entry, FetchedAt: now}, []AssignmentContextSource{agentDirectorySource(entry)}, true, nil
+				one := []AgentDirectoryEntry{entry}
+				checked, err := s.applyAgentMentionPolicy(ctx, assignment, one)
+				if err != nil {
+					return nil, nil, false, err
+				}
+				return AgentDirectoryDetail{Agent: one[0], FetchedAt: now, PolicyChecked: checked}, []AssignmentContextSource{agentDirectorySource(one[0])}, true, nil
 			}
 		}
 		return nil, nil, false, nil
@@ -33,6 +38,9 @@ func (s Server) assignmentAgentDirectoryView(ctx context.Context, assignment Ass
 	if start < len(entries) {
 		end := min(start+agentDirectoryPageSize, len(entries))
 		out.Agents = entries[start:end]
+		if out.PolicyChecked, err = s.applyAgentMentionPolicy(ctx, assignment, out.Agents); err != nil {
+			return nil, nil, false, err
+		}
 		if end < len(entries) {
 			out.NextCursor = strconv.Itoa(page + 1)
 		}
