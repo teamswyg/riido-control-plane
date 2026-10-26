@@ -6,6 +6,9 @@ type composedAssignRequest struct {
 	Request               AssignRequest
 	IntentGateRequired    bool
 	AgentOwnerPrincipalID string
+	// TaskContext is the context composed into Request.Prompt, kept so the
+	// assignment can store it as its CLI snapshot. Nil when composed without it.
+	TaskContext *AIAgentTaskContext
 }
 
 func composeAssignRequestWithTaskContext(taskID, componentID string, req AssignRequest, contextSnapshot AIAgentTaskContext) (AssignRequest, error) {
@@ -43,6 +46,7 @@ func composeAssignRequestWithTaskContextResult(
 	return composedAssignRequest{
 		Request:            req,
 		IntentGateRequired: composed.IntentGateRequired,
+		TaskContext:        &contextSnapshot,
 	}, nil
 }
 

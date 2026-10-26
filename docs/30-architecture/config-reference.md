@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `55`; manifest entries: `55`; secret/credential entries: `8`; operator-only entries: `14`.
+Runtime env reads: `56`; manifest entries: `56`; secret/credential entries: `8`; operator-only entries: `14`.
 
 ## Runtime Env
 
@@ -42,6 +42,7 @@ Runtime env reads: `55`; manifest entries: `55`; secret/credential entries: `8`;
 | `RIIDO_AI_SERVER_ASSIGNMENT_ACTIVE_LEASE_SECONDS` | `store default 20` | `public` | Optional active assignment lease duration. |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` | `false` | `public` | Enables development AI Agent client persistence. |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | `empty` | `operator` | DynamoDB table for development snapshot and assignment operation state. |
+| `RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT` | `false` | `public` | Stores each assignment's composed task context and read records for the Riido CLI and serves them to the leased daemon at /v1/agents/{agent_id}/assignment-context; uses the assignment DynamoDB table when configured, otherwise process memory. |
 | `RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE` | `empty` | `public` | Expected daemon profile accepted by this control-plane environment; mismatches are rejected and stale profile rows are pruned. |
 | `RIIDO_AI_SERVER_MINIMUM_DAEMON_VERSION` | `v0.0.68` | `public` | Minimum daemon release that supports the current AI Agent client capability. |
 | `RIIDO_AI_SERVER_LATEST_DAEMON_VERSION` | `v0.0.68` | `public` | Latest recommended daemon release displayed as update guidance. |

@@ -50,6 +50,10 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
+	assignmentContext, err := assignmentContextStoreFromEnv(assignmentOperationStore)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	commentDelivery := riidoaiserver.CommentDeliveryConfig{EvidenceBaseURL: os.Getenv("RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL"), Key: os.Getenv("RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY")}
 	if err := commentDelivery.Validate(); err != nil {
 		return runtimeConfig{}, err
@@ -79,6 +83,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AIAgentProfileThumbnails: profileThumbnails,
 		AssignmentOperationStore: assignmentOperationStore,
 		AssignmentOutbox:         assignmentOutbox,
+		AssignmentContext:        assignmentContext,
 		TaskContextReader:        taskContextReader,
 	}, nil
 }

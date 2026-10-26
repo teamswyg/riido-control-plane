@@ -31,6 +31,8 @@ func agentHTTPRoute(method, path string) string {
 		return "/v1/agents/{agent_id}/events"
 	case strings.HasSuffix(path, "/thread-progress"):
 		return "/v1/agents/{agent_id}/thread-progress"
+	case strings.HasSuffix(path, "/assignment-context"):
+		return "/v1/agents/{agent_id}/assignment-context"
 	default:
 		return ""
 	}

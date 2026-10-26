@@ -4,6 +4,7 @@ import "context"
 
 type preparedThreadMessage struct {
 	Request            AssignRequest
+	TaskContext        *AIAgentTaskContext
 	StartsNewExecution bool
 	Replay             *AIAgentTaskActionResponse
 }
@@ -22,6 +23,6 @@ func (s Server) prepareThreadMessage(ctx context.Context, principal Authorizatio
 	if found {
 		return preparedThreadMessage{Replay: &replay}, nil
 	}
-	request, err := s.assignRequestFromAIAgentTaskThreadMessage(ctx, principal, bearer, taskID, threadID, req, selected, history)
-	return preparedThreadMessage{Request: request, StartsNewExecution: taskThreadMessageStartsNewExecution(AIAgentTaskThreadRecord{WorkStatus: selected.WorkStatus, AssignmentState: selected.AssignmentState})}, err
+	request, taskContext, err := s.assignRequestFromAIAgentTaskThreadMessage(ctx, principal, bearer, taskID, threadID, req, selected, history)
+	return preparedThreadMessage{Request: request, TaskContext: taskContext, StartsNewExecution: taskThreadMessageStartsNewExecution(AIAgentTaskThreadRecord{WorkStatus: selected.WorkStatus, AssignmentState: selected.AssignmentState})}, err
 }

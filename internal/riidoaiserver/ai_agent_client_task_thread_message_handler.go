@@ -64,5 +64,7 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeAIAgentClientError(w, err)
 		return
 	}
+	// The thread record maps this assignment to its source message.
+	s.captureAssignmentContext(r.Context(), assignment, prepared.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID})
 	writeJSON(w, http.StatusAccepted, response)
 }

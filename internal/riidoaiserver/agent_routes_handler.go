@@ -29,6 +29,8 @@ func (s Server) handleAgents(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.handleAgentToolApprovalWait(w, r, agentID, approvalID)
+	case suffix == "assignment-context" && r.Method == http.MethodPost:
+		s.handleAgentAssignmentContext(w, r, agentID)
 	case suffix == "provider-status" && r.Method == http.MethodPost:
 		s.handleProviderStatusSync(w, r, agentID)
 	case suffix == "provider-status" && r.Method == http.MethodGet:

@@ -36,5 +36,6 @@ func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgent
 		ControlPlaneOwnerGraphQL: controlplaneowner.NewGraphQLHandler(controlplaneowner.NewRuntimeUseCase()),
 		LongPollMaxHold:          config.LongPollMaxHold,
 		LongPollTick:             config.LongPollTick,
+		AssignmentContext:        config.AssignmentContext,
 	}).Handler()
 }
