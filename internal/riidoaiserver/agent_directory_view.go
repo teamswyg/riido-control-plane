@@ -34,8 +34,9 @@ func (s Server) assignmentAgentDirectoryView(ctx context.Context, assignment Ass
 		page = 0
 	}
 	out := AgentDirectoryPage{Agents: []AgentDirectoryEntry{}, Total: len(entries), Cursor: strconv.Itoa(page), FetchedAt: now}
-	start := page * agentDirectoryPageSize
-	if start < len(entries) {
+	// Compare before multiplying so even the largest cursor cannot overflow.
+	if page < (len(entries)+agentDirectoryPageSize-1)/agentDirectoryPageSize {
+		start := page * agentDirectoryPageSize
 		end := min(start+agentDirectoryPageSize, len(entries))
 		out.Agents = entries[start:end]
 		if out.PolicyChecked, err = s.applyAgentMentionPolicy(ctx, assignment, out.Agents); err != nil {

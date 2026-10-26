@@ -17,3 +17,18 @@ func TestAgentDirectoryWorksWithoutSnapshotAndPagesPastEnd(t *testing.T) {
 		t.Fatalf("status=%d body=%s", code, out)
 	}
 }
+
+func TestAgentDirectoryHugeCursorReturnsEmptyPage(t *testing.T) {
+	f := newAssignmentContextFixture(t, NewMemoryAssignmentContextStore())
+	for _, cursor := range []string{"9223372036854775807", "184467440737095516", "-1"} {
+		body, _ := json.Marshal(AgentAssignmentContextRequest{AssignmentID: f.leased.ID, LeaseToken: f.leased.LeaseToken, View: AssignmentContextViewAgents, Cursor: cursor})
+		code, out := f.do("/v1/agents/agent-owned-codex/assignment-context", string(body), f.device)
+		var resp struct{ Data AgentDirectoryPage }
+		if code != http.StatusOK || json.Unmarshal([]byte(out), &resp) != nil || resp.Data.NextCursor != "" {
+			t.Fatalf("cursor %s: status=%d body=%s", cursor, code, out)
+		}
+		if cursor != "-1" && len(resp.Data.Agents) != 0 {
+			t.Fatalf("cursor %s returned agents: %s", cursor, out)
+		}
+	}
+}
