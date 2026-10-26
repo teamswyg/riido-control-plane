@@ -6,6 +6,9 @@ import "strings"
 // is false when the target is outside this assignment's snapshot.
 func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any, []AssignmentContextSource, bool) {
 	target = strings.TrimSpace(target)
+	if view == AssignmentContextViewMeeting {
+		return selectAssignmentContextMeeting(c, target)
+	}
 	if view == AssignmentContextViewTask {
 		return selectAssignmentContextTask(c, target)
 	}
@@ -15,6 +18,8 @@ func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any
 		return nil, nil, false
 	}
 	switch view {
+	case AssignmentContextViewMeetings:
+		return assignmentContextMeetingList(c), assignmentContextMeetingTitleSources(c.Extended), true
 	case AssignmentContextViewTree:
 		tree := struct {
 			Component AIAgentTaskContextComponent `json:"component"`
@@ -37,7 +42,7 @@ func selectAssignmentContextView(c AIAgentTaskContext, view, target string) (any
 			Related        *AIAgentTaskContextExtended  `json:"related,omitempty"`
 		}{c.Resources, c.ResourceStatus, assignmentContextResourcesOnly(c.Hierarchy), assignmentContextRelatedOnly(c.Extended)}, append(sources, assignmentContextRelatedSources(c.Extended)...), true
 	default:
-		return c, assignmentContextSources(c), true
+		return assignmentContextBase(c), assignmentContextSources(c), true
 	}
 }
 

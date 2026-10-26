@@ -83,3 +83,11 @@ marked unconfirmed. Finite read outcome/operation/source and duration attributes
 expose degradation without document IDs, content, tokens or upstream error text.
 The overall timeout remains configured by the operator; synthetic call-count and
 deadline checks are not production latency or model-comprehension guarantees.
+
+## Related meeting bodies · RIID-5900
+
+At assign/reply time, the existing requester bearer may capture up to 20 directly linked meetings, using the task's verified team. Each meeting detail must match its requested ID and have no deletion timestamp before provider JSON/HTML is read. Legacy meetings without a document use their authorized description. Denial never falls back to stored text. Empty projections remain empty; stored representations do not establish current Yjs freshness. At most four meeting reads run concurrently under the original request deadline. Each body, including alternate text, is limited to 8192 UTF-8 bytes. Meeting documents also participate in the existing 256KiB snapshot bound and terminal-plus-24h retention; no user token is persisted.
+
+The existing assignment-context endpoint adds `view=meetings` (optional task target) and `view=meeting` (required linked meeting ID). Base context, resources, list and prompt contain meeting metadata only. Only explicit meeting reads return the selected document and record `related_meeting/body` with its captured version. Empty is a successful empty body; denied is 403, deleted is 404, and unavailable is 503. Outside-snapshot targets remain 403. Per-body or whole-snapshot truncation is explicit. Current viewer permission to read that meeting body is required to expose its historical body-read metadata.
+
+This slice covers meeting list and body selection only. Meeting boards, meeting comments and additional linked-work traversal remain unimplemented; synthetic contract tests are separate from actual staging reads.

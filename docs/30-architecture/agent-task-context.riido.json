@@ -43,7 +43,22 @@
     "internal/riidoaiserver/ai_agent_assignment_prompt_fallback.go",
     "internal/riidoaiserver/server_task_context_compose.go",
     "internal/riidoaiserver/ai_agent_task_context_provider_document.go",
-    "internal/riidoaiserver/task_context_component_read.go"
+    "internal/riidoaiserver/task_context_component_read.go",
+    "internal/riidoaiserver/agent_assignment_context_http.go",
+    "internal/riidoaiserver/ai_agent_run_reads_visibility.go",
+    "internal/riidoaiserver/assignment_context_bound.go",
+    "internal/riidoaiserver/assignment_context_hierarchy_views.go",
+    "internal/riidoaiserver/assignment_context_views.go",
+    "internal/riidoaiserver/task_context_extended_types.go",
+    "internal/riidoaiserver/task_context_related_read.go",
+    "internal/riidoaiserver/agent_assignment_context_meeting.go",
+    "internal/riidoaiserver/ai_agent_run_reads_meeting_visibility.go",
+    "internal/riidoaiserver/assignment_context_meeting_bound.go",
+    "internal/riidoaiserver/assignment_context_meeting_views.go",
+    "internal/riidoaiserver/task_context_meeting_capture.go",
+    "internal/riidoaiserver/task_context_meeting_detail.go",
+    "internal/riidoaiserver/task_context_meeting_read.go",
+    "internal/riidoaiserver/task_context_meeting_types.go"
   ],
   "policy": {
     "identity": "same task/agent/conversation; preserve explicit initial and latest follow-up directives even when context reads fail",
@@ -54,7 +69,10 @@
       "parent_document_runes": 2500,
       "recent_messages": 8,
       "conversation_runes": 6000,
-      "resource_items_per_kind": 8
+      "resource_items_per_kind": 8,
+      "related_meetings": 20,
+      "meeting_body_bytes": 8192,
+      "meeting_concurrency": 4
     },
     "resource_semantics": "metadata only, contents not downloaded; unsafe URL credentials omitted; unavailable/incomplete marked",
     "format": "bounded readable HTML and supported Tiptap JSON projections; valid Unicode; preserve explicit empty versus unavailable documents",
@@ -63,7 +81,8 @@
     "freshness": "legacy provider JSON/HTML and component snapshots have unconfirmed freshness; never claim Yjs revision or cross-document atomicity; do not overwrite a nonempty component snapshot with unversioned provider HTML",
     "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed.",
     "graphql_metadata_endpoint": "When a separate GraphQL endpoint is configured, bundle provider JSON/HTML in one viewer-bearer GraphQL request and file/link metadata in another per authorized component; an optional resource root error cannot discard a document read. Keep workspace/detail REST checks and shared deadline. No cross-principal cache, anonymous fallback, attachment download, or replay on GraphQL denial. REST-only deployments retain bounded JSON/HTML fallback.",
-    "failure_observation": "Finite operation/outcome/source/duration trace fields distinguish missing/null/empty/invalid/budget/denied/unavailable; no upstream original, document identity, body, URL or token in observations."
+    "failure_observation": "Finite operation/outcome/source/duration trace fields distinguish missing/null/empty/invalid/budget/denied/unavailable; no upstream original, document identity, body, URL or token in observations.",
+    "related_meeting_bodies": "RIID-5900 captures only directly linked, same-team, undeleted meeting bodies under the requester bearer and shared deadline. At most 20 meetings, 4 concurrent reads, 8192 UTF-8 bytes per body; all stored bodies participate in the existing 256KiB snapshot bound and 24h terminal retention. Base/resources/prompt remain title-only; explicit meeting view alone serves and records a body read. Empty, denied, deleted and unavailable remain distinct. Viewer audit visibility rechecks current body access. Board, meeting comments and further linked-work reads remain unimplemented."
   },
   "verification": {
     "synthetic_only": true,
@@ -92,14 +111,16 @@
       "TestTaskContextProjectionJSONOnlyAndConflictsRetainEvidence",
       "TestTaskContextJSONInvalidIsNeverAnEmptyDocument",
       "TestTaskContextBundleDeadlineKeepsSnapshotAndCancelsReads",
-      "TestTaskContextProjectionAlternatesShareCurrentAndParentBudgets"
+      "TestTaskContextProjectionAlternatesShareCurrentAndParentBudgets",
+      "TestMeetingBodySelectedOnlyByExplicitView",
+      "TestMeetingBodyHTTPReadRecordsOnlyExplicitBody"
     ]
   },
   "limits": [
     "does not guarantee model comprehension or semantic completion",
     "no automatic provider recovery",
     "no frontend changes or deployment",
-    "attachment and linked document bodies are not fetched by the server"
+    "external attachment and linked URL bodies are not fetched by the server"
   ],
   "evidence_tool": "tools/knowledgecoverage",
   "loop": {

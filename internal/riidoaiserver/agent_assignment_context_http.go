@@ -45,6 +45,10 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		s.writeAssignmentContextRefusal(w, r, snapshot, req, now, AssignmentContextReadUnavailable, http.StatusNotFound, "assignment context snapshot unavailable")
 		return
 	}
+	if s.refuseUnavailableMeeting(w, r, snapshot, req, now) {
+		return
+	}
+	snapshot.Truncated = snapshot.Truncated || assignmentContextMeetingTruncated(snapshot.Context, req)
 	data, sources, inScope, err := s.assignmentContextViewData(r.Context(), snapshot, req)
 	if err != nil {
 		writeError(w, http.StatusServiceUnavailable, "assignment context store unavailable")

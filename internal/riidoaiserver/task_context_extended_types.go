@@ -1,20 +1,14 @@
 package riidoaiserver
 
 // Extended task context is read only when assignment context snapshots are
-// enabled (Riido CLI read scope): related work and meetings by title, and the
-// task's comments with a read priority. Bodies of related items are not read.
+// enabled (Riido CLI read scope): related work titles and explicitly selected meeting bodies, and the
+// task's comments with a read priority. Related work bodies are not read; meeting bodies stay out of the base view.
 type AIAgentTaskContextRelatedWork struct {
 	ID       string `json:"id"`
 	Kind     string `json:"kind"`
 	Title    string `json:"title"`
 	Relation string `json:"relation,omitempty"`
 	IsDone   bool   `json:"isDone,omitempty"`
-}
-
-type AIAgentTaskContextRelatedMeeting struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	StartTime string `json:"startTime,omitempty"`
 }
 
 // Comment priorities: 1 the comment that started the run (and its replies),
@@ -45,10 +39,13 @@ type AIAgentTaskContextComment struct {
 // AIAgentTaskContextExtended groups the extended reads with their status
 // (available, partial, unavailable).
 type AIAgentTaskContextExtended struct {
-	RelatedWork     []AIAgentTaskContextRelatedWork    `json:"related_work,omitempty"`
-	RelatedMeetings []AIAgentTaskContextRelatedMeeting `json:"related_meetings,omitempty"`
-	RelatedStatus   string                             `json:"related_status,omitempty"`
-	Comments        []AIAgentTaskContextComment        `json:"comments,omitempty"`
-	CommentStatus   string                             `json:"comment_status,omitempty"`
-	CommentTotal    int                                `json:"comment_total,omitempty"`
+	MeetingStatus    string                             `json:"meeting_status,omitempty"`
+	MeetingTotal     int                                `json:"meeting_total,omitempty"`
+	MeetingTruncated bool                               `json:"meeting_truncated,omitempty"`
+	RelatedWork      []AIAgentTaskContextRelatedWork    `json:"related_work,omitempty"`
+	RelatedMeetings  []AIAgentTaskContextRelatedMeeting `json:"related_meetings,omitempty"`
+	RelatedStatus    string                             `json:"related_status,omitempty"`
+	Comments         []AIAgentTaskContextComment        `json:"comments,omitempty"`
+	CommentStatus    string                             `json:"comment_status,omitempty"`
+	CommentTotal     int                                `json:"comment_total,omitempty"`
 }
