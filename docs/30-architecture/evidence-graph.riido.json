@@ -25239,6 +25239,91 @@
       ],
       "decision": "Reuse408 cancellation/504 deadline/502 dependency fixed messages for the8reconcile call sites, with safe finite stage logs. RED/green HTTP tests prove wrapped sentinel handling and absence of an upstream canary. Existing successful assignment/read/SSE behavior remains unchanged. Refresh generated docs and their changed golden outputs without relaxing gates. API evidence source checks grow70to71; strict counter/golden expectations are refreshed for the added verifier while endpoint counts and gates remain unchanged.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_assignment_context_5900",
+      "observation": "Agents received every task, parent and resource body in the prompt and could not read more during a run; the server kept no record of which Riido sources an answer used. The monolith accepts only short-lived user JWTs, so the control-plane cannot read on the user's behalf after the request ends.",
+      "hypothesis": "Store the task context the server already composes with the requester Bearer per assignment, let only the leased daemon read it back with its device credential, and record every prompt or CLI read so clients can show what an answer read without any user token being stored.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_task_thread_message_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_thread_message_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_preparation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_cli_prompt.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_trigger_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_stream_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/config-reference.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_trigger_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_stream_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT (default off) thread-message, assign and comment-delivered assignments capture their composed context after publication; thread follow-up composition and history are unchanged when the flag is off. Reads stream as agent_context_read under the thread's existing visibility.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

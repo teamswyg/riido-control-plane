@@ -4,7 +4,6 @@ import (
 	"crypto/subtle"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type assignmentContextDevice struct {
@@ -53,23 +52,20 @@ func (s Server) leasedAssignmentForContext(w http.ResponseWriter, r *http.Reques
 	}
 	switch assignment.State {
 	case AssignmentLeased, AssignmentReady, AssignmentRunning:
-		return assignment, true
 	default:
 		writeError(w, http.StatusConflict, "assignment is not active")
 		return Assignment{}, false
 	}
-}
-
-func (s Server) writeAssignmentContextRefusal(w http.ResponseWriter, r *http.Request, snapshot AssignmentContextSnapshot, req AgentAssignmentContextRequest, at time.Time, status string, httpStatus int, message string) {
-	source := AssignmentContextSource{Kind: "task", ID: snapshot.TaskID, Part: req.View}
-	if target := strings.TrimSpace(req.Target); target != "" {
-		source = AssignmentContextSource{Kind: "target", ID: target, Part: req.View}
+	if checker, ok := s.assignment.(assignmentLeaseChecker); ok {
+		current, err := checker.AssignmentLeaseCurrent(r.Context(), assignment)
+		if err != nil {
+			writeError(w, http.StatusServiceUnavailable, "assignment store unavailable")
+			return Assignment{}, false
+		}
+		if !current {
+			writeError(w, http.StatusConflict, "assignment lease expired")
+			return Assignment{}, false
+		}
 	}
-	reads := assignmentContextReadRecords(snapshot, []AssignmentContextSource{source}, AssignmentContextViaCLI, status, req.RequestID, at)
-	if s.config.AssignmentContext.AppendAssignmentContextReads(r.Context(), reads) != nil {
-		writeError(w, http.StatusServiceUnavailable, "assignment context read record unavailable")
-		return
-	}
-	s.publishAssignmentContextReads(r.Context(), reads)
-	writeError(w, httpStatus, message)
+	return assignment, true
 }

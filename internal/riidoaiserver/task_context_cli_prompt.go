@@ -27,18 +27,17 @@ func writeParentTaskContextSummaries(out *strings.Builder, hierarchy AIAgentTask
 // writeExtendedTaskContext lists related work and meetings by title and the
 // priority-1 comments; the rest stays readable through the riido CLI.
 func writeExtendedTaskContext(out *strings.Builder, component AIAgentTaskContextComponent, extended *AIAgentTaskContextExtended, instruction string) {
-	var section strings.Builder
-	section.WriteString("\n## Related work and meetings\nTitles only; bodies were not read.\n")
+	out.WriteString("\n## Related work and meetings\nTitles only; bodies were not read.\n")
 	if extended.RelatedStatus != "available" {
-		section.WriteString("[Related items incomplete or unavailable.]\n")
+		out.WriteString("[Related items incomplete or unavailable.]\n")
 	}
-	for _, work := range extended.RelatedWork {
-		section.WriteString("- " + work.Kind + " (" + work.Relation + "): " + strings.Join(strings.Fields(work.Title), " ") + " [id: " + work.ID + "]\n")
+	lines, omitted := promptRelatedLines(extended)
+	for _, line := range lines {
+		out.WriteString(line.text)
 	}
-	for _, meeting := range extended.RelatedMeetings {
-		section.WriteString("- meeting: " + strings.Join(strings.Fields(meeting.Title), " ") + " [id: " + meeting.ID + "]\n")
+	if omitted > 0 {
+		out.WriteString(strconv.Itoa(omitted) + " more related item(s) not shown: riido work relations " + taskContextCLIRef(component.KeyNumber, component.ID) + "\n")
 	}
-	out.WriteString(boundedTaskContextText(section.String(), 2500) + "\n")
 	out.WriteString("\n## Comments\n")
 	triggers := 0
 	for _, comment := range extended.Comments {

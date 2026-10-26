@@ -55,8 +55,7 @@ func assignmentContextRelatedSources(extended *AIAgentTaskContextExtended) []Ass
 	return sources
 }
 
-// assignmentContextPromptSources lists what the prompt contained (CLI mode:
-// parent summaries, related titles, priority-1 comments only).
+// assignmentContextPromptSources: what the CLI-mode prompt contained.
 func assignmentContextPromptSources(c AIAgentTaskContext, comments []AIAgentTaskContextComment) []AssignmentContextSource {
 	if c.Extended == nil {
 		return assignmentContextSources(c)
@@ -69,7 +68,10 @@ func assignmentContextPromptSources(c AIAgentTaskContext, comments []AIAgentTask
 		}
 		sources = append(sources, source)
 	}
-	sources = append(sources, assignmentContextRelatedSources(c.Extended)...)
+	related, _ := promptRelatedLines(c.Extended)
+	for _, line := range related {
+		sources = append(sources, line.source)
+	}
 	priority := slices.DeleteFunc(slices.Clone(comments), func(item AIAgentTaskContextComment) bool { return item.Priority != TaskContextCommentPriorityTrigger })
 	return append(sources, assignmentContextCommentSources(priority)...)
 }
