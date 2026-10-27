@@ -53,7 +53,9 @@ func (s *Store) readLocalCLIInstallation(state *storeState, req cliInstallationR
 		return cliInstallationResult{err: errCLIInstallationUnavailable}
 	}
 	for _, claim := range state.executionClaims {
-		if claim.DeviceID == link.DeviceID && claimMatchesNonOwnerAssignment(claim, state.assignments[claim.AssignmentID]) {
+		assignment := state.assignments[claim.AssignmentID]
+		if claim.DeviceID == link.DeviceID && claimMatchesNonOwnerAssignment(claim, assignment) &&
+			!assignment.UpdatedAt.IsZero() && assignment.UpdatedAt.Add(s.activeLeaseDuration).After(s.now()) {
 			set.observation = deviceExecutionBlocked
 			break
 		}

@@ -52,7 +52,15 @@ func (s *DynamoDBAssignmentOperationStore) installationExecutionObservation(ctx 
 		if err != nil {
 			return deviceExecutionUnknown, err
 		}
-		if found && claimMatchesNonOwnerAssignment(claim, projection.Assignment) {
+		if !found || !claimMatchesNonOwnerAssignment(claim, projection.Assignment) {
+			continue
+		}
+		lease, found, err := s.LoadAgentActiveAssignment(ctx, claim.AgentID)
+		if err != nil {
+			return deviceExecutionUnknown, err
+		}
+		if found && lease.ActiveAssignmentID == claim.AssignmentID && lease.LeaseToken != "" &&
+			leaseEpoch(lease.LeaseToken) == claim.LeaseEpoch && !lease.Expired(s.now()) {
 			return deviceExecutionBlocked, nil
 		}
 	}

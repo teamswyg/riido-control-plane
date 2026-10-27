@@ -24,12 +24,14 @@ func TestCLIInstallationDynamoPolicyFencesClaimBeforeCommit(t *testing.T) {
 		t.Fatal(err)
 	}
 	projection := terminationProjectionItem(t, assignment, 4)
+	active := store.agentActiveAssignmentDynamoDBItem(AssignmentOperationRecord{AgentID: assignment.AgentID, AssignmentID: assignment.ID, Assignment: assignment, RecordedAt: dynamo.now})
 	dynamo.mu.Lock()
 	dynamo.beforeCommit = func(items map[string]map[string]map[string]string) {
 		// A concurrent claim transaction commits after the observation query,
 		// immediately before this request's final revision condition.
 		items[terminationItemKey(item)] = item
 		items[terminationItemKey(projection)] = projection
+		items[terminationItemKey(active)] = active
 		dynamo.applyPolicyUpdate(store.devicePolicyAdvanceAction("fixture-device").Update)
 	}
 	dynamo.mu.Unlock()
