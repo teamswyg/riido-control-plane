@@ -58,7 +58,12 @@
     "internal/riidoaiserver/task_context_meeting_capture.go",
     "internal/riidoaiserver/task_context_meeting_detail.go",
     "internal/riidoaiserver/task_context_meeting_read.go",
-    "internal/riidoaiserver/task_context_meeting_types.go"
+    "internal/riidoaiserver/task_context_meeting_types.go",
+    "internal/riidoaiserver/assignment_context_read_quota.go",
+    "internal/riidoaiserver/agent_assignment_context_quota.go",
+    "internal/riidoaiserver/dynamodb_assignment_context_quota.go",
+    "internal/riidoaiserver/dynamodb_assignment_context_quota_key.go",
+    "internal/riidoaiserver/dynamodb_context_terminal_actions.go"
   ],
   "policy": {
     "identity": "same task/agent/conversation; preserve explicit initial and latest follow-up directives even when context reads fail",
@@ -72,12 +77,14 @@
       "resource_items_per_kind": 8,
       "related_meetings": 20,
       "meeting_body_bytes": 8192,
-      "meeting_concurrency": 4
+      "meeting_concurrency": 4,
+      "cli_read_attempts_per_assignment": 100
     },
     "resource_semantics": "metadata only, contents not downloaded; unsafe URL credentials omitted; unavailable/incomplete marked",
     "format": "bounded readable HTML and supported Tiptap JSON projections; valid Unicode; preserve explicit empty versus unavailable documents",
     "followup_reads": "one canonical history read, no additional legacy thread-list read",
     "permissions": "no caller permission widening or anonymous fallback",
+    "cli_read_quota": "RIID-5900 allows 100 authenticated active-lease CLI read attempts per durable assignment ID, atomically across servers. Every request counts, including reused request IDs, denied targets and unavailable data; prompt capture, viewer read-history GET and local whoami do not count. Exhaustion returns 429 and storage failure returns 503 before any data read. Heartbeat, lease refresh, runtime run-label changes and snapshot recapture cannot reset the counter; a new follow-up assignment receives its own budget. Terminal transactions fence READ_QUOTA with the same first-terminal +24h TTL as payloads, including before the first CLI read. Active-lease validation precedes consumption so expired counter removal cannot revive a terminal execution.",
     "freshness": "legacy provider JSON/HTML and component snapshots have unconfirmed freshness; never claim Yjs revision or cross-document atomicity; do not overwrite a nonempty component snapshot with unversioned provider HTML",
     "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed.",
     "graphql_metadata_endpoint": "When a separate GraphQL endpoint is configured, bundle provider JSON/HTML in one viewer-bearer GraphQL request and file/link metadata in another per authorized component; an optional resource root error cannot discard a document read. Keep workspace/detail REST checks and shared deadline. No cross-principal cache, anonymous fallback, attachment download, or replay on GraphQL denial. REST-only deployments retain bounded JSON/HTML fallback.",
@@ -113,7 +120,13 @@
       "TestTaskContextBundleDeadlineKeepsSnapshotAndCancelsReads",
       "TestTaskContextProjectionAlternatesShareCurrentAndParentBudgets",
       "TestMeetingBodySelectedOnlyByExplicitView",
-      "TestMeetingBodyHTTPReadRecordsOnlyExplicitBody"
+      "TestMeetingBodyHTTPReadRecordsOnlyExplicitBody",
+      "TestAssignmentContextQuotaCountsEveryAuthenticatedAttempt",
+      "TestAssignmentContextQuotaSurvivesHeartbeatRunLabelAndRecapture",
+      "TestAssignmentContextQuotaNewFollowupGetsIndependentBudget",
+      "TestAssignmentContextQuotaUnavailableFailsBeforeAnyDataRead",
+      "TestDynamoDBAssignmentContextQuotaAtomicAcrossServers",
+      "TestDynamoDBAssignmentContextQuotaTerminalFencesFirstAndLaterReads"
     ]
   },
   "limits": [

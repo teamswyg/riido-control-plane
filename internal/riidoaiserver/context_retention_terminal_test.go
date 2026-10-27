@@ -36,7 +36,7 @@ func TestContextRetentionTerminalCommitKeepsInitialExpiryAndAudit(t *testing.T) 
 	}
 	f.fake.mu.Lock()
 	for key, item := range f.fake.items {
-		if item["sk"]["S"] == "SNAPSHOT" || item["sk"]["S"] == "COMMENTS#0000" {
+		if item["sk"]["S"] == "SNAPSHOT" || item["sk"]["S"] == "COMMENTS#0000" || item["sk"]["S"] == assignmentContextReadQuotaSK {
 			if item[assignmentContextTTLAttribute]["N"] != want {
 				t.Errorf("%s expiry=%v", key, item[assignmentContextTTLAttribute])
 			}
@@ -55,7 +55,7 @@ func TestContextRetentionTerminalCommitKeepsInitialExpiryAndAudit(t *testing.T) 
 	}
 }
 
-func TestContextRetentionUnusedExecutionCreatesOnlyLifecycleMetadata(t *testing.T) {
+func TestContextRetentionUnusedExecutionCreatesOnlyLifecycleAndQuotaFences(t *testing.T) {
 	f := newContextRetentionFixture(t)
 	ctx := context.Background()
 	record := AssignmentOperationRecord{AssignmentID: "unused", Assignment: Assignment{ID: "unused", State: AssignmentFailed, UpdatedAt: f.now}, RecordedAt: f.now}
@@ -64,8 +64,12 @@ func TestContextRetentionUnusedExecutionCreatesOnlyLifecycleMetadata(t *testing.
 		t.Fatal(err)
 	}
 	for _, item := range f.fake.items {
-		if item["pk"]["S"] == dynamoDBAssignmentContextPK("unused") && item["sk"]["S"] != assignmentContextLifecycleSK {
+		if item["pk"]["S"] == dynamoDBAssignmentContextPK("unused") && item["sk"]["S"] != assignmentContextLifecycleSK && item["sk"]["S"] != assignmentContextReadQuotaSK {
 			t.Fatalf("unnecessary row: %v", item)
 		}
+	}
+	quota := f.fake.items[dynamoDBAssignmentContextPK("unused")+"|"+assignmentContextReadQuotaSK]
+	if quota[assignmentContextTTLAttribute]["N"] != strconv.FormatInt(f.now.Add(24*time.Hour).Unix(), 10) {
+		t.Fatal("unused execution must fence late quota creation with terminal TTL")
 	}
 }

@@ -25967,6 +25967,76 @@
       ],
       "decision": "The explicit-view regression failed before implementation and passes with body-only audit; independent review reproduced missing-projection-as-empty and normalized-HTML-format defects, now covered by passing regressions. Empty, partial, denied, deleted and unavailable remain distinct. Meeting documents participate in the existing 256KiB bound without mutating captured input. Source/body, current viewer access, concurrency and byte/deadline regressions pass, including race verification. Generated source inventory, claim hashes and behavior goldens are refreshed for these additive reads; this does not change endpoint routing, authentication policy, TTL or deployment. Meeting boards, comments and further linked work remain unimplemented, and actual staging acceptance is separate.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "riido_cli_context_read_quota_5900",
+      "observation": "RIID-5900 CLI context reads had no execution-wide call budget. Reusing a request ID could repeatedly fetch live agent data, and lease or runtime run-label changes are not safe quota identities.",
+      "hypothesis": "Charge an authenticated active lease exactly once per HTTP attempt using a conditional atomic counter keyed by durable assignment ID. Preserve the budget through runtime metadata changes and fence its 24h cleanup in the terminal transaction.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_quota.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_read_quota.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_context_quota.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_terminal_actions.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_quota_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_quota_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_quota_followup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_quota_lifecycle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_context_quota_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_assignment_context_quota_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_terminal_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Allow at most 100 read attempts per assignment; count replayed request IDs, denied targets and unavailable data, but exclude prompt capture, viewer audit GET and local whoami. Return 429 on exhaustion and 503 on quota-store failure before reading data. New follow-up assignments receive new budgets. Terminal transactions create a TTL fence even before the first CLI call, and active-lease validation prevents expired counter removal from reviving a terminal execution. Synthetic two-store concurrency tests admit exactly 100 of 150 attempts; 16 simultaneous TCP requests avoid the local accept-queue resets observed at 150 simultaneous connections. Live DynamoDB acceptance remains a separate QA gate.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {
