@@ -52,6 +52,8 @@ func (s *Store) loop(state storeState) {
 				}
 			}
 			msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
+		case executionTerminationCommand:
+			msg.reply <- s.commitExecutionTermination(&state, msg)
 		case observeDeviceExecutionCmd:
 			msg.reply <- s.observeLocalExecutionClaims(&state, msg)
 		case pollCmd:

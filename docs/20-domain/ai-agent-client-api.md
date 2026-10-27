@@ -231,4 +231,4 @@ One stable timeline row inside a thread history record. message_id is the React 
 
 ## Non-Goals
 
-- `canonical riido-contracts changes`, `frontend hook policy`, `Figma interpretation`, `live AWS deployment`, `production persistence topology`
+- `canonical riido-contracts changes`, `frontend hook policy`, `Figma interpretation`, `live AWS deployment`, `production persistence topology`, `Private daemon POST /v1/daemon/execution-claims/{assignment_id}/termination is device-only and not part of the browser generated client. It records claim-bound local invocation observations without access permission or remote completion claims.`

@@ -111,6 +111,11 @@
       "id": "authenticated-execution-claim-provenance",
       "kind": "replay",
       "rule": "Device-authenticated claims retain immutable device, owner-at-claim, assignment requester and hashed lease epoch in the same CAS transaction as lease/projection/journal writes. Replay and local snapshots retain this private claim across owner changes, stale scheduler repair and ordinary terminal events; legacy bearer claims have unknown provenance. The private observation reader returns blocked only for a current non-owner active lease and otherwise unknown, never permission. Confirmed execution termination, coverage/migration, installation linking and service-authenticated OAuth/API policy remain mandatory follow-up boundaries."
+    },
+    {
+      "id": "claim-local-termination-receipt",
+      "kind": "replay",
+      "rule": "Device-authenticated local invocation observations bind the immutable original claim owner, device and hashed epoch. Store one immutable receipt per epoch through claim, projection and receipt conditions in one three-action transaction. A same-epoch active projection conflicts before either a new receipt or a replay ACK; missing or legacy unhashed projections fail closed. Compare the current projection lease_epoch hash with its actual token digest and CAS it with schema, state and sequence, without copying raw lease or prompt into conditions. Different current epochs permit only the old receipt and never mutate the new execution. Up to three attempts within the request deadline reread all guards and recover only the exact committed ACK; changed counts conflict. The count measures provider Process.Start successes, not host commands or OS descendants. Snapshot-only mode persists a private trial before ACK; unsupported journal authorities fail closed. No projection, active lease, task journal, SSE, outbox or TTL mutation and no access permission or remote completion inference."
     }
   ],
   "version_constants": [
@@ -192,6 +197,16 @@
         "TestAssignmentOperationReplayKeepsSameEventSeqAcrossDifferentTasks",
         "TestAssignmentOperationReplayRebuildsAssignmentIndexes",
         "TestAssignmentOperationReplayRejectsInvalidRecords"
+      ]
+    },
+    {
+      "name": "execution-termination-transaction",
+      "file": "internal/riidoaiserver/dynamodb_execution_termination_actions.go",
+      "contains": [
+        "claimCheck",
+        "projectionCheck",
+        "lease_epoch = :epoch",
+        "attribute_not_exists(pk) AND attribute_not_exists(sk)"
       ]
     }
   ],
