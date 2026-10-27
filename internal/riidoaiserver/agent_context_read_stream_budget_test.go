@@ -33,18 +33,24 @@ func TestContextReadReplaySharesOneBudgetAndKeepsTerminal(t *testing.T) {
 	}
 }
 
-func TestContextReadDeliveryDoesNotWaitForBusyStore(t *testing.T) {
+func TestContextReadDeliveryBoundsWaitForBusyStore(t *testing.T) {
 	snapshots := &memoryAIAgentClientSnapshotStore{}
 	store := openPersistentAIAgentClientStoreForDelegateTest(t, snapshots)
 	store.operationMu.Lock()
 	defer store.operationMu.Unlock()
 	event := ClientStreamEvent{EventType: AgentClientEventContextRead, Payload: AgentContextReadEvent{AgentID: "agent-owned-codex"}}
-	if _, allowed := store.FilterAIAgentClientEvent(t.Context(), AuthorizationResult{PrincipalID: "user-1"}, event); allowed {
-		t.Fatal("busy persistent store must drop this hint")
+	ctx, cancel := context.WithTimeout(t.Context(), 25*time.Millisecond)
+	defer cancel()
+	started := time.Now()
+	if _, allowed := store.FilterAIAgentClientEvent(ctx, AuthorizationResult{PrincipalID: "user-1"}, event); allowed {
+		t.Fatal("busy persistent store must drop this hint at the deadline")
 	}
 	store.mu.Lock()
 	defer store.mu.Unlock()
-	if _, allowed := store.DevelopmentAIAgentClientStore.FilterAIAgentClientEvent(t.Context(), AuthorizationResult{PrincipalID: "user-1"}, event); allowed {
-		t.Fatal("busy local store must drop this hint")
+	if _, allowed := store.DevelopmentAIAgentClientStore.FilterAIAgentClientEvent(ctx, AuthorizationResult{PrincipalID: "user-1"}, event); allowed {
+		t.Fatal("expired metadata worker must not wait for the local store")
+	}
+	if time.Since(started) > time.Second {
+		t.Fatal("lock wait exceeded the metadata worker deadline")
 	}
 }
