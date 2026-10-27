@@ -7,13 +7,14 @@ import (
 )
 
 // Stored JSON is a conservative upper bound for DynamoDB item bytes. Reserve
-// room for TTL, then bound 1 snapshot + 10 comment pages + lifecycle <1.25 MiB.
+// room for TTL, then bound 1 snapshot + 10 comment pages + lifecycle + quota <1.25 MiB.
 // Current terminal transactions have at most 6 other items (400 KiB each), so
 // their aggregate stays below DynamoDB's 4 MiB limit, including Update items.
 const (
 	contextSnapshotItemBytes   = 256 << 10
 	contextCommentItemBytes    = 96 << 10
 	contextLifecycleItemBytes  = 1 << 10
+	contextQuotaItemBytes      = 1 << 10
 	contextTerminalBaseActions = 6
 )
 

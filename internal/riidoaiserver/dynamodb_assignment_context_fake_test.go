@@ -44,7 +44,11 @@ func (f *assignmentContextFakeDynamoDB) ServeHTTP(w http.ResponseWriter, r *http
 				f.put(item.Put.Item)
 			}
 			if u := item.Update; u != nil {
-				f.items[u.Key["pk"]["S"]+"|"+u.Key["sk"]["S"]][assignmentContextTTLAttribute] = u.ExpressionAttributeValues[":expiry"]
+				key := u.Key["pk"]["S"] + "|" + u.Key["sk"]["S"]
+				if f.items[key] == nil {
+					f.put(u.Key)
+				}
+				f.items[key][assignmentContextTTLAttribute] = u.ExpressionAttributeValues[":expiry"]
 			}
 		}
 	case dynamoDBGetItemTarget:

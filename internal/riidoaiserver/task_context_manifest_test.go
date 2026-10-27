@@ -25,4 +25,7 @@ func TestTaskContextManifestBudgetsMatchRuntime(t *testing.T) {
 			t.Errorf("SSOT budget %s = %d, runtime %d", key, got, want)
 		}
 	}
+	if got := manifest.Policy.SourceBudget["cli_read_attempts_per_assignment"]; got != assignmentContextReadLimit {
+		t.Fatalf("CLI read quota=%d want=%d", got, assignmentContextReadLimit)
+	}
 }

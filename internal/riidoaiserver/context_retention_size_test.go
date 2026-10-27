@@ -25,7 +25,7 @@ func TestContextRetentionCaptureRejectsOversizedStoredItemsBeforeWriting(t *test
 }
 
 func TestContextRetentionAggregateBudgetIncludesUpdatedItemBytes(t *testing.T) {
-	contextBytes := contextSnapshotItemBytes + assignmentContextMaxCommentPages*contextCommentItemBytes + contextLifecycleItemBytes
+	contextBytes := contextSnapshotItemBytes + assignmentContextMaxCommentPages*contextCommentItemBytes + contextLifecycleItemBytes + contextQuotaItemBytes
 	if contextBytes >= 1280<<10 {
 		t.Fatalf("context budget=%d", contextBytes)
 	}
@@ -35,5 +35,8 @@ func TestContextRetentionAggregateBudgetIncludesUpdatedItemBytes(t *testing.T) {
 	f := newContextRetentionFixture(t)
 	if _, err := f.store.contextLifecycleFence(strings.Repeat("x", 1024), nil, 0); err == nil {
 		t.Fatal("oversized lifecycle accepted")
+	}
+	if _, err := assignmentContextQuotaKey(strings.Repeat("x", 1024)); err == nil {
+		t.Fatal("oversized quota accepted")
 	}
 }

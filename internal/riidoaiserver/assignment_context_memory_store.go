@@ -18,6 +18,7 @@ type MemoryAssignmentContextStore struct {
 	snapshots       map[string]AssignmentContextSnapshot
 	reads           map[string][]AssignmentContextRead
 	comments        map[string][][]AIAgentTaskContextComment
+	readAttempts    map[string]int
 }
 
 func NewMemoryAssignmentContextStore() *MemoryAssignmentContextStore {

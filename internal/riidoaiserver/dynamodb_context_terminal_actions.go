@@ -29,6 +29,18 @@ func (s *DynamoDBAssignmentOperationStore) terminalContextActions(ctx context.Co
 		return nil, err
 	}
 	actions := []dynamoDBTransactWriteItem{fence}
+	quotaKey, err := assignmentContextQuotaKey(assignment.ID)
+	if err != nil {
+		return nil, err
+	}
+	// Always fence quota, even when no CLI call has created the counter yet.
+	// A first read racing this terminal transaction cannot recreate an active
+	// counter after cleanup, and updates never move the terminal expiry.
+	actions = append(actions, dynamoDBTransactWriteItem{Update: &dynamoDBTransactWriteUpdateAction{
+		TableName: s.tableName, Key: quotaKey,
+		UpdateExpression:          "SET " + assignmentContextTTLAttribute + " = :expiry",
+		ExpressionAttributeValues: map[string]map[string]string{":expiry": {"N": strconv.FormatInt(expiry, 10)}},
+	}})
 	for _, item := range items {
 		actions = append(actions, dynamoDBTransactWriteItem{Update: &dynamoDBTransactWriteUpdateAction{
 			TableName: s.tableName, Key: map[string]map[string]string{"pk": item["pk"], "sk": item["sk"]},

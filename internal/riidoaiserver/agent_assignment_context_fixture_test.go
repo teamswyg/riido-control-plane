@@ -17,10 +17,10 @@ type assignmentContextFixture struct {
 	contexts *MemoryAssignmentContextStore
 	leased   Assignment
 	agents   *DevelopmentAIAgentClientStore
+	service  Server
 }
 
-// newAssignmentContextFixture assigns task-private through the client API with
-// a request-scoped task context, then leases it with the daemon poll.
+// Assign through the client API and lease the task with a daemon poll.
 func newAssignmentContextFixture(t *testing.T, contexts *MemoryAssignmentContextStore) *assignmentContextFixture {
 	t.Helper()
 	return newAssignmentContextFixtureWith(t, contexts, assignmentContextTestTaskContext())
@@ -40,7 +40,8 @@ func newAssignmentContextFixtureWith(t *testing.T, contexts *MemoryAssignmentCon
 	if contexts != nil {
 		config.AssignmentContext = contexts
 	}
-	f := &assignmentContextFixture{t: t, server: NewServer(config).Handler(), contexts: contexts, agents: aiAgentStore}
+	service := NewServer(config)
+	f := &assignmentContextFixture{t: t, server: service.Handler(), contexts: contexts, agents: aiAgentStore, service: service}
 	if code, body := f.do("/v2/client/workspaces/workspace-dev-riid/ai-agent/tasks/task-private/assignment", `{"agent_id":"agent-owned-codex","request_id":"req-assign-1"}`, func(r *http.Request) { r.Header.Set(aiAgentTokenHeader, "user-token") }); code != http.StatusAccepted {
 		t.Fatalf("assign status=%d body=%s", code, body)
 	}

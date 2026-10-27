@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const loopRegistryBehaviorGoldenSHA256 = "6a5c9387db367f4e7b2d318251a9efcf6c24b2153721816c344a192ebee25f85"
+const loopRegistryBehaviorGoldenSHA256 = "0c4504811675454969ec413b4943cfdbb9ac538b00865d0698cb47ed0e661524"
 
 var (
 	loopRegistryDocSemanticHashPattern = regexp.MustCompile(
