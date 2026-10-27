@@ -26037,6 +26037,80 @@
       ],
       "decision": "Allow at most 100 read attempts per assignment; count replayed request IDs, denied targets and unavailable data, but exclude prompt capture, viewer audit GET and local whoami. Return 429 on exhaustion and 503 on quota-store failure before reading data. New follow-up assignments receive new budgets. Terminal transactions create a TTL fence even before the first CLI call, and active-lease validation prevents expired counter removal from reviving a terminal execution. Synthetic two-store concurrency tests admit exactly 100 of 150 attempts; 16 simultaneous TCP requests avoid the local accept-queue resets observed at 150 simultaneous connections. Live DynamoDB acceptance remains a separate QA gate.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "riido_cli_run_read_current_metadata_5900",
+      "observation": "Run-read history exposed source IDs but no current display title or source-version comparison, even though its viewer-authorized task context and agent directory had already been read to decide visibility.",
+      "hypothesis": "Reusing exactly those current responses can add useful GET-only metadata without a second monolith request, retained-title fallback, or a wider SSE payload. Legacy read hashes alone cannot prove a change because historical source completeness was not recorded.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_current.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_extended.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_freshness.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_agents.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_types.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_titles_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_freshness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_event_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_fail_closed_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Viewer GET includes only currently authorized nonempty titles and optional modified_since_read. A valid source updated_at increase proves true; the same comparable source hash proves false; legacy hash differences, partial content and unavailable comparisons remain omitted. Current context is fetched once, visible agent titles reuse one directory query, revoked sources remain absent, and SSE contains neither field. CP preserves its existing DSL operations while projecting the two canonical fields and regenerating contracts and clients. Source completeness provenance remains a later slice.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {

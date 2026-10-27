@@ -7,9 +7,9 @@ import (
 
 type runReadSourceKey struct{ kind, id, part string }
 
-func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, workspaceID, taskID string) (map[runReadSourceKey]bool, bool) {
+func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, workspaceID, taskID string) (map[runReadSourceKey]runReadMetadata, bool) {
 	token, _ := requestBearerToken(r)
-	visible, err := s.loadCurrentRunReadSources(r.Context(), token, workspaceID, taskID)
+	current, err := s.loadCurrentRunReadContext(r.Context(), token, workspaceID, taskID)
 	if errors.Is(err, ErrAuthorizationForbidden) {
 		writeError(w, http.StatusForbidden, "forbidden")
 		return nil, false
@@ -18,7 +18,7 @@ func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, wo
 		writeError(w, http.StatusServiceUnavailable, "source access unavailable")
 		return nil, false
 	}
-	return visible, true
+	return currentRunReadMetadata(current), true
 }
 
 // Visibility is recomputed from the viewer's current response. Missing parents,

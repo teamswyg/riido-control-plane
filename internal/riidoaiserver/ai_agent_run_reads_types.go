@@ -13,8 +13,10 @@ type aiAgentRunReader interface {
 
 type AIAgentRunRead struct {
 	AgentContextReadSource
-	Via      string    `json:"via"`
-	ServedAt time.Time `json:"served_at"`
+	Via               string    `json:"via"`
+	ServedAt          time.Time `json:"served_at"`
+	Title             string    `json:"title,omitempty"`
+	ModifiedSinceRead *bool     `json:"modified_since_read,omitempty"`
 }
 
 type AIAgentRunReadsResponse struct {
