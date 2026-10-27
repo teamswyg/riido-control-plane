@@ -43,9 +43,17 @@ export type AIAgentOnboardingTaskTemplateKey = "schedule" | "interview" | "launc
 export interface AIAgentRunRead {
   id?: string;
   kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target" | "agent";
+  /**
+   * 현재 조회자에게 보이는 자료와 기록된 조회 시점의 버전을 비교한 결과입니다. 수정이 확인되면 true, 비교 가능한 버전이 같으면 false이며, 부분 본문 등으로 비교할 수 없으면 생략합니다. 조회 시각만으로 수정 여부를 추정하지 않습니다.
+   */
+  modified_since_read?: boolean;
   part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments" | "profile";
   served_at: string;
   status: "served" | "truncated" | "denied" | "unavailable";
+  /**
+   * 현재 조회자의 권한으로 확인한 자료 제목입니다. 과거 스냅샷 제목은 사용하지 않으며, 현재 이름이 없으면 생략합니다.
+   */
+  title?: string;
   updated_at?: string;
   version?: string;
   via: "prompt" | "cli";

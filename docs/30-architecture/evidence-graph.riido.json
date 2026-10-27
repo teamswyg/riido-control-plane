@@ -25967,6 +25967,80 @@
       ],
       "decision": "The explicit-view regression failed before implementation and passes with body-only audit; independent review reproduced missing-projection-as-empty and normalized-HTML-format defects, now covered by passing regressions. Empty, partial, denied, deleted and unavailable remain distinct. Meeting documents participate in the existing 256KiB bound without mutating captured input. Source/body, current viewer access, concurrency and byte/deadline regressions pass, including race verification. Generated source inventory, claim hashes and behavior goldens are refreshed for these additive reads; this does not change endpoint routing, authentication policy, TTL or deployment. Meeting boards, comments and further linked work remain unimplemented, and actual staging acceptance is separate.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "riido_cli_run_read_current_metadata_5900",
+      "observation": "Run-read history exposed source IDs but no current display title or source-version comparison, even though its viewer-authorized task context and agent directory had already been read to decide visibility.",
+      "hypothesis": "Reusing exactly those current responses can add useful GET-only metadata without a second monolith request, retained-title fallback, or a wider SSE payload. Legacy read hashes alone cannot prove a change because historical source completeness was not recorded.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_current.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_extended.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_freshness.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_agents.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_types.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_titles_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_freshness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_event_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_fail_closed_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Viewer GET includes only currently authorized nonempty titles and optional modified_since_read. A valid source updated_at increase proves true; the same comparable source hash proves false; legacy hash differences, partial content and unavailable comparisons remain omitted. Current context is fetched once, visible agent titles reuse one directory query, revoked sources remain absent, and SSE contains neither field. CP preserves its existing DSL operations while projecting the two canonical fields and regenerating contracts and clients. Source completeness provenance remains a later slice.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {
