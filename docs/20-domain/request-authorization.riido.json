@@ -261,6 +261,17 @@
         "device-auth-before-token-auth",
         "browser-jwt-not-daemon-auth"
       ]
+    },
+    {
+      "id": "execution-termination-device-proof",
+      "rules": [
+        "device-proof-required-without-bearer-fallback",
+        "original-claim-device-owner-epoch-required",
+        "lease-only-in-single-protected-header",
+        "strict-bounded-body-without-identity-fields",
+        "fixed-errors-without-credential-or-dependency-detail",
+        "local-observation-is-not-access-permission"
+      ]
     }
   ],
   "source_checks": [
@@ -676,6 +687,16 @@
       "file": "internal/riidoaiserver/external_authorizer_http_callbacks_test.go",
       "contains": [
         "TestExternalAuthorizerHTTPCallbacksArePrivateAndConcurrent"
+      ]
+    },
+    {
+      "name": "execution-termination-device-only",
+      "file": "internal/riidoaiserver/server_execution_termination_auth.go",
+      "contains": [
+        "singleExecutionHeader",
+        "AuthorizeDeviceCredential",
+        "leaseEpoch(lease)",
+        "ErrAuthorizationUnauthenticated"
       ]
     }
   ],

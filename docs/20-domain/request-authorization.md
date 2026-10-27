@@ -64,6 +64,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `coalescing` | `in-flight-only`, `no-ttl-auth-cache`, `bearer-token-hashed-in-key`, `request-scope-separated`, `concurrent-identical-requests-share-one-hop`, `caller-cancellation-isolated-from-other-waiters`, `last-waiter-cancels-shared-hop`, `provider-owned-timeout-unchanged`, `finished-or-abandoned-result-not-cached`, `old-finish-cannot-delete-new-call`, `shared-panic-fails-closed-with-fixed-message` |
 | `cors` | `exact-origin-allowlist`, `method-allowlist`, `header-allowlist`, `no-browser-credentials`, `unsupported-header-rejected` |
 | `device-principal` | `device-headers-server-only`, `both-device-fields-required`, `device-auth-before-token-auth`, `browser-jwt-not-daemon-auth` |
+| `execution-termination-device-proof` | `device-proof-required-without-bearer-fallback`, `original-claim-device-owner-epoch-required`, `lease-only-in-single-protected-header`, `strict-bounded-body-without-identity-fields`, `fixed-errors-without-credential-or-dependency-detail`, `local-observation-is-not-access-permission` |
 
 ## Evidence Loop
 

@@ -20,6 +20,124 @@
   ],
   "chains": [
     {
+      "id": "cli_claim_local_termination_observation_5900",
+      "observation": "A terminal task event can precede direct-child termination, while host continuation, lost Submit replies, resumed epochs and pending host work prevent the last Session alone from proving claim quiescence. Terminal ACK also clears daemon lease state.",
+      "hypothesis": "Accept a device-authenticated claim-scoped local observation only against the immutable original claim and an atomically checked projection, retaining one immutable epoch receipt. Keep unknown and access policy separate; a daemon sender must aggregate all local invocation and host-work boundaries before terminal delivery.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "assignment_operation_journal_must_preserve_replay_and_claim_ports",
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
+        "module_decomposition_must_preserve_surface_area_ratchet"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination_actions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination_get.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_termination.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_termination_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_termination_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_execution_termination.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_execution_termination_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_execution_termination_json.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_execution_termination.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_auth_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_concurrent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_dynamo_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_owner_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_projection_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_termination_validation_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "assignment-operation-journal-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "HTTP missing endpoint, snapshot receipt loss and active/missing projection acceptance were reproduced before correction. The sender contract has a provider-start count, not a descendant count. Three-action CAS retains original claim, current non-secret epoch guard and one receipt; retry ACKs recheck the same guards. This local HTTP/storage fixture boundary does not claim daemon rollout, installation coverage, service-authenticated OAuth enforcement, remote completion or live acceptance.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "cli_authenticated_execution_claim_provenance_5900",
       "observation": "Device-credential polling discarded the authenticated owner and accepted another device ID in the request body. Lease expiry and scheduler terminal state did not prove that the local invocation had ended, and neither snapshot nor journal replay retained immutable claim-time device ownership.",
       "hypothesis": "Bind the authenticated header device to the poll body and commit a private immutable device/owner/requester/hashed-epoch sidecar with the real claim CAS. Preserve the claim in local snapshots and journal replay. Observe blocked or unknown without inferring safe idle from missing history or scheduler state.",

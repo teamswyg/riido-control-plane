@@ -44,6 +44,7 @@ var serverRoutes = []serverRoute{
 	{"/v1/client/ai-agent/agents", Server.handleAIAgentClientAgents},
 	{"/v1/client/ai-agent/agents/", Server.handleAIAgentClientAgents},
 	{"/v1/client/ai-agent/events", Server.handleAIAgentClientEvents},
+	{"POST /v1/daemon/execution-claims/{assignment_id}/termination", Server.handleExecutionTermination},
 	{"/v1/daemon/runtime-snapshot", Server.handleDaemonRuntimeSnapshot},
 	{"/v1/daemon/agent-bindings", Server.handleDaemonAgentBindings},
 	{"/v1/agent-catalog", Server.handleAgentCatalog},
