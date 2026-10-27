@@ -83,6 +83,10 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 			}
 		}
 		operation := dynamoDBClaimAssignmentOperation(assignment, candidate.LastEventSeq, at, clearMessage, clearMetadata)
+		operation.ExecutionClaim = newExecutionClaim(ctx, operation.Assignment)
+		if err := validateOperationExecutionClaim(operation); err != nil {
+			return AssignmentClaimResult{}, err
+		}
 		payload, err := s.claimTransactionPayload(operation, candidate.LastEventSeq)
 		if len(repairs) > 0 || activeCondition != nil {
 			payload, err = s.claimRepairTransactionPayload(operation, candidate.LastEventSeq, repairs, activeCondition)

@@ -17,6 +17,10 @@ on:
       - "internal/riidoaiserver/assignment_contract_gen.go"
       - "internal/riidoaiserver/assignment_operation_port.go"
       - "internal/riidoaiserver/assignment_operation_port_test.go"
+      - "internal/riidoaiserver/*execution_claim*.go"
+      - "internal/riidoaiserver/agent_poll*.go"
+      - "internal/riidoaiserver/store_poll*.go"
+      - "internal/riidoaiserver/dynamodb_assignment_operation*.go"
   pull_request:
     paths:
       - ".github/workflows/assignment-operation-journal.yml"
@@ -32,6 +36,10 @@ on:
       - "internal/riidoaiserver/assignment_contract_gen.go"
       - "internal/riidoaiserver/assignment_operation_port.go"
       - "internal/riidoaiserver/assignment_operation_port_test.go"
+      - "internal/riidoaiserver/*execution_claim*.go"
+      - "internal/riidoaiserver/agent_poll*.go"
+      - "internal/riidoaiserver/store_poll*.go"
+      - "internal/riidoaiserver/dynamodb_assignment_operation*.go"
 
 jobs:
   journal:
@@ -59,7 +67,7 @@ jobs:
             -check-doc \
             -evidence-out out/assignment-operation-journal-evidence.json
       - name: Test assignment operation journal
-        run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease' -count=1
+        run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease|ExecutionClaim|AgentPollRejectsAuthenticatedDeviceBodyMismatch' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

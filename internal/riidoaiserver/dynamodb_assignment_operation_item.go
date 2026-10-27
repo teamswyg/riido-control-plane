@@ -48,5 +48,12 @@ func assignmentOperationDynamoDBItem(record AssignmentOperationRecord) (map[stri
 		"assignment_json":    {"S": string(assignmentJSON)},
 		"events_json":        {"S": string(eventsJSON)},
 	}
+	if record.ExecutionClaim != nil {
+		claimJSON, err := json.Marshal(record.ExecutionClaim)
+		if err != nil {
+			return nil, err
+		}
+		item["execution_claim_json"] = map[string]string{"S": string(claimJSON)}
+	}
 	return item, nil
 }

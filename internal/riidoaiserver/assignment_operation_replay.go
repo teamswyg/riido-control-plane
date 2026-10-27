@@ -25,6 +25,9 @@ func stateFromAssignmentOperations(records []AssignmentOperationRecord) (storeSt
 		if err := validateAssignmentOperationRecord(record); err != nil {
 			return storeState{}, err
 		}
+		if err := rememberExecutionClaim(&state, record.ExecutionClaim); err != nil {
+			return storeState{}, err
+		}
 		for _, event := range record.Events {
 			eventKey := assignmentOperationEventReplayKey(event)
 			if seenEvents[eventKey] {

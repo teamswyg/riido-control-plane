@@ -106,6 +106,11 @@
       "id": "daemon-event-dependency-status",
       "kind": "replay",
       "rule": "Ready, recovery journal and terminal event persistence failures remain retryable: dependency unavailability or exhausted CAS returns 503, deadline 504 and cancellation 408 with fixed messages. Input validation stays 400. A daemon retries the same stable event key within its existing finite budget; storage failures never authorize dispatch. Legacy snapshot-only and write-only journal event paths mutate a private trial and publish or retain ACKs only after their single authority accepts persistence. A non-projection legacy journal combined with a snapshot store has no atomic receipt port and fails closed before either write; production projection-backed journals and local snapshot-only mode remain supported. Stale Ready/recovery lease rechecks have a two-second total lookup deadline, including operation-store actor queueing; timeout is retryable 504 and never publishes or caches an ACK. This bounds the existing background lookup but does not claim caller-context propagation through all actor operations."
+    },
+    {
+      "id": "authenticated-execution-claim-provenance",
+      "kind": "replay",
+      "rule": "Device-authenticated claims retain immutable device, owner-at-claim, assignment requester and hashed lease epoch in the same CAS transaction as lease/projection/journal writes. Replay and local snapshots retain this private claim across owner changes, stale scheduler repair and ordinary terminal events; legacy bearer claims have unknown provenance. The private observation reader returns blocked only for a current non-owner active lease and otherwise unknown, never permission. Confirmed execution termination, coverage/migration, installation linking and service-authenticated OAuth/API policy remain mandatory follow-up boundaries."
     }
   ],
   "version_constants": [

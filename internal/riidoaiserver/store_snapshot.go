@@ -16,6 +16,7 @@ import (
 const StoreSnapshotSchemaVersion = "riido-ai-server-store-snapshot.v1"
 
 type StoreSnapshot struct {
+	ExecutionClaims   []executionClaim       `json:"execution_claims,omitempty"`
 	SchemaVersion     string                 `json:"schema_version"`
 	SavedAt           time.Time              `json:"saved_at"`
 	Tasks             []StoreSnapshotTask    `json:"tasks"`
@@ -189,6 +190,7 @@ func snapshotFromState(state *storeState, savedAt time.Time) StoreSnapshot {
 		events[taskID] = append([]TaskEvent(nil), taskEvents...)
 	}
 	return StoreSnapshot{
+		ExecutionClaims:   executionClaimsFromState(state),
 		SchemaVersion:     StoreSnapshotSchemaVersion,
 		SavedAt:           savedAt,
 		Tasks:             tasks,
@@ -208,6 +210,11 @@ func stateFromSnapshot(snapshot StoreSnapshot) (storeState, error) {
 		return storeState{}, fmt.Errorf("unsupported store snapshot schema_version %q", snapshot.SchemaVersion)
 	}
 	state := newStoreState()
+	for _, claim := range snapshot.ExecutionClaims {
+		if err := rememberExecutionClaim(&state, &claim); err != nil {
+			return storeState{}, err
+		}
+	}
 	state.nextAssignmentSeq = snapshot.NextAssignmentSeq
 	state.nextEventSeq = snapshot.NextEventSeq
 	for _, task := range snapshot.Tasks {
