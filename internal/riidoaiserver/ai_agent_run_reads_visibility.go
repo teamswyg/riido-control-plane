@@ -48,6 +48,9 @@ func visibleRunReadSources(current AIAgentTaskContext) map[runReadSourceKey]bool
 			add(source)
 		}
 	}
+	for _, source := range visibleMeetingBodySources(current.Extended) {
+		add(source)
+	}
 	for _, source := range assignmentContextRelatedSources(current.Extended) {
 		add(source)
 	}

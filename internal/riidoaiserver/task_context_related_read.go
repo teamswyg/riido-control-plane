@@ -9,7 +9,7 @@ import (
 // readExtendedTaskContext reads titles of related work and meetings and the
 // task's comments. Each part fails independently into its status.
 func (c *AIAgentPrivateTaskContextClient) readExtendedTaskContext(ctx context.Context, teamID, componentID, bearer string) *AIAgentTaskContextExtended {
-	out := &AIAgentTaskContextExtended{RelatedStatus: "available"}
+	out := &AIAgentTaskContextExtended{RelatedStatus: "available", MeetingStatus: "unavailable"}
 	base := strings.Split(c.privateComponentDetailEndpoint(teamID, componentID), "?")[0]
 	var issues []privateRelatedIssue
 	var meetings []privateRelatedMeeting
@@ -20,19 +20,15 @@ func (c *AIAgentPrivateTaskContextClient) readExtendedTaskContext(ctx context.Co
 	})
 	wg.Go(func() {
 		meetingsErr = c.readPrivateContextComponent(ctx, base+"/relations/meetings", bearer, "related_meetings", &meetings)
+		if meetingsErr == nil {
+			c.captureRelatedMeetings(ctx, teamID, bearer, meetings, out)
+		}
 	})
 	wg.Go(func() {
 		out.Comments, out.CommentTotal, out.CommentStatus = c.readTaskContextComments(ctx, base, bearer)
 	})
 	wg.Wait()
 	out.RelatedWork = relatedWorkFromIssues(issues)
-	for _, item := range meetings {
-		if item.Meeting != nil && strings.TrimSpace(item.Meeting.ID) != "" {
-			out.RelatedMeetings = append(out.RelatedMeetings, AIAgentTaskContextRelatedMeeting{
-				ID: strings.TrimSpace(item.Meeting.ID), Title: boundedTaskContextText(item.Meeting.Title, 200), StartTime: normalizedTaskContextTime(item.Meeting.StartTime),
-			})
-		}
-	}
 	switch {
 	case issuesErr != nil && meetingsErr != nil:
 		out.RelatedStatus = "unavailable"

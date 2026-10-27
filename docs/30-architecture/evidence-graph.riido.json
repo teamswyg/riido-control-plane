@@ -25905,6 +25905,68 @@
       ],
       "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT, views agents and agent answer from current control-plane state with live=true and fetched_at, 50 agents per cursor page. Scope is the assignment requester: public agents plus the requester's own, or every workspace agent when the snapshot recorded requester_admin from the authorized request; without that recorded fact admin is never assumed. Entries carry agent_id, name, public description with role_status, work_status, runtime kind and online/offline connection, callable and unavailable_reasons (self, runtime_offline); policy_checked stays false until RIID-5892 registers ServerConfig.AgentMentionPrecheck for its mention-time policy (budget, depth, cycles, session conflicts); when set, its reasons are added to every non-current entry and a failing precheck fails the read instead of showing unchecked agents as checked, and the server that starts a mentioned run remains the final authority. Hidden and unknown agents are refused alike with a denied read. Legacy assignments without created_by are refused. InheritAssignmentContext copies a parent snapshot and comment pages only within the same task, workspace and requester, records no prompt reads and never overwrites an existing child snapshot. Run reads expose agent profile reads only for agents the viewer can currently see and fail closed when the directory cannot be listed. The CLI-mode prompt tells agents to check riido agents list before mentioning another agent and to ask the requester when no agent clearly fits. Live and replayed agent_context_read events drop agent sources the subscriber cannot currently see, without counting them, so other viewers of the thread never learn private agent IDs or profile hashes. omitted_sources is recomputed per subscriber from unserialized cut-off bookkeeping; a directory event replayed without it reports zero instead of a count that could include hidden agents. Agent directory read records emitted by the HTTP history and SSE paths must be accepted by the public source enums (kind=agent, part=profile); a runtime-to-OpenAPI regression guards both projections without changing visibility policy.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_selected_meeting_body_5900",
+      "observation": "RIID-5900 snapshots exposed related meeting titles only despite planned meeting body reads. Adding bodies directly to Extended would also expose every captured body through base context and resources, and a missing provider projection could be mistaken for an authoritative empty document.",
+      "hypothesis": "Capture directly linked same-team undeleted meeting bodies with the requester bearer under the existing deadline, 20-item, four-worker and 8192-byte limits. Strip bodies from base/resources/list/prompt and serve only the explicitly selected meeting view with current-viewer body-read metadata permission checks.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_meeting_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_meeting_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_meeting_views.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_meeting.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_meeting_visibility.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_meeting_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_meeting_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_meeting_view_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_meeting_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_meeting_prompt_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The explicit-view regression failed before implementation and passes with body-only audit; independent review reproduced missing-projection-as-empty and normalized-HTML-format defects, now covered by passing regressions. Empty, partial, denied, deleted and unavailable remain distinct. Meeting documents participate in the existing 256KiB bound without mutating captured input. Source/body, current viewer access, concurrency and byte/deadline regressions pass, including race verification. Generated source inventory, claim hashes and behavior goldens are refreshed for these additive reads; this does not change endpoint routing, authentication policy, TTL or deployment. Meeting boards, comments and further linked work remain unimplemented, and actual staging acceptance is separate.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {

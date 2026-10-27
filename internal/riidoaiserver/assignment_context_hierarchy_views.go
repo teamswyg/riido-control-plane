@@ -5,6 +5,8 @@ package riidoaiserver
 // resources = `riido work relations`, comments = `riido work comments`.
 // agents/agent (`riido agents list|show`) are live reads, not snapshot views.
 const (
+	AssignmentContextViewMeetings  = "meetings"
+	AssignmentContextViewMeeting   = "meeting"
 	AssignmentContextViewBase      = "base"
 	AssignmentContextViewTask      = "task"
 	AssignmentContextViewTree      = "tree"
@@ -16,7 +18,7 @@ const (
 
 func validAssignmentContextView(view string) bool {
 	switch view {
-	case AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
+	case AssignmentContextViewMeeting, AssignmentContextViewMeetings, AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
 		AssignmentContextViewAgents, AssignmentContextViewAgent:
 		return true
 	}
@@ -57,5 +59,5 @@ func assignmentContextRelatedOnly(extended *AIAgentTaskContextExtended) *AIAgent
 	if extended == nil {
 		return nil
 	}
-	return &AIAgentTaskContextExtended{RelatedWork: extended.RelatedWork, RelatedMeetings: extended.RelatedMeetings, RelatedStatus: extended.RelatedStatus}
+	return &AIAgentTaskContextExtended{RelatedWork: extended.RelatedWork, RelatedMeetings: meetingTitlesOnly(extended.RelatedMeetings), RelatedStatus: extended.RelatedStatus, MeetingStatus: extended.MeetingStatus, MeetingTotal: extended.MeetingTotal, MeetingTruncated: extended.MeetingTruncated}
 }

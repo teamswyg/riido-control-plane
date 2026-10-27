@@ -17,6 +17,7 @@ func boundAssignmentContext(c AIAgentTaskContext) (AIAgentTaskContext, bool) {
 		return c, false
 	}
 	c.Hierarchy = cloneAssignmentContextHierarchy(c.Hierarchy)
+	c.Extended = cloneAssignmentContextMeetings(c.Extended)
 	docs := assignmentContextDocuments(&c)
 	for _, doc := range docs {
 		doc.AlternateContent, doc.AlternateSource, doc.AlternateFormat = "", "", ""
@@ -33,6 +34,7 @@ func boundAssignmentContext(c AIAgentTaskContext) (AIAgentTaskContext, bool) {
 		}
 		longest.Content = truncateUTF8(longest.Content, len(longest.Content)/2)
 	}
+	markTruncatedMeetingDocuments(c.Extended)
 	return c, true
 }
 
@@ -48,7 +50,7 @@ func assignmentContextDocuments(c *AIAgentTaskContext) []*AIAgentTaskContextDocu
 			docs = append(docs, ref.Document)
 		}
 	}
-	return docs
+	return append(docs, assignmentContextMeetingDocuments(c.Extended)...)
 }
 
 // The caller's context must not be mutated through shared document pointers.
