@@ -20,6 +20,9 @@ func TestMemoryContextRetentionPrunesOnlyPayloadAfterTerminal(t *testing.T) {
 	p := &memoryContextProjection{assignment: Assignment{ID: "assignment", State: AssignmentRunning, UpdatedAt: now}}
 	m.retentionReader = p
 	ctx := context.Background()
+	if ok, err := m.ConsumeAssignmentContextRead(ctx, "assignment"); !ok || err != nil {
+		t.Fatal(ok, err)
+	}
 	if err := m.SaveAssignmentContextSnapshot(ctx, AssignmentContextSnapshot{AssignmentID: "assignment"}); err != nil {
 		t.Fatal(err)
 	}
@@ -37,8 +40,11 @@ func TestMemoryContextRetentionPrunesOnlyPayloadAfterTerminal(t *testing.T) {
 	if _, found, err := m.LoadAssignmentContextCommentPage(ctx, "assignment", 0); err != nil || found {
 		t.Fatalf("found=%v err=%v", found, err)
 	}
-	if len(m.snapshots) != 0 || len(m.comments) != 0 || len(m.reads["assignment"]) != 1 {
+	if len(m.snapshots) != 0 || len(m.comments) != 0 || len(m.readAttempts) != 0 || len(m.reads["assignment"]) != 1 {
 		t.Fatal("wrong retention partition")
+	}
+	if ok, err := m.ConsumeAssignmentContextRead(ctx, "assignment"); ok || !errors.Is(err, errAssignmentContextExpired) {
+		t.Fatalf("expired counter replenished: allowed=%v err=%v", ok, err)
 	}
 	if err := m.SaveAssignmentContextSnapshot(ctx, AssignmentContextSnapshot{AssignmentID: "assignment"}); !errors.Is(err, errAssignmentContextExpired) {
 		t.Fatalf("recapture=%v", err)

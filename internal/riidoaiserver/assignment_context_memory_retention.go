@@ -47,6 +47,7 @@ func (m *MemoryAssignmentContextStore) expirePayloads(ctx context.Context, id st
 	if m.expiry[id] > 0 && m.now().Unix() >= m.expiry[id] {
 		delete(m.snapshots, id)
 		delete(m.comments, id)
+		delete(m.readAttempts, id)
 		return true, nil
 	}
 	return false, nil

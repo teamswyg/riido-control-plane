@@ -27,7 +27,7 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	assignment, ok := s.leasedAssignmentForContext(w, r, agentID, device, req)
-	if !ok {
+	if !ok || !s.consumeAssignmentContextRead(w, r, assignment.ID) {
 		return
 	}
 	if assignmentContextLiveView(req.View) {

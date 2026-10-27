@@ -3,6 +3,19 @@
 RIID-5818 owns readable, bounded task context and conversation continuity.
 The assignment remains one task; references do not authorize additional work.
 
+RIID-5900 limits CLI reads to 100 authenticated active-lease attempts per durable
+assignment ID. All views share the counter, including live agent discovery,
+reused request IDs, denied targets and unavailable data. Prompt capture, viewer
+read-history GET and local whoami do not consume it. DynamoDB increments the
+counter atomically across servers; exhausted budgets return HTTP 429 and storage
+failures return 503 before data access. Repeating the same execution cannot
+restore the budget. Heartbeat/lease refresh, runtime run-label changes and
+snapshot recapture keep it; a new follow-up assignment receives a new budget.
+Terminal transactions fence the counter even before the first CLI call and set
+its TTL to the same first-terminal +24h deadline as context payloads. Read audit
+records retain their existing policy. Active-lease validation precedes quota
+consumption, so physical TTL cleanup cannot revive a terminal capability.
+
 The request-scoped reader keeps the caller's existing bearer and team scope.
 Only project, milestone and parent-task IDs already returned by the authorized
 task detail may be followed. Parent reads are deduplicated, at most three in

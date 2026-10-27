@@ -63,6 +63,7 @@ type AssignmentContextRead struct {
 }
 
 type AssignmentContextStore interface {
+	ConsumeAssignmentContextRead(ctx context.Context, assignmentID string) (bool, error)
 	SaveAssignmentContextSnapshot(ctx context.Context, snapshot AssignmentContextSnapshot) error
 	LoadAssignmentContextSnapshot(ctx context.Context, assignmentID string) (AssignmentContextSnapshot, bool, error)
 	AppendAssignmentContextReads(ctx context.Context, reads []AssignmentContextRead) error
