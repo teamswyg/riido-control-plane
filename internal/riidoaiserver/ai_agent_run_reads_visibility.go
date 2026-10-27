@@ -8,14 +8,9 @@ import (
 type runReadSourceKey struct{ kind, id, part string }
 
 func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, workspaceID, taskID string) (map[runReadSourceKey]bool, bool) {
-	reader, ok := s.taskContext.(AIAgentTaskContextRequestReader)
-	if !ok {
-		writeError(w, http.StatusServiceUnavailable, "source access unavailable")
-		return nil, false
-	}
 	token, _ := requestBearerToken(r)
-	current, err := reader.GetAIAgentTaskContextForRequest(r.Context(), AIAgentTaskContextRequest{ComponentID: taskID, WorkspaceID: workspaceID, BearerToken: token, Extended: true})
-	if errors.Is(err, ErrAuthorizationForbidden) || taskContextReadOutcome(r.Context(), err) == "denied" {
+	visible, err := s.loadCurrentRunReadSources(r.Context(), token, workspaceID, taskID)
+	if errors.Is(err, ErrAuthorizationForbidden) {
 		writeError(w, http.StatusForbidden, "forbidden")
 		return nil, false
 	}
@@ -23,11 +18,7 @@ func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, wo
 		writeError(w, http.StatusServiceUnavailable, "source access unavailable")
 		return nil, false
 	}
-	if current.Component.ID != taskID {
-		writeError(w, http.StatusForbidden, "forbidden")
-		return nil, false
-	}
-	return visibleRunReadSources(current), true
+	return visible, true
 }
 
 // Visibility is recomputed from the viewer's current response. Missing parents,

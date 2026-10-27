@@ -78,12 +78,12 @@ func (s Server) handleTaskNotificationStream(w http.ResponseWriter, r *http.Requ
 	}
 	// Never replay notifications. Membership and task access are checked again for
 	// every live delivery, including after a long-running stream loses access.
-	serveAIAgentClientEventStream(w, r.WithContext(ctx), nil, merged, func(event ClientStreamEvent) bool {
+	serveAIAgentClientEventStream(w, r.WithContext(ctx), nil, merged, func(ctx context.Context, event ClientStreamEvent) (ClientStreamEvent, bool) {
 		notification, valid := event.Payload.(AgentTaskNotificationEvent)
 		if !valid {
-			return false
+			return ClientStreamEvent{}, false
 		}
 		principal, allowed := principals[notification.WorkspaceID]
-		return allowed && s.clientNotificationAuthorized(r, principal, event)
+		return event, allowed && s.clientNotificationAuthorized(r.WithContext(ctx), principal, event)
 	})
 }

@@ -25336,6 +25336,147 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "riido_cli_context_stream_current_viewer_5900",
+      "observation": "Viewer GET run reads filters current task/source permissions, but SSE replay bypassed delivery authorization and live delivery checked only task notifications. A RED HTTP regression exposed a hidden resource ID/hash and omitted count in both live and replay, and kept sending after task permission revocation. Serial request-scoped lookups could delay terminal events behind historical read hints.",
+      "hypothesis": "Reusing the current viewer source policy at delivery and rechecking existing Agent/thread visibility closes metadata leaks; bounded best-effort hint validation keeps progress and terminal delivery independent of slow metadata reads.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_stream_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_delivery_store.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_async_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_denial_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_fixture_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_stream_queue.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_revocation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_visibility_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_event_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_event_stream.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_event_stream_live.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_events_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_current.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_visibility.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_notification_stream_handler.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_queue_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_queue_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_context_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_async_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_denial_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_revocation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_visibility_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Live and replayed agent_context_read SSE hints reauthorize the current viewer, task and source parts with the same request-scoped context policy as GET run reads, and recheck existing Agent/thread visibility including current roles. Empty or failed context and hidden sources are omitted; an entirely hidden read emits no hint, and omitted_sources is zero because capped identities cannot all be reauthorized. The stream uses the same authenticated token for authorization and monolith context, including the legacy JWT header; GET remains Bearer-only. No positive permission cache spans deliveries. Replay read checks share a two-second budget. Live validation uses one worker and at most 32 queued hints per subscriber; newer progress/terminal delivery cancels older pending hints to preserve cursor order, and channel-close draining is bounded to two seconds. Busy store locks, timeout, cancellation or queue saturation drop only best-effort hints, never durable READ audit rows; the complete currently authorized list is recoverable through paginated GET run reads. Focused regression covers live/replay task/resource revocation, unavailable section fallback, upstream failure, identity/workspace/role changes, private Agent profiles, deleted public Agent history, immutable shared payload, bounded replay, late completion cancellation and nonblocking terminal delivery. Native checks and staging are distinct evidence; unit tests do not establish real hidden-viewer staging acceptance. Timeout bounds assume context-compliant adapters: production private-context/external-authorizer HTTP clients and DynamoDB snapshot command/reply waits propagate cancellation. TryLock only avoids the delivery entry locks; existing snapshot restoration and internal mutexes remain unchanged. The async writer can cancel and return without waiting for an adapter; it cannot forcibly terminate a dependency that ignores cancellation forever. Queue regression proves a 1000-hint burst stays at one active worker plus 32 pending and a canceled worker does not restart stale hints.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "riido_cli_assignment_context_5900",
       "observation": "Agents received every task, parent and resource body in the prompt and could not read more during a run; the server kept no record of which Riido sources an answer used. The monolith accepts only short-lived user JWTs, so the control-plane cannot read on the user's behalf after the request ends.",
       "hypothesis": "Store the task context the server already composes with the requester Bearer per assignment, let only the leased daemon read it back with its device credential, and record every prompt or CLI read so clients can show what an answer read without any user token being stored.",
