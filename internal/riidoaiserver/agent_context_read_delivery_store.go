@@ -9,7 +9,9 @@ type aiAgentClientEventFilter interface {
 // Delivery rechecks the existing agent/thread policy using the freshly
 // authorized principal, including deleted-agent thread snapshots.
 func (s *DevelopmentAIAgentClientStore) FilterAIAgentClientEvent(ctx context.Context, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
-	if ctx.Err() != nil || !s.mu.TryLock() {
+	ctx, cancel := context.WithTimeout(ctx, DefaultAIAgentTaskContextClientTimeout)
+	defer cancel()
+	if !lockContextReadDelivery(ctx, &s.mu) {
 		return ClientStreamEvent{}, false
 	}
 	defer s.mu.Unlock()
@@ -17,7 +19,9 @@ func (s *DevelopmentAIAgentClientStore) FilterAIAgentClientEvent(ctx context.Con
 }
 
 func (s *PersistentAIAgentClientStore) FilterAIAgentClientEvent(ctx context.Context, principal AuthorizationResult, event ClientStreamEvent) (ClientStreamEvent, bool) {
-	if ctx.Err() != nil || !s.operationMu.TryLock() {
+	ctx, cancel := context.WithTimeout(ctx, DefaultAIAgentTaskContextClientTimeout)
+	defer cancel()
+	if !lockContextReadDelivery(ctx, &s.operationMu) {
 		return ClientStreamEvent{}, false
 	}
 	defer s.operationMu.Unlock()
