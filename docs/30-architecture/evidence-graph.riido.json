@@ -26159,6 +26159,40 @@
       ],
       "decision": "Viewer GET includes only currently authorized nonempty titles and optional modified_since_read. A valid source updated_at increase proves true; the same comparable source hash proves false; legacy hash differences, partial content and unavailable comparisons remain omitted. Current context is fetched once, visible agent titles reuse one directory query, revoked sources remain absent, and SSE contains neither field. CP preserves its existing DSL operations while projecting the two canonical fields and regenerating contracts and clients. Source completeness provenance remains a later slice.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "riido_cli_comment_verified_context_5900",
+      "observation": "Comment-triggered assignments replaced server-verified extended context with a trigger-only fallback. CP has no original user bearer to safely recover related sources itself.",
+      "hypothesis": "Preserve context enriched by the existing server-key-authenticated monolith evidence endpoint under the original author current task/team permissions; retain the trigger-only fallback only for legacy evidence.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_delivery_extended.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_delivery_verified_context_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep bounded same-task recent roots (20 plus the immutable trigger, maximum 21), trigger parent identity, same-team related work and meeting bodies, and file/link metadata supplied by verified delivery evidence. CP neither fabricates user authorization nor performs anonymous reads. Preserve legacy fallback, snapshot bounds, read audit and current-viewer permission checks. Synthetic tests cover evidence capture and header boundaries; live comment-triggered acceptance is separate.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {

@@ -16,6 +16,15 @@ its TTL to the same first-terminal +24h deadline as context payloads. Read audit
 records retain their existing policy. Active-lease validation precedes quota
 consumption, so physical TTL cleanup cannot revive a terminal capability.
 
+Comment-triggered executions retain extended context from the existing verified
+monolith delivery evidence. The producer reads recent same-task root comments
+(20 plus an out-of-page or reply trigger, at most 21), same-team linked work and
+meetings, and bounded file/link metadata under the stored author's current
+permissions. CP preserves that evidence without requesting a user credential
+or making anonymous reads. Only older evidence with no `extended` field receives
+the trigger-only fallback. The original comment remains the execution trigger;
+normal snapshot capture, read audit and current viewer filtering still apply.
+
 The request-scoped reader keeps the caller's existing bearer and team scope.
 Only project, milestone and parent-task IDs already returned by the authorized
 task detail may be followed. Parent reads are deduplicated, at most three in
