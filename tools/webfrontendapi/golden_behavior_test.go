@@ -20,7 +20,7 @@ func TestWebFrontendAPIBehaviorGolden(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertWebFrontendFileSHA256(t, out, "ad5a2105dc558ff6108dad73866b16cc762845c011d82c661da5ab23e804c629")
+	assertWebFrontendFileSHA256(t, out, "f1e6f8a7db4cb05598fda3548d65bf6ef47a394f97989ad44bdce688a9ff7776")
 	doc := filepath.Join(repo, "docs/30-architecture/web-frontend-api.md")
 	assertWebFrontendFileSHA256(t, doc, "f0abee974b574a266e30a0066981b6b54efaa22b83f68b7639df8bb65c1b5de1")
 }

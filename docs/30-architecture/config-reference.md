@@ -10,12 +10,13 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `56`; manifest entries: `56`; secret/credential entries: `8`; operator-only entries: `14`.
+Runtime env reads: `57`; manifest entries: `57`; secret/credential entries: `8`; operator-only entries: `14`.
 
 ## Runtime Env
 
 | Variable | Default | Sensitivity | Meaning |
 | --- | --- | --- | --- |
+| `RIIDO_AI_SERVER_CLI_INSTALLATION_RESOURCE` | `empty` | `public` | Exact canonical OAuth resource for private CLI installation service; required with service:riido-monolith in AUTHZ_TOKENS_JSON. Missing config fails closed without user/device fallback. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL` | `empty` | `operator` | Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY` | `empty` | `secret` | Dedicated server-to-server comment delivery secret (minimum 32 bytes). |
 | `RIIDO_AI_SERVER_ADDR` | `:8080` | `public` | HTTP listen address passed to the main API server. |

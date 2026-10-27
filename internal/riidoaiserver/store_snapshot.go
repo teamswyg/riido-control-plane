@@ -16,6 +16,7 @@ import (
 const StoreSnapshotSchemaVersion = "riido-ai-server-store-snapshot.v1"
 
 type StoreSnapshot struct {
+	CLIInstallations      cliInstallationSnapshot       `json:"cli_installations,omitempty"`
 	ExecutionTerminations []executionTerminationReceipt `json:"execution_terminations,omitempty"`
 	ExecutionClaims       []executionClaim              `json:"execution_claims,omitempty"`
 	SchemaVersion         string                        `json:"schema_version"`
@@ -192,6 +193,7 @@ func snapshotFromState(state *storeState, savedAt time.Time) StoreSnapshot {
 	}
 	return StoreSnapshot{
 		ExecutionClaims:       executionClaimsFromState(state),
+		CLIInstallations:      cliInstallationSnapshotFromState(state),
 		ExecutionTerminations: executionTerminationsFromState(state),
 		SchemaVersion:         StoreSnapshotSchemaVersion,
 		SavedAt:               savedAt,
@@ -213,6 +215,9 @@ func stateFromSnapshot(snapshot StoreSnapshot) (storeState, error) {
 	}
 	state := newStoreState()
 	if err := restoreExecutionHistory(&state, snapshot); err != nil {
+		return storeState{}, err
+	}
+	if err := restoreCLIInstallations(&state, snapshot.CLIInstallations); err != nil {
 		return storeState{}, err
 	}
 	state.nextAssignmentSeq = snapshot.NextAssignmentSeq

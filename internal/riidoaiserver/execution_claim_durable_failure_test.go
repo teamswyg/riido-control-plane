@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -40,9 +41,15 @@ func TestExecutionClaimStaleRepairAndNewClaimShareTransaction(t *testing.T) {
 	for range 3 {
 		<-requests
 	}
-	payload := decodeDynamoDBRepairTransactWritePayload(t, <-requests)
-	if len(payload.TransactItems) != 7 {
+	var payload struct{ TransactItems []dynamoDBTransactWriteItem }
+	if err := json.Unmarshal((<-requests).body, &payload); err != nil {
+		t.Fatal(err)
+	}
+	if len(payload.TransactItems) != 8 {
 		t.Fatalf("atomic repair count=%d", len(payload.TransactItems))
+	}
+	if !isDevicePolicyAdvance(payload.TransactItems[7]) {
+		t.Fatal("repair revision is not in the same CAS")
 	}
 	if claim.Operations[0].ExecutionClaim != nil || claim.Operation.ExecutionClaim == nil {
 		t.Fatal("repair manufactured or lost claim provenance")

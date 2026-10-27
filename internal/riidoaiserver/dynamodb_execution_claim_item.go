@@ -56,5 +56,5 @@ func (s *DynamoDBAssignmentOperationStore) appendExecutionClaimAction(items []dy
 	}
 	return append(items, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{
 		TableName: s.tableName, ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)", Item: item,
-	}}), nil
+	}}, s.devicePolicyAdvanceAction(claim.DeviceID)), nil
 }

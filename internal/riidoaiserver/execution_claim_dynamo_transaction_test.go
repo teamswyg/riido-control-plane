@@ -28,9 +28,15 @@ func TestAuthenticatedExecutionClaimDynamoTransaction(t *testing.T) {
 		t.Fatalf("claim failed: %v", err)
 	}
 	<-requests
-	payload := decodeDynamoDBTransactWritePayload(t, <-requests)
-	if len(payload.TransactItems) != 4 {
+	var payload struct{ TransactItems []dynamoDBTransactWriteItem }
+	if err := json.Unmarshal((<-requests).body, &payload); err != nil {
+		t.Fatal(err)
+	}
+	if len(payload.TransactItems) != 5 {
 		t.Fatalf("authenticated claim requires atomic sidecar: actions=%d", len(payload.TransactItems))
+	}
+	if !isDevicePolicyAdvance(payload.TransactItems[4]) {
+		t.Fatal("claim revision is not in the same CAS")
 	}
 	sidecar := payload.TransactItems[3].Put
 	if sidecar.ConditionExpression != "attribute_not_exists(pk) AND attribute_not_exists(sk)" {

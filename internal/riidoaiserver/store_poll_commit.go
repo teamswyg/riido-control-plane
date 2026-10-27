@@ -17,6 +17,7 @@ func (s *Store) handlePollCommand(state *storeState, msg pollCmd) pollResult {
 		}
 		trial := cloneLegacyEventState(state)
 		trial.executionClaims = maps.Clone(state.executionClaims)
+		trial.devicePolicyRevisions = maps.Clone(state.devicePolicyRevisions)
 		trial.tasks = maps.Clone(state.tasks)
 		trial.agentAssignments = maps.Clone(state.agentAssignments)
 		quiet := *s

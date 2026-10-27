@@ -23,7 +23,7 @@ func (s *DynamoDBAssignmentOperationStore) executionTerminationActions(id execut
 		return nil, err
 	}
 	item := map[string]map[string]string{"pk": {"S": "DEVICE_EXECUTION_TERMINATION#" + id.deviceID}, "sk": {"S": id.key()}, "schema": {"S": executionTerminationItemSchema}, "payload": {"S": string(payload)}}
-	return append(actions, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)", Item: item}}), nil
+	return append(actions, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)", Item: item}}, s.devicePolicyAdvanceAction(id.deviceID)), nil
 }
 
 func executionTerminationItemKey(item map[string]map[string]string) map[string]map[string]string {

@@ -58,7 +58,12 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err := commentDelivery.Validate(); err != nil {
 		return runtimeConfig{}, err
 	}
+	installationService, err := cliInstallationServiceFromEnv()
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	return runtimeConfig{
+		CLIInstallationService:  installationService,
 		CommentDelivery:         commentDelivery,
 		AssignmentSnapshotStore: snapshotStore,
 

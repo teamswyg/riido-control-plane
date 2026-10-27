@@ -52,6 +52,10 @@ func (s *Store) commitExecutionTermination(state *storeState, msg executionTermi
 	}
 	receipt := newExecutionTermination(msg.identity, msg.request, s.now())
 	trial := *state
+	trial.devicePolicyRevisions = maps.Clone(state.devicePolicyRevisions)
+	if err := bumpDevicePolicyRevision(&trial, msg.identity.deviceID); err != nil {
+		return executionTerminationResult{err: err}
+	}
 	trial.executionTerminations = maps.Clone(state.executionTerminations)
 	trial.executionTerminations[msg.identity.key()] = receipt
 	if s.snapshotStore != nil {
@@ -60,5 +64,6 @@ func (s *Store) commitExecutionTermination(state *storeState, msg executionTermi
 		}
 	}
 	state.executionTerminations = trial.executionTerminations
+	state.devicePolicyRevisions = trial.devicePolicyRevisions
 	return executionTerminationResult{receipt: receipt}
 }

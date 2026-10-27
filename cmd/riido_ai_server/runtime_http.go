@@ -24,6 +24,7 @@ func newRuntimeHTTPServers(config runtimeConfig, store *riidoaiserver.Store, aiA
 
 func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgentClient riidoaiserver.AIAgentClientStore, httpTransactions *riidoaiserver.HTTPTransactionMetrics, traceRecorder riidoaiserver.TraceRecorder) http.Handler {
 	return riidoaiserver.NewServer(riidoaiserver.ServerConfig{
+		CLIInstallationService:   config.CLIInstallationService,
 		Assignment:               store,
 		AIAgentClient:            aiAgentClient,
 		AIAgentProfileThumbnails: config.AIAgentProfileThumbnails,
