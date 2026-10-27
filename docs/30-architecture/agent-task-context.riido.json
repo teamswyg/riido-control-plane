@@ -65,7 +65,13 @@
     "internal/riidoaiserver/dynamodb_assignment_context_quota_key.go",
     "internal/riidoaiserver/dynamodb_context_terminal_actions.go",
     "internal/riidoaiserver/comment_delivery.go",
-    "internal/riidoaiserver/comment_delivery_extended.go"
+    "internal/riidoaiserver/comment_delivery_extended.go",
+    "internal/riidoaiserver/task_context_reply_metadata.go",
+    "internal/riidoaiserver/ai_agent_run_reads_current.go",
+    "internal/riidoaiserver/assignment_context_comments.go",
+    "internal/riidoaiserver/task_context_extended_enrich.go",
+    "internal/riidoaiserver/task_context_request.go",
+    "internal/riidoaiserver/task_context_reply_projection.go"
   ],
   "policy": {
     "identity": "same task/agent/conversation; preserve explicit initial and latest follow-up directives even when context reads fail",
@@ -80,7 +86,10 @@
       "related_meetings": 20,
       "meeting_body_bytes": 8192,
       "meeting_concurrency": 4,
-      "cli_read_attempts_per_assignment": 100
+      "cli_read_attempts_per_assignment": 100,
+      "viewer_reply_parents": 200,
+      "viewer_reply_metadata": 200,
+      "viewer_reply_http_calls": 1
     },
     "resource_semantics": "metadata only, contents not downloaded; unsafe URL credentials omitted; unavailable/incomplete marked",
     "format": "bounded readable HTML and supported Tiptap JSON projections; valid Unicode; preserve explicit empty versus unavailable documents",
@@ -92,7 +101,8 @@
     "response_delivery": "Single provider turn by default; answer-only requests need no repository or tool checks; latest directive overrides historical intent gates; fetch additional context only when needed.",
     "graphql_metadata_endpoint": "When a separate GraphQL endpoint is configured, bundle provider JSON/HTML in one viewer-bearer GraphQL request and file/link metadata in another per authorized component; an optional resource root error cannot discard a document read. Keep workspace/detail REST checks and shared deadline. No cross-principal cache, anonymous fallback, attachment download, or replay on GraphQL denial. REST-only deployments retain bounded JSON/HTML fallback.",
     "failure_observation": "Finite operation/outcome/source/duration trace fields distinguish missing/null/empty/invalid/budget/denied/unavailable; no upstream original, document identity, body, URL or token in observations.",
-    "related_meeting_bodies": "RIID-5900 captures only directly linked, same-team, undeleted meeting bodies under the requester bearer and shared deadline. At most 20 meetings, 4 concurrent reads, 8192 UTF-8 bytes per body; all stored bodies participate in the existing 256KiB snapshot bound and 24h terminal retention. Base/resources/prompt remain title-only; explicit meeting view alone serves and records a body read. Empty, denied, deleted and unavailable remain distinct. Viewer audit visibility rechecks current body access. Board, meeting comments and further linked-work reads remain unimplemented."
+    "related_meeting_bodies": "RIID-5900 captures only directly linked, same-team, undeleted meeting bodies under the requester bearer and shared deadline. At most 20 meetings, 4 concurrent reads, 8192 UTF-8 bytes per body; all stored bodies participate in the existing 256KiB snapshot bound and 24h terminal retention. Base/resources/prompt remain title-only; explicit meeting view alone serves and records a body read. Empty, denied, deleted and unavailable remain distinct. Viewer audit visibility rechecks current body access. Board, meeting comments and further linked-work reads remain unimplemented.",
+    "viewer_reply_visibility": "RIID-5900 viewer GET and SSE opt into current reply metadata only. First authorize the current workspace/task and read its bounded root comments with the viewer bearer. Roots with replyCount > 0 are deduplicated and capped at 200. One GraphQL alias batch invokes existing getCommentReplies under the same bearer/team; monolith binds every result to its requested current root parent. Request only id/status/updatedAt, retain at most 200 unique active replies, reject root ID collisions, and never use historical trigger or parent IDs as permission. Any HTTP/GraphQL error, null/missing expected alias, timeout, or response above the existing 1MiB bound hides the entire reply batch while retaining independently verified roots. Metadata-only replies have no body hash and cannot prove modified_since_read=false; only a strictly later comparable source timestamp proves true. Recheck every GET/event with no positive cache. Assignment snapshot/prompt scope is unchanged. Replies whose parents fall outside the existing bounded current root list remain unverified and hidden."
   },
   "verification": {
     "synthetic_only": true,
@@ -130,7 +140,17 @@
       "TestAssignmentContextQuotaUnavailableFailsBeforeAnyDataRead",
       "TestDynamoDBAssignmentContextQuotaAtomicAcrossServers",
       "TestDynamoDBAssignmentContextQuotaTerminalFencesFirstAndLaterReads",
-      "TestCommentDeliveryPreservesVerifiedExtendedContext"
+      "TestCommentDeliveryPreservesVerifiedExtendedContext",
+      "TestAIAgentRunReadsIncludesCurrentlyReadableReply",
+      "TestAIAgentRunReadsRechecksReplyAccess",
+      "TestCurrentReplyMetadataBatchesBoundedCurrentRoots",
+      "TestCurrentReplyMetadataFailsClosed",
+      "TestCurrentReplyMetadataHonorsRequestDeadline",
+      "TestCurrentReplyMetadataDoesNotExpandAssignmentContext",
+      "TestCurrentReplyMetadataFreshnessRequiresLaterTimestamp",
+      "TestContextReadStreamRechecksReplyAccess",
+      "TestCurrentReplyMetadataDoesNotFetchUnverifiedParents",
+      "TestCurrentReplyMetadataCapsCombinedReplies"
     ]
   },
   "limits": [

@@ -21,18 +21,6 @@ type AIAgentTaskContextReader interface {
 	GetAIAgentTaskContext(ctx context.Context, componentID string) (AIAgentTaskContext, error)
 }
 
-type AIAgentTaskContextRequest struct {
-	ComponentID      string
-	WorkspaceID      string
-	BearerToken      string
-	DocumentSnapshot *AIAgentTaskDocumentSnapshot
-	Extended         bool // also read related work, meetings and comments (extra upstream reads)
-}
-
-type AIAgentTaskContextRequestReader interface {
-	GetAIAgentTaskContextForRequest(ctx context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error)
-}
-
 type AIAgentTaskContextClientConfig struct {
 	BaseURL         string
 	WorkspaceID     string

@@ -36,7 +36,11 @@ func pageAssignmentContextComments(comments []AIAgentTaskContextComment) [][]AIA
 func assignmentContextCommentSources(comments []AIAgentTaskContextComment) []AssignmentContextSource {
 	sources := make([]AssignmentContextSource, 0, len(comments))
 	for _, comment := range comments {
-		sources = append(sources, AssignmentContextSource{Kind: "comment", ID: comment.ID, Part: "body", Version: assignmentContextVersion(comment.Body), UpdatedAt: comment.UpdatedAt})
+		source := AssignmentContextSource{Kind: "comment", ID: comment.ID, Part: "body", UpdatedAt: comment.UpdatedAt}
+		if !comment.MetadataOnly {
+			source.Version = assignmentContextVersion(comment.Body)
+		}
+		sources = append(sources, source)
 	}
 	return sources
 }

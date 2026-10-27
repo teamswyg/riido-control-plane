@@ -25336,6 +25336,107 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "riido_cli_current_viewer_reply_metadata_5900",
+      "observation": "A completed staging comment-triggered run stored 36 READ rows while the same current viewer received 34. The two excluded rows were the trigger reply via prompt and CLI. The current root-comment list excluded that reply, although getCommentReplies under the same viewer returned the active reply. A RED HTTP regression reproduced zero visible reply rows and zero reply lookups.",
+      "hypothesis": "Keep root-based current task permission checks, then authorize reply metadata using the existing same-viewer parent-scoped reply resolver. A single bounded alias HTTP request avoids per-parent HTTP requests without claiming a single SQL query. Metadata-only replies cannot establish an unchanged body hash.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "request_authorization_must_preserve_security_boundary",
+        "module_decomposition_must_preserve_surface_area_ratchet"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_current.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_extended_enrich.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_extended_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_comments.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_reply_metadata.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_reply_projection.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_replies_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_replies_current_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_context_read_stream_reply_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_reply_freshness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_reply_scope_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_reply_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_reply_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_reply_deadline_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/moduledecomposition"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Viewer GET and live/replay SSE opt into current reply metadata only. Up to 200 current same-task roots with replies authorize one additional GraphQL HTTP request with id/status/updatedAt; resolver and SQL execution remain per parent. At most 200 active unique replies are retained under the original deadline and 1MiB response cap. Any batch error or missing/null expected alias hides all replies; historical snapshot/trigger IDs cannot widen visibility. MetadataOnly rows have no body hash; only an increased comparable timestamp proves modified=true, otherwise unknown is omitted. No positive cache or assignment snapshot expansion. Related code/tests are split below the existing line budget without raising ratchets. Generated syntax/loop evidence changes propagate dependent hashes; no unrelated runtime behavior is added. Actual same-run staging 34-to-36 verification follows deployment.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "riido_cli_context_stream_current_viewer_5900",
       "observation": "Viewer GET run reads filters current task/source permissions, but SSE replay bypassed delivery authorization and live delivery checked only task notifications. A RED HTTP regression exposed a hidden resource ID/hash and omitted count in both live and replay, and kept sending after task permission revocation. Serial request-scoped lookups could delay terminal events behind historical read hints. Staging sparse CLI reads produced durable reads but no live hint; a deterministic Persistent-store regression reproduced fanout followed by snapshot save holding the same lock that delivery TryLock immediately rejected.",
       "hypothesis": "Reusing the current viewer source policy at delivery and rechecking existing Agent/thread visibility closes metadata leaks; bounded best-effort hint validation keeps progress and terminal delivery independent of slow metadata reads. Waiting for the publication lock only in the existing bounded metadata worker lets committed reads reach delivery without blocking the stream writer or caching permissions.",
