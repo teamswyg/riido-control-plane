@@ -20,7 +20,7 @@ func (s Server) loadCurrentRunReadContext(ctx context.Context, token, workspaceI
 	if !ok || token == "" {
 		return AIAgentTaskContext{}, errors.New("source access unavailable")
 	}
-	current, err := reader.GetAIAgentTaskContextForRequest(ctx, AIAgentTaskContextRequest{ComponentID: taskID, WorkspaceID: workspaceID, BearerToken: token, Extended: true})
+	current, err := reader.GetAIAgentTaskContextForRequest(ctx, AIAgentTaskContextRequest{ComponentID: taskID, WorkspaceID: workspaceID, BearerToken: token, Extended: true, ReplyMetadata: true})
 	if errors.Is(err, ErrAuthorizationForbidden) || taskContextReadOutcome(ctx, err) == "denied" {
 		return AIAgentTaskContext{}, ErrAuthorizationForbidden
 	}

@@ -25,15 +25,16 @@ const (
 )
 
 type AIAgentTaskContextComment struct {
-	ID         string `json:"id"`
-	ParentID   string `json:"parentId,omitempty"`
-	Priority   int    `json:"priority"`
-	Author     string `json:"author,omitempty"`
-	Body       string `json:"body"`
-	CreatedAt  string `json:"createdAt,omitempty"`
-	UpdatedAt  string `json:"updatedAt,omitempty"`
-	ReplyCount int    `json:"replyCount,omitempty"`
-	Truncated  bool   `json:"truncated,omitempty"`
+	ID           string `json:"id"`
+	ParentID     string `json:"parentId,omitempty"`
+	Priority     int    `json:"priority"`
+	Author       string `json:"author,omitempty"`
+	Body         string `json:"body"`
+	CreatedAt    string `json:"createdAt,omitempty"`
+	UpdatedAt    string `json:"updatedAt,omitempty"`
+	ReplyCount   int    `json:"replyCount,omitempty"`
+	Truncated    bool   `json:"truncated,omitempty"`
+	MetadataOnly bool   `json:"-"` // ephemeral viewer reply check; no body hash or snapshot content
 }
 
 // AIAgentTaskContextExtended groups the extended reads with their status
