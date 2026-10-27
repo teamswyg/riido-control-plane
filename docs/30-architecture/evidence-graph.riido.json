@@ -20,6 +20,96 @@
   ],
   "chains": [
     {
+      "id": "cli_authenticated_execution_claim_provenance_5900",
+      "observation": "Device-credential polling discarded the authenticated owner and accepted another device ID in the request body. Lease expiry and scheduler terminal state did not prove that the local invocation had ended, and neither snapshot nor journal replay retained immutable claim-time device ownership.",
+      "hypothesis": "Bind the authenticated header device to the poll body and commit a private immutable device/owner/requester/hashed-epoch sidecar with the real claim CAS. Preserve the claim in local snapshots and journal replay. Observe blocked or unknown without inferring safe idle from missing history or scheduler state.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "assignment_operation_journal_must_preserve_replay_and_claim_ports",
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence",
+        "module_decomposition_must_preserve_surface_area_ratchet"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_poll_claim_context.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_claim.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_poll_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_claim_item.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_claim_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_claim_observation.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_poll_device_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_http_integration_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_restart_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_durable_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_reader_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_claim_bearer_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "assignment-operation-journal-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The header/body mismatch, missing atomic sidecar and stale-repair action-budget failures were reproduced before correction. Keep bearer polling compatible without trusted device provenance. Local single-authority claims use copy-on-write and publish only after persistence; production durable claims retain CAS-before-publication without copying all history on every poll. Preserve the six arbitrary-item retention budget and permit only one separately validated 4 KiB claim action. Shared generated syntax/module/hash evidence is regenerated without changing unrelated runtime semantics or weakening tests. This is the recording foundation only: confirmed execution termination, installation coverage/migration/linking and service-authenticated monolith OAuth/API enforcement remain required. No live authorization or deployment acceptance is claimed.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "desktop_credential_account_connection_5828",
       "observation": "A desktop with an existing device credential could connect the current account using a changed shared machine UUID, linking a device without running runtimes. PR 1104 also exposed unchecked test decoding, direct sentinel comparison and stale generated authorization, module and syntax evidence.",
       "hypothesis": "Require current workspace authorization and proof of the actual stored device credential to append the account connection without rotating the device identity. Store the authorization explanation in its executable manifest and regenerate dependent evidence so CI validates the same implementation and documented contract.",

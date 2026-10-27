@@ -7,6 +7,7 @@ type taskRecord struct {
 }
 
 type storeState struct {
+	executionClaims         map[string]executionClaim
 	tasks                   map[string]taskRecord
 	assignments             map[string]Assignment
 	agentAssignments        map[string][]string
@@ -41,6 +42,7 @@ type eventAppendLatencyMetrics struct {
 
 func newStoreState() storeState {
 	return storeState{
+		executionClaims:       map[string]executionClaim{},
 		tasks:                 map[string]taskRecord{},
 		assignments:           map[string]Assignment{},
 		agentAssignments:      map[string][]string{},

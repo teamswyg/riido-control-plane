@@ -65,10 +65,11 @@ func (s *DynamoDBAssignmentOperationStore) claimRepairTransactionPayload(record 
 		ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
 		Item:                operationItem,
 	}})
-	payload := struct {
-		TransactItems []dynamoDBTransactWriteItem `json:"TransactItems"`
-	}{
-		TransactItems: items,
+	items, err = s.appendExecutionClaimAction(items, record.ExecutionClaim)
+	if err != nil {
+		return nil, err
 	}
-	return json.Marshal(payload)
+	return json.Marshal(struct {
+		TransactItems []dynamoDBTransactWriteItem `json:"TransactItems"`
+	}{items})
 }

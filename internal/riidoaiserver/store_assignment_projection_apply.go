@@ -20,6 +20,9 @@ func (s *Store) applyClaimedAssignmentOperations(state *storeState, claim Assign
 		return errors.New("claimed assignment operations missing primary claim operation")
 	}
 	for _, operation := range operations {
+		if err := rememberExecutionClaim(state, operation.ExecutionClaim); err != nil {
+			return err
+		}
 		applyAssignmentToState(state, operation.Assignment)
 		for _, event := range operation.Events {
 			s.appendRecordedEvent(state, event)

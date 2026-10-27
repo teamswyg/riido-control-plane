@@ -36,6 +36,7 @@ type cancelAssignmentResult struct {
 }
 
 type pollCmd struct {
+	ctx     context.Context
 	agentID string
 	req     PollRequest
 	// countRequest increments pollRequestsTotal for this evaluation. A daemon

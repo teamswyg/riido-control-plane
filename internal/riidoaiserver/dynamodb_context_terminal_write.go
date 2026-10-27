@@ -20,8 +20,11 @@ func (s *DynamoDBAssignmentOperationStore) writeAssignmentWithContextRetention(c
 	if len(terminal) == 0 {
 		return doDynamoDBJSON(ctx, request)
 	}
-	if len(actions) > contextTerminalBaseActions || len(terminal) > 1 {
+	if len(terminal) > 1 {
 		return nil, errors.New("terminal retention action budget exceeded")
+	}
+	if err := validateExecutionClaimTerminalBudget(actions); err != nil {
+		return nil, err
 	}
 	var lastErr error
 	for range 3 {

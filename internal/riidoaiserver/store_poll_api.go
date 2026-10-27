@@ -31,7 +31,7 @@ func (s *Store) pollAgent(ctx context.Context, agentID string, req PollRequest, 
 		FinishTraceSpan(span, err)
 	}()
 	reply := make(chan pollResult, 1)
-	if err := s.send(ctx, pollCmd{agentID: agentID, req: req, countRequest: count, reply: reply}); err != nil {
+	if err := s.send(ctx, pollCmd{ctx: ctx, agentID: agentID, req: req, countRequest: count, reply: reply}); err != nil {
 		return PollResponse{}, err
 	}
 	select {
