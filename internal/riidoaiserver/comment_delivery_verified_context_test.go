@@ -14,7 +14,8 @@ func TestCommentDeliveryPreservesVerifiedExtendedContext(t *testing.T) {
 	evidence := verifiedCommentDelivery{EventID: "event", CommentID: "trigger", TaskID: "task", AgentID: "agent-public-openclaw", WorkspaceID: "workspace-dev-riid", PrincipalID: "user-1", Body: "요약 부탁", Context: AIAgentTaskContext{
 		Component: AIAgentTaskContextComponent{ID: "task", ComponentType: "task", Title: "검토"}, Document: AIAgentTaskContextDocument{Content: "작업 본문"},
 		Resources: []AIAgentTaskContextResource{{ID: "link", Kind: "link", Title: "자료", URL: "https://example.test/spec"}}, ResourceStatus: "available",
-		Extended: &AIAgentTaskContextExtended{RelatedStatus: "available", CommentStatus: "available", CommentTotal: 2,
+		Extended: &AIAgentTaskContextExtended{
+			RelatedStatus: "available", CommentStatus: "available", CommentTotal: 2,
 			Comments:        []AIAgentTaskContextComment{{ID: "parent", Body: "기존 의견", Priority: 2}, {ID: "trigger", ParentID: "parent", Body: "요약 부탁", Priority: 1}},
 			RelatedWork:     []AIAgentTaskContextRelatedWork{{ID: "related", Kind: "task", Title: "연관 작업"}},
 			RelatedMeetings: []AIAgentTaskContextRelatedMeeting{{ID: "meeting", Title: "연관 미팅", BodyStatus: "available", Document: &AIAgentTaskContextDocument{Content: "회의 본문", ContentFormat: "markdown", Status: "available"}}},

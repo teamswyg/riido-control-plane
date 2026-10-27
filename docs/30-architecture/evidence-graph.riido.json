@@ -25703,8 +25703,8 @@
     },
     {
       "id": "riido_cli_agent_directory_5892",
-      "observation": "RIID-5892 lets an agent start another agent by mentioning it, but a running agent only saw the agent IDs and names placed in its prompt at start. It could not check another agent's public role, work status or runtime connection before choosing, and a run started by an agent mention had no requester Bearer, so it received no assignment context snapshot and its Riido CLI reads failed.",
-      "hypothesis": "Serve agent directory views live over the existing leased-daemon assignment-context route, scoped to the original requester (public agents plus the requester's own, or every workspace agent when the requester was an admin at request time), without private instructions or owners, and let a mentioned run inherit the mentioning run's snapshot for the same task, workspace and requester. Record every directory read so viewers see only agents they can currently see.",
+      "observation": "RIID-5892 lets an agent start another agent by mentioning it, but a running agent only saw the agent IDs and names placed in its prompt at start. It could not check another agent's public role, work status or runtime connection before choosing, and a run started by an agent mention had no requester Bearer, so it received no assignment context snapshot and its Riido CLI reads failed. Directory list/detail also omitted the last observed daemon heartbeat, so an offline runtime could not be distinguished from one never observed.",
+      "hypothesis": "Serve agent directory views live over the existing leased-daemon assignment-context route, scoped to the original requester (public agents plus the requester's own, or every workspace agent when the requester was an admin at request time), without private instructions or owners, and let a mentioned run inherit the mentioning run's snapshot for the same task, workspace and requester. Record every directory read so viewers see only agents they can currently see. Reuse the currently authorized assignable-list snapshot to project optional runtime.last_seen_at without per-agent daemon reads or unrelated timestamp fallbacks.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -25848,6 +25848,38 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/agent_directory_read_contract_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_directory_heartbeat_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_list_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_list_ai_agent_task_assignable_agents.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_last_seen_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_heartbeat_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_heartbeat_projection_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_last_seen_persistence_test.go"
         }
       ],
       "verifiers": [
@@ -25894,6 +25926,22 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/agent_directory_read_contract_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_last_seen_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_heartbeat_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_heartbeat_projection_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_directory_last_seen_persistence_test.go"
         }
       ],
       "evidence": [
@@ -25903,7 +25951,7 @@
           "redacted": true
         }
       ],
-      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT, views agents and agent answer from current control-plane state with live=true and fetched_at, 50 agents per cursor page. Scope is the assignment requester: public agents plus the requester's own, or every workspace agent when the snapshot recorded requester_admin from the authorized request; without that recorded fact admin is never assumed. Entries carry agent_id, name, public description with role_status, work_status, runtime kind and online/offline connection, callable and unavailable_reasons (self, runtime_offline); policy_checked stays false until RIID-5892 registers ServerConfig.AgentMentionPrecheck for its mention-time policy (budget, depth, cycles, session conflicts); when set, its reasons are added to every non-current entry and a failing precheck fails the read instead of showing unchecked agents as checked, and the server that starts a mentioned run remains the final authority. Hidden and unknown agents are refused alike with a denied read. Legacy assignments without created_by are refused. InheritAssignmentContext copies a parent snapshot and comment pages only within the same task, workspace and requester, records no prompt reads and never overwrites an existing child snapshot. Run reads expose agent profile reads only for agents the viewer can currently see and fail closed when the directory cannot be listed. The CLI-mode prompt tells agents to check riido agents list before mentioning another agent and to ask the requester when no agent clearly fits. Live and replayed agent_context_read events drop agent sources the subscriber cannot currently see, without counting them, so other viewers of the thread never learn private agent IDs or profile hashes. omitted_sources is recomputed per subscriber from unserialized cut-off bookkeeping; a directory event replayed without it reports zero instead of a count that could include hidden agents. Agent directory read records emitted by the HTTP history and SSE paths must be accepted by the public source enums (kind=agent, part=profile); a runtime-to-OpenAPI regression guards both projections without changing visibility policy.",
+      "decision": "Behind RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT, views agents and agent answer from current control-plane state with live=true and fetched_at, 50 agents per cursor page. Scope is the assignment requester: public agents plus the requester's own, or every workspace agent when the snapshot recorded requester_admin from the authorized request; without that recorded fact admin is never assumed. Entries carry agent_id, name, public description with role_status, work_status, runtime kind and online/offline connection, callable and unavailable_reasons (self, runtime_offline); policy_checked stays false until RIID-5892 registers ServerConfig.AgentMentionPrecheck for its mention-time policy (budget, depth, cycles, session conflicts); when set, its reasons are added to every non-current entry and a failing precheck fails the read instead of showing unchecked agents as checked, and the server that starts a mentioned run remains the final authority. Hidden and unknown agents are refused alike with a denied read. Legacy assignments without created_by are refused. InheritAssignmentContext copies a parent snapshot and comment pages only within the same task, workspace and requester, records no prompt reads and never overwrites an existing child snapshot. Run reads expose agent profile reads only for agents the viewer can currently see and fail closed when the directory cannot be listed. The CLI-mode prompt tells agents to check riido agents list before mentioning another agent and to ask the requester when no agent clearly fits. Live and replayed agent_context_read events drop agent sources the subscriber cannot currently see, without counting them, so other viewers of the thread never learn private agent IDs or profile hashes. omitted_sources is recomputed per subscriber from unserialized cut-off bookkeeping; a directory event replayed without it reports zero instead of a count that could include hidden agents. Agent directory read records emitted by the HTTP history and SSE paths must be accepted by the public source enums (kind=agent, part=profile); a runtime-to-OpenAPI regression guards both projections without changing visibility policy. runtime.last_seen_at now carries only a matched daemon heartbeat, including its previous value while offline; missing observations are omitted. Explicit daemon identities cannot use another daemon or aggregate device heartbeat; only unscoped legacy runtimes use Device.DaemonLastSeenAt. Agent UpdatedAt and runtime LastDetectedAt never substitute for heartbeat. A non-serialized request-scoped sidecar contains only currently visible agent IDs and times from the same locked snapshot. HTTP list/show regressions and an 80-agent Persistent fixture verify one list/snapshot reload per request, zero GetAIAgentDaemon calls, hidden-agent rejection and no ordinary API sidecar serialization. The list DTO was moved to a small file to preserve the existing line-budget ratchet; its public JSON shape is unchanged.",
       "next_loop": "closed_loop_candidate"
     },
     {

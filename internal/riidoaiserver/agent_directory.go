@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"time"
 )
 
 var errAgentDirectoryRequesterUnknown = errors.New("assignment requester is unknown")
@@ -39,7 +38,9 @@ func (s Server) assignmentAgentDirectory(ctx context.Context, assignment Assignm
 	}
 	entries := make([]AgentDirectoryEntry, 0, len(list.Agents))
 	for _, agent := range list.Agents {
-		entries = append(entries, s.agentDirectoryEntry(agent, assignment.AgentID))
+		entry := s.agentDirectoryEntry(agent, assignment.AgentID)
+		entry.Runtime.LastSeenAt = list.agentDaemonLastSeenAt[agent.AgentID]
+		entries = append(entries, entry)
 	}
 	return entries, nil
 }
@@ -64,12 +65,4 @@ func (s Server) agentDirectoryEntry(agent AgentClientRecord, currentAgentID stri
 	}
 	entry.Callable = len(entry.UnavailableReasons) == 0
 	return entry
-}
-
-func agentDirectorySource(entry AgentDirectoryEntry) AssignmentContextSource {
-	source := AssignmentContextSource{Kind: "agent", ID: entry.AgentID, Part: "profile", Version: assignmentContextVersion(entry.Name + "\n" + entry.Description)}
-	if !entry.UpdatedAt.IsZero() {
-		source.UpdatedAt = entry.UpdatedAt.UTC().Format(time.RFC3339)
-	}
-	return source
 }

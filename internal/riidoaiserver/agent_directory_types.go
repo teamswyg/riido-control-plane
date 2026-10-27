@@ -21,6 +21,7 @@ const (
 type AgentDirectoryRuntime struct {
 	Kind       RuntimeKind `json:"kind,omitempty"`
 	Connection string      `json:"connection"`
+	LastSeenAt time.Time   `json:"last_seen_at,omitzero"`
 }
 
 // AgentDirectoryEntry separates work status (what the agent is doing) from
@@ -53,4 +54,12 @@ type AgentDirectoryDetail struct {
 	Agent         AgentDirectoryEntry `json:"agent"`
 	FetchedAt     time.Time           `json:"fetched_at"`
 	PolicyChecked bool                `json:"policy_checked"`
+}
+
+func agentDirectorySource(entry AgentDirectoryEntry) AssignmentContextSource {
+	source := AssignmentContextSource{Kind: "agent", ID: entry.AgentID, Part: "profile", Version: assignmentContextVersion(entry.Name + "\n" + entry.Description)}
+	if !entry.UpdatedAt.IsZero() {
+		source.UpdatedAt = entry.UpdatedAt.UTC().Format(time.RFC3339)
+	}
+	return source
 }
