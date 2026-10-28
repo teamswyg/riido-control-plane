@@ -26,7 +26,7 @@ func (s Server) authorizeExecutionTermination(r *http.Request) (executionTermina
 	if strings.TrimSpace(principal.PrincipalID) == "" {
 		return executionTerminationIdentity{}, errTerminationForbidden
 	}
-	return executionTerminationIdentity{device, principal.PrincipalID, assignmentID, leaseEpoch(lease)}, nil
+	return executionTerminationIdentity{deviceID: device, ownerPrincipalID: principal.PrincipalID, assignmentID: assignmentID, epoch: leaseEpoch(lease), coverage: executionCoverageAuth{principal.executionCoverageGeneration, principal.credentialGeneration}}, nil
 }
 
 func singleExecutionHeader(r *http.Request, name string, limit int) (string, bool) {

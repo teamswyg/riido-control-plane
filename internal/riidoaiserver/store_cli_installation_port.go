@@ -13,10 +13,12 @@ type cliInstallationRead struct {
 	expected *cliInstallationReadSet
 }
 type cliInstallationReadSet struct {
-	link        cliInstallationLink
-	revision    uint64
-	found       bool
-	observation deviceExecutionObservation
+	link              cliInstallationLink
+	revision          uint64
+	found             bool
+	observation       deviceExecutionObservation
+	coverage          *executionCoverage
+	coverageAuthority bool
 }
 type cliInstallationCommand struct {
 	ctx     context.Context

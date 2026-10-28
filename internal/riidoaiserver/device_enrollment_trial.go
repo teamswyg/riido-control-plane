@@ -16,6 +16,8 @@ func (s *PersistentAIAgentClientStore) enrollmentTrial() (*DevelopmentAIAgentCli
 	}
 	s.mu.Lock()
 	trial.expectedDaemonProfile, trial.daemonClientPolicy = s.expectedDaemonProfile, s.daemonClientPolicy
+	trial.executionCoverageEnrollment = s.executionCoverageEnrollment
+	_, trial.executionCoverageAtomic = s.snapshotStore.(executionCoverageEnrollmentStore)
 	s.mu.Unlock()
 	return trial, before, nil
 }
@@ -47,6 +49,12 @@ func (s *PersistentAIAgentClientStore) resolveDeviceEnrollment(ctx context.Conte
 	committed, found, err := s.snapshotStore.LoadAIAgentClientSnapshot(readCtx)
 	if err != nil || !found || !sameEnrollmentCredential(committed, proposed, response.DeviceID) {
 		return EnrollDeviceResponse{}, writeErr
+	}
+	if response.ExecutionCoverageGeneration != "" {
+		authority, ok := s.snapshotStore.(executionCoverageEnrollmentStore)
+		if !ok || authority.verifyEnrollmentCoverage(readCtx, response) != nil {
+			return EnrollDeviceResponse{}, writeErr
+		}
 	}
 	s.publishDeviceEnrollment(trial, response.DeviceID)
 	s.version = committed.Version

@@ -56,6 +56,9 @@ func validateOperationExecutionClaim(record AssignmentOperationRecord) error {
 		return err
 	}
 	a := record.Assignment
+	if claim.CoverageGeneration != "" && (claim.RuntimeProvider != a.RuntimeProvider || claim.TerminationScope != coverageTerminationScope(a)) {
+		return errors.New("execution coverage runtime does not match leased operation")
+	}
 	if record.OperationType != AssignmentOperationPollStart || a.State != AssignmentLeased || a.LeaseToken == "" ||
 		claim.AssignmentID != a.ID || claim.AgentID != a.AgentID || claim.RequesterPrincipalID != a.CreatedBy ||
 		claim.LeaseEpoch != leaseEpoch(a.LeaseToken) || !claim.ClaimedAt.Equal(a.UpdatedAt) {

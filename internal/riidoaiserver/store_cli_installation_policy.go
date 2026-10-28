@@ -3,8 +3,6 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"strconv"
-	"time"
 )
 
 func (s *Store) readCLIInstallationPolicy(ctx context.Context, id cliInstallationIdentity, owners cliInstallationDeviceOwnerReader) (cliInstallationPolicy, error) {
@@ -61,15 +59,4 @@ func (s *Store) readLocalCLIInstallation(state *storeState, req cliInstallationR
 		}
 	}
 	return cliInstallationResult{read: set}
-}
-
-func installationPolicyFromRead(set cliInstallationReadSet, owner string, now time.Time) cliInstallationPolicy {
-	result := cliInstallationPolicy{SchemaVersion: cliInstallationPolicySchema, Decision: "unknown", LinkRevision: "0", ExecutionRevision: "0", CoverageState: "unknown", CheckedAt: now.UTC()}
-	if set.found {
-		result.LinkRevision, result.ExecutionRevision = set.link.LinkRevision, strconv.FormatUint(set.revision, 10)
-		if owner != "" && owner == set.link.DeviceOwnerAtLink && owner == set.link.LinkApprovedBy && set.observation == deviceExecutionBlocked {
-			result.Decision = "blocked"
-		}
-	}
-	return result
 }

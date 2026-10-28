@@ -46,9 +46,16 @@ func (s *DynamoDBAssignmentOperationStore) saveConditionalAssignment(ctx context
 		write.Put.ConditionExpression = "attribute_not_exists(pk) AND attribute_not_exists(sk)"
 		items[2] = write
 	}
+	actions := make([]dynamoDBTransactWriteItem, 0, len(items)+1)
+	for _, item := range items {
+		actions = append(actions, dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: item.Put.TableName, Item: item.Put.Item, ConditionExpression: item.Put.ConditionExpression, ExpressionAttributeValues: item.Put.ExpressionAttributeValues}})
+	}
+	if admission := record.executionAdmission; admission != nil && admission.coverage != nil {
+		actions = append(actions, dynamoDBTransactWriteItem{ConditionCheck: executionCoverageCondition(s.tableName, *admission.coverage)})
+	}
 	payload, err := json.Marshal(struct {
-		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
-	}{items})
+		TransactItems []dynamoDBTransactWriteItem `json:"TransactItems"`
+	}{actions})
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,7 @@ func assertQueuedClaimTransactPayload(
 	payload dynamoDBTransactWritePayload,
 ) {
 	t.Helper()
-	if len(payload.TransactItems) != 3 {
+	if len(payload.TransactItems) != 4 {
 		t.Fatalf("transact item count = %d", len(payload.TransactItems))
 	}
 	wantLeaseToken := "asn-000001:" + strconv.FormatInt(claimAt.UnixNano(), 10)

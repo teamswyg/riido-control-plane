@@ -16,7 +16,7 @@ func TestExecutionClaimDynamoContentionPublishesNeitherClaimNorStart(t *testing.
 	f.deny = true
 	actor := NewStoreWithConfig(StoreConfig{OperationStore: f.store, Now: func() time.Time { return f.now }})
 	defer actor.Close()
-	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"device", "owner"})
+	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device", ownerPrincipalID: "owner"})
 	poll, err := actor.PollAgent(ctx, queued.AgentID, PollRequest{})
 	if err != nil || poll.Action != PollNone || poll.Assignment != nil {
 		t.Fatal("contended claim dispatched")
@@ -33,7 +33,7 @@ func TestExecutionClaimDynamoContentionPublishesNeitherClaimNorStart(t *testing.
 
 func TestExecutionClaimStaleRepairAndNewClaimShareTransaction(t *testing.T) {
 	fixture, store, requests := newStaleBlockedClaimFixture(t)
-	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"device", "owner"})
+	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device", ownerPrincipalID: "owner"})
 	claim, err := store.ClaimNextAssignment(ctx, "jykim-new", fixture.Now)
 	if err != nil || !claim.Claimed {
 		t.Fatalf("claim failed: %v", err)

@@ -110,7 +110,7 @@
     {
       "id": "authenticated-execution-claim-provenance",
       "kind": "replay",
-      "rule": "Device-authenticated claims retain immutable device, owner-at-claim, assignment requester and hashed lease epoch in the same CAS transaction as lease/projection/journal writes. Replay and local snapshots retain this private claim across owner changes, stale scheduler repair and ordinary terminal events; legacy bearer claims have unknown provenance. The private observation reader returns blocked only for a current non-owner active lease and otherwise unknown, never permission. Confirmed execution termination, coverage/migration, installation linking and service-authenticated OAuth/API policy remain mandatory follow-up boundaries."
+      "rule": "Device-authenticated claims retain immutable device, owner-at-claim, assignment requester and hashed lease epoch in the same CAS as lease/projection/journal writes. Covered claims additionally bind server-issued coverage/credential generations and server-validated runtime termination scope. Replay and snapshots retain original provenance across credential rotation, stale repair and ordinary terminal events. Legacy bearer claims retain unknown provenance and must condition-check their trusted binding as uncovered in the actual claim transaction. Claim history alone never grants permission; the complete-coverage installation policy owns that separate verdict."
     },
     {
       "id": "claim-local-termination-receipt",
@@ -120,7 +120,7 @@
     {
       "id": "installation-policy-revision-fence",
       "kind": "replay",
-      "rule": "Authenticated claim admission, new local termination receipt and new installation link atomically advance a bounded device-policy revision in the same transaction. A service policy read strongly reads immutable link and device revision, reads bounded execution evidence, and condition-checks the same link/revision before returning blocked or unknown. Blocked requires a non-owner claim with a current, matching, unexpired active lease: local/snapshot mode requires a nonzero UpdatedAt strictly within the configured lease duration; DynamoDB mode requires the current unexpired agent active row to match assignment and hashed lease epoch. Missing, expired or mismatched evidence remains unknown, not allowed. Retry at most three times within two seconds; malformed/missing coverage, partial history, restart and empty history never imply allowed. Local snapshot mode persists one trial before publication; unsupported journals fail closed. Complete coverage bootstrap, legacy migration, provider/remote termination meaning, explicit unknown recovery and monolith per-request enforcement remain mandatory gates before allowed can exist."
+      "rule": "Authenticated claim admission, new termination receipts and new installation links atomically advance the bounded device-policy revision. Legacy/local history remains unknown unless a current matching unexpired non-owner lease proves blocked. Only a new server-issued dcov_ namespace born atomically with its credential/device/CURRENT publication has complete coverage; re-enrollment, version, empty history and lease expiry never upgrade legacy. Every covered claim, read-only resume and Ready validates authenticated owner, coverage generation and current credential at its final CAS. Raw bearer claims require a trusted legacy binding and an uncovered-policy CAS; missing binding cannot claim. A non-owner or unknown-requester claim increments unresolved executions with the immutable claim and lease transaction. A new matching local-invocation receipt decrements once with claim, projection and ledger CAS; replay does not decrement, remote/unobserved receipts do not resolve, and an old epoch cannot close a new epoch. Current credential rotation may close an original claim without rewriting its provenance. Service policy rechecks immutable link, current credential authority and the same revision; allowed requires complete coverage and zero unresolved executions at that final authorization snapshot. It does not lock the whole response against later claims. Missing/corrupt authority, partial history, unsupported backends and unresolved restart stay unknown. Retry at most three times within two seconds. New covered enrollment is default-off until every poll-serving instance enforces these gates. Flag-off never removes existing enforcement; an unaware old binary is not a safe rollback. Legacy recovery, remote termination, monolith consumption and authenticated rollout remain separate acceptance gates."
     }
   ],
   "version_constants": [
@@ -212,6 +212,39 @@
         "projectionCheck",
         "lease_epoch = :epoch",
         "attribute_not_exists(pk) AND attribute_not_exists(sk)"
+      ]
+    },
+    {
+      "name": "covered-admission-final-cas",
+      "file": "internal/riidoaiserver/dynamodb_execution_coverage_admission.go",
+      "contains": [
+        "appendExecutionAdmissionActions",
+        "executionCoverageChangeAction",
+        "legacyExecutionAdmissionFence",
+        "ErrAuthorizationForbidden"
+      ]
+    },
+    {
+      "name": "covered-resume-projection-fence",
+      "file": "internal/riidoaiserver/dynamodb_execution_coverage_assignment.go",
+      "contains": [
+        "authorizeCoveredAssignment",
+        "executionCoverageCondition",
+        "assignment_state = :state AND lease_epoch = :epoch"
+      ]
+    },
+    {
+      "name": "coverage-lifecycle-regression",
+      "file": "internal/riidoaiserver/coverage_lifecycle_test.go",
+      "contains": [
+        "TestCoverageLifecycleActualEnrollmentClaimReceiptAndRotation"
+      ]
+    },
+    {
+      "name": "coverage-remote-regression",
+      "file": "internal/riidoaiserver/coverage_lifecycle_remote_test.go",
+      "contains": [
+        "TestCoverageLifecycleRemoteProofDoesNotRestoreAllowed"
       ]
     }
   ],

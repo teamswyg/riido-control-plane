@@ -9,7 +9,8 @@ import (
 const DeviceCredentialSchemaVersion = "riido-device-credential.v1"
 
 type EnrollDeviceRequest struct {
-	DeviceID string `json:"device_id,omitempty"`
+	DeviceID                  string `json:"device_id,omitempty"`
+	ExecutionCoverageProtocol string `json:"execution_coverage_protocol,omitempty"`
 	// MachineID is unique and stable to the physical device. When present, the
 	// DeviceID is derived from the machine so every workspace resolves to one row.
 	MachineID   string `json:"machine_id,omitempty"`
@@ -19,13 +20,15 @@ type EnrollDeviceRequest struct {
 }
 
 type EnrollDeviceResponse struct {
-	SchemaVersion    string    `json:"schema_version"`
-	DeviceID         string    `json:"device_id"`
-	DeviceSecret     string    `json:"device_secret"`
-	OwnerPrincipalID string    `json:"owner_principal_id"`
-	WorkspaceID      string    `json:"workspace_id,omitempty"`
-	DisplayName      string    `json:"display_name,omitempty"`
-	IssuedAt         time.Time `json:"issued_at"`
+	ExecutionCoverageGeneration string    `json:"execution_coverage_generation,omitempty"`
+	CredentialGeneration        string    `json:"credential_generation,omitempty"`
+	SchemaVersion               string    `json:"schema_version"`
+	DeviceID                    string    `json:"device_id"`
+	DeviceSecret                string    `json:"device_secret"`
+	OwnerPrincipalID            string    `json:"owner_principal_id"`
+	WorkspaceID                 string    `json:"workspace_id,omitempty"`
+	DisplayName                 string    `json:"display_name,omitempty"`
+	IssuedAt                    time.Time `json:"issued_at"`
 }
 
 type DeviceCredentialStore interface {
@@ -34,11 +37,13 @@ type DeviceCredentialStore interface {
 }
 
 type deviceCredentialRecord struct {
-	deviceID         string
-	machineID        string
-	secretHash       [sha256.Size]byte
-	ownerPrincipalID string
-	workspaceID      string
-	displayName      string
-	issuedAt         time.Time
+	coverageGeneration   string
+	credentialGeneration string
+	deviceID             string
+	machineID            string
+	secretHash           [sha256.Size]byte
+	ownerPrincipalID     string
+	workspaceID          string
+	displayName          string
+	issuedAt             time.Time
 }

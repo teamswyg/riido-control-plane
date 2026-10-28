@@ -33,7 +33,7 @@ func TestCLIInstallationHTTPLinkAndPolicyNeverInferIdle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx := context.WithValue(t.Context(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"fixture-device", "owner"})
+	ctx := context.WithValue(t.Context(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "fixture-device", ownerPrincipalID: "owner"})
 	if _, err = f.actor.PollAgent(ctx, "agent", PollRequest{}); err != nil {
 		t.Fatal(err)
 	}

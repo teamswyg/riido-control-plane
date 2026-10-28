@@ -307,7 +307,10 @@
         "daemon_headers: daemon sends X-Riido-Device-ID and X-Riido-Device-Secret for SaaS device authentication",
         "no_browser_jwt: daemon must not consume browser JWT or X-Riido-AI-Agent-Token as its long-lived credential",
         "frontend_boundary: riido-client generated APIs must not receive device_secret in schemas, examples, comments, events, logs, or status responses",
-        "revocation_future: rotation and revocation are future DevicePrincipal lifecycle operations, not workspace create/list operations"
+        "revocation_future: explicit revocation is a future DevicePrincipal lifecycle operation, not workspace create/list operations",
+        "coverage_enrollment: default-off covered registration requires execution_coverage_protocol=riido-execution-coverage.v1; only a newly server-issued namespace atomically publishes execution_coverage_generation and credential_generation with its durable policy birth; re-enrollment never upgrades legacy",
+        "coverage_daemon_headers: covered poll, agent event and batch progress requests send one X-Riido-Execution-Coverage matching the authenticated device generation; raw user bearer cannot replace covered device authentication; legacy omits this header",
+        "coverage_rotation: rotating an existing covered credential preserves immutable coverage generation and unresolved executions under the same policy revision CAS even when new enrollment is disabled; all serving instances must enforce coverage before activation"
       ]
     },
     {

@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
-	"strings"
 	"time"
 )
 
@@ -18,10 +16,17 @@ type executionClaim struct {
 	AgentID              string    `json:"agent_id"`
 	LeaseEpoch           string    `json:"lease_epoch"`
 	ClaimedAt            time.Time `json:"claimed_at"`
+	CoverageGeneration   string    `json:"coverage_generation,omitempty"`
+	CredentialGeneration string    `json:"credential_generation,omitempty"`
+	RuntimeProvider      string    `json:"runtime_provider,omitempty"`
+	TerminationScope     string    `json:"termination_scope,omitempty"`
 }
 
 type (
-	authenticatedClaimDevice    struct{ deviceID, ownerPrincipalID string }
+	authenticatedClaimDevice struct {
+		deviceID, ownerPrincipalID string
+		coverage                   executionCoverageAuth
+	}
 	authenticatedClaimDeviceKey struct{}
 )
 
@@ -40,27 +45,16 @@ func newExecutionClaim(ctx context.Context, assignment Assignment) *executionCla
 	if !ok {
 		return nil
 	}
-	return &executionClaim{
+	claim := &executionClaim{
 		DeviceID: device.deviceID, OwnerPrincipalID: device.ownerPrincipalID,
 		RequesterPrincipalID: assignment.CreatedBy, AssignmentID: assignment.ID, AgentID: assignment.AgentID,
 		LeaseEpoch: leaseEpoch(assignment.LeaseToken), ClaimedAt: assignment.UpdatedAt,
 	}
+	if admission := executionAdmissionFromContext(ctx); admission != nil && admission.coverage != nil {
+		claim.CoverageGeneration, claim.CredentialGeneration = admission.coverage.Generation, admission.coverage.CredentialGeneration
+		claim.RuntimeProvider, claim.TerminationScope = assignment.RuntimeProvider, coverageTerminationScope(assignment)
+	}
+	return claim
 }
 
 func (claim executionClaim) key() string { return claim.AssignmentID + "#" + claim.LeaseEpoch }
-
-func (claim executionClaim) validate() error {
-	for _, id := range []string{claim.DeviceID, claim.OwnerPrincipalID, claim.AssignmentID, claim.AgentID} {
-		if strings.TrimSpace(id) == "" || len(id) > 512 {
-			return errors.New("invalid execution claim identity")
-		}
-	}
-	if len(claim.RequesterPrincipalID) > 512 || claim.ClaimedAt.IsZero() {
-		return errors.New("invalid execution claim provenance")
-	}
-	digest, err := hex.DecodeString(claim.LeaseEpoch)
-	if err != nil || len(digest) != sha256.Size || strings.ToLower(claim.LeaseEpoch) != claim.LeaseEpoch {
-		return errors.New("invalid execution claim epoch")
-	}
-	return nil
-}

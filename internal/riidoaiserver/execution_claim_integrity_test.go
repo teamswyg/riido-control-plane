@@ -12,7 +12,7 @@ func TestExecutionClaimRejectsReplacementAndMalformedJournal(t *testing.T) {
 	now := time.Date(2026, 10, 28, 1, 0, 0, 0, time.UTC)
 	a := sampleQueuedAssignmentOperationRecord(now).Assignment
 	record := dynamoDBClaimAssignmentOperation(a, 1, now, "", nil)
-	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"device", "owner"})
+	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device", ownerPrincipalID: "owner"})
 	record.ExecutionClaim = newExecutionClaim(ctx, record.Assignment)
 	state, err := stateFromAssignmentOperations([]AssignmentOperationRecord{record})
 	if err != nil {

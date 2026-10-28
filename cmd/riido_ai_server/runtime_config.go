@@ -7,9 +7,10 @@ import (
 )
 
 type runtimeConfig struct {
-	CLIInstallationService  riidoaiserver.CLIInstallationServiceConfig
-	CommentDelivery         riidoaiserver.CommentDeliveryConfig
-	AssignmentSnapshotStore riidoaiserver.SnapshotStore
+	ExecutionCoverageEnrollment bool
+	CLIInstallationService      riidoaiserver.CLIInstallationServiceConfig
+	CommentDelivery             riidoaiserver.CommentDeliveryConfig
+	AssignmentSnapshotStore     riidoaiserver.SnapshotStore
 
 	Addr                     string
 	ShutdownTimeout          time.Duration

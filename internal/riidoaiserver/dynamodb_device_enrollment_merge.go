@@ -40,6 +40,11 @@ func mergeCommittedEnrollmentState(ctx context.Context, items []map[string]map[s
 		if !exists {
 			return errAIAgentSnapshotConflict
 		}
+		for deviceID, existing := range credentials {
+			if deviceID != mutation.deviceID && proposed.MachineID != "" && existing.MachineID == proposed.MachineID {
+				return errAIAgentSnapshotConflict
+			}
+		}
 		credentials[mutation.deviceID] = proposed
 	}
 	requested.DeviceCredentials = make([]AIAgentClientDeviceCredentialSnapshot, 0, len(credentials))

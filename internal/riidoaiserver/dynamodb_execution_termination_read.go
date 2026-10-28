@@ -22,6 +22,17 @@ func (s *DynamoDBAssignmentOperationStore) loadExecutionTerminationReadSet(ctx c
 		return set, errTerminationForbidden
 	}
 	set.claim = item
+	set.claimValue = claim
+	if claim.CoverageGeneration != "" {
+		coverage, covered, err := s.loadExecutionCoverage(ctx, id.deviceID)
+		if err != nil {
+			return set, err
+		}
+		if !covered || coverage.Generation != claim.CoverageGeneration || coverage.OwnerPrincipalID != claim.OwnerPrincipalID || coverage.Generation != id.coverage.generation || coverage.CredentialGeneration != id.coverage.credential {
+			return set, errTerminationForbidden
+		}
+		set.coverage = &coverage
+	}
 	set.projection, err = s.executionTerminationGet(ctx, dynamoDBAssignmentProjectionPK(id.assignmentID), dynamoDBAssignmentProjectionSK)
 	if err != nil {
 		return set, err

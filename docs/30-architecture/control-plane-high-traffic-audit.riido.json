@@ -78,7 +78,7 @@
         "internal/riidoaiserver/ai_agent_client_development_func_merge_thread_progress_lines.go",
         "internal/riidoaiserver/ai_agent_client_thread_progress_retention_test.go"
       ],
-      "patterns": ["subscribers             map[int]aiAgentClientSubscriber", "visibilityKey", "make(chan ClientStreamEvent, 32)", "deliverAIAgentClientEvent"],
+      "patterns": ["subscribers                 map[int]aiAgentClientSubscriber", "visibilityKey", "make(chan ClientStreamEvent, 32)", "deliverAIAgentClientEvent"],
       "candidate": "Measure subscriber fanout pressure and terminal compensation counts before changing buffer size or adding richer realtime event types."
     },
     {
