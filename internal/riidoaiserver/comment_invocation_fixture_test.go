@@ -30,6 +30,7 @@ type commentCallFixture struct {
 }
 
 func newCommentCallFixture(t *testing.T) *commentCallFixture {
+	t.Helper()
 	return newCommentCallFixtureWithContext(t, nil)
 }
 
@@ -47,7 +48,9 @@ func newCommentCallFixtureWithContext(t *testing.T, contexts AssignmentContextSt
 			w.WriteHeader(f.status)
 			return
 		}
-		json.NewEncoder(w).Encode(f.evidence)
+		if err := json.NewEncoder(w).Encode(f.evidence); err != nil {
+			t.Error(err)
+		}
 	}))
 	t.Cleanup(endpoint.Close)
 	f.assignments = &commentCompletionStore{Store: NewStoreWithConfig(StoreConfig{AgentRegistry: f.client})}

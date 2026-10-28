@@ -56,7 +56,7 @@ func recordIntentDialogueDurableEvent(
 		State:             state,
 		EventType:         eventType,
 		Message:           message,
-		ProviderSessionID: "intent-dialogue-native-session",
+		ProviderSessionID: "intent-dialog-native-session",
 	}
 	response, err := assignmentStore.RecordAgentEvent(context.Background(), action.AgentID, req)
 	if err != nil {

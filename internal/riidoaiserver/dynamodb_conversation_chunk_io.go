@@ -52,7 +52,10 @@ func (s *DynamoDBAIAgentClientSnapshot) loadConversationChunks(ctx context.Conte
 		for _, hash := range batch {
 			actions = append(actions, map[string]any{"Get": map[string]any{"TableName": s.tableName, "Key": map[string]map[string]string{"pk": {"S": conversationChunkPK}, "sk": {"S": hash}}}})
 		}
-		payload, _ := json.Marshal(map[string]any{"TransactItems": actions})
+		payload, err := json.Marshal(map[string]any{"TransactItems": actions})
+		if err != nil {
+			return nil, err
+		}
 		body, err := doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBSnapshotTransactGetTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 		if err != nil {
 			return nil, err

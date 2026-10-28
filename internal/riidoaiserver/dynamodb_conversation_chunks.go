@@ -6,8 +6,10 @@ import (
 	"errors"
 )
 
-const conversationChunkPK = "AI_AGENT_CLIENT#history-chunks"
-const conversationChunkBytes = 192 << 10
+const (
+	conversationChunkPK    = "AI_AGENT_CLIENT#history-chunks"
+	conversationChunkBytes = 192 << 10
+)
 
 // Parts remain one atomic manifest update. Large immutable payloads are staged
 // separately, so neither the item nor transaction size grows with the history.
@@ -24,7 +26,10 @@ func conversationPartItems(snapshot AIAgentClientSnapshot, part dynamoDBAIAgentC
 				"pk": {"S": conversationChunkPK}, "sk": {"S": hash}, "body": {"S": body},
 			})
 		}
-		encoded, _ := json.Marshal(hashes)
+		encoded, err := json.Marshal(hashes)
+		if err != nil {
+			return nil, err
+		}
 		delete(item, "part_gzip")
 		item["chunk_hashes_json"] = map[string]string{"S": string(encoded)}
 	}

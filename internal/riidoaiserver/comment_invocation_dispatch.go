@@ -3,8 +3,9 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"github.com/teamswyg/riido-contracts/assignment"
 	"strings"
+
+	"github.com/teamswyg/riido-contracts/assignment"
 )
 
 func (s Server) dispatchCommentMentions(ctx context.Context, event TaskEvent) error {

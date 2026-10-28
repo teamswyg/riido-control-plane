@@ -19,7 +19,12 @@ func conversationManifestHashes(snapshot AIAgentClientSnapshot, hashes map[strin
 		values[key] = hash
 	}
 	values[conversationHistoryManifestGuard] = 1
-	body, _ := json.Marshal(values)
+	body, err := json.Marshal(values)
+	if err != nil {
+		// This locally constructed map contains only strings and an integer.
+		// Never drop the old-writer fence if that invariant is broken.
+		panic(err)
+	}
 	return string(body)
 }
 

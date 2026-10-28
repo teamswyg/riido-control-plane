@@ -49,5 +49,4 @@ func TestCommentHandoffRetriesContextWithoutDuplicateChild(t *testing.T) {
 	if got, found, err := contexts.LoadAssignmentContextSnapshot(t.Context(), child.AssignmentID); err != nil || !found || got.TriggerID != child.SourceMessageID {
 		t.Fatalf("repair failed: %+v %t %v", got, found, err)
 	}
-
 }

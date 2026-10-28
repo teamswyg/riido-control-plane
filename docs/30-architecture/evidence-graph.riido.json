@@ -20,6 +20,85 @@
   ],
   "chains": [
     {
+      "id": "comment_native_conversation_continuity_5891_5892",
+      "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication.",
+      "hypothesis": "Bind verified root comments to stable conversation identities while retaining per-Agent native sessions, import visible messages only on the next request, and publish immutable history chunks through the existing atomic manifest. Preserve SSE replay semantics and reject stale writers before they can replace newer conversation history.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "sse_reconnect_must_resume_after_last_event_id",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_conversation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/native_history.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_invocation_dispatch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_conversation_chunks.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_conversation_manifest.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_event_handler.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_conversation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/native_history_persistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/native_history_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_invocation_context_retry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_conversation_roundtrip_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_conversation_concurrency_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_conversation_failure_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Retain distinct root-comment, thread, message, execution and provider-session IDs. Handoff inherits the authorized snapshot before creating a child, uses the persisted Agent message ID, and is bounded and idempotent. Large histories remain durable with hashed chunks and a format marker that fences old writers. Deploy a compatible storage baseline first and never roll back below it once new manifests exist. Unit/race/fixture checks do not replace authenticated provider round-trip QA.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "cli_claim_local_termination_observation_5900",
       "observation": "A terminal task event can precede direct-child termination, while host continuation, lost Submit replies, resumed epochs and pending host work prevent the last Session alone from proving claim quiescence. Terminal ACK also clears daemon lease state.",
       "hypothesis": "Accept a device-authenticated claim-scoped local observation only against the immutable original claim and an atomically checked projection, retaining one immutable epoch receipt. Keep unknown and access policy separate; a daemon sender must aggregate all local invocation and host-work boundaries before terminal delivery.",
