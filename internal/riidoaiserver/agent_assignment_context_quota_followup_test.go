@@ -14,6 +14,11 @@ func TestAssignmentContextQuotaNewFollowupGetsIndependentBudget(t *testing.T) {
 		}
 	}
 	f.event(AssignmentReady, EventAssignmentReady)
+	// A continued native run must have a real provider session to resume.
+	pin, _ := json.Marshal(AgentEventRequest{AssignmentID: f.leased.ID, TaskID: f.leased.TaskID, DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev", State: AssignmentRunning, EventType: EventProviderSessionPinned, ProviderSessionID: "quota-native-session"})
+	if code, body := f.do("/v1/agents/agent-owned-codex/events", string(pin), f.device); code != http.StatusOK {
+		t.Fatalf("native session pin: %d %s", code, body)
+	}
 	f.event(AssignmentRunning, EventAssignmentRunning)
 	f.event(AssignmentCompleted, EventAssignmentCompleted)
 	old := f.leased

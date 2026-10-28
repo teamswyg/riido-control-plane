@@ -63,6 +63,9 @@ func TestCommentDeliveryVerifiedEvidenceAndRetry(t *testing.T) {
 	if err != nil || len(threads.Threads) != 1 || len(threads.AssignedAgentIDs) != 1 {
 		t.Fatalf("membership: %+v %v", threads, err)
 	}
+	if threads.Threads[0].ConversationID != "comment:comment" {
+		t.Fatal("comment delivery lost its stable root conversation")
+	}
 
 	assertDeliveredCommentContext(t, assignments, a, evidence)
 	evidence.Context.Component.ID = "other-task"

@@ -48,14 +48,15 @@ func recordIntentDialogueDurableEvent(
 ) {
 	t.Helper()
 	req := AgentEventRequest{
-		AssignmentID: action.AssignmentID,
-		TaskID:       action.TaskID,
-		DaemonID:     "daemon-dev-macbook",
-		DeviceID:     "device-dev-macbook",
-		RuntimeID:    "runtime-codex-dev",
-		State:        state,
-		EventType:    eventType,
-		Message:      message,
+		AssignmentID:      action.AssignmentID,
+		TaskID:            action.TaskID,
+		DaemonID:          "daemon-dev-macbook",
+		DeviceID:          "device-dev-macbook",
+		RuntimeID:         "runtime-codex-dev",
+		State:             state,
+		EventType:         eventType,
+		Message:           message,
+		ProviderSessionID: "intent-dialogue-native-session",
 	}
 	response, err := assignmentStore.RecordAgentEvent(context.Background(), action.AgentID, req)
 	if err != nil {

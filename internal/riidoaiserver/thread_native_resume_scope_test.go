@@ -44,10 +44,10 @@ func TestNativeFollowupSelectsOnlyAuthorizedPersistedSession(t *testing.T) {
 				wantResume = ""
 			case "legacy-no-pin":
 				source.projection.Assignment.ProviderSessionID = ""
-				wantResume = ""
+				wantErr = true
 			case "missing-source":
 				source.found = false
-				wantResume = ""
+				wantErr = true
 			case "unsupported-openclaw":
 				req.RuntimeProvider = "openclaw"
 				wantResume = ""

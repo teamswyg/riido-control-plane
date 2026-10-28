@@ -20,6 +20,12 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if message, found, err := decodeNativeHistory(input.Metadata); err != nil || found {
+		if err != nil {
+			return err
+		}
+		return s.recordNativeHistoryLocked(input, message)
+	}
 	agent, ok := s.agents[input.AgentID]
 	if !ok {
 		return ErrAIAgentNotFound

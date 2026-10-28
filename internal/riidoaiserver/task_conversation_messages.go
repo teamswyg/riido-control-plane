@@ -1,19 +1,22 @@
 package riidoaiserver
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
 
 func taskConversationMessages(thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history []AIAgentTaskThreadHistoryRecord) []AIAgentTaskThreadHistoryMessage {
 	var messages []AIAgentTaskThreadHistoryMessage
 	seen := make(map[string]bool)
 	for _, record := range history {
-		if record.TaskID != thread.TaskID || record.AgentID != thread.AgentID {
+		if record.TaskID != thread.TaskID || (record.AgentID != thread.AgentID && !strings.HasPrefix(thread.ConversationID, "comment:")) {
 			continue
 		}
 		if thread.ConversationID != "" {
 			if record.ConversationID != thread.ConversationID {
 				continue
 			}
-		} else if record.ThreadID != thread.ThreadID {
+		} else if record.ThreadID != thread.ThreadID || record.AgentID != thread.AgentID {
 			continue
 		}
 		for _, message := range record.Messages {

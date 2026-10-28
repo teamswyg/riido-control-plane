@@ -389,13 +389,20 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	RecoveryPolicy *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
+	commentInvocation *CommentInvocation
+	skipSourceMessage bool
+	RecoveryPolicy    *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
 
 	RequestID                       string                       `json:"request_id,omitempty"`
 	DocumentSnapshot                *AIAgentTaskDocumentSnapshot `json:"document_snapshot,omitempty"`
 	Instruction                     string                       `json:"instruction,omitempty"`
 	SourceCommentID                 string                       `json:"-"`
-	VerifiedTaskContext             *AIAgentTaskContext          `json:"-"`
+	SourceMessageID                 string                       `json:"-"`
+	conversationID                  string
+	parentThreadID                  string
+	sourceMessageObservedAt         time.Time
+	legacyCommentConversations      []string
+	VerifiedTaskContext             *AIAgentTaskContext `json:"-"`
 	membershipPublicationGeneration string
 	AgentID                         string `json:"agent_id"`
 	AssignmentID                    string `json:"-"`
@@ -499,6 +506,7 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 }
 
 type AIAgentTaskThreadRecord struct {
+	CommentInvocation  *CommentInvocation                   `json:"comment_invocation,omitempty"`
 	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	ThreadID           string                               `json:"thread_id"`
 	ConversationID     string                               `json:"conversation_id,omitempty"`

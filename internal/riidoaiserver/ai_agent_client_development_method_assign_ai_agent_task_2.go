@@ -78,7 +78,23 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
 	agent.AssignedTaskCount++
 	s.agents[agent.AgentID] = agent
+	if req.conversationID != "" {
+		s.adoptLegacyCommentConversationsLocked(taskID, req)
+		sourceMessageID := req.SourceMessageID
+		if sourceMessageID == "" {
+			sourceMessageID = req.SourceCommentID
+		}
+		s.upsertTaskThreadMessageFromActionLocked(response, sourceMessageID, req.conversationID, req.parentThreadID)
+		if !req.skipSourceMessage {
+			s.appendThreadUserMessageLocked(response, principal, req.Instruction, req.SourceCommentID, req.sourceMessageObservedAt)
+		}
+	}
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
+	for i := range s.taskThreads[taskID] {
+		if s.taskThreads[taskID][i].ThreadID == response.ThreadID {
+			s.taskThreads[taskID][i].CommentInvocation = copyCommentInvocation(req.commentInvocation)
+		}
+	}
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 	s.agents[agent.AgentID] = agent
 	s.assignTaskAgentMemberLocked(taskID, agent)
