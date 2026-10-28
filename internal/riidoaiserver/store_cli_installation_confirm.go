@@ -18,11 +18,12 @@ func (s *Store) confirmLocalCLIInstallation(state *storeState, req cliInstallati
 		}
 		return link, nil
 	}
-	if !s.now().Before(intent.ExpiresAt) {
+	now := s.now()
+	if !now.Before(intent.ExpiresAt) {
 		return cliInstallationLink{}, errCLIInstallationExpired
 	}
 	if !exists {
-		link = linkForCLIInstallation(intent, req.device, s.now())
+		link = linkForCLIInstallation(intent, req.device, now)
 		if err := link.valid(); err != nil {
 			return cliInstallationLink{}, err
 		}

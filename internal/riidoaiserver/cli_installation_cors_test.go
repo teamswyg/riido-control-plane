@@ -10,7 +10,7 @@ import (
 func TestCLIInstallationPrivateRoutesRejectBrowserOrigin(t *testing.T) {
 	f := newCLIInstallationFixture(t)
 	handler := NewServer(ServerConfig{Assignment: f.actor, AIAgentClient: f.devices, CLIInstallationService: f.service, WebAllowedOrigins: []string{"https://web.fixture.invalid"}}).Handler()
-	for _, path := range []string{"/v1/internal/cli-installations/link-intents", "/v1/internal/cli-installations/policy", "/v1/daemon/cli-installation-links/intent/confirm"} {
+	for _, path := range []string{"/v1/internal/cli-installations/link-intents", "/v1/internal/cli-installations/policy", "/v1/internal/cli-installations/link-receipts", "/v1/daemon/cli-installation-links/intent/confirm"} {
 		for _, method := range []string{http.MethodOptions, http.MethodPost} {
 			r := httptest.NewRequest(method, path, strings.NewReader(`{}`))
 			r.Header.Set("Origin", "https://web.fixture.invalid")

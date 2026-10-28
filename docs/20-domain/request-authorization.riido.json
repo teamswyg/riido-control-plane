@@ -283,7 +283,9 @@
         "strict-four-kib-json-and-two-second-deadline",
         "immutable-link-and-expiring-intent-atomic-consumption",
         "fixed-private-errors-and-no-browser-auth-surface",
-        "policy-blocked-or-unknown-never-allowed"
+        "policy-blocked-or-unknown-never-allowed",
+        "service-auth-original-consumed-intent-receipt-with-exact-identity",
+        "historical-link-receipt-never-substitutes-current-policy"
       ]
     }
   ],
@@ -727,6 +729,14 @@
       "contains": [
         "TestCLIInstallationLinkRequiresApprovedDeviceOwnerAndKey",
         "TestCLIInstallationOwnerChangeNeverRestoresPermission"
+      ]
+    },
+    {
+      "name": "cli-installation-original-receipt-regression",
+      "file": "internal/riidoaiserver/cli_installation_receipt_test.go",
+      "contains": [
+        "TestCLIInstallationReceiptRequiresOriginalConsumedIntent",
+        "TestCLIInstallationReceiptRejectsMismatchedBinding"
       ]
     }
   ],

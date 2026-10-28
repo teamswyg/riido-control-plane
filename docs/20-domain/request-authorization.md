@@ -65,7 +65,7 @@ Executable SSOT: [`request-authorization.riido.json`](request-authorization.riid
 | `cors` | `exact-origin-allowlist`, `method-allowlist`, `header-allowlist`, `no-browser-credentials`, `unsupported-header-rejected` |
 | `device-principal` | `device-headers-server-only`, `both-device-fields-required`, `device-auth-before-token-auth`, `browser-jwt-not-daemon-auth` |
 | `execution-termination-device-proof` | `device-proof-required-without-bearer-fallback`, `original-claim-device-owner-epoch-required`, `lease-only-in-single-protected-header`, `strict-bounded-body-without-identity-fields`, `fixed-errors-without-credential-or-dependency-detail`, `local-observation-is-not-access-permission` |
-| `cli-installation-service-link` | `exact-static-service-principal-and-operation-scopes`, `separate-authorizer-no-user-device-wildcard-fallback`, `configured-canonical-resource-client-and-key-binding`, `device-plus-p256-domain-separated-one-time-link-proof`, `strict-four-kib-json-and-two-second-deadline`, `immutable-link-and-expiring-intent-atomic-consumption`, `fixed-private-errors-and-no-browser-auth-surface`, `policy-blocked-or-unknown-never-allowed` |
+| `cli-installation-service-link` | `exact-static-service-principal-and-operation-scopes`, `separate-authorizer-no-user-device-wildcard-fallback`, `configured-canonical-resource-client-and-key-binding`, `device-plus-p256-domain-separated-one-time-link-proof`, `strict-four-kib-json-and-two-second-deadline`, `immutable-link-and-expiring-intent-atomic-consumption`, `fixed-private-errors-and-no-browser-auth-surface`, `policy-blocked-or-unknown-never-allowed`, `service-auth-original-consumed-intent-receipt-with-exact-identity`, `historical-link-receipt-never-substitutes-current-policy` |
 
 ## Evidence Loop
 
