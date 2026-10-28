@@ -39,7 +39,18 @@ func (s *DynamoDBAssignmentOperationStore) confirmCLIInstallationLink(ctx contex
 		if len(oldLink) == 0 {
 			link = linkForCLIInstallation(intent, device, s.now())
 		}
-		actions, err := s.cliInstallationConfirmActions(intent, link, oldIntent, oldLink)
+		coverage, covered, err := s.loadExecutionCoverage(ctx, device.deviceID)
+		if err != nil {
+			return cliInstallationLink{}, err
+		}
+		var authority *executionCoverage
+		if covered {
+			if coverage.OwnerPrincipalID != device.ownerPrincipalID || coverage.Generation != device.coverage.generation || coverage.CredentialGeneration != device.coverage.credential {
+				return cliInstallationLink{}, ErrAuthorizationForbidden
+			}
+			authority = &coverage
+		}
+		actions, err := s.cliInstallationConfirmActions(intent, link, oldIntent, oldLink, authority)
 		if err != nil {
 			return cliInstallationLink{}, err
 		}
@@ -49,24 +60,4 @@ func (s *DynamoDBAssignmentOperationStore) confirmCLIInstallationLink(ctx contex
 		}
 	}
 	return cliInstallationLink{}, errCLIInstallationUnavailable
-}
-
-func (s *DynamoDBAssignmentOperationStore) cliInstallationConfirmActions(intent cliInstallationIntent, link cliInstallationLink, oldIntent, oldLink map[string]map[string]string) ([]dynamoDBTransactWriteItem, error) {
-	if intent.Consumed {
-		return []dynamoDBTransactWriteItem{{ConditionCheck: s.installationItemCondition(oldIntent, cliInstallationIntentKey(intent.ID))}, {ConditionCheck: s.installationItemCondition(oldLink, cliInstallationLinkKey(link.cliInstallationIdentity))}}, nil
-	}
-	intent.Consumed = true
-	newIntent, err := cliInstallationItem(cliInstallationIntentKey(intent.ID), cliInstallationIntentItemSchema, intent)
-	if err != nil {
-		return nil, err
-	}
-	actions := []dynamoDBTransactWriteItem{s.installationItemPut(newIntent, oldIntent)}
-	if len(oldLink) > 0 {
-		return append(actions, dynamoDBTransactWriteItem{ConditionCheck: s.installationItemCondition(oldLink, cliInstallationLinkKey(link.cliInstallationIdentity))}), nil
-	}
-	newLink, err := cliInstallationItem(cliInstallationLinkKey(link.cliInstallationIdentity), cliInstallationLinkItemSchema, link)
-	if err != nil {
-		return nil, err
-	}
-	return append(actions, s.installationItemPut(newLink, nil), s.devicePolicyAdvanceAction(link.DeviceID)), nil
 }

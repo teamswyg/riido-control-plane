@@ -20,6 +20,10 @@ func (s *Store) RecordAgentEvent(ctx context.Context, agentID string, req AgentE
 	if strings.TrimSpace(req.AssignmentID) == "" {
 		return AgentEventResponse{}, errors.New("assignment_id is required")
 	}
+	ctx, err = s.prepareCoverageEvent(ctx, agentID, req)
+	if err != nil {
+		return AgentEventResponse{}, err
+	}
 	approval, err := s.preflightRecoveryCandidate(ctx, agentID, req)
 	if err != nil {
 		return AgentEventResponse{}, err

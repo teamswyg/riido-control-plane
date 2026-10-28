@@ -26715,6 +26715,470 @@
       ],
       "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "cli_installation_complete_coverage_5900",
+      "observation": "Unknown-only link policy prevents unsafe permission but cannot restore ordinary linked use after verified local execution completion. Empty history, lease expiry, legacy registration and mutable device binding cannot prove complete execution coverage.",
+      "hypothesis": "Atomic server-issued birth, device/owner/generation/credential admission fencing and an epoch-bound unresolved ledger allow a final policy authorization snapshot to grant permission safely for covered local executions while keeping legacy and unobserved work unknown.",
+      "claims": [
+        "execution_coverage_must_fence_installation_permission",
+        "cli_installation_link_must_preserve_key_and_policy_fences",
+        "assignment_operation_journal_must_preserve_replay_and_claim_ports"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/execution_coverage_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config_parts.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_open.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_event_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_poll_claim_context.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_thread_progress_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_type_development_ai_agent_client_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistence_device_credential.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_operation_port.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/authorization.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_coverage_authority.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_policy_result.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_authorize.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_contract.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_enroll.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_enroll_identity.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_credential_enroll_normalize.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_coverage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_authority.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_enrollment_trial.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/durable_assignment_mutation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/durable_assignment_mutation_publish.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_mutation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_next.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_repair_transaction_payload.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_claim_transaction_payload.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_operation_store_type.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_confirm.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_confirm_actions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_coverage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_observation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_enrollment_coverage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_enrollment_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_policy_revision.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_claim_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_claim_item.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_coverage_admission.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_coverage_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_coverage_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_coverage_condition_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_coverage_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination_actions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_execution_termination_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_claim.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_claim_coverage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_claim_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_claim_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_coverage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_coverage_action.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_coverage_context.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_coverage_event_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_termination.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_execution_termination_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_port.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_event_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_execution_coverage_admission.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_poll.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/execution_coverage_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_coverage_condition_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_membership_shared_dynamo_fixture_condition_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_execution_coverage_revision_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_cas_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_conditions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_execution_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_fixture_integrity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_get_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_handler_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_hook_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_http_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_legacy_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_link_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_policy_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_put_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_query_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_remote_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_request_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_restart_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_transaction_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/coverage_lifecycle_ttl_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_atomic_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_authority_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_backend_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_concurrent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_intercept_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_legacy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_lifecycle_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_store_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_enrollment_coverage_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_admission_guard_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_auth_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_legacy_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_progress_auth_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_runtime_scope_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_termination_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_termination_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_coverage_termination_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "assignment-operation-journal-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Source and synthetic HTTP/Dynamo regression evidence cover birth, admission, credential rotation, receipt idempotency, policy/claim interleaving and conservative unknown states. This chain does not assert live AWS/provider termination, fleet activation, Desktop integration or authenticated release acceptance. Per-request monolith consumption and runtime/installation rollout remain separate gates.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -84,6 +84,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 		}
 		operation := dynamoDBClaimAssignmentOperation(assignment, candidate.LastEventSeq, at, clearMessage, clearMetadata)
 		operation.ExecutionClaim = newExecutionClaim(ctx, operation.Assignment)
+		operation.executionAdmission = executionAdmissionFromContext(ctx)
 		if err := validateOperationExecutionClaim(operation); err != nil {
 			return AssignmentClaimResult{}, err
 		}

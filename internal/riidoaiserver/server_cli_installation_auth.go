@@ -44,5 +44,5 @@ func (s Server) authorizeCLIInstallationDevice(r *http.Request) (authenticatedCl
 	if !cliInstallationID(principal.PrincipalID) {
 		return authenticatedClaimDevice{}, ErrAuthorizationForbidden
 	}
-	return authenticatedClaimDevice{id, principal.PrincipalID}, nil
+	return authenticatedClaimDevice{deviceID: id, ownerPrincipalID: principal.PrincipalID, coverage: executionCoverageAuth{principal.executionCoverageGeneration, principal.credentialGeneration}}, nil
 }

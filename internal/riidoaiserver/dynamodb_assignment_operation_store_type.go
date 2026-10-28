@@ -18,6 +18,7 @@ type DynamoDBAssignmentOperationStoreConfig struct {
 }
 
 type DynamoDBAssignmentOperationStore struct {
+	executionCoverageAuthority       *DynamoDBAIAgentClientSnapshot
 	enableAssignmentContextRetention bool
 	enableAgentHistory               bool
 	commands                         chan dynamoDBAssignmentOperationCommand

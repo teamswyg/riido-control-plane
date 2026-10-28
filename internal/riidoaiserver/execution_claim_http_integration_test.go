@@ -52,7 +52,8 @@ func TestExecutionClaimAuthenticatedHTTPToDurableObservation(t *testing.T) {
 		t.Fatalf("expired lease must stay unknown: %s %v", observed, err)
 	}
 	// The scheduler may mark a stale assignment terminal. This is no execution-end proof.
-	if _, err := actor.PollAgent(context.Background(), record.AgentID, PollRequest{}); err != nil {
+	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device", ownerPrincipalID: "owner"})
+	if _, err := actor.PollAgent(ctx, record.AgentID, PollRequest{}); err != nil {
 		t.Fatal(err)
 	}
 	observed, err = actor.observeDeviceExecutions(context.Background(), "device")

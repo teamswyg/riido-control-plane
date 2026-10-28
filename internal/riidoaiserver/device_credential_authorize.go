@@ -34,7 +34,9 @@ func (s *DevelopmentAIAgentClientStore) AuthorizeDeviceCredential(ctx context.Co
 		workspaceID = record.workspaceID
 	}
 	return AuthorizationResult{
-		PrincipalID: record.ownerPrincipalID,
-		WorkspaceID: workspaceID,
+		executionCoverageGeneration: record.coverageGeneration,
+		credentialGeneration:        record.credentialGeneration,
+		PrincipalID:                 record.ownerPrincipalID,
+		WorkspaceID:                 workspaceID,
 	}, nil
 }

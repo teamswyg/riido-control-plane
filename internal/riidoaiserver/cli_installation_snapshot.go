@@ -43,7 +43,7 @@ func restoreCLIInstallations(state *storeState, snapshot cliInstallationSnapshot
 	for _, intent := range state.cliInstallationIntents {
 		if intent.Consumed {
 			link, ok := state.cliInstallationLinks[intent.Request.key()]
-			device := authenticatedClaimDevice{intent.Request.ExpectedDeviceID, intent.Request.ApprovedPrincipalID}
+			device := authenticatedClaimDevice{deviceID: intent.Request.ExpectedDeviceID, ownerPrincipalID: intent.Request.ApprovedPrincipalID}
 			if !ok || !matchingCLIInstallationLink(link, intent, device) {
 				return errCLIInstallationUnavailable
 			}

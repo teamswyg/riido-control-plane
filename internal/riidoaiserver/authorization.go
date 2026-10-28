@@ -60,9 +60,11 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationResult struct {
-	PrincipalID string
-	WorkspaceID string
-	Roles       []AgentCatalogRole
+	executionCoverageGeneration string
+	credentialGeneration        string
+	PrincipalID                 string
+	WorkspaceID                 string
+	Roles                       []AgentCatalogRole
 }
 
 type RequestAuthorizer interface {

@@ -18,6 +18,10 @@ func (s *Store) handlePoll(ctx context.Context, state *storeState, agentID strin
 		}
 		return PollResponse{}, false, nil, "", err
 	}
+	ctx, admissionErr := s.prepareExecutionAdmission(ctx, agentID, req)
+	if admissionErr != nil {
+		return PollResponse{}, false, nil, "", admissionErr
+	}
 	if count {
 		state.pollRequestsTotal++
 	}
@@ -57,6 +61,9 @@ func (s *Store) handlePoll(ctx context.Context, state *storeState, agentID strin
 			recordPollAction(state, response.Action, count)
 			return response, false, nil, "", nil
 		case isAgentActive(durableAssignment.State):
+			if err := s.authorizeCoveredAssignment(ctx, durableAssignment); err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
 			response.Action = PollActive
 			response.Assignment = copyAssignment(durableAssignment)
 			recordPollAction(state, response.Action, count)
@@ -74,6 +81,9 @@ func (s *Store) handlePoll(ctx context.Context, state *storeState, agentID strin
 				stale := s.failStaleAssignment(state, assignment)
 				recordPollAction(state, response.Action, count)
 				return response, false, &stale, AssignmentOperationAgentEvent, nil
+			}
+			if err := s.authorizeCoveredAssignment(ctx, assignment); err != nil {
+				return PollResponse{}, false, nil, "", err
 			}
 			response.Action = PollActive
 			response.Assignment = copyAssignment(assignment)

@@ -19,7 +19,7 @@ func TestExecutionTerminationHTTPRecordsOriginalClaimAfterTerminal(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx := context.WithValue(t.Context(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"device", "owner"})
+	ctx := context.WithValue(t.Context(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device", ownerPrincipalID: "owner"})
 	poll, err := actor.PollAgent(ctx, "agent", PollRequest{})
 	if err != nil || poll.Action != PollStart {
 		t.Fatalf("claim: %v", err)

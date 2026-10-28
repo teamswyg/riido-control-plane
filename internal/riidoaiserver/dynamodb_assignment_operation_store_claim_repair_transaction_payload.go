@@ -65,7 +65,7 @@ func (s *DynamoDBAssignmentOperationStore) claimRepairTransactionPayload(record 
 		ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)",
 		Item:                operationItem,
 	}})
-	items, err = s.appendExecutionClaimAction(items, record.ExecutionClaim)
+	items, err = s.appendExecutionClaimAction(items, record.ExecutionClaim, record.executionAdmission)
 	if err != nil {
 		return nil, err
 	}

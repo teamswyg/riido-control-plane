@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -57,7 +56,7 @@ func TestDynamoDBAssignmentOperationStoreClaimContentionReturnsNoClaim(t *testin
 	}
 	defer store.Close()
 
-	claim, err := store.ClaimNextAssignment(context.Background(), "jykim1", fixedNow)
+	claim, err := store.ClaimNextAssignment(legacyClaimFixtureContext(), "jykim1", fixedNow)
 	if err != nil {
 		t.Fatalf("ClaimNextAssignment contention: %v", err)
 	}
