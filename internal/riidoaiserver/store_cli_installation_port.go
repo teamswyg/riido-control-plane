@@ -25,12 +25,14 @@ type cliInstallationCommand struct {
 	create  *cliInstallationIntent
 	confirm *cliInstallationConfirmation
 	read    *cliInstallationRead
+	receipt *cliInstallationReceiptRequest
 	reply   chan cliInstallationResult
 }
 type cliInstallationResult struct {
-	link cliInstallationLink
-	read cliInstallationReadSet
-	err  error
+	link    cliInstallationLink
+	read    cliInstallationReadSet
+	receipt cliInstallationReceipt
+	err     error
 }
 
 func (s *Store) executeCLIInstallation(ctx context.Context, command cliInstallationCommand) (cliInstallationResult, error) {

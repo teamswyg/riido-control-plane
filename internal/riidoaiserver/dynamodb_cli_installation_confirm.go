@@ -33,11 +33,12 @@ func (s *DynamoDBAssignmentOperationStore) confirmCLIInstallationLink(ctx contex
 		if intent.Consumed && len(oldLink) == 0 {
 			return cliInstallationLink{}, errCLIInstallationUnavailable
 		}
-		if !intent.Consumed && !s.now().Before(intent.ExpiresAt) {
+		now := s.now()
+		if !intent.Consumed && !now.Before(intent.ExpiresAt) {
 			return cliInstallationLink{}, errCLIInstallationExpired
 		}
 		if len(oldLink) == 0 {
-			link = linkForCLIInstallation(intent, device, s.now())
+			link = linkForCLIInstallation(intent, device, now)
 		}
 		coverage, covered, err := s.loadExecutionCoverage(ctx, device.deviceID)
 		if err != nil {

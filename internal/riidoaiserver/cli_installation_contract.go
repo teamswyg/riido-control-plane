@@ -59,6 +59,7 @@ type cliInstallationRepository interface {
 	createCLIInstallationIntent(context.Context, cliInstallationIntent) error
 	confirmCLIInstallationLink(context.Context, string, authenticatedClaimDevice, string, string) (cliInstallationLink, error)
 	readCLIInstallationPolicy(context.Context, cliInstallationIdentity, cliInstallationDeviceOwnerReader) (cliInstallationPolicy, error)
+	readCLIInstallationReceipt(context.Context, cliInstallationReceiptRequest) (cliInstallationReceipt, error)
 }
 
 type cliInstallationDeviceOwnerReader interface {
