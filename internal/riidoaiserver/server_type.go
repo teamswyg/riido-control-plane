@@ -6,6 +6,7 @@ import (
 )
 
 type ServerConfig struct {
+	CLIInstallationService   CLIInstallationServiceConfig
 	CommentDelivery          CommentDeliveryConfig
 	Authorizer               RequestAuthorizer
 	AgentCatalogStore        AgentCatalogStore

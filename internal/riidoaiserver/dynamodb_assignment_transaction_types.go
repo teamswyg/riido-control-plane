@@ -30,6 +30,7 @@ type dynamoDBTransactWriteDeleteAction struct {
 }
 
 type dynamoDBTransactWritePutAction struct {
+	ExpressionAttributeNames  map[string]string            `json:"ExpressionAttributeNames,omitempty"`
 	TableName                 string                       `json:"TableName"`
 	ConditionExpression       string                       `json:"ConditionExpression,omitempty"`
 	ExpressionAttributeValues map[string]map[string]string `json:"ExpressionAttributeValues,omitempty"`

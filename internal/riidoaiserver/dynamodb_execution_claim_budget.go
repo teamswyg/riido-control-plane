@@ -7,13 +7,20 @@ import (
 )
 
 // Preserve the six arbitrary 400 KiB item budget. One strictly bounded private
-// claim may accompany a stale-blocker repair in the same atomic transaction.
+// claim and one bounded policy revision update may accompany a stale repair.
 func validateExecutionClaimTerminalBudget(actions []json.RawMessage) error {
-	base, claims := 0, 0
+	base, claims, policies := 0, 0, 0
 	for _, raw := range actions {
 		var action dynamoDBTransactWriteItem
 		if err := json.Unmarshal(raw, &action); err != nil {
 			return err
+		}
+		if action.Update != nil && strings.HasPrefix(dynamoDBStringValue(action.Update.Key, "pk"), "DEVICE_POLICY#") {
+			policies++
+			if len(raw) > 4<<10 || !isDevicePolicyAdvance(action) {
+				return errors.New("invalid bounded device policy action")
+			}
+			continue
 		}
 		put := action.Put
 		if put == nil || !strings.HasPrefix(dynamoDBStringValue(put.Item, "pk"), "DEVICE_EXECUTION#") {
@@ -28,7 +35,7 @@ func validateExecutionClaimTerminalBudget(actions []json.RawMessage) error {
 			return err
 		}
 	}
-	if base > contextTerminalBaseActions || claims > 1 {
+	if base > contextTerminalBaseActions || claims > 1 || policies > 1 {
 		return errors.New("terminal retention action budget exceeded")
 	}
 	return nil

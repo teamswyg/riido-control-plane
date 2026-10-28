@@ -8,6 +8,7 @@ import (
 func traceHTTPRoute(method, path string) string {
 	path = strings.TrimSpace(path)
 	for _, route := range []func(string, string) string{
+		cliInstallationHTTPRoute,
 		agentHTTPRoute,
 		daemonHTTPRoute,
 		aiAgentClientHTTPRoute,

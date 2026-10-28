@@ -4,11 +4,18 @@ import "strings"
 
 func (f *terminationDynamoFixture) conditionsHold(actions []dynamoDBTransactWriteItem) bool {
 	for _, action := range actions {
+		if action.Update != nil {
+			if !f.policyUpdateAllowed(action.Update) {
+				return false
+			}
+			continue
+		}
 		var key, values map[string]map[string]string
 		var names map[string]string
 		condition := ""
 		if action.Put != nil {
 			key, values, condition = action.Put.Item, action.Put.ExpressionAttributeValues, action.Put.ConditionExpression
+			names = action.Put.ExpressionAttributeNames
 		}
 		if action.ConditionCheck != nil {
 			key, values, condition = action.ConditionCheck.Key, action.ConditionCheck.ExpressionAttributeValues, action.ConditionCheck.ConditionExpression

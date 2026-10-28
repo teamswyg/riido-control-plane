@@ -7,6 +7,7 @@ import (
 )
 
 type runtimeConfig struct {
+	CLIInstallationService  riidoaiserver.CLIInstallationServiceConfig
 	CommentDelivery         riidoaiserver.CommentDeliveryConfig
 	AssignmentSnapshotStore riidoaiserver.SnapshotStore
 

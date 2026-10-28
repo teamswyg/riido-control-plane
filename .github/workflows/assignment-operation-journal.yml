@@ -12,6 +12,9 @@ on:
       - "tools/assignmentjournal/**"
       - "go.mod"
       - "go.sum"
+      - "internal/riidoaiserver/*cli_installation*.go"
+      - "internal/riidoaiserver/dynamodb_device_policy*.go"
+      - "cmd/riido_ai_server/cli_installation*.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/assignment_contract_gen.go"
@@ -33,6 +36,9 @@ on:
       - "tools/assignmentjournal/**"
       - "go.mod"
       - "go.sum"
+      - "internal/riidoaiserver/*cli_installation*.go"
+      - "internal/riidoaiserver/dynamodb_device_policy*.go"
+      - "cmd/riido_ai_server/cli_installation*.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/assignment_api.go"
       - "internal/riidoaiserver/assignment_contract_gen.go"
@@ -71,7 +77,7 @@ jobs:
             -check-doc \
             -evidence-out out/assignment-operation-journal-evidence.json
       - name: Test assignment operation journal
-        run: go test ./internal/riidoaiserver -run 'AssignmentOperation|AssignmentActiveLease|ExecutionClaim|ExecutionTermination|AgentPollRejectsAuthenticatedDeviceBodyMismatch' -count=1
+        run: go test ./internal/riidoaiserver -run 'CLIInstallation|AssignmentOperation|AssignmentActiveLease|ExecutionClaim|ExecutionTermination|AgentPollRejectsAuthenticatedDeviceBodyMismatch' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

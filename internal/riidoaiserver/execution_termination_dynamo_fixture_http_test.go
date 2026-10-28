@@ -12,6 +12,8 @@ func (f *terminationDynamoFixture) ServeHTTP(w http.ResponseWriter, r *http.Requ
 	defer f.mu.Unlock()
 	f.requests = append(f.requests, data)
 	switch r.Header.Get("X-Amz-Target") {
+	case dynamoDBQueryTarget:
+		f.queryPolicyClaims(w, data)
 	case dynamoDBGetItemTarget:
 		var req struct {
 			Key            map[string]map[string]string
@@ -37,6 +39,9 @@ func (f *terminationDynamoFixture) ServeHTTP(w http.ResponseWriter, r *http.Requ
 			return
 		}
 		for _, action := range req.TransactItems {
+			if action.Update != nil {
+				f.applyPolicyUpdate(action.Update)
+			}
 			if action.Put != nil {
 				f.items[terminationItemKey(action.Put.Item)] = action.Put.Item
 				f.commits++

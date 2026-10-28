@@ -134,7 +134,7 @@
           "redacted": true
         }
       ],
-      "decision": "HTTP missing endpoint, snapshot receipt loss and active/missing projection acceptance were reproduced before correction. The sender contract has a provider-start count, not a descendant count. Three-action CAS retains original claim, current non-secret epoch guard and one receipt; retry ACKs recheck the same guards. This local HTTP/storage fixture boundary does not claim daemon rollout, installation coverage, service-authenticated OAuth enforcement, remote completion or live acceptance.",
+      "decision": "HTTP missing endpoint, snapshot receipt loss and active/missing projection acceptance were reproduced before correction. The sender contract has a provider-start count, not a descendant count. Original claim, current non-secret epoch guard and one receipt remain atomic; the installation-policy slice adds a fourth revision-advance action for a new receipt. Retry ACKs only recheck the original three guards. This local HTTP/storage fixture boundary does not claim daemon rollout, installation coverage, service-authenticated OAuth enforcement, remote completion or live acceptance.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -224,7 +224,7 @@
           "redacted": true
         }
       ],
-      "decision": "The header/body mismatch, missing atomic sidecar and stale-repair action-budget failures were reproduced before correction. Keep bearer polling compatible without trusted device provenance. Local single-authority claims use copy-on-write and publish only after persistence; production durable claims retain CAS-before-publication without copying all history on every poll. Preserve the six arbitrary-item retention budget and permit only one separately validated 4 KiB claim action. Shared generated syntax/module/hash evidence is regenerated without changing unrelated runtime semantics or weakening tests. This is the recording foundation only: confirmed execution termination, installation coverage/migration/linking and service-authenticated monolith OAuth/API enforcement remain required. No live authorization or deployment acceptance is claimed.",
+      "decision": "The header/body mismatch, missing atomic sidecar and stale-repair action-budget failures were reproduced before correction. Keep bearer polling compatible without trusted device provenance. Local single-authority claims use copy-on-write and publish only after persistence; production durable claims retain CAS-before-publication without copying all history on every poll. Preserve the six arbitrary-item retention budget and permit only one separately validated 4 KiB claim action and one bounded 4 KiB device-policy revision update. Shared generated syntax/module/hash evidence is regenerated without changing unrelated runtime semantics or weakening tests. This is the recording foundation only: confirmed execution termination, installation coverage/migration/linking and service-authenticated monolith OAuth/API enforcement remain required. No live authorization or deployment acceptance is claimed.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -26514,6 +26514,207 @@
       ],
       "decision": "Keep bounded same-task recent roots (20 plus the immutable trigger, maximum 21), trigger parent identity, same-team related work and meeting bodies, and file/link metadata supplied by verified delivery evidence. CP neither fabricates user authorization nor performs anonymous reads. Preserve legacy fallback, snapshot bounds, read audit and current-viewer permission checks. Synthetic tests cover evidence capture and header boundaries; live comment-triggered acceptance is separate.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "cli_installation_service_link_and_revision_5900",
+      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership.",
+      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists.",
+      "claims": [
+        "cli_installation_link_must_preserve_key_and_policy_fences",
+        "request_authorization_must_preserve_security_boundary",
+        "assignment_operation_journal_must_preserve_replay_and_claim_ports"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/cli_installation_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_contract.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_device_owner.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_proof.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_resource.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_route.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_service.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_confirm.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_intent.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_item.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_policy_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_policy_revision.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_confirm.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_intent.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_json.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_confirm.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_port.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/cli_installation_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_auth_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_canonical_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_concurrent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_conflict_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_cors_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_dynamo_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_dynamo_revision_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_link_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_policy_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_proof_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_resource_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_route_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_schema_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_snapshot_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "assignment-operation-journal-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -23,7 +23,7 @@ func TestExecutionTerminationHTTPCommitsClaimBoundDynamoReceipt(t *testing.T) {
 		t.Fatalf("status=%d", first.Code)
 	}
 	f.mu.Lock()
-	if len(f.actions) != 3 || f.actions[0].ConditionCheck == nil || f.actions[1].ConditionCheck == nil || f.actions[2].Put == nil {
+	if len(f.actions) != 4 || f.actions[0].ConditionCheck == nil || f.actions[1].ConditionCheck == nil || f.actions[2].Put == nil || !isDevicePolicyAdvance(f.actions[3]) {
 		t.Error("claim, projection and receipt must commit atomically")
 	}
 	for _, body := range f.requests {

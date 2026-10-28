@@ -272,6 +272,19 @@
         "fixed-errors-without-credential-or-dependency-detail",
         "local-observation-is-not-access-permission"
       ]
+    },
+    {
+      "id": "cli-installation-service-link",
+      "rules": [
+        "exact-static-service-principal-and-operation-scopes",
+        "separate-authorizer-no-user-device-wildcard-fallback",
+        "configured-canonical-resource-client-and-key-binding",
+        "device-plus-p256-domain-separated-one-time-link-proof",
+        "strict-four-kib-json-and-two-second-deadline",
+        "immutable-link-and-expiring-intent-atomic-consumption",
+        "fixed-private-errors-and-no-browser-auth-surface",
+        "policy-blocked-or-unknown-never-allowed"
+      ]
     }
   ],
   "source_checks": [
@@ -697,6 +710,23 @@
         "AuthorizeDeviceCredential",
         "leaseEpoch(lease)",
         "ErrAuthorizationUnauthenticated"
+      ]
+    },
+    {
+      "name": "cli-installation-service-and-proof",
+      "file": "internal/riidoaiserver/cli_installation_service.go",
+      "contains": [
+        "cliInstallationServicePrincipal",
+        "cli-installation:link",
+        "cli-installation:policy-read"
+      ]
+    },
+    {
+      "name": "cli-installation-security-regressions",
+      "file": "internal/riidoaiserver/cli_installation_proof_test.go",
+      "contains": [
+        "TestCLIInstallationLinkRequiresApprovedDeviceOwnerAndKey",
+        "TestCLIInstallationOwnerChangeNeverRestoresPermission"
       ]
     }
   ],

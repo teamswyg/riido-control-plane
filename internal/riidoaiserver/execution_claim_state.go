@@ -18,6 +18,11 @@ func rememberExecutionClaim(state *storeState, claim *executionClaim) error {
 	if state.executionClaims == nil {
 		state.executionClaims = map[string]executionClaim{}
 	}
+	if _, exists := state.executionClaims[claim.key()]; !exists {
+		if err := bumpDevicePolicyRevision(state, claim.DeviceID); err != nil {
+			return err
+		}
+	}
 	state.executionClaims[claim.key()] = *claim
 	return nil
 }

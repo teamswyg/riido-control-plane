@@ -16,6 +16,9 @@ on:
       - "cmd/riido_ai_server/authorizer_auth.go"
       - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
+      - "internal/riidoaiserver/*cli_installation*.go"
+      - "internal/riidoaiserver/dynamodb_device_policy*.go"
+      - "cmd/riido_ai_server/cli_installation*.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/authorization_coalescing*.go"
@@ -42,6 +45,9 @@ on:
       - "cmd/riido_ai_server/authorizer_auth.go"
       - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
+      - "internal/riidoaiserver/*cli_installation*.go"
+      - "internal/riidoaiserver/dynamodb_device_policy*.go"
+      - "cmd/riido_ai_server/cli_installation*.go"
       - "internal/riidoaiserver/doc.go"
       - "internal/riidoaiserver/authorization.go"
       - "internal/riidoaiserver/authorization_coalescing*.go"
@@ -81,7 +87,7 @@ jobs:
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
       - name: Test request authorization adapters
-        run: go test ./internal/riidoaiserver ./internal/authpep -run 'ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
+        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:
