@@ -21,7 +21,11 @@ func encodeSplitDynamoDBAIAgentClientSnapshot(snapshot AIAgentClientSnapshot, pr
 		if part.name != dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships && previousHashes != nil && previousHashes[part.name] == part.hash {
 			continue
 		}
-		items = append(items, dynamoDBAIAgentClientSnapshotPartItem(snapshot, part))
+		partItems, err := conversationPartItems(snapshot, part)
+		if err != nil {
+			return nil, nil, 0, err
+		}
+		items = append(items, partItems...)
 	}
 	items = append(items, dynamoDBAIAgentClientSnapshotManifestItem(snapshot, hashes))
 	return items, hashes, encodedBytes, nil

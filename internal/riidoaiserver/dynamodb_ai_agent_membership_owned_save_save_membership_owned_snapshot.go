@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"strings"
 )
 
 // Ordinary snapshot writers preserve the committed relation. Only a scoped
@@ -21,7 +22,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		oldMember := dynamoDBAIAgentClientSnapshotItemsByPart(committed)[dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships]
 		if (scoped || createMutation) && current != nil {
 			var committedHashes map[string]string
-			if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
+			if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 			}
 			if createMutation && !maps.Equal(s.partHashes, committedHashes) {
@@ -69,8 +70,17 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		}
 		var committedHashes map[string]string
 		if current != nil {
-			if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
+			if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
+			}
+			// Even an ordinary heartbeat/event writer must not replace conversation
+			// parts that another replica advanced after this writer's last load.
+			if snapshotHasConversationHistory(snapshot) || strings.Contains(dynamoDBStringValue(current, "part_hashes_json"), conversationHistoryManifestGuard) {
+				for _, part := range []string{dynamoDBAIAgentClientSnapshotPartTaskThreads, dynamoDBAIAgentClientSnapshotPartTaskThreadMessages} {
+					if s.partHashes[part] != committedHashes[part] {
+						return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, errTaskAgentSnapshotChanged
+					}
+				}
 			}
 		}
 		items, hashes, encoded, err := encodeSplitDynamoDBAIAgentClientSnapshot(snapshot, committedHashes)
@@ -78,7 +88,10 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 			return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 		}
 		stats := dynamoDBAIAgentClientSnapshotWritePressure(items)
-		writes := items
+		writes, err := s.stageConversationChunks(ctx, items, credentials)
+		if err != nil {
+			return stats, encoded, err
+		}
 
 		actions := []dynamoDBTransactWriteItem{}
 		if scoped {

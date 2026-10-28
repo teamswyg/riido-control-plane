@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -15,7 +14,7 @@ func decodeCommittedAIAgentClientPart(name string, current, item map[string]map[
 	if manifest == "" {
 		return nil // Legacy CURRENT has no membership commit; reconstruct from threads.
 	}
-	if err := json.Unmarshal([]byte(manifest), &hashes); err != nil {
+	if err := decodeConversationManifestHashes([]byte(manifest), &hashes); err != nil {
 		return fmt.Errorf("decode DynamoDB AI Agent client membership manifest: %w", err)
 	}
 	expected, advertised := hashes[name]

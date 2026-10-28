@@ -10,13 +10,14 @@ import (
 )
 
 type snapshotDynamoDBFixture struct {
-	requests             chan capturedDynamoDBRequest
-	mu                   sync.Mutex
-	items                map[string]map[string]map[string]string
-	server               *httptest.Server
-	store                *DynamoDBAIAgentClientSnapshot
-	metrics              *AIAgentClientPersistenceMetrics
-	failMembershipCommit bool
+	requests              chan capturedDynamoDBRequest
+	mu                    sync.Mutex
+	items                 map[string]map[string]map[string]string
+	server                *httptest.Server
+	store                 *DynamoDBAIAgentClientSnapshot
+	metrics               *AIAgentClientPersistenceMetrics
+	failMembershipCommit  bool
+	failConversationChunk bool
 }
 
 func newSnapshotDynamoDBFixture(t *testing.T, now time.Time, items map[string]map[string]map[string]string, metrics *AIAgentClientPersistenceMetrics) *snapshotDynamoDBFixture {
@@ -25,7 +26,7 @@ func newSnapshotDynamoDBFixture(t *testing.T, now time.Time, items map[string]ma
 		items = map[string]map[string]map[string]string{}
 	}
 	fixture := &snapshotDynamoDBFixture{
-		requests: make(chan capturedDynamoDBRequest, 32),
+		requests: make(chan capturedDynamoDBRequest, 256),
 		items:    items,
 		metrics:  metrics,
 	}
