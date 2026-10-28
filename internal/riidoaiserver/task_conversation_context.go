@@ -16,7 +16,11 @@ func appendTaskConversationContext(out *strings.Builder, thread AIAgentTaskThrea
 		if text == "" {
 			continue
 		}
-		part := "\n### Previous " + string(message.Role) + " message\n" + text + "\n"
+		author := string(message.Role)
+		if strings.HasPrefix(thread.ConversationID, "comment:") {
+			author = conversationMessageAuthor(message, history)
+		}
+		part := "\n### Previous " + author + " message\n" + text + "\n"
 		parts = append(parts, part)
 		remaining -= len([]rune(part))
 	}

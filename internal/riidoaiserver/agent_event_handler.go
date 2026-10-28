@@ -33,6 +33,10 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 			return
 		}
 	}
+	if err := s.dispatchCommentMentions(r.Context(), response.Event); err != nil {
+		writeError(w, http.StatusServiceUnavailable, "assignment event committed but comment handoff is pending; retry the same event")
+		return
+	}
 	logAgentResponseDelivery(req, response, receivedAt, committedAt, time.Now())
 	writeJSON(w, http.StatusOK, response)
 }

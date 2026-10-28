@@ -56,6 +56,9 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 		}
 		return AgentEventResponse{SchemaVersion: SchemaVersion, Assignment: copyAssignment(assignment), Event: existing}, nil
 	}
+	if err := validateNativeHistoryEvent(assignment, req); err != nil {
+		return AgentEventResponse{}, err
+	}
 	if req.EventType == assignmentcontract.EventAssignmentWaitingForUser && (!req.ConfirmationReason.Valid() || isTerminal(assignment.State) || assignment.State == AssignmentCancelling) {
 		return AgentEventResponse{}, errors.New("waiting event requires an active execution and confirmation_reason")
 	}

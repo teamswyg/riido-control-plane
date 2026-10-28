@@ -8,10 +8,12 @@ import (
 	"github.com/teamswyg/riido-contracts/assignment"
 )
 
+var errNativeSessionUnavailable = errors.New("native session unavailable; start a new conversation explicitly")
+
 // Select only the assignment behind the authorized thread. The daemon remains
 // the authority for its retained device/runtime/workdir/session binding.
 func (s Server) applyThreadNativeResume(ctx context.Context, principal AuthorizationResult, thread AIAgentTaskThreadRecord, req *AssignRequest, agentOwnerPrincipalID string) error {
-	if thread.AssignmentID == "" || !nativeFollowupProvider(req.RuntimeProvider) {
+	if thread.AssignmentID == "" || isNonDurableAssignmentID(thread.AssignmentID) || !nativeFollowupProvider(req.RuntimeProvider) {
 		return nil
 	}
 	reader, ok := s.assignment.(AssignmentProjectionReader)
@@ -23,12 +25,15 @@ func (s Server) applyThreadNativeResume(ctx context.Context, principal Authoriza
 		return assignmentDependencyFailure(err)
 	}
 	if !found {
-		return nil // Legacy histories can have no retained assignment/native pin.
+		return errNativeSessionUnavailable
 	}
 	previous := projection.Assignment
 	resumeID := assignment.ResumeSessionIDForAssignment(previous)
-	if !isTerminal(previous.State) || resumeID == "" {
+	if !isTerminal(previous.State) {
 		return nil
+	}
+	if resumeID == "" {
+		return errNativeSessionUnavailable
 	}
 	if previous.ID != thread.AssignmentID || previous.TaskID != thread.TaskID || previous.AgentID != thread.AgentID || previous.WorkspaceID != principal.WorkspaceID || previous.WorkspaceID != req.WorkspaceID {
 		return ErrAuthorizationForbidden

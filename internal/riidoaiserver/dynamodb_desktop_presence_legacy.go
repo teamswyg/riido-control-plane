@@ -2,7 +2,6 @@ package riidoaiserver
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 )
 
@@ -33,7 +32,7 @@ func (s *DynamoDBAIAgentClientSnapshot) readLegacyDesktopPresence(ctx context.Co
 		return nil, errors.New("desktop presence manifest is invalid")
 	}
 	var hashes map[string]string
-	if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &hashes); err != nil {
+	if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &hashes); err != nil {
 		return nil, err
 	}
 	if _, present := hashes[dynamoDBAIAgentClientSnapshotPartDeviceConnections]; present {

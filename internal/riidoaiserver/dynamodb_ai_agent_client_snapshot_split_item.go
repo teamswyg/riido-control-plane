@@ -16,7 +16,7 @@ func dynamoDBAIAgentClientSnapshotManifestItem(snapshot AIAgentClientSnapshot, h
 		"workspace_id":               {"S": snapshot.WorkspaceID},
 		"next_device_credential_seq": {"N": strconv.Itoa(snapshot.NextDeviceCredentialSeq)},
 		"next_daemon_command":        {"N": strconv.Itoa(snapshot.NextDaemonCommand)},
-		"part_hashes_json":           {"S": mustJSONDynamoDBAIAgentClientSnapshotPartHashes(hashes)},
+		"part_hashes_json":           {"S": conversationManifestHashes(snapshot, hashes)},
 	}
 }
 
