@@ -2,12 +2,12 @@ package riidoaiserver
 
 import "context"
 
-// threadReactionMutationContextKey names the one task thread whose reaction
+// threadReactionMutationContextKey carries the one task thread whose reaction
 // state the current save changes.
 type threadReactionMutationContextKey struct{}
 
-func withThreadReactionMutation(ctx context.Context, threadID string) context.Context {
-	return context.WithValue(ctx, threadReactionMutationContextKey{}, threadID)
+func withThreadReactionMutation(ctx context.Context, mutation threadReactionMutation) context.Context {
+	return context.WithValue(ctx, threadReactionMutationContextKey{}, mutation)
 }
 
 func mergeCommittedSharedSnapshotParts(ctx context.Context, items []map[string]map[string]string, requested *AIAgentClientSnapshot) error {
@@ -18,8 +18,9 @@ func mergeCommittedSharedSnapshotParts(ctx context.Context, items []map[string]m
 }
 
 // mergeCommittedThreadReactions keeps the committed reactions so a writer with
-// a stale cache never erases them. Only a reaction write replaces the state of
-// its own thread; it reloads fresh state right before it changes it.
+// a stale cache never erases them. Only a reaction write changes its own
+// thread, and it applies its own change on top of the committed state, so two
+// replicas that wrote the same thread at once both keep their change.
 func mergeCommittedThreadReactions(ctx context.Context, items []map[string]map[string]string, requested *AIAgentClientSnapshot) error {
 	current := dynamoDBAIAgentClientSnapshotCurrentItem(items)
 	parts := dynamoDBAIAgentClientSnapshotItemsByPart(items)
@@ -31,11 +32,12 @@ func mergeCommittedThreadReactions(ctx context.Context, items []map[string]map[s
 	for threadID, state := range committed.TaskThreadReactions {
 		merged[threadID] = state
 	}
-	if threadID, ok := ctx.Value(threadReactionMutationContextKey{}).(string); ok && threadID != "" {
-		if state, ok := requested.TaskThreadReactions[threadID]; ok {
-			merged[threadID] = state
+	if mutation, ok := ctx.Value(threadReactionMutationContextKey{}).(threadReactionMutation); ok && mutation.threadID != "" {
+		state := mergedThreadReactionState(merged[mutation.threadID], mutation.before, requested.TaskThreadReactions[mutation.threadID])
+		if state.isEmpty() {
+			delete(merged, mutation.threadID)
 		} else {
-			delete(merged, threadID)
+			merged[mutation.threadID] = state
 		}
 	}
 	requested.TaskThreadReactions = retainedTaskThreadReactions(merged, requested.TaskThreads)

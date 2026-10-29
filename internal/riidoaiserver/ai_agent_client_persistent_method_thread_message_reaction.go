@@ -13,8 +13,8 @@ func (s *PersistentAIAgentClientStore) ReactToAIAgentTaskThreadMessage(ctx conte
 }
 
 // saveThreadReactionUpdate changes one thread's reaction state on freshly
-// reloaded state and saves only that thread's part of the reactions. A failed
-// save forces the next operation to reload, so the unsaved change is dropped
+// reloaded state and saves only that change of the reactions. A failed save
+// forces the next operation to reload, so the unsaved change is dropped
 // instead of being reported as an already applied no-op.
 func (s *PersistentAIAgentClientStore) saveThreadReactionUpdate(ctx context.Context, threadID string, update func() (bool, error)) error {
 	s.operationMu.Lock()
@@ -23,11 +23,12 @@ func (s *PersistentAIAgentClientStore) saveThreadReactionUpdate(ctx context.Cont
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return err
 	}
+	mutation := threadReactionMutation{threadID: threadID, before: s.taskThreadReactionState(threadID)}
 	changed, err := update()
 	if err != nil || !changed {
 		return err
 	}
-	if err := s.saveSnapshot(withThreadReactionMutation(ctx, threadID)); err != nil {
+	if err := s.saveSnapshot(withThreadReactionMutation(ctx, mutation)); err != nil {
 		s.requireSnapshotReload()
 		return err
 	}
@@ -41,4 +42,10 @@ func (s *PersistentAIAgentClientStore) requireSnapshotReload() {
 	s.snapshotReloadMu.Lock()
 	s.snapshotReloadRequired = true
 	s.snapshotReloadMu.Unlock()
+}
+
+func (s *DevelopmentAIAgentClientStore) taskThreadReactionState(threadID string) AIAgentTaskThreadReactionState {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.taskThreadReactions[threadID]
 }

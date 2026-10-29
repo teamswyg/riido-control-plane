@@ -25,5 +25,8 @@ func (s *DevelopmentAIAgentClientStore) recordAssignmentStatusEventLocked(
 	if shouldFanoutStatus {
 		s.appendAgentTaskActionEvent(response)
 	}
+	if response.WorkStatus == AgentWorkStatusRunning && runAlreadyStarted(hadThread, previousThread, input.AssignmentID) {
+		return
+	}
 	s.appendTaskNotificationLocked(input.Event, response)
 }
