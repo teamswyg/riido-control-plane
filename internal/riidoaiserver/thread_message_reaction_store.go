@@ -38,6 +38,11 @@ func (s *DevelopmentAIAgentClientStore) ReactToAIAgentTaskThreadMessage(ctx cont
 	}
 	messages := s.taskThreadHistoryMessagesLocked(thread)
 	message, found := findTaskThreadHistoryMessage(messages, strings.TrimSpace(messageID))
+	if !found && strings.HasPrefix(strings.TrimSpace(messageID), "msg_agent_") {
+		// The agent message id changes with each run state; an id read before
+		// the change still means this thread's run.
+		message, found = findTaskThreadHistoryMessage(messages, taskThreadProjectionMessageID(thread))
+	}
 	if !found {
 		return threadMessageReactionChange{}, ErrAIAgentNotFound
 	}

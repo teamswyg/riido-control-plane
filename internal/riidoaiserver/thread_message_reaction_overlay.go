@@ -9,7 +9,9 @@ func withTaskThreadReactions(
 ) []AIAgentTaskThreadHistoryMessage {
 	statusEmoji := agentStatusReactionEmoji(thread.AssignmentState)
 	statusTarget := ""
-	if statusEmoji != "" {
+	// A run started by a monolith comment keeps its status reaction on that
+	// comment, never on a follow-up thread message.
+	if statusEmoji != "" && state.CommentEventID == "" {
 		statusTarget = taskThreadStatusReactionTarget(thread, messages)
 	}
 	if len(state.Members) == 0 && statusTarget == "" {

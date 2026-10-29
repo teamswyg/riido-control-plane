@@ -54,5 +54,10 @@ func TestThreadMessageReactionsSurviveSnapshotAndSplitParts(t *testing.T) {
 		t.Fatal(err)
 	}
 	reloaded := reactionHistoryMessage(t, restored, owner, taskID, threadID, AIAgentTaskThreadMessageRoleUser)
-	assertReactions(t, reloaded.Reactions, "1f44d:member:user-1", "1f440:agent:agent-public-openclaw")
+	// The linked comment holds the status reaction, so the thread message keeps
+	// only the member reaction.
+	assertReactions(t, reloaded.Reactions, "1f44d:member:user-1")
+	if plans := restored.CommentStatusReactionPlans(taskID); len(plans) != 1 || plans[0].EventID != "event-1" {
+		t.Fatalf("restored comment link plans = %+v", plans)
+	}
 }

@@ -3,9 +3,9 @@ package riidoaiserver
 const agentTaskNotificationStarted = "started"
 
 // startedNotificationKindLocked sends the started push once per assignment,
-// when the run starts working. runAlreadyStarted keeps it once even after the
-// first push leaves the event replay buffer. Only runs started from a thread message or a
+// when the run starts working. Only runs started from a thread message or a
 // monolith comment qualify, because those are the runs that receive 1f440.
+// runAlreadyStarted keeps it once after a confirmation resume.
 func (s *DevelopmentAIAgentClientStore) startedNotificationKindLocked(event TaskEvent, response AIAgentTaskActionResponse) string {
 	if event.Type != EventAssignmentRunning || response.ConfirmationReason != "" {
 		return ""

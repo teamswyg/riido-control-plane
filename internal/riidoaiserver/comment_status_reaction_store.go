@@ -44,10 +44,10 @@ func (s *DevelopmentAIAgentClientStore) MarkCommentStatusReactionApplied(ctx con
 
 func (s *DevelopmentAIAgentClientStore) markCommentStatusReactionApplied(ctx context.Context, workspaceID, threadID, emoji string) (bool, error) {
 	return s.updateTaskThreadReactionState(ctx, workspaceID, threadID, func(state *AIAgentTaskThreadReactionState) bool {
-		if state.CommentEventID == "" || state.CommentReactionApplied == emoji {
+		if state.CommentEventID == "" || state.CommentReactionApplied == appliedCommentReaction(emoji) {
 			return false
 		}
-		state.CommentReactionApplied = emoji
+		state.CommentReactionApplied = appliedCommentReaction(emoji)
 		return true
 	})
 }

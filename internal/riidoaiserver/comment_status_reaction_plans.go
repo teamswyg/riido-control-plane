@@ -13,9 +13,22 @@ func (s *DevelopmentAIAgentClientStore) CommentStatusReactionPlans(taskID string
 		if !ok || state.CommentEventID == "" {
 			continue
 		}
-		if emoji := agentStatusReactionEmoji(thread.AssignmentState); emoji != state.CommentReactionApplied {
+		if emoji := agentStatusReactionEmoji(thread.AssignmentState); appliedCommentReaction(emoji) != state.CommentReactionApplied {
 			plans = append(plans, commentStatusReactionPlan{WorkspaceID: s.taskThreadWorkspaceIDLocked(thread), ThreadID: thread.ThreadID, EventID: state.CommentEventID, Emoji: emoji})
 		}
 	}
 	return plans
+}
+
+// commentReactionCleared records a confirmed removal. An empty applied value
+// only means nothing was confirmed: a 👀 write may have reached monolith
+// before its record failed, so a run without a reaction still writes the
+// removal once.
+const commentReactionCleared = "-"
+
+func appliedCommentReaction(emoji string) string {
+	if emoji == "" {
+		return commentReactionCleared
+	}
+	return emoji
 }
