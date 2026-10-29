@@ -28056,6 +28056,80 @@
       ],
       "decision": "Implement default-off captured read scope with bounded storage and exact leaf authority. Synthetic HTTP/Dynamo fixtures and separate actual monolith PostgreSQL tests are source evidence, not live deployment or provider acceptance. Actual producer-consumer wire and CLI traversal, complete generated/repository checks, and explicit rollout authorization remain gates; all serving writers must understand the new snapshot schema before activation.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_run_read_grouping_5917",
+      "observation": "The read UI (RIID-5917) groups sources by work or meeting and shows a collapsed count, but GET run reads returned no owner for links, attachments, comments or Agent profiles and no total, so each card would page through every read. The read-scope capture also recorded links, related titles and parent summaries as via=prompt although that prompt only carries the task document preview, hierarchy titles and the request, and it dropped the triggering comment.",
+      "hypothesis": "The owner is already known while visibility metadata is rebuilt from the current viewer context, and the existing filter loop sees every visible read, so owner, listed and source_total can be derived at response time without storage, SSE or extra monolith calls. Recording read-scope prompt evidence from the prompt's actual sections makes via=prompt truthful.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_owner.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_extended.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_agents.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_current_sources.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_capture.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_owner_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_source_total_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_fail_closed_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Owners are attached only to keys already visible in the current viewer context: current-task links, attachments and comments belong to the task, hierarchy links to their project, milestone or parent task, read-scope child sources to their page's work or meeting, and every Agent profile to one agent_directory group. listed is false only for via=prompt title or summary reads. source_total counts visible groups with a listed read across all pages in the existing loop. Read-scope prompt evidence is limited to the task document, hierarchy titles and the triggering comment. SSE, storage and the default-off read-scope flag are unchanged; the canonical contract is riido-contracts#235 without a new tag.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {

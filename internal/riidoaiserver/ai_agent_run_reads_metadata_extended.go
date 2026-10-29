@@ -22,5 +22,6 @@ func addRunReadExtendedMetadata(metadata map[runReadSourceKey]runReadMetadata, c
 	}
 	for i, source := range assignmentContextCommentSources(extended.Comments) {
 		addRunReadMetadata(metadata, source, "", !extended.Comments[i].Truncated)
+		setRunReadOwner(metadata, source, runReadOwner{"task", current.Component.ID})
 	}
 }

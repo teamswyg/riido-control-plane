@@ -24,7 +24,7 @@ func (s Server) addVisibleAgentReadSources(w http.ResponseWriter, r *http.Reques
 	}
 	for _, agent := range list.Agents {
 		entry := AgentDirectoryEntry{AgentID: agent.AgentID, Name: strings.TrimSpace(agent.Name), Description: strings.TrimSpace(agent.Description), UpdatedAt: agent.UpdatedAt}
-		visible[runReadSourceKey{"agent", agent.AgentID, "profile"}] = runReadMetadata{title: entry.Name, source: agentDirectorySource(entry), comparable: true}
+		visible[runReadSourceKey{"agent", agent.AgentID, "profile"}] = runReadMetadata{owner: runReadOwner{kind: runReadOwnerAgentDirectory}, title: entry.Name, source: agentDirectorySource(entry), comparable: true}
 	}
 	return true
 }

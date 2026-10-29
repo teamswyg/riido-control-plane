@@ -44,9 +44,21 @@ export interface AIAgentRunRead {
   id?: string;
   kind: "task" | "project" | "milestone" | "parent_task" | "link" | "attachment" | "related_task" | "related_backlog" | "related_intake" | "related_meeting" | "comment" | "target" | "agent";
   /**
+   * 조회 자료 화면 목록에 표시할지 여부입니다. 프롬프트로 제목·요약만 전달된 기록(via=prompt, part=title 또는 summary)은 false입니다.
+   */
+  listed: boolean;
+  /**
    * 현재 조회자에게 보이는 자료와 기록된 조회 시점의 버전을 비교한 결과입니다. 수정이 확인되면 true, 비교 가능한 버전이 같으면 false이며, 부분 본문 등으로 비교할 수 없으면 생략합니다. 조회 시각만으로 수정 여부를 추정하지 않습니다.
    */
   modified_since_read?: boolean;
+  /**
+   * owner_kind가 가리키는 작업·미팅 ID입니다. `agent_directory`는 ID 없이 생략합니다.
+   */
+  owner_id?: string;
+  /**
+   * 링크·첨부·댓글·Agent 프로필이 속한 작업·미팅 종류입니다. Agent 프로필은 `agent_directory` 하나로 묶습니다. 기록 자체가 묶음 기준이면 생략합니다. 현재 조회자에게 보이는 자료로만 계산합니다.
+   */
+  owner_kind?: string;
   part: "body" | "summary" | "title" | "metadata" | "base" | "task" | "tree" | "resources" | "comments" | "profile";
   served_at: string;
   status: "served" | "truncated" | "denied" | "unavailable";
@@ -70,6 +82,10 @@ export interface AIAgentRunReadsResponse {
   reads: AIAgentRunRead[];
   run_id: string;
   schema_version: string;
+  /**
+   * 현재 조회자에게 보이는 기록을 owner(없으면 기록 자체) 단위로 묶어, listed 기록이 하나 이상인 묶음 수입니다. 모든 페이지를 합한 값이며 숨긴 자료는 세지 않습니다.
+   */
+  source_total: number;
   task_id: string;
   thread_id: string;
 }
