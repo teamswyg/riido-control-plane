@@ -285,7 +285,12 @@
         "fixed-private-errors-and-no-browser-auth-surface",
         "policy-blocked-or-unknown-never-allowed",
         "service-auth-original-consumed-intent-receipt-with-exact-identity",
-        "historical-link-receipt-never-substitutes-current-policy"
+        "historical-link-receipt-never-substitutes-current-policy",
+        "explicit-v2-request-id-with-legacy-v1-preserved",
+        "atomic-original-intent-response-replay-with-exact-immutable-payload",
+        "uncertain-snapshot-save-retains-original-pair-in-full-actor-state",
+        "snapshot-replay-ack-requires-successful-save-of-the-same-pair",
+        "replay-never-renews-expiry-or-promotes-current-permission"
       ]
     }
   ],
@@ -737,6 +742,14 @@
       "contains": [
         "TestCLIInstallationReceiptRequiresOriginalConsumedIntent",
         "TestCLIInstallationReceiptRejectsMismatchedBinding"
+      ]
+    },
+    {
+      "name": "cli-installation-intent-original-response-regression",
+      "file": "internal/riidoaiserver/cli_installation_intent_replay_test.go",
+      "contains": [
+        "TestCLIInstallationIntentV2ReplaysOriginalResponse",
+        "TestCLIInstallationIntentV1RejectsReplayRequestID"
       ]
     }
   ],

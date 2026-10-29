@@ -43,6 +43,7 @@ type cliInstallationIntent struct {
 	ChallengeDigest string                       `json:"challenge_digest"`
 	ExpiresAt       time.Time                    `json:"expires_at"`
 	Consumed        bool                         `json:"consumed"`
+	ReplayKey       string                       `json:"replay_key,omitempty"`
 }
 
 type cliInstallationLink struct {
@@ -57,6 +58,7 @@ type cliInstallationLink struct {
 
 type cliInstallationRepository interface {
 	createCLIInstallationIntent(context.Context, cliInstallationIntent) error
+	createOrReplayCLIInstallationIntent(context.Context, cliInstallationIntentReplay) (cliInstallationIntentReplayResponse, error)
 	confirmCLIInstallationLink(context.Context, string, authenticatedClaimDevice, string, string) (cliInstallationLink, error)
 	readCLIInstallationPolicy(context.Context, cliInstallationIdentity, cliInstallationDeviceOwnerReader) (cliInstallationPolicy, error)
 	readCLIInstallationReceipt(context.Context, cliInstallationReceiptRequest) (cliInstallationReceipt, error)
