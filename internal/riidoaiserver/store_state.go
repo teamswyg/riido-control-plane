@@ -8,6 +8,7 @@ type taskRecord struct {
 
 type storeState struct {
 	cliInstallationIntents  map[string]cliInstallationIntent
+	cliInstallationReplays  map[string]cliInstallationIntentReplay
 	cliInstallationLinks    map[string]cliInstallationLink
 	devicePolicyRevisions   map[string]uint64
 	executionTerminations   map[string]executionTerminationReceipt
@@ -47,6 +48,7 @@ type eventAppendLatencyMetrics struct {
 func newStoreState() storeState {
 	return storeState{
 		cliInstallationIntents: map[string]cliInstallationIntent{},
+		cliInstallationReplays: map[string]cliInstallationIntentReplay{},
 		cliInstallationLinks:   map[string]cliInstallationLink{},
 		devicePolicyRevisions:  map[string]uint64{},
 		executionClaims:        map[string]executionClaim{},

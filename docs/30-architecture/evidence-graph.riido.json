@@ -26517,8 +26517,8 @@
     },
     {
       "id": "cli_installation_service_link_and_revision_5900",
-      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy.",
-      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects.",
+      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy. The original link receipt cannot recover an intent creation response lost before the monolith learns the random ID/challenge; a digest alone cannot recreate that response.",
+      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects. Bind the monolith persisted request ID to the exact immutable v2 payload and original response, publishing both request and intent atomically. Domain-separated length-prefixed deterministic intent IDs make an intent-only collision fail closed instead of silently issuing a replacement.",
       "claims": [
         "cli_installation_link_must_preserve_key_and_policy_fences",
         "request_authorization_must_preserve_security_boundary",
@@ -26649,6 +26649,50 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/server_route_registry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_digest.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_restore.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_intent_replay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_intent_replay_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_intent_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_intent_random.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_intent.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_intent_replay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_state.go"
         }
       ],
       "verifiers": [
@@ -26739,6 +26783,50 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/cli_installation_confirmation_clock_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_concurrent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_conflict_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_corruption_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_decode_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_expiry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_restore_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_validation_test.go"
         }
       ],
       "evidence": [
@@ -26758,7 +26846,7 @@
           "redacted": true
         }
       ],
-      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed. A new private receipt route reads the original consumed intent/link through the existing actor or durable store without mutation, revision changes, or present permission promotion. Exact service scope and identity, pending/expired rejection, snapshot/Dynamo restart, strict LinkedAt-before-expiry, and one-clock confirm/replay are tested. The route registry adds one entry; no throughput or latency improvement is claimed, and no live AWS or deployment acceptance follows from these fixtures.",
+      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed. A new private receipt route reads the original consumed intent/link through the existing actor or durable store without mutation, revision changes, or present permission promotion. Exact service scope and identity, pending/expired rejection, snapshot/Dynamo restart, strict LinkedAt-before-expiry, and one-clock confirm/replay are tested. The route registry adds one entry; no throughput or latency improvement is claimed, and no live AWS or deployment acceptance follows from these fixtures. Actual v2 HTTP rejection was observed before implementation. Existing v1 regression exposed that the shared JSON decoder requires every declared field; a bounded route-local schema probe now selects the exact v1/v2 key set and the unchanged strict decoder remains authoritative. The tests cover same/consumed/expired replay, eight concurrent requests, failed/acknowledgement-lost transactions, restart, immutable payload conflicts, orphan/corrupt record pairs, legacy snapshot restore, and domain/tuple separation. Snapshot publication and Dynamo two-item CAS preserve the original challenge and expiry without changing link or coverage revisions. No new endpoint, shared contract tag, live deployment, public linking orchestration, OS key acceptance or performance improvement is claimed.",
       "next_loop": "closed_loop_candidate"
     },
     {
