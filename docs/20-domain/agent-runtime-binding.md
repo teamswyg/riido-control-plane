@@ -54,6 +54,9 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | `legacy-grant-backfill` | - | snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants |
 | `cross-workspace-bindings` | - | daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids |
 | `legacy-runtime-prune` | - | agentd-local runtimes are pruned from restored snapshots |
+| `snapshot-preserves-observed-liveness` | - | Snapshot reload preserves newer in-process heartbeat timestamps only for still-present device/runtime/daemon identities with unchanged credentials and daemon session; deleted or revoked identities and newer durable observations remain authoritative. |
+| `optional-provider-version` | - | Successful version observations carry an optional timestamp; absent or malformed timestamps remain unknown. Malformed optional CLI version metadata becomes version-probe-failed without rejecting the runtime heartbeat; model normalization never invents a default from ordering. |
+| `verified-device-id-precedence` | - | Re-enrollment with an existing owner/workspace-authorized device_id preserves that device and its machine identity even when a local machine_id differs; names never prove physical identity. |
 | `runtime-liveness-heartbeat-tolerance` | - | runtime and daemon bindings remain live across two legacy heartbeat windows and become stale only after 45 seconds without a snapshot |
 
 ## Non-Goals

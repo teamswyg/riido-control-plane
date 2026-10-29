@@ -457,6 +457,9 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	nextSubscriberID := s.nextSubscriberID
 	devices := pruneLegacyRuntimeRecords(copyDevices(snapshot.Devices))
 	devices = backfillRuntimeProviderVersionsFromSeed(devices, s.devices)
+	if preserveSubscribers {
+		s.preserveRuntimeSnapshotLivenessLocked(devices, daemons, deviceCredentials)
+	}
 	s.workspaceID = strings.TrimSpace(snapshot.WorkspaceID)
 	s.devices = devices
 	s.deviceCredentials = deviceCredentials

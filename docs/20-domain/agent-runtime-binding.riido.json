@@ -32,6 +32,9 @@
     {"id": "legacy-grant-backfill", "rule": "snapshot restore backfills the original credential owner connection when older snapshots have no explicit grants"},
     {"id": "cross-workspace-bindings", "rule": "daemon agent-bindings include every agent whose verified runtime binding targets the device, even when the agent workspace is not in connected_workspace_ids"},
     {"id": "legacy-runtime-prune", "rule": "agentd-local runtimes are pruned from restored snapshots"},
+    {"id": "snapshot-preserves-observed-liveness", "rule": "Snapshot reload preserves newer in-process heartbeat timestamps only for still-present device/runtime/daemon identities with unchanged credentials and daemon session; deleted or revoked identities and newer durable observations remain authoritative."},
+    {"id": "optional-provider-version", "rule": "Successful version observations carry an optional timestamp; absent or malformed timestamps remain unknown. Malformed optional CLI version metadata becomes version-probe-failed without rejecting the runtime heartbeat; model normalization never invents a default from ordering."},
+    {"id": "verified-device-id-precedence", "rule": "Re-enrollment with an existing owner/workspace-authorized device_id preserves that device and its machine identity even when a local machine_id differs; names never prove physical identity."},
     {"id": "runtime-liveness-heartbeat-tolerance", "rule": "runtime and daemon bindings remain live across two legacy heartbeat windows and become stale only after 45 seconds without a snapshot"}
   ],
   "source_checks": [

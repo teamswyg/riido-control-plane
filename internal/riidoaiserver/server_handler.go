@@ -12,5 +12,5 @@ func (s Server) Handler() http.Handler {
 	}
 	handler = withHTTPTransactionMetrics(handler, s.config.HTTPTransactions)
 	handler = withHTTPTracing(handler, s.config.TraceRecorder)
-	return handler
+	return withRequestCorrelation(handler)
 }

@@ -8,8 +8,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"unicode"
-	"unicode/utf8"
 
 	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
@@ -517,10 +515,7 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			runtime.DetectionState != RuntimeDetectionStateError {
 			return nil, fmt.Errorf("runtimes[%d].detection_state is invalid", i)
 		}
-		providerVersion, err := normalizeRuntimeProviderVersion(runtime.ProviderVersion)
-		if err != nil {
-			return nil, fmt.Errorf("runtimes[%d].provider_version: %w", i, err)
-		}
+		providerVersion := normalizeRuntimeSnapshotVersion(&runtime)
 		healthStatus, diagnosticCode, diagnosticSummary, err := normalizeRuntimeProviderHealth(runtime)
 		if err != nil {
 			return nil, fmt.Errorf("runtimes[%d].provider_health: %w", i, err)
@@ -534,6 +529,7 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,
 			ProviderVersion:           providerVersion,
+			ProviderVersionObservedAt: normalizeVersionObservedAt(runtime.ProviderVersionObservedAt, providerVersion, now),
 			HealthStatus:              healthStatus,
 			DiagnosticCode:            diagnosticCode,
 			DiagnosticSummary:         diagnosticSummary,
@@ -544,22 +540,6 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 		})
 	}
 	return out, nil
-}
-
-func normalizeRuntimeProviderVersion(value string) (string, error) {
-	value = strings.TrimSpace(value)
-	if value == "" {
-		return "", nil
-	}
-	if utf8.RuneCountInString(value) > 128 {
-		return "", errors.New("must be 128 characters or fewer")
-	}
-	for _, r := range value {
-		if unicode.IsControl(r) {
-			return "", errors.New("must not contain control characters")
-		}
-	}
-	return value, nil
 }
 
 func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {
@@ -580,7 +560,6 @@ func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {
 func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []RuntimeModelRecord {
 	out := make([]RuntimeModelRecord, 0, len(models))
 	seen := map[string]struct{}{}
-	hasDefault := false
 	for _, model := range models {
 		model.ModelID = strings.TrimSpace(model.ModelID)
 		model.Label = strings.TrimSpace(model.Label)
@@ -594,16 +573,10 @@ func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []Run
 		if model.Label == "" {
 			model.Label = model.ModelID
 		}
-		if model.IsDefault {
-			hasDefault = true
-		}
 		out = append(out, model)
 	}
 	if len(out) == 0 {
 		return []RuntimeModelRecord{defaultRuntimeModel(kind)}
-	}
-	if !hasDefault {
-		out[0].IsDefault = true
 	}
 	return out
 }

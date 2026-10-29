@@ -4,6 +4,14 @@ import "fmt"
 
 func (s *DevelopmentAIAgentClientStore) enrollmentDeviceIDLocked(enrollment normalizedDeviceEnrollment) (string, error) {
 	switch {
+	case enrollment.deviceID != "":
+		existing, ok := s.deviceCredentials[enrollment.deviceID]
+		if !ok ||
+			existing.ownerPrincipalID != enrollment.principalID ||
+			existing.workspaceID != enrollment.workspaceID {
+			return "", ErrAuthorizationForbidden
+		}
+		return enrollment.deviceID, nil
 	case enrollment.machineID != "":
 		for deviceID, existing := range s.deviceCredentials {
 			if existing.machineID != enrollment.machineID {
@@ -26,14 +34,6 @@ func (s *DevelopmentAIAgentClientStore) enrollmentDeviceIDLocked(enrollment norm
 			return newCoverageIdentity(executionCoveragePrefix)
 		}
 		return deviceID, nil
-	case enrollment.deviceID != "":
-		existing, ok := s.deviceCredentials[enrollment.deviceID]
-		if !ok ||
-			existing.ownerPrincipalID != enrollment.principalID ||
-			existing.workspaceID != enrollment.workspaceID {
-			return "", ErrAuthorizationForbidden
-		}
-		return enrollment.deviceID, nil
 	default:
 		if enrollment.coverageProtocol != "" {
 			return newCoverageIdentity(executionCoveragePrefix)
