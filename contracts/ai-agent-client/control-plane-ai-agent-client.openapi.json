@@ -190,6 +190,15 @@
           "path": [
             "aiAgent",
             "tasks",
+            "threadMessages",
+            "reactions"
+          ],
+          "description": "task thread message에 사람 멤버가 emoji reaction을 남기거나 지우는 namespace입니다. AI Agent reaction은 control-plane이 실행 상태에 따라 직접 기록합니다."
+        },
+        {
+          "path": [
+            "aiAgent",
+            "tasks",
             "threadStreamSubscription"
           ],
           "description": "선택된 workspace의 task에서 활성 thread filter 목록과 공통 SSE stream handoff를 조회하는 namespace입니다."
@@ -4981,6 +4990,211 @@
         }
       }
     },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages/{message_id}/reactions": {
+      "post": {
+        "operationId": "addAIAgentTaskThreadMessageReactionV2",
+        "summary": "task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thread_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAIAgentTaskThreadMessageReactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadMessageReactionsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ],
+        "x-riido-rbac-policy": "task_thread_message_reaction.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threadMessages",
+            "reactions",
+            "add"
+          ],
+          "generated_path": "v2.aiAgent.tasks.threadMessages.reactions.add",
+          "invalidates": [
+            "v3.aiAgent.tasks.threads"
+          ]
+        },
+        "x-riido-scenarios": [
+          "addAIAgentTaskThreadMessageReactionV2.member-reaction-is-idempotent",
+          "addAIAgentTaskThreadMessageReactionV2.progress-message-is-not-reactable"
+        ]
+      }
+    },
+    "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages/{message_id}/reactions/{emoji}": {
+      "delete": {
+        "operationId": "deleteAIAgentTaskThreadMessageReactionV2",
+        "summary": "task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)",
+        "tags": [
+          "ai_agent_client"
+        ],
+        "parameters": [
+          {
+            "name": "emoji",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "thread_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAgentTaskThreadMessageReactionsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-riido-auth-scopes": [
+          "ai-agent:write",
+          "task:{task_id}:comment"
+        ],
+        "x-riido-rbac-policy": "task_thread_message_reaction.v1",
+        "x-riido-operation-kind": "command",
+        "x-riido-client": {
+          "module": "v2",
+          "facade_path": [
+            "aiAgent",
+            "tasks",
+            "threadMessages",
+            "reactions",
+            "delete"
+          ],
+          "generated_path": "v2.aiAgent.tasks.threadMessages.reactions.delete",
+          "invalidates": [
+            "v3.aiAgent.tasks.threads"
+          ]
+        },
+        "x-riido-scenarios": [
+          "deleteAIAgentTaskThreadMessageReactionV2.member-deletes-only-its-own-reaction"
+        ]
+      }
+    },
     "/v3/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads": {
       "get": {
         "operationId": "listAIAgentTaskThreadHistoryV3",
@@ -5138,6 +5352,59 @@
           "next_action"
         ],
         "type": "object"
+      },
+      "AIAgentMessageReaction": {
+        "description": "한 message에 같은 emoji로 남은 reaction 묶음입니다. 사람과 AI Agent reaction을 함께 셉니다.",
+        "properties": {
+          "actors": {
+            "description": "reaction을 남긴 순서대로 정렬합니다.",
+            "items": {
+              "$ref": "#/components/schemas/AIAgentMessageReactionActor"
+            },
+            "type": "array"
+          },
+          "count": {
+            "description": "actors 수와 같습니다.",
+            "type": "integer"
+          },
+          "emoji": {
+            "description": "monolith 댓글 reaction과 같은 정규화 값입니다. 소문자 unified codepoint를 '-'로 이은 문자열이며 (예: 👀 1f440, ✅ 2705, ❌ 274c), 서버는 monolith reaction emoji catalog와 같은 규칙으로 정규화합니다.",
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{2,6}(-[0-9a-f]{2,6})*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "emoji",
+          "count",
+          "actors"
+        ],
+        "type": "object"
+      },
+      "AIAgentMessageReactionActor": {
+        "description": "reaction 하나를 남긴 사람 멤버 또는 AI Agent입니다.",
+        "properties": {
+          "id": {
+            "description": "kind가 member이면 Riido user id, agent이면 agent_id입니다.",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AIAgentMessageReactionActorKind"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "type": "object"
+      },
+      "AIAgentMessageReactionActorKind": {
+        "description": "task thread message reaction을 남긴 주체 종류입니다. 화면은 두 종류를 같은 reaction chip에 함께 셉니다.",
+        "enum": [
+          "member",
+          "agent"
+        ],
+        "type": "string"
       },
       "AIAgentOnboardingLocale": {
         "description": "온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.",
@@ -5655,6 +5922,29 @@
         ],
         "type": "object"
       },
+      "AIAgentTaskThreadMessageReactionsResponse": {
+        "description": "reaction 변경 뒤 대상 message의 전체 reaction 목록입니다. client는 이 응답으로 해당 message의 reaction chip을 바로 갱신합니다.",
+        "properties": {
+          "message_id": {
+            "type": "string"
+          },
+          "reactions": {
+            "items": {
+              "$ref": "#/components/schemas/AIAgentMessageReaction"
+            },
+            "type": "array"
+          },
+          "thread_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "thread_id",
+          "message_id",
+          "reactions"
+        ],
+        "type": "object"
+      },
       "AIAgentTaskThreadMessageRole": {
         "description": "v3 task thread history에서 한 message row의 작성 주체 또는 진행 로그 역할입니다.",
         "enum": [
@@ -5830,6 +6120,21 @@
           "agent_id",
           "thread_id",
           "run_id"
+        ],
+        "type": "object"
+      },
+      "AddAIAgentTaskThreadMessageReactionRequest": {
+        "description": "사람 멤버가 task thread message에 emoji reaction을 남기는 요청입니다. AI Agent reaction은 이 요청으로 만들 수 없습니다.",
+        "properties": {
+          "emoji": {
+            "description": "monolith 댓글 reaction과 같은 정규화 값입니다. 소문자 unified codepoint를 '-'로 이은 문자열이며 (예: 👀 1f440, ✅ 2705, ❌ 274c), 서버는 monolith reaction emoji catalog와 같은 규칙으로 정규화합니다.",
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{2,6}(-[0-9a-f]{2,6})*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "emoji"
         ],
         "type": "object"
       },
@@ -6664,6 +6969,7 @@
           },
           "notification_type": {
             "enum": [
+              "started",
               "result_ready",
               "answer_required",
               "approval_required",
@@ -6797,6 +7103,13 @@
           "observed_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "reactions": {
+            "description": "role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.",
+            "items": {
+              "$ref": "#/components/schemas/AIAgentMessageReaction"
+            },
+            "type": "array"
           },
           "seq": {
             "type": "integer"
