@@ -295,9 +295,10 @@ func TestAIAgentGeneratedEndpointSmokeMatrixMatchesOpenAPI(t *testing.T) {
 	openAPI := readAIAgentGeneratedOpenAPIOperations(t)
 	matrix := readAIAgentGeneratedSmokeMatrix(t)
 	knownEvidenceTests := map[string]struct{}{
-		"TestHTTPAIAgentClientGeneratedEndpointSmokeV1": {},
-		"TestHTTPAIAgentClientGeneratedEndpointSmokeV2": {},
-		"TestHTTPAIAgentClientV3ThreadHistory":          {},
+		"TestMessageReactionHTTPAuthorizesAndPersistsActor": {},
+		"TestHTTPAIAgentClientGeneratedEndpointSmokeV1":     {},
+		"TestHTTPAIAgentClientGeneratedEndpointSmokeV2":     {},
+		"TestHTTPAIAgentClientV3ThreadHistory":              {},
 	}
 
 	if matrix.SchemaVersion != "riido-ai-agent-generated-endpoint-smoke-matrix.v1" {

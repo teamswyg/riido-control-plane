@@ -28,6 +28,7 @@ func (s Server) handleAIAgentClientStopTask(w http.ResponseWriter, r *http.Reque
 		writeAIAgentClientError(w, err)
 		return
 	}
+	s.scheduleCommentStatusReactions(r.Context(), principal, taskID)
 	writeJSON(w, http.StatusAccepted, response)
 }
 
@@ -49,5 +50,6 @@ func (s Server) handleAIAgentClientStopTaskAgentAssignment(w http.ResponseWriter
 		writeAIAgentClientError(w, err)
 		return
 	}
+	s.scheduleCommentStatusReactions(r.Context(), principal, taskID)
 	writeJSON(w, http.StatusAccepted, response)
 }

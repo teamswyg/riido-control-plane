@@ -25,6 +25,7 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskThreadHistory(ctx context
 		Threads:          threads,
 		AgentSnapshots:   snapshots,
 	}
+	s.projectAgentMessageReactionsLocked(response.Threads)
 	suppressSupersededQueuedHistoryMessages(response.Threads)
 	response.ActiveStream = taskThreadHistoryActiveStream(response.Threads)
 	return response, nil
@@ -66,7 +67,18 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryMessagesLocked(thread A
 		progress,
 	)
 	if message, ok := taskThreadProjectionMessage(thread); ok {
-		out = append(out, message)
+		found := false
+		for i := range out {
+			if out[i].MessageID == message.MessageID {
+				message.Reactions = out[i].Reactions
+				out[i] = message
+				found = true
+				break
+			}
+		}
+		if !found {
+			out = append(out, message)
+		}
 	}
 	sortTaskThreadHistoryMessages(out)
 	return out
