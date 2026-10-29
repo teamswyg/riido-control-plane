@@ -5,6 +5,7 @@ import "strings"
 // GET-only metadata is derived from the same current, viewer-authorized context
 // as visibility. It never loads retained snapshots or triggers a second read.
 type runReadMetadata struct {
+	owner      runReadOwner
 	title      string
 	source     AssignmentContextSource
 	comparable bool
@@ -19,12 +20,12 @@ func currentRunReadMetadata(current AIAgentTaskContext) map[runReadSourceKey]run
 	}
 	addRunReadMetadata(metadata, assignmentContextTaskSource(current, "title"), current.Component.Title, false)
 	addRunReadMetadata(metadata, assignmentContextTaskSource(current, "body"), current.Component.Title, current.Document.Status != "partial")
-	addRunReadResourceMetadata(metadata, current.Resources)
+	addRunReadResourceMetadata(metadata, current.Resources, runReadOwner{"task", current.Component.ID})
 	for _, ref := range assignmentContextHierarchyRefs(current.Hierarchy) {
 		canCompare := ref.ref.Document != nil && ref.ref.Document.Status != "partial" && ref.ref.DocumentStatus != "partial"
 		sources := assignmentContextReferenceSources(ref.kind, ref.ref)
 		addRunReadMetadata(metadata, sources[0], ref.ref.Title, canCompare)
-		addRunReadResourceMetadata(metadata, ref.ref.Resources)
+		addRunReadResourceMetadata(metadata, ref.ref.Resources, runReadOwner{ref.kind, ref.ref.ID})
 	}
 	addRunReadExtendedMetadata(metadata, current)
 	addReadScopeCurrentMetadata(metadata, current)
@@ -36,7 +37,8 @@ func addRunReadMetadata(metadata map[runReadSourceKey]runReadMetadata, source As
 	if _, visible := metadata[key]; !visible {
 		return
 	}
-	value := runReadMetadata{title: strings.TrimSpace(title), source: source, comparable: canCompare}
+	// A later, more specific source keeps the owner an earlier pass assigned.
+	value := runReadMetadata{owner: metadata[key].owner, title: strings.TrimSpace(title), source: source, comparable: canCompare}
 	metadata[key] = value
 	if source.Part == "body" {
 		// Prompt summaries record the hash of the same source document, not the
@@ -50,9 +52,10 @@ func addRunReadMetadata(metadata map[runReadSourceKey]runReadMetadata, source As
 	}
 }
 
-func addRunReadResourceMetadata(metadata map[runReadSourceKey]runReadMetadata, resources []AIAgentTaskContextResource) {
+func addRunReadResourceMetadata(metadata map[runReadSourceKey]runReadMetadata, resources []AIAgentTaskContextResource, owner runReadOwner) {
 	sources := assignmentContextResourceSources(resources)
 	for i, source := range sources {
 		addRunReadMetadata(metadata, source, resources[i].Title, false)
+		setRunReadOwner(metadata, source, owner)
 	}
 }

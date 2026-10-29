@@ -25,7 +25,8 @@ func TestCommentDeliveryReadScopeNegotiationAndBoundedFullCapture(t *testing.T) 
 				if scenario == "legacy" {
 					want = ""
 				}
-				if r.Header.Get(commentReadScopeVersionHeader) != want {
+				// RIID-5907 reaction writes share this upstream; only evidence reads negotiate scope.
+				if r.Method == http.MethodGet && r.Header.Get(commentReadScopeVersionHeader) != want {
 					t.Errorf("capability=%q want%q", r.Header.Get(commentReadScopeVersionHeader), want)
 				}
 				_ = json.NewEncoder(w).Encode(evidence)
