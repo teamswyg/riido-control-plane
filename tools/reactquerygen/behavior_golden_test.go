@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	reactQueryGenCoreHash  = "b75c5571a525c68e4b0ddee0b0cee0832a1c04366076a54dc998115169b2f734"
+	reactQueryGenCoreHash  = "d1466552a9351a9f7c707067a0ca969b5e8ad01c510be9bd2def754a3716786c"
 	reactQueryGenReactHash = "de2e01620db9b3abb977a42159c3469dd5f7e2864df357cd4ab0decd5d013fe5"
 )
 

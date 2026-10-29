@@ -113,8 +113,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if found {
-		s.trackCommentDeliveryReaction(ctx, principal.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
-		writeJSON(w, http.StatusAccepted, response)
+		s.acceptCommentDelivery(ctx, w, evidence, response)
 		return
 	}
 	composed, err := s.assignRequestFromAIAgentClientTaskResult(ctx, principal, "", evidence.TaskID, request)
@@ -129,8 +128,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 			writeCommentDeliveryError(w, err)
 			return
 		}
-		s.trackCommentDeliveryReaction(ctx, principal.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
-		writeJSON(w, http.StatusAccepted, response)
+		s.acceptCommentDelivery(ctx, w, evidence, response)
 		return
 	}
 	creationContext, creationReceipt := withTaskAgentCreationReceipt(ctx)
@@ -150,8 +148,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.captureAssignmentContext(ctx, assignment, composed.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerComment, ID: evidence.CommentID, RequesterAdmin: aiAgentIsAdmin(principal)})
-	s.trackCommentDeliveryReaction(ctx, principal.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
-	writeJSON(w, http.StatusAccepted, response)
+	s.acceptCommentDelivery(ctx, w, evidence, response)
 }
 
 // Retry infrastructure and projection failures with the same durable event identity.

@@ -294,10 +294,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		}
 		taskThreads[taskID] = copied
 	}
-	taskThreadMessages := make(map[string][]AIAgentTaskThreadHistoryMessage, len(s.taskThreadMessages))
-	for threadID, messages := range s.taskThreadMessages {
-		taskThreadMessages[threadID] = retainLatestThreadHistoryMessages(messages)
-	}
+	taskThreadMessages := retainedTaskThreadMessages(s.taskThreadMessages)
 	events, err := snapshotEvents(retainLatestClientReplayEvents(s.events))
 	if err != nil {
 		return AIAgentClientSnapshot{}, err
@@ -441,13 +438,9 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		}
 		taskThreads[taskID] = copied
 	}
-	taskThreadMessages := make(map[string][]AIAgentTaskThreadHistoryMessage, len(snapshot.TaskThreadMessages))
-	for threadID, messages := range snapshot.TaskThreadMessages {
-		threadID = strings.TrimSpace(threadID)
-		if threadID == "" {
-			return errors.New("ai agent client snapshot task thread message thread_id is required")
-		}
-		taskThreadMessages[threadID] = retainLatestThreadHistoryMessages(messages)
+	taskThreadMessages, err := restoredTaskThreadMessages(snapshot.TaskThreadMessages)
+	if err != nil {
+		return err
 	}
 	events, err := restoreSnapshotEvents(snapshot.Events)
 	if err != nil {

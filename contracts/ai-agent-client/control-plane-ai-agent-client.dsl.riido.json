@@ -2907,14 +2907,6 @@
           "type": "string",
           "max_length": 180,
           "pattern": "^[^\\r\\n]*$"
-        },
-        {
-          "name": "reactions",
-          "type": "array",
-          "description": "role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.",
-          "items": {
-            "ref": "AIAgentMessageReaction"
-          }
         }
       ]
     },
@@ -3616,6 +3608,14 @@
           "type": "string",
           "max_length": 180,
           "pattern": "^[^\\r\\n]*$"
+        },
+        {
+          "name": "reactions",
+          "type": "array",
+          "description": "role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.",
+          "items": {
+            "ref": "AIAgentMessageReaction"
+          }
         }
       ]
     },

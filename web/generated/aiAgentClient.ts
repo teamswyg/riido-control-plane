@@ -227,6 +227,10 @@ export interface AIAgentTaskThreadHistoryMessage {
   display_message?: string;
   message_id: string;
   observed_at?: string;
+  /**
+   * role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.
+   */
+  reactions?: AIAgentMessageReaction[];
   result_message?: string;
   role: AIAgentTaskThreadMessageRole;
   run_id?: string;
@@ -723,10 +727,6 @@ export interface AgentThreadProgressLine {
   message: string;
   message_key?: string;
   observed_at?: string;
-  /**
-   * role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.
-   */
-  reactions?: AIAgentMessageReaction[];
   seq: number;
 }
 

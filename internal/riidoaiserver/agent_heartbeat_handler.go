@@ -42,6 +42,7 @@ func (s Server) handleAgentHeartbeat(w http.ResponseWriter, r *http.Request, age
 				Message:      event.Message,
 				Metadata:     event.Metadata,
 			}, event)
+			s.reconcileCommentStatusReactions(event.TaskID)
 		}
 	}
 	writeJSON(w, http.StatusOK, response)

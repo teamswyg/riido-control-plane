@@ -3060,14 +3060,6 @@
             "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
             "max_length": 180,
             "pattern": "^[^\\r\\n]*$"
-          },
-          {
-            "name": "reactions",
-            "type": "array",
-            "description": "role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.",
-            "items": {
-              "ref": "AIAgentMessageReaction"
-            }
           }
         ]
       }
@@ -3808,6 +3800,14 @@
             "description": "Optional server-projected user-facing progress summary, shared by live SSE and cold history. At most 180 Unicode characters of plain single-line text from known tool.collecting/tool.running description or tool.completed summary arguments only; omit for unknown/internal progress and assistant partials. This field is display copy, never an execution or authorization signal.",
             "max_length": 180,
             "pattern": "^[^\\r\\n]*$"
+          },
+          {
+            "name": "reactions",
+            "type": "array",
+            "description": "role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.",
+            "items": {
+              "ref": "AIAgentMessageReaction"
+            }
           }
         ]
       }

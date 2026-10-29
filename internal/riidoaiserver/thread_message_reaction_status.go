@@ -1,7 +1,5 @@
 package riidoaiserver
 
-import "strings"
-
 const (
 	reactionEmojiStarted   = "1f440"
 	reactionEmojiCompleted = "2705"
@@ -38,23 +36,16 @@ func taskThreadReactionTarget(message AIAgentTaskThreadHistoryMessage) (string, 
 	}
 }
 
-// taskThreadStatusReactionTarget is the user message that started the run: the
-// message with the thread source id, or else the first user message of the
-// current run. It is "" when no stored thread message belongs to the run.
+// taskThreadStatusReactionTarget is the first user message of the current run,
+// the message that started it. The thread source id is not used: a follow-up
+// folded into a running run overwrites it. It is "" when no stored thread
+// message belongs to the run (an assignment or a monolith comment).
 func taskThreadStatusReactionTarget(thread AIAgentTaskThreadRecord, messages []AIAgentTaskThreadHistoryMessage) string {
-	source := strings.TrimSpace(thread.SourceMessageID)
-	first := ""
 	for _, message := range messages {
-		if message.Role != AIAgentTaskThreadMessageRoleUser {
-			continue
-		}
-		if source != "" && message.SourceMessageID == source {
+		sameRun := message.AssignmentID == thread.AssignmentID && (message.RunID == "" || thread.RunID == "" || message.RunID == thread.RunID)
+		if message.Role == AIAgentTaskThreadMessageRoleUser && sameRun {
 			return message.MessageID
 		}
-		sameRun := message.AssignmentID == thread.AssignmentID && (message.RunID == "" || thread.RunID == "" || message.RunID == thread.RunID)
-		if first == "" && sameRun {
-			first = message.MessageID
-		}
 	}
-	return first
+	return ""
 }

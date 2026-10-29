@@ -2,7 +2,6 @@ package riidoaiserver
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -59,13 +58,8 @@ func (s Server) handleAIAgentClientThreadMessageReaction(w http.ResponseWriter, 
 		writeAIAgentClientError(w, err)
 		return
 	}
-	if change.Notify != nil && s.commentReactions != nil && s.config.CommentDelivery.monolithEnabled() {
-		notification := *change.Notify
-		s.commentReactions.wg.Go(func() {
-			if err := s.config.CommentDelivery.postThreadReactionNotification(context.Background(), notification); err != nil {
-				log.Printf("agent thread reaction notification failed message=%s: %v", notification.MessageID, err)
-			}
-		})
+	if change.Notify != nil {
+		s.queueThreadReactionNotification(*change.Notify)
 	}
 	writeJSON(w, http.StatusOK, change.Response)
 }

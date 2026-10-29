@@ -15,7 +15,8 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	}
-	defer s.reconcileCommentStatusReactionsAfter(r, taskID)
+	// Every task request may change or retry the status reaction of a comment-started run.
+	defer s.reconcileCommentStatusReactions(taskID)
 	switch {
 	case suffix == "assignable-agents" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)

@@ -35,6 +35,7 @@ func (s Server) handleAIAgentClientTaskThreadsV3(w http.ResponseWriter, r *http.
 		writeThreadProjectionError(w, r, err)
 		return
 	}
+	s.reconcileCommentStatusReactions(taskID)
 	response, err := s.aiAgent.ListAIAgentTaskThreadHistory(r.Context(), principal, taskID)
 	if err != nil {
 		logRequestFailure(r, "thread_history", err)

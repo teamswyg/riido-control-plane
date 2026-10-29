@@ -2,11 +2,17 @@ package riidoaiserver
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
 	"strings"
 )
+
+// acceptCommentDelivery answers an accepted delivery after linking it to its
+// run thread for the comment status reaction.
+func (s Server) acceptCommentDelivery(ctx context.Context, w http.ResponseWriter, evidence verifiedCommentDelivery, response AIAgentTaskActionResponse) {
+	s.trackCommentDeliveryReaction(ctx, evidence.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
+	writeJSON(w, http.StatusAccepted, response)
+}
 
 // trackCommentDeliveryReaction links an accepted delivery to its run thread and
 // writes the started reaction. A failure is logged and never fails delivery.
@@ -22,14 +28,6 @@ func (s Server) trackCommentDeliveryReaction(ctx context.Context, workspaceID, t
 	s.reconcileCommentStatusReactions(taskID)
 }
 
-// reconcileCommentStatusReactionsAfter runs after task requests that may stop
-// or reassign a comment-started run.
-func (s Server) reconcileCommentStatusReactionsAfter(r *http.Request, taskID string) {
-	if r.Method != http.MethodGet {
-		s.reconcileCommentStatusReactions(taskID)
-	}
-}
-
 // reconcileCommentStatusReactions writes the agent status reaction of each
 // comment-started run of the task to monolith. It never blocks or fails the
 // caller; a failed write is retried on the next run state change.
@@ -41,24 +39,5 @@ func (s Server) reconcileCommentStatusReactions(taskID string) {
 	for _, plan := range store.CommentStatusReactionPlans(taskID) {
 		threadID := plan.ThreadID
 		s.commentReactions.start(threadID, func() { s.applyCommentStatusReaction(store, taskID, threadID) })
-	}
-}
-
-func (s Server) applyCommentStatusReaction(store commentStatusReactionStore, taskID, threadID string) {
-	for _, plan := range store.CommentStatusReactionPlans(taskID) {
-		if plan.ThreadID != threadID {
-			continue
-		}
-		ctx := context.Background()
-		err := s.config.CommentDelivery.putCommentStatusReaction(ctx, plan.EventID, plan.Emoji)
-		var statusErr monolithStatusError
-		if err != nil && (!errors.As(err, &statusErr) || !statusErr.permanent()) {
-			log.Printf("agent comment status reaction failed thread=%s: %v", threadID, err)
-			return
-		}
-		if err := store.MarkCommentStatusReactionApplied(ctx, plan.WorkspaceID, threadID, plan.Emoji); err != nil {
-			log.Printf("agent comment status reaction not recorded thread=%s: %v", threadID, err)
-		}
-		return
 	}
 }
