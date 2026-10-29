@@ -11,7 +11,7 @@ func clearRiidoAIServerEnv(t *testing.T) {
 
 func riidoAIServerEnvKeys() []string {
 	return []string{
-		envAddr, envShutdownTimeoutSeconds, envAuthzTokensJSON,
+		envAddr, envShutdownTimeoutSeconds, envAuthzTokensJSON, envCLIInstallationResource,
 		envExternalAuthzURL, envExternalAuthzAudience, envExternalAuthzTimeout,
 		envAuthIssuer, envAuthResource, envAuthAuthorizationProfile,
 		envAuthIntrospectionClientID, envAuthIntrospectionClientSecret, envAuthHTTPTimeout,

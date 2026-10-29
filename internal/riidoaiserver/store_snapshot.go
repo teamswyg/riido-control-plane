@@ -16,17 +16,20 @@ import (
 const StoreSnapshotSchemaVersion = "riido-ai-server-store-snapshot.v1"
 
 type StoreSnapshot struct {
-	SchemaVersion     string                 `json:"schema_version"`
-	SavedAt           time.Time              `json:"saved_at"`
-	Tasks             []StoreSnapshotTask    `json:"tasks"`
-	Assignments       []Assignment           `json:"assignments"`
-	AgentAssignments  map[string][]string    `json:"agent_assignments"`
-	Events            map[string][]TaskEvent `json:"events"`
-	ToolApprovals     []ToolApprovalRequest  `json:"tool_approvals,omitempty"`
-	ToolDecisions     []ToolApprovalDecision `json:"tool_decisions,omitempty"`
-	Metrics           StoreSnapshotMetrics   `json:"metrics,omitempty"`
-	NextAssignmentSeq int64                  `json:"next_assignment_seq"`
-	NextEventSeq      int64                  `json:"next_event_seq"`
+	CLIInstallations      cliInstallationSnapshot       `json:"cli_installations,omitempty"`
+	ExecutionTerminations []executionTerminationReceipt `json:"execution_terminations,omitempty"`
+	ExecutionClaims       []executionClaim              `json:"execution_claims,omitempty"`
+	SchemaVersion         string                        `json:"schema_version"`
+	SavedAt               time.Time                     `json:"saved_at"`
+	Tasks                 []StoreSnapshotTask           `json:"tasks"`
+	Assignments           []Assignment                  `json:"assignments"`
+	AgentAssignments      map[string][]string           `json:"agent_assignments"`
+	Events                map[string][]TaskEvent        `json:"events"`
+	ToolApprovals         []ToolApprovalRequest         `json:"tool_approvals,omitempty"`
+	ToolDecisions         []ToolApprovalDecision        `json:"tool_decisions,omitempty"`
+	Metrics               StoreSnapshotMetrics          `json:"metrics,omitempty"`
+	NextAssignmentSeq     int64                         `json:"next_assignment_seq"`
+	NextEventSeq          int64                         `json:"next_event_seq"`
 }
 
 type StoreSnapshotTask struct {
@@ -189,17 +192,20 @@ func snapshotFromState(state *storeState, savedAt time.Time) StoreSnapshot {
 		events[taskID] = append([]TaskEvent(nil), taskEvents...)
 	}
 	return StoreSnapshot{
-		SchemaVersion:     StoreSnapshotSchemaVersion,
-		SavedAt:           savedAt,
-		Tasks:             tasks,
-		Assignments:       assignments,
-		AgentAssignments:  agentAssignments,
-		Events:            events,
-		ToolApprovals:     approvals,
-		ToolDecisions:     decisions,
-		Metrics:           snapshotMetricsFromState(state),
-		NextAssignmentSeq: state.nextAssignmentSeq,
-		NextEventSeq:      state.nextEventSeq,
+		ExecutionClaims:       executionClaimsFromState(state),
+		CLIInstallations:      cliInstallationSnapshotFromState(state),
+		ExecutionTerminations: executionTerminationsFromState(state),
+		SchemaVersion:         StoreSnapshotSchemaVersion,
+		SavedAt:               savedAt,
+		Tasks:                 tasks,
+		Assignments:           assignments,
+		AgentAssignments:      agentAssignments,
+		Events:                events,
+		ToolApprovals:         approvals,
+		ToolDecisions:         decisions,
+		Metrics:               snapshotMetricsFromState(state),
+		NextAssignmentSeq:     state.nextAssignmentSeq,
+		NextEventSeq:          state.nextEventSeq,
 	}
 }
 
@@ -208,6 +214,12 @@ func stateFromSnapshot(snapshot StoreSnapshot) (storeState, error) {
 		return storeState{}, fmt.Errorf("unsupported store snapshot schema_version %q", snapshot.SchemaVersion)
 	}
 	state := newStoreState()
+	if err := restoreExecutionHistory(&state, snapshot); err != nil {
+		return storeState{}, err
+	}
+	if err := restoreCLIInstallations(&state, snapshot.CLIInstallations); err != nil {
+		return storeState{}, err
+	}
 	state.nextAssignmentSeq = snapshot.NextAssignmentSeq
 	state.nextEventSeq = snapshot.NextEventSeq
 	for _, task := range snapshot.Tasks {

@@ -10,12 +10,17 @@ func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID 
 		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
 		return
 	}
-	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionPoll, AgentID: agentID}); !ok {
+	auth, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionPoll, AgentID: agentID})
+	if !ok {
 		return
 	}
 	var req PollRequest
 	if err := decodeJSON(r, &req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	ctx, ok := authenticatedPollContext(w, r, req, auth)
+	if !ok {
 		return
 	}
 	var response PollResponse
@@ -25,9 +30,9 @@ func (s Server) handleAgentPoll(w http.ResponseWriter, r *http.Request, agentID 
 		if maxHold := s.config.LongPollMaxHold; maxHold > 0 && hold > maxHold {
 			hold = maxHold
 		}
-		response, err = longPoll.WaitForAssignment(r.Context(), agentID, req, hold, s.config.LongPollTick)
+		response, err = longPoll.WaitForAssignment(ctx, agentID, req, hold, s.config.LongPollTick)
 	} else {
-		response, err = s.assignment.PollAgent(r.Context(), agentID, req)
+		response, err = s.assignment.PollAgent(ctx, agentID, req)
 	}
 	if err != nil {
 		logAgentPollRejected(agentID, err)

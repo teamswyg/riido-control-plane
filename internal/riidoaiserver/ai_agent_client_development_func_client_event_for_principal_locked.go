@@ -20,6 +20,9 @@ func clientEventForPrincipalLocked(s *DevelopmentAIAgentClientStore, principal A
 	if statusEvent, ok := event.Payload.(AgentWorkStatusChangedEvent); ok {
 		event.Payload = clientVisibleWorkStatusChangedEvent(statusEvent)
 	}
+	if readEvent, ok := event.Payload.(AgentContextReadEvent); ok {
+		event.Payload = s.agentContextReadEventForPrincipalLocked(principal, readEvent)
+	}
 	if !clientEventVisibleToLocked(s, principal, event) {
 		return ClientStreamEvent{}, false
 	}

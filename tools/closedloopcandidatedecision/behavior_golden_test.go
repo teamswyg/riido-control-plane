@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const closedLoopCandidateDecisionGoldenSHA256 = "314bac0ad1047de71b3fdd1b440faf0f201eb640c0d467b8696ba797f3601c4c"
+const closedLoopCandidateDecisionGoldenSHA256 = "13cb548ed8bf09a79034f324addadc47f39e05d8929ec29a987d6aec8ea81fd2"
 
 func TestClosedLoopCandidateDecisionBehaviorGolden(t *testing.T) {
 	root := repoRootForTest(t)

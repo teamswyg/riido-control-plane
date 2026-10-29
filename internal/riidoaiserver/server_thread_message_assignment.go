@@ -22,21 +22,21 @@ func (s Server) readTaskThreadMessageContext(ctx context.Context, principal Auth
 	return selected, history, err
 }
 
-func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, bearerToken, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest, selectedThread AIAgentTaskThreadRecord, history AIAgentTaskThreadHistoryCollectionResponse) (AssignRequest, error) {
+func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, bearerToken, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest, selectedThread AIAgentTaskThreadRecord, history AIAgentTaskThreadHistoryCollectionResponse) (AssignRequest, *AIAgentTaskContext, error) {
 	composed, err := s.assignRequestFromAIAgentClientTaskResult(ctx, principal, bearerToken, taskID, AssignAIAgentTaskRequest{
 		AgentID:          selectedThread.AgentID,
 		RequestID:        threadMessageRequestID(threadID, req.RequestID),
 		DocumentSnapshot: req.DocumentSnapshot,
 	})
 	if err != nil {
-		return AssignRequest{}, err
+		return AssignRequest{}, nil, err
 	}
 	assignmentReq := composed.Request
 	if err := s.applyThreadNativeResume(ctx, principal, selectedThread, &assignmentReq, composed.AgentOwnerPrincipalID); err != nil {
-		return AssignRequest{}, err
+		return AssignRequest{}, nil, err
 	}
 	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req, history.Threads...)
-	return assignmentReq, nil
+	return assignmentReq, composed.TaskContext, nil
 }
 
 func selectAIAgentThreadForFollowup(threads AIAgentTaskThreadCollectionResponse, threadID string) (AIAgentTaskThreadRecord, error) {

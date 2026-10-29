@@ -15,5 +15,9 @@ func (s *DevelopmentAIAgentClientStore) ListAIAgentTaskAssignableAgents(ctx cont
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return AgentClientListResponse{SchemaVersion: SchemaVersion, Agents: s.visibleAgents(principal)}, nil
+	agents := s.visibleAgents(principal)
+	return AgentClientListResponse{
+		SchemaVersion: SchemaVersion, Agents: agents,
+		agentDaemonLastSeenAt: s.visibleAgentDaemonLastSeenLocked(agents),
+	}, nil
 }

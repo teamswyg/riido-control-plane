@@ -6,27 +6,32 @@ import (
 )
 
 type normalizedDeviceEnrollment struct {
-	principalID string
-	workspaceID string
-	displayName string
-	machineID   string
-	deviceID    string
-	appVersion  string
+	coverageProtocol string
+	principalID      string
+	workspaceID      string
+	displayName      string
+	machineID        string
+	deviceID         string
+	appVersion       string
 }
 
 func normalizeDeviceEnrollment(principal AuthorizationResult, workspaceID string, req EnrollDeviceRequest) (normalizedDeviceEnrollment, error) {
 	out := normalizedDeviceEnrollment{
-		principalID: strings.TrimSpace(principal.PrincipalID),
-		workspaceID: strings.TrimSpace(workspaceID),
-		displayName: strings.TrimSpace(req.DisplayName),
-		machineID:   strings.TrimSpace(req.MachineID),
-		deviceID:    strings.TrimSpace(req.DeviceID),
-		appVersion:  strings.TrimSpace(req.AppVersion),
+		coverageProtocol: req.ExecutionCoverageProtocol,
+		principalID:      strings.TrimSpace(principal.PrincipalID),
+		workspaceID:      strings.TrimSpace(workspaceID),
+		displayName:      strings.TrimSpace(req.DisplayName),
+		machineID:        strings.TrimSpace(req.MachineID),
+		deviceID:         strings.TrimSpace(req.DeviceID),
+		appVersion:       strings.TrimSpace(req.AppVersion),
 	}
 	return completeDeviceEnrollment(out, principal)
 }
 
 func completeDeviceEnrollment(out normalizedDeviceEnrollment, principal AuthorizationResult) (normalizedDeviceEnrollment, error) {
+	if out.coverageProtocol != "" && out.coverageProtocol != executionCoverageProtocol {
+		return normalizedDeviceEnrollment{}, errors.New("unsupported execution coverage protocol")
+	}
 	if out.workspaceID == "" {
 		out.workspaceID = strings.TrimSpace(principal.WorkspaceID)
 	}

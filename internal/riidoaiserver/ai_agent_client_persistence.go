@@ -234,13 +234,15 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 	credentials := make([]AIAgentClientDeviceCredentialSnapshot, 0, len(s.deviceCredentials))
 	for _, record := range s.deviceCredentials {
 		credentials = append(credentials, AIAgentClientDeviceCredentialSnapshot{
-			DeviceID:         record.deviceID,
-			MachineID:        record.machineID,
-			SecretHashSHA256: hex.EncodeToString(record.secretHash[:]),
-			OwnerPrincipalID: record.ownerPrincipalID,
-			WorkspaceID:      record.workspaceID,
-			DisplayName:      record.displayName,
-			IssuedAt:         record.issuedAt,
+			ExecutionCoverageGeneration: record.coverageGeneration,
+			CredentialGeneration:        record.credentialGeneration,
+			DeviceID:                    record.deviceID,
+			MachineID:                   record.machineID,
+			SecretHashSHA256:            hex.EncodeToString(record.secretHash[:]),
+			OwnerPrincipalID:            record.ownerPrincipalID,
+			WorkspaceID:                 record.workspaceID,
+			DisplayName:                 record.displayName,
+			IssuedAt:                    record.issuedAt,
 		})
 	}
 	sort.Slice(credentials, func(i, j int) bool { return credentials[i].DeviceID < credentials[j].DeviceID })
@@ -347,14 +349,19 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		}
 		var hash [sha256.Size]byte
 		copy(hash[:], rawHash)
+		if err := validateCredentialCoverage(record); err != nil {
+			return err
+		}
 		deviceCredentials[deviceID] = deviceCredentialRecord{
-			deviceID:         deviceID,
-			machineID:        strings.TrimSpace(record.MachineID),
-			secretHash:       hash,
-			ownerPrincipalID: strings.TrimSpace(record.OwnerPrincipalID),
-			workspaceID:      strings.TrimSpace(record.WorkspaceID),
-			displayName:      strings.TrimSpace(record.DisplayName),
-			issuedAt:         record.IssuedAt,
+			coverageGeneration:   record.ExecutionCoverageGeneration,
+			credentialGeneration: record.CredentialGeneration,
+			deviceID:             deviceID,
+			machineID:            strings.TrimSpace(record.MachineID),
+			secretHash:           hash,
+			ownerPrincipalID:     strings.TrimSpace(record.OwnerPrincipalID),
+			workspaceID:          strings.TrimSpace(record.WorkspaceID),
+			displayName:          strings.TrimSpace(record.DisplayName),
+			issuedAt:             record.IssuedAt,
 		}
 	}
 	deviceConnectionGrants := make(map[string]map[string]DeviceConnectionGrant)
@@ -539,6 +546,9 @@ func restoreSnapshotEventPayload(eventType string, raw json.RawMessage) (any, er
 		return payload, json.Unmarshal(raw, &payload)
 	case AgentClientEventThreadProgress:
 		var payload AgentThreadProgressEvent
+		return payload, json.Unmarshal(raw, &payload)
+	case AgentClientEventContextRead:
+		var payload AgentContextReadEvent
 		return payload, json.Unmarshal(raw, &payload)
 	default:
 		var payload map[string]any

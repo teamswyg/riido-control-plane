@@ -3,6 +3,28 @@
 RIID-5818 owns readable, bounded task context and conversation continuity.
 The assignment remains one task; references do not authorize additional work.
 
+RIID-5900 limits CLI reads to 100 authenticated active-lease attempts per durable
+assignment ID. All views share the counter, including live agent discovery,
+reused request IDs, denied targets and unavailable data. Prompt capture, viewer
+read-history GET and local whoami do not consume it. DynamoDB increments the
+counter atomically across servers; exhausted budgets return HTTP 429 and storage
+failures return 503 before data access. Repeating the same execution cannot
+restore the budget. Heartbeat/lease refresh, runtime run-label changes and
+snapshot recapture keep it; a new follow-up assignment receives a new budget.
+Terminal transactions fence the counter even before the first CLI call and set
+its TTL to the same first-terminal +24h deadline as context payloads. Read audit
+records retain their existing policy. Active-lease validation precedes quota
+consumption, so physical TTL cleanup cannot revive a terminal capability.
+
+Comment-triggered executions retain extended context from the existing verified
+monolith delivery evidence. The producer reads recent same-task root comments
+(20 plus an out-of-page or reply trigger, at most 21), same-team linked work and
+meetings, and bounded file/link metadata under the stored author's current
+permissions. CP preserves that evidence without requesting a user credential
+or making anonymous reads. Only older evidence with no `extended` field receives
+the trigger-only fallback. The original comment remains the execution trigger;
+normal snapshot capture, read audit and current viewer filtering still apply.
+
 The request-scoped reader keeps the caller's existing bearer and team scope.
 Only project, milestone and parent-task IDs already returned by the authorized
 task detail may be followed. Parent reads are deduplicated, at most three in
@@ -83,3 +105,21 @@ marked unconfirmed. Finite read outcome/operation/source and duration attributes
 expose degradation without document IDs, content, tokens or upstream error text.
 The overall timeout remains configured by the operator; synthetic call-count and
 deadline checks are not production latency or model-comprehension guarantees.
+
+## Related meeting bodies · RIID-5900
+
+At assign/reply time, the existing requester bearer may capture up to 20 directly linked meetings, using the task's verified team. Each meeting detail must match its requested ID and have no deletion timestamp before provider JSON/HTML is read. Legacy meetings without a document use their authorized description. Denial never falls back to stored text. Empty projections remain empty; stored representations do not establish current Yjs freshness. At most four meeting reads run concurrently under the original request deadline. Each body, including alternate text, is limited to 8192 UTF-8 bytes. Meeting documents also participate in the existing 256KiB snapshot bound and terminal-plus-24h retention; no user token is persisted.
+
+The existing assignment-context endpoint adds `view=meetings` (optional task target) and `view=meeting` (required linked meeting ID). Base context, resources, list and prompt contain meeting metadata only. Only explicit meeting reads return the selected document and record `related_meeting/body` with its captured version. Empty is a successful empty body; denied is 403, deleted is 404, and unavailable is 503. Outside-snapshot targets remain 403. Per-body or whole-snapshot truncation is explicit. Current viewer permission to read that meeting body is required to expose its historical body-read metadata.
+
+This slice covers meeting list and body selection only. Meeting boards, meeting comments and additional linked-work traversal remain unimplemented; synthetic contract tests are separate from actual staging reads.
+
+## Current viewer reply visibility · RIID-5900
+
+A comment-triggered assignment may capture a reply that is absent from the root-only comment list. Historical read metadata for that reply must still be checked against current viewer permission. Viewer GET and SSE therefore opt into reply metadata after authorizing the current workspace/task and reading its bounded root comments. Assignment snapshot/prompt capture does not opt in.
+
+Only current same-task roots with a positive reply count qualify. Deduplicate and cap these parents at 200, then use one GraphQL alias batch of the existing `getCommentReplies` query under the same viewer bearer and verified team. Each resolver returns only replies whose database `parent_id` equals its requested root. Request only `id/status/updatedAt`, retain at most 200 unique active replies, and reject collisions with current root IDs. Historical trigger/parent IDs are not authorization evidence. No additional monolith contract or per-comment HTTP loop is introduced.
+
+Any batch HTTP/GraphQL error, missing/null expected alias, cancellation, deadline or existing 1MiB response limit keeps all replies hidden. Independently verified roots remain available; there is no positive cache across GETs or events. A reply whose parent is outside the existing bounded current root list remains unverified and hidden. Metadata-only replies contain no body hash: an empty body cannot prove `modified_since_read=false`; only a strictly later comparable source timestamp proves true, otherwise freshness stays unknown.
+
+Synthetic regressions cover the readable trigger reply, GET/live/replay revalidation, deletion/403/partial errors, malformed and oversized responses, alias completeness, deduplication and the 200-parent/200-reply/one-call bounds, deadline propagation, unchanged assignment capture and conservative timestamp-only freshness. Actual staging acceptance remains separate.

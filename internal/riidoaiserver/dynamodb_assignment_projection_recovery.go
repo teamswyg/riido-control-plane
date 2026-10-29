@@ -32,7 +32,7 @@ func (s *DynamoDBAssignmentOperationStore) preserveRecoveryProjection(ctx contex
 		if err != nil {
 			return err
 		}
-		_, err = doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBPutItemTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
+		_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBPutItemTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 		if err == nil {
 			return nil
 		}

@@ -44,7 +44,7 @@ func (s *DynamoDBAssignmentOperationStore) recoverFailedTaskAgentPublicationAtte
 	if err != nil {
 		return nil, err
 	}
-	_, err = doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
+	_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 	if isDynamoDBTransactionContention(err) {
 		return nil, errTaskAgentPublicationRecoveryChanged
 	}

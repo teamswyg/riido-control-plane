@@ -26,7 +26,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 			if err != nil {
 				return AssignmentClaimResult{}, err
 			}
-			_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+			_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{
 				endpoint:     s.endpoint,
 				endpointHost: s.endpointHost,
 				region:       s.region,
@@ -83,6 +83,11 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 			}
 		}
 		operation := dynamoDBClaimAssignmentOperation(assignment, candidate.LastEventSeq, at, clearMessage, clearMetadata)
+		operation.ExecutionClaim = newExecutionClaim(ctx, operation.Assignment)
+		operation.executionAdmission = executionAdmissionFromContext(ctx)
+		if err := validateOperationExecutionClaim(operation); err != nil {
+			return AssignmentClaimResult{}, err
+		}
 		payload, err := s.claimTransactionPayload(operation, candidate.LastEventSeq)
 		if len(repairs) > 0 || activeCondition != nil {
 			payload, err = s.claimRepairTransactionPayload(operation, candidate.LastEventSeq, repairs, activeCondition)
@@ -90,7 +95,7 @@ func (s *DynamoDBAssignmentOperationStore) claimNext(ctx context.Context, agentI
 		if err != nil {
 			return AssignmentClaimResult{}, err
 		}
-		_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+		_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{
 			endpoint:     s.endpoint,
 			endpointHost: s.endpointHost,
 			region:       s.region,

@@ -6,6 +6,7 @@ import (
 )
 
 type ServerConfig struct {
+	CLIInstallationService   CLIInstallationServiceConfig
 	CommentDelivery          CommentDeliveryConfig
 	Authorizer               RequestAuthorizer
 	AgentCatalogStore        AgentCatalogStore
@@ -31,6 +32,12 @@ type ServerConfig struct {
 	// AIAgentGlobalReconcileMinInterval coalesces workspace-wide AI Agent
 	// projection repair. Task-scoped action/read repair still runs per request.
 	AIAgentGlobalReconcileMinInterval time.Duration
+	// AssignmentContext stores per-assignment task context snapshots and read
+	// records for the Riido CLI. Nil disables capture and the daemon endpoint.
+	AssignmentContext AssignmentContextStore
+	// AgentMentionPrecheck, when set (RIID-5892), adds mention-policy reasons
+	// to the live agent directory; the mention-time check stays authoritative.
+	AgentMentionPrecheck AgentMentionPrecheck
 }
 
 type Server struct {

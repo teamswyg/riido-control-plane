@@ -7,8 +7,10 @@ import (
 )
 
 type runtimeConfig struct {
-	CommentDelivery         riidoaiserver.CommentDeliveryConfig
-	AssignmentSnapshotStore riidoaiserver.SnapshotStore
+	ExecutionCoverageEnrollment bool
+	CLIInstallationService      riidoaiserver.CLIInstallationServiceConfig
+	CommentDelivery             riidoaiserver.CommentDeliveryConfig
+	AssignmentSnapshotStore     riidoaiserver.SnapshotStore
 
 	Addr                     string
 	ShutdownTimeout          time.Duration
@@ -32,6 +34,7 @@ type runtimeConfig struct {
 	AssignmentOperationStore riidoaiserver.AssignmentOperationStore
 	AssignmentOutbox         riidoaiserver.EventSink
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
+	AssignmentContext        riidoaiserver.AssignmentContextStore
 }
 
 func closeRuntimeConfig(config runtimeConfig) {

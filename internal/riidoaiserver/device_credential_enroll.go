@@ -30,18 +30,24 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 	if err != nil {
 		return EnrollDeviceResponse{}, err
 	}
-	// A persisted device selection remains authoritative across local machine-ID drift.
+	// Persisted device selection remains authoritative across local machine-ID drift.
 	if existing, ok := s.deviceCredentials[deviceID]; ok && enrollment.deviceID != "" {
 		enrollment.machineID = existing.machineID
 	}
+	coverage, credential, err := s.enrollmentCoverageLocked(deviceID, enrollment)
+	if err != nil {
+		return EnrollDeviceResponse{}, err
+	}
 	s.deviceCredentials[deviceID] = deviceCredentialRecord{
-		deviceID:         deviceID,
-		machineID:        enrollment.machineID,
-		secretHash:       hash,
-		ownerPrincipalID: enrollment.principalID,
-		workspaceID:      enrollment.workspaceID,
-		displayName:      enrollment.displayName,
-		issuedAt:         now,
+		coverageGeneration:   coverage,
+		credentialGeneration: credential,
+		deviceID:             deviceID,
+		machineID:            enrollment.machineID,
+		secretHash:           hash,
+		ownerPrincipalID:     enrollment.principalID,
+		workspaceID:          enrollment.workspaceID,
+		displayName:          enrollment.displayName,
+		issuedAt:             now,
 	}
 	s.upsertDeviceConnectionGrantLocked(deviceID, AuthorizationResult{
 		PrincipalID: enrollment.principalID,
@@ -56,12 +62,14 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 		ConnectedWorkspaceIDs: []string{enrollment.workspaceID},
 	})
 	return EnrollDeviceResponse{
-		SchemaVersion:    DeviceCredentialSchemaVersion,
-		DeviceID:         deviceID,
-		DeviceSecret:     secret,
-		OwnerPrincipalID: enrollment.principalID,
-		WorkspaceID:      enrollment.workspaceID,
-		DisplayName:      enrollment.displayName,
-		IssuedAt:         now,
+		ExecutionCoverageGeneration: coverage,
+		CredentialGeneration:        credential,
+		SchemaVersion:               DeviceCredentialSchemaVersion,
+		DeviceID:                    deviceID,
+		DeviceSecret:                secret,
+		OwnerPrincipalID:            enrollment.principalID,
+		WorkspaceID:                 enrollment.workspaceID,
+		DisplayName:                 enrollment.displayName,
+		IssuedAt:                    now,
 	}, nil
 }

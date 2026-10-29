@@ -19,6 +19,7 @@ func (s *Store) saveOperation(state *storeState, operationType AssignmentOperati
 	}
 	recordedAt := s.now()
 	return s.operationStore.SaveAssignmentOperation(context.Background(), AssignmentOperationRecord{
+		ExecutionClaim:   executionClaimForOperation(state, operationType, assignment),
 		createsExecution: len(createsExecution) > 0 && createsExecution[0],
 		SchemaVersion:    AssignmentOperationSchemaVersion,
 		OperationID:      assignmentOperationID(operationType, assignment, events),

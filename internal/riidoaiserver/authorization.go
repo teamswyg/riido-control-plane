@@ -60,9 +60,11 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationResult struct {
-	PrincipalID string
-	WorkspaceID string
-	Roles       []AgentCatalogRole
+	executionCoverageGeneration string
+	credentialGeneration        string
+	PrincipalID                 string
+	WorkspaceID                 string
+	Roles                       []AgentCatalogRole
 }
 
 type RequestAuthorizer interface {
@@ -242,6 +244,8 @@ func authorizationScopesPermit(scopes []string, req AuthorizationRequest) bool {
 
 func authorizationScopeCandidates(req AuthorizationRequest) []string {
 	switch req.Resource {
+	case "cli_installation":
+		return []string{"cli-installation:" + string(req.Action)}
 	case AuthorizationResourceAIAgentClient:
 		candidates := []string{"riido:*", "ai-agent:*"}
 		switch req.Action {

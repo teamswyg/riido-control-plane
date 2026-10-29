@@ -13,7 +13,7 @@ func (s *DynamoDBAssignmentOperationStore) saveAssignmentProjection(ctx context.
 	if err != nil {
 		return err
 	}
-	_, err = doDynamoDBJSON(ctx, dynamoDBRequest{
+	_, err = s.writeAssignmentWithContextRetention(ctx, dynamoDBRequest{
 		endpoint:     s.endpoint,
 		endpointHost: s.endpointHost,
 		region:       s.region,
@@ -39,7 +39,7 @@ func (s *DynamoDBAssignmentOperationStore) saveAssignmentProjection(ctx context.
 		MessageAlt string `json:"Message"`
 	}
 	_ = json.Unmarshal(apiErr.body, &dynamoErr)
-	if strings.Contains(dynamoErr.Type, "ConditionalCheckFailedException") {
+	if projectionConditionFailed(err) {
 		if err := s.preserveRecoveryProjection(ctx, record, credentials); err != nil {
 			return err
 		}

@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -32,7 +31,7 @@ func TestDynamoDBAssignmentOperationStoreClaimsQueuedAssignmentWithTransaction(t
 		},
 	})
 
-	claim, err := store.ClaimNextAssignment(context.Background(), "jykim1", claimAt)
+	claim, err := store.ClaimNextAssignment(legacyClaimFixtureContext(), "jykim1", claimAt)
 	if err != nil {
 		t.Fatalf("ClaimNextAssignment: %v", err)
 	}

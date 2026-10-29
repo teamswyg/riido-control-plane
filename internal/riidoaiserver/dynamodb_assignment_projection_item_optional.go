@@ -2,6 +2,7 @@ package riidoaiserver
 
 func assignmentProjectionOptionalFields(item map[string]map[string]string, assignment Assignment) {
 	if assignment.LeaseToken != "" {
+		item["lease_epoch"] = map[string]string{"S": leaseEpoch(assignment.LeaseToken)}
 		item["lease_token"] = map[string]string{"S": assignment.LeaseToken}
 	}
 	if assignment.AgentInstruction != "" {

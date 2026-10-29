@@ -14,7 +14,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `syntaxhash_duplicate_shapes_policy` | `tools/syntaxhash/duplicates` | 100% | `f506f1540fac` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
-| `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `a8b9d5d2f845` | `runtime_adapter_config_must_preserve_public_env_contract` |
+| `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `9b9aca540a22` | `runtime_adapter_config_must_preserve_public_env_contract` |
 | `repo_identity_guard` | `internal/repoidentity` | 100% | `2402928360f7` | `repo_identity_must_anchor_public_module_boundary` |
 | `contracts_compat_mirror` | `internal/contractscompat` | 100% | `664fe505058d` | `shared_contract_compat_must_preserve_generated_contract_surface` |
 | `request_authorization_guard` | `tools/requestauth` | 100% | `2239ceed1945` | `request_authorization_must_preserve_security_boundary` |
@@ -36,7 +36,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `harness_promotion_guard` | `tools/harnesspromotion` | 100% | `95c7fdfe7029` | `harness_promotion_must_run_after_failure` |
 | `loop_closure_audit_guard` | `tools/loopclosureaudit` | 100% | `a434a8bda384` | `loop_closure_audit_must_prove_human_exit_requirements` |
 | `closed_loop_candidate_intake_guard` | `tools/closedloopcandidateintake` | 100% | `de3efe4d5931` | `candidate_intake_must_consume_candidate_artifact` |
-| `closed_loop_candidate_decision_guard` | `tools/closedloopcandidatedecision` | 100% | `860e82760d1a` | `candidate_decisions_must_match_consumed_candidates` |
+| `closed_loop_candidate_decision_guard` | `tools/closedloopcandidatedecision` | 100% | `98cedb8f6610` | `candidate_decisions_must_match_consumed_candidates` |
 | `loop_refresh_dispatch_guard` | `tools/looprefreshdispatch` | 100% | `5874d236e6be` | `expired_loop_refresh_commands_must_dispatch_safe_workflows` |
 | `evidence_graph_guard` | `tools/evidencegraph` | 100% | `f9b54fa2c06b` | `evidence_graph_evidence_must_expose_full_chain` |
 | `pre_commit_baseline_guard` | `tools/precommitbaseline` | 100% | `6c5e4f1ff758` | `pre_commit_baseline_evidence_must_self_expire` |
@@ -116,14 +116,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d23929aab84a` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `1a51c7931f57` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `8569c2a9d935` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `3927`
-- tracked files: `3927`
+- Go files: `4279`
+- tracked files: `4279`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -169,16 +169,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `3927`
-- unique syntax hashes: `3724`
+- tracked files: `4279`
+- unique syntax hashes: `4076`
 - compression gain: `203`
-- analysis reduction: `5.16%`
+- analysis reduction: `4.74%`
 - collision count: `0`
-- relocation mappings: `3927`
+- relocation mappings: `4279`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `111`
 - missing golden commands: `0`
-- efficiency score: `516`
+- efficiency score: `474`
 - compression score: `203`
-- weighted score: `719`
+- weighted score: `677`

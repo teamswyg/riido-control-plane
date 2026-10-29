@@ -4,13 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/teamswyg/riido-contracts/hostintegration"
 	"log"
 	"sort"
 	"strings"
 	"time"
-	"unicode"
-	"unicode/utf8"
 
 	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
@@ -518,17 +515,7 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			runtime.DetectionState != RuntimeDetectionStateError {
 			return nil, fmt.Errorf("runtimes[%d].detection_state is invalid", i)
 		}
-		providerVersion, err := normalizeRuntimeProviderVersion(runtime.ProviderVersion)
-		if err != nil {
-			// Version is optional display metadata. Legacy probes may send warnings
-			// or control characters; never reject the device heartbeat for that.
-			providerVersion = ""
-			if runtime.HealthStatus == "" || runtime.HealthStatus == hostintegration.ProviderHealthHealthy {
-				runtime.HealthStatus = hostintegration.ProviderHealthUnknown
-				runtime.DiagnosticCode = hostintegration.ProviderDiagnosticVersionProbeFailed
-				runtime.DiagnosticSummary = ""
-			}
-		}
+		providerVersion := normalizeRuntimeSnapshotVersion(&runtime)
 		healthStatus, diagnosticCode, diagnosticSummary, err := normalizeRuntimeProviderHealth(runtime)
 		if err != nil {
 			return nil, fmt.Errorf("runtimes[%d].provider_health: %w", i, err)
@@ -552,22 +539,6 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 		})
 	}
 	return out, nil
-}
-
-func normalizeRuntimeProviderVersion(value string) (string, error) {
-	value = strings.TrimSpace(value)
-	if value == "" {
-		return "", nil
-	}
-	if utf8.RuneCountInString(value) > 128 {
-		return "", errors.New("must be 128 characters or fewer")
-	}
-	for _, r := range value {
-		if unicode.IsControl(r) {
-			return "", errors.New("must not contain control characters")
-		}
-	}
-	return value, nil
 }
 
 func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {

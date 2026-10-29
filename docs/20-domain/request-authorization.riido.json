@@ -261,6 +261,32 @@
         "device-auth-before-token-auth",
         "browser-jwt-not-daemon-auth"
       ]
+    },
+    {
+      "id": "execution-termination-device-proof",
+      "rules": [
+        "device-proof-required-without-bearer-fallback",
+        "original-claim-device-owner-epoch-required",
+        "lease-only-in-single-protected-header",
+        "strict-bounded-body-without-identity-fields",
+        "fixed-errors-without-credential-or-dependency-detail",
+        "local-observation-is-not-access-permission"
+      ]
+    },
+    {
+      "id": "cli-installation-service-link",
+      "rules": [
+        "exact-static-service-principal-and-operation-scopes",
+        "separate-authorizer-no-user-device-wildcard-fallback",
+        "configured-canonical-resource-client-and-key-binding",
+        "device-plus-p256-domain-separated-one-time-link-proof",
+        "strict-four-kib-json-and-two-second-deadline",
+        "immutable-link-and-expiring-intent-atomic-consumption",
+        "fixed-private-errors-and-no-browser-auth-surface",
+        "policy-blocked-or-unknown-never-allowed",
+        "service-auth-original-consumed-intent-receipt-with-exact-identity",
+        "historical-link-receipt-never-substitutes-current-policy"
+      ]
     }
   ],
   "source_checks": [
@@ -676,6 +702,41 @@
       "file": "internal/riidoaiserver/external_authorizer_http_callbacks_test.go",
       "contains": [
         "TestExternalAuthorizerHTTPCallbacksArePrivateAndConcurrent"
+      ]
+    },
+    {
+      "name": "execution-termination-device-only",
+      "file": "internal/riidoaiserver/server_execution_termination_auth.go",
+      "contains": [
+        "singleExecutionHeader",
+        "AuthorizeDeviceCredential",
+        "leaseEpoch(lease)",
+        "ErrAuthorizationUnauthenticated"
+      ]
+    },
+    {
+      "name": "cli-installation-service-and-proof",
+      "file": "internal/riidoaiserver/cli_installation_service.go",
+      "contains": [
+        "cliInstallationServicePrincipal",
+        "cli-installation:link",
+        "cli-installation:policy-read"
+      ]
+    },
+    {
+      "name": "cli-installation-security-regressions",
+      "file": "internal/riidoaiserver/cli_installation_proof_test.go",
+      "contains": [
+        "TestCLIInstallationLinkRequiresApprovedDeviceOwnerAndKey",
+        "TestCLIInstallationOwnerChangeNeverRestoresPermission"
+      ]
+    },
+    {
+      "name": "cli-installation-original-receipt-regression",
+      "file": "internal/riidoaiserver/cli_installation_receipt_test.go",
+      "contains": [
+        "TestCLIInstallationReceiptRequiresOriginalConsumedIntent",
+        "TestCLIInstallationReceiptRejectsMismatchedBinding"
       ]
     }
   ],

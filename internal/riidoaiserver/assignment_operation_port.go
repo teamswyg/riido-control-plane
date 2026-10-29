@@ -77,8 +77,10 @@ type AssignmentClaimResult struct {
 }
 
 type AssignmentOperationRecord struct {
+	ExecutionClaim     *executionClaim       `json:"execution_claim,omitempty"`
 	ExpectedProjection *AssignmentProjection `json:"-"`
 	eventACK           *assignmentEventACKReceipt
+	executionAdmission *executionAdmission
 	createsExecution   bool
 	SchemaVersion      string                  `json:"schema_version"`
 	OperationID        string                  `json:"operation_id"`
@@ -92,6 +94,9 @@ type AssignmentOperationRecord struct {
 }
 
 func validateAssignmentOperationRecord(record AssignmentOperationRecord) error {
+	if err := validateOperationExecutionClaim(record); err != nil {
+		return err
+	}
 	if record.SchemaVersion != AssignmentOperationSchemaVersion {
 		return fmt.Errorf("unsupported assignment operation schema_version %q", record.SchemaVersion)
 	}

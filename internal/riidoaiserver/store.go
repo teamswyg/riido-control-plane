@@ -52,29 +52,14 @@ func (s *Store) loop(state storeState) {
 				}
 			}
 			msg.reply <- cancelAssignmentResult{assignment: assignment, err: err}
+		case cliInstallationCommand:
+			msg.reply <- s.commitCLIInstallation(&state, msg)
+		case executionTerminationCommand:
+			msg.reply <- s.commitExecutionTermination(&state, msg)
+		case observeDeviceExecutionCmd:
+			msg.reply <- s.observeLocalExecutionClaims(&state, msg)
 		case pollCmd:
-			beforeEventSeq := state.nextEventSeq
-			response, operationAlreadySaved, mutatedAssignment, mutationOperationType, err := s.handlePoll(&state, msg.agentID, msg.req, msg.countRequest)
-			if err == nil && mutatedAssignment != nil {
-				err = s.saveOperation(&state, mutationOperationType, *mutatedAssignment, eventsAfterSeq(&state, beforeEventSeq))
-				if err == nil {
-					err = s.saveSnapshot(&state)
-				}
-			}
-			if err == nil && mutatedAssignment == nil && response.Action == PollStart {
-				if !operationAlreadySaved {
-					err = s.saveAssignmentMutationOperations(&state, AssignmentOperationPollStart, *response.Assignment, eventsAfterSeq(&state, beforeEventSeq))
-				}
-				if err == nil {
-					err = s.saveSnapshot(&state)
-				}
-			}
-			if err == nil {
-				for _, event := range eventsAfterSeq(&state, beforeEventSeq) {
-					logAssignmentFailure(&state, event)
-				}
-			}
-			msg.reply <- pollResult{response: response, operationAlreadySaved: operationAlreadySaved, mutatedAssignment: mutatedAssignment, mutationOperationType: mutationOperationType, err: err}
+			msg.reply <- s.handlePollCommand(&state, msg)
 		case eventCmd:
 			if err := msg.ctx.Err(); err != nil {
 				msg.reply <- eventResult{err: err}

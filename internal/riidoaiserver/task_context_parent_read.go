@@ -33,6 +33,7 @@ func (c *AIAgentPrivateTaskContextClient) enrichParentTaskContext(ctx context.Co
 			parent.Document = selectTaskContextDocument(parent.Document, c.readProviderProjection(ctx, teamID, id, bearer))
 			resources, status := c.readTaskContextResources(ctx, teamID, id, bearer)
 			for _, ref := range refs {
+				ref.UpdatedAt = parent.Component.UpdatedAt
 				if parent.Document.Status != "unavailable" {
 					document := parent.Document
 					ref.Document = &document

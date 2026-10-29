@@ -11,7 +11,7 @@ func assertStaleBlockedRepairPayload(
 	payload dynamoDBRepairTransactWritePayload,
 ) {
 	t.Helper()
-	if len(payload.TransactItems) != 6 {
+	if len(payload.TransactItems) != 7 {
 		t.Fatalf("transact item count = %d", len(payload.TransactItems))
 	}
 	activeCheck := payload.TransactItems[0].ConditionCheck

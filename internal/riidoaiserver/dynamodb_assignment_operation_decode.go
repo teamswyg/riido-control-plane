@@ -30,6 +30,11 @@ func assignmentOperationRecordFromDynamoDBItem(item map[string]map[string]string
 		Events:        events,
 		RecordedAt:    recordedAt,
 	}
+	if raw := dynamoDBStringValue(item, "execution_claim_json"); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &record.ExecutionClaim); err != nil {
+			return AssignmentOperationRecord{}, err
+		}
+	}
 	if record.AgentID == "" {
 		record.AgentID = dynamoDBStringValue(item, "agent_id")
 	}

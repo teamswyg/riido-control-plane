@@ -15,10 +15,8 @@ func (s *DynamoDBAssignmentOperationStore) claimTransactionPayload(record Assign
 		return nil, err
 	}
 	payload := struct {
-		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
-	}{
-		TransactItems: make([]dynamoDBTransactWritePut, 3),
-	}
+		TransactItems []dynamoDBTransactWriteItem `json:"TransactItems"`
+	}{TransactItems: []dynamoDBTransactWriteItem{{Put: &dynamoDBTransactWritePutAction{}}, {Put: &dynamoDBTransactWritePutAction{}}, {Put: &dynamoDBTransactWritePutAction{}}}}
 	payload.TransactItems[0].Put.TableName = s.tableName
 	payload.TransactItems[0].Put.ConditionExpression = "assignment_state = :queued AND agent_id = :agent_id AND last_event_seq = :expected_last_event_seq"
 	payload.TransactItems[0].Put.ExpressionAttributeValues = map[string]map[string]string{
@@ -36,5 +34,9 @@ func (s *DynamoDBAssignmentOperationStore) claimTransactionPayload(record Assign
 	payload.TransactItems[2].Put.TableName = s.tableName
 	payload.TransactItems[2].Put.ConditionExpression = "attribute_not_exists(pk) AND attribute_not_exists(sk)"
 	payload.TransactItems[2].Put.Item = operationItem
+	payload.TransactItems, err = s.appendExecutionClaimAction(payload.TransactItems, record.ExecutionClaim, record.executionAdmission)
+	if err != nil {
+		return nil, err
+	}
 	return json.Marshal(payload)
 }

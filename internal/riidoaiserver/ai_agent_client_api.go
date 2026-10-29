@@ -280,11 +280,6 @@ type AgentClientRecord struct {
 	UpdatedAt           time.Time         `json:"updated_at"`
 }
 
-type AgentClientListResponse struct {
-	SchemaVersion string              `json:"schema_version"`
-	Agents        []AgentClientRecord `json:"agents"`
-}
-
 type AgentClientRecordResponse struct {
 	SchemaVersion string            `json:"schema_version"`
 	Agent         AgentClientRecord `json:"agent"`

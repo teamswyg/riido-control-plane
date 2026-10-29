@@ -99,7 +99,7 @@ func TestDurableQueueNeverFallsBackToStaleLocalAssignment(t *testing.T) {
 	state := newStoreState()
 	assignment := Assignment{ID: "cancelled-elsewhere", AgentID: "agent", TaskID: "task", State: AssignmentQueued}
 	applyAssignmentToState(&state, assignment)
-	response, _, _, _, err := store.handlePoll(&state, "agent", PollRequest{}, true)
+	response, _, _, _, err := store.handlePoll(context.Background(), &state, "agent", PollRequest{}, true)
 	if err != nil || response.Action == PollStart || response.Assignment != nil {
 		t.Fatalf("executed a stale queue entry: %+v %v", response, err)
 	}

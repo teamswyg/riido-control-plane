@@ -8,6 +8,7 @@ import (
 func traceHTTPRoute(method, path string) string {
 	path = strings.TrimSpace(path)
 	for _, route := range []func(string, string) string{
+		cliInstallationHTTPRoute,
 		agentHTTPRoute,
 		daemonHTTPRoute,
 		aiAgentClientHTTPRoute,
@@ -31,6 +32,8 @@ func agentHTTPRoute(method, path string) string {
 		return "/v1/agents/{agent_id}/events"
 	case strings.HasSuffix(path, "/thread-progress"):
 		return "/v1/agents/{agent_id}/thread-progress"
+	case strings.HasSuffix(path, "/assignment-context"):
+		return "/v1/agents/{agent_id}/assignment-context"
 	default:
 		return ""
 	}
@@ -38,6 +41,8 @@ func agentHTTPRoute(method, path string) string {
 
 func daemonHTTPRoute(method, path string) string {
 	switch {
+	case method == http.MethodPost && strings.HasPrefix(path, "/v1/daemon/execution-claims/") && strings.HasSuffix(path, "/termination"):
+		return "/v1/daemon/execution-claims/{assignment_id}/termination"
 	case method == http.MethodPost && path == "/v1/daemon/runtime-snapshot":
 		return "/v1/daemon/runtime-snapshot"
 	case method == http.MethodGet && path == "/v1/daemon/agent-bindings":

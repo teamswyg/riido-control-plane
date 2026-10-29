@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, count bool) (PollResponse, bool, *Assignment, AssignmentOperationType, error) {
+func (s *Store) handlePoll(ctx context.Context, state *storeState, agentID string, req PollRequest, count bool) (PollResponse, bool, *Assignment, AssignmentOperationType, error) {
 	agentID = strings.TrimSpace(agentID)
 	if agentID == "" {
 		return PollResponse{}, false, nil, "", errors.New("agent_id is required")
@@ -17,6 +17,10 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			return response, false, nil, "", nil
 		}
 		return PollResponse{}, false, nil, "", err
+	}
+	ctx, admissionErr := s.prepareExecutionAdmission(ctx, agentID, req)
+	if admissionErr != nil {
+		return PollResponse{}, false, nil, "", admissionErr
 	}
 	if count {
 		state.pollRequestsTotal++
@@ -57,6 +61,9 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 			recordPollAction(state, response.Action, count)
 			return response, false, nil, "", nil
 		case isAgentActive(durableAssignment.State):
+			if err := s.authorizeCoveredAssignment(ctx, durableAssignment); err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
 			response.Action = PollActive
 			response.Assignment = copyAssignment(durableAssignment)
 			recordPollAction(state, response.Action, count)
@@ -75,6 +82,9 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 				recordPollAction(state, response.Action, count)
 				return response, false, &stale, AssignmentOperationAgentEvent, nil
 			}
+			if err := s.authorizeCoveredAssignment(ctx, assignment); err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
 			response.Action = PollActive
 			response.Assignment = copyAssignment(assignment)
 			recordPollAction(state, response.Action, count)
@@ -82,11 +92,14 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 		}
 	}
 	if claimer, ok := s.operationStore.(AssignmentClaimer); ok {
-		claim, err := claimer.ClaimNextAssignment(context.Background(), agentID, s.now())
+		claim, err := claimer.ClaimNextAssignment(ctx, agentID, s.now())
 		if err != nil {
 			return PollResponse{}, false, nil, "", err
 		}
 		if claim.Claimed {
+			if expected := newExecutionClaim(ctx, claim.Assignment); expected != nil && (claim.Operation.ExecutionClaim == nil || *claim.Operation.ExecutionClaim != *expected) {
+				return PollResponse{}, false, nil, "", errors.New("authenticated claim persistence evidence is missing")
+			}
 			if err := s.applyClaimedAssignment(state, claim); err != nil {
 				return PollResponse{}, false, nil, "", err
 			}
@@ -114,6 +127,11 @@ func (s *Store) handlePoll(state *storeState, agentID string, req PollRequest, c
 		assignment.State = AssignmentLeased
 		assignment.LeaseToken = fmt.Sprintf("%s:%d", assignment.ID, now.UnixNano())
 		assignment.UpdatedAt = now
+		if claim := newExecutionClaim(ctx, assignment); claim != nil {
+			if err := rememberExecutionClaim(state, claim); err != nil {
+				return PollResponse{}, false, nil, "", err
+			}
+		}
 		state.assignments[id] = assignment
 		s.appendEvent(state, assignment.TaskID, assignment.ID, assignment.AgentID, EventAssignmentLeased, assignment.State, "", map[string]string{"lease_token": assignment.LeaseToken}, now)
 		response.Action = PollStart
