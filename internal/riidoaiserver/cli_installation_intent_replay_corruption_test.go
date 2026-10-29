@@ -21,16 +21,17 @@ func TestCLIInstallationIntentV2RejectsIncompleteOrChangedPairs(t *testing.T) {
 			requestKey := terminationItemKey(cliInstallationIntentReplayKey(record.key()))
 			intentKey := terminationItemKey(cliInstallationIntentKey(response.IntentID))
 			dynamo.mu.Lock()
-			if broken == "request-only" {
+			switch broken {
+			case "request-only":
 				delete(dynamo.items, intentKey)
-			} else if broken == "intent-only" {
+			case "intent-only":
 				delete(dynamo.items, requestKey)
-			} else if broken == "binding" {
+			case "binding":
 				intent := record.intent()
 				intent.ReplayKey = "changed"
 				data, _ := json.Marshal(intent)
 				dynamo.items[intentKey]["payload"]["S"] = string(data)
-			} else {
+			default:
 				if broken == "challenge" {
 					record.Response.Challenge = base64.RawURLEncoding.EncodeToString(make([]byte, 32))
 				} else {

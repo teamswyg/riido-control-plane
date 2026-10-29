@@ -26518,7 +26518,7 @@
     {
       "id": "cli_installation_service_link_and_revision_5900",
       "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy. The original link receipt cannot recover an intent creation response lost before the monolith learns the random ID/challenge; a digest alone cannot recreate that response.",
-      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects. Bind the monolith persisted request ID to the exact immutable v2 payload and original response, publishing both request and intent atomically. Domain-separated length-prefixed deterministic intent IDs make an intent-only collision fail closed instead of silently issuing a replacement.",
+      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects. Bind the monolith persisted request ID to the exact immutable v2 payload and original response, publishing both request and intent atomically. Domain-separated length-prefixed deterministic intent IDs make an intent-only collision fail closed instead of silently issuing a replacement. Retain an uncertain atomic snapshot intent/replay pair in the full actor state so another save cannot erase it; do not acknowledge a retry until the complete snapshot saves successfully.",
       "claims": [
         "cli_installation_link_must_preserve_key_and_policy_fences",
         "request_authorization_must_preserve_security_boundary",
@@ -26827,6 +26827,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/cli_installation_intent_replay_validation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_uncertain_test.go"
         }
       ],
       "evidence": [
