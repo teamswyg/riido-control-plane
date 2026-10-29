@@ -15,10 +15,10 @@ func TestRequestCorrelationIgnoresCallerAndSurvivesAuthorizationFailure(t *testi
 	}))
 	for range 2 {
 		req := httptest.NewRequest(http.MethodPost, "/v1/daemon/runtime-snapshot", nil)
-		req.Header.Set("X-Riido-Request-ID", "caller-secret")
+		req.Header.Set("X-Riido-Request-Id", "caller-secret")
 		out := httptest.NewRecorder()
 		handler.ServeHTTP(out, req)
-		id := out.Header().Get("X-Riido-Request-ID")
+		id := out.Header().Get("X-Riido-Request-Id")
 		if decoded, err := hex.DecodeString(id); err != nil || len(decoded) != 16 || ids[len(ids)-1] != id {
 			t.Fatalf("invalid correlation: %q", id)
 		}
