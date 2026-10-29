@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/teamswyg/riido-contracts/hostintegration"
+
 	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
@@ -529,6 +531,7 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,
 			ProviderVersion:           providerVersion,
+			ProviderVersionObservedAt: normalizeVersionObservedAt(runtime.ProviderVersionObservedAt, providerVersion, now),
 			HealthStatus:              healthStatus,
 			DiagnosticCode:            diagnosticCode,
 			DiagnosticSummary:         diagnosticSummary,

@@ -15,10 +15,10 @@ func logRequestFailure(r *http.Request, stage string, err error) {
 	traceID, spanID := traceCorrelationFromContext(r.Context())
 	if stage == "authorization" {
 		hints := authorizationTokenHints(r, time.Now())
-		log.Printf("event=control_plane_request_failed route=%q stage=%q error_type=%q trace_id=%q span_id=%q token_source=%q token_format=%q expiry_hint=%q token_header_relation=%q", sseLogRoute(r), boundedRequestFailureStage(stage), boundedRequestFailureType(err), traceID, spanID, hints.source, hints.format, hints.expiryHint, hints.headerRelation)
+		log.Printf("event=control_plane_request_failed route=%q stage=%q error_type=%q trace_id=%q span_id=%q request_id=%q token_source=%q token_format=%q expiry_hint=%q token_header_relation=%q", sseLogRoute(r), boundedRequestFailureStage(stage), boundedRequestFailureType(err), traceID, spanID, requestCorrelationID(r), hints.source, hints.format, hints.expiryHint, hints.headerRelation)
 		return
 	}
-	log.Printf("event=control_plane_request_failed route=%q stage=%q error_type=%q trace_id=%q span_id=%q", sseLogRoute(r), boundedRequestFailureStage(stage), boundedRequestFailureType(err), traceID, spanID)
+	log.Printf("event=control_plane_request_failed route=%q stage=%q error_type=%q trace_id=%q span_id=%q request_id=%q", sseLogRoute(r), boundedRequestFailureStage(stage), boundedRequestFailureType(err), traceID, spanID, requestCorrelationID(r))
 }
 
 func boundedRequestFailureStage(stage string) string {

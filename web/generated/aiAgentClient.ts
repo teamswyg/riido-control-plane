@@ -1150,6 +1150,10 @@ export interface RuntimeRecord {
    * provider runtime이 자기 신고한 version 문자열입니다. UI 표시용 raw signal이며 capability/scheduling 분기 조건으로 사용하지 않습니다.
    */
   provider_version: string;
+  /**
+   * CLI 버전을 마지막으로 성공적으로 확인한 시각입니다. 실패 후 보존된 버전의 시각은 갱신하지 않으며, 알 수 없으면 생략합니다.
+   */
+  provider_version_observed_at?: string;
   requires_experimental_opt_in: boolean;
   runtime_id: string;
 }
