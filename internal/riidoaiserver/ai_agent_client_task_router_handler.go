@@ -15,6 +15,7 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	}
+	defer s.reconcileCommentStatusReactionsAfter(r, taskID)
 	switch {
 	case suffix == "assignable-agents" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)
@@ -60,6 +61,8 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		s.handleAIAgentClientCreateTaskThreadMessage(w, r, taskID, threadID)
+	case strings.HasPrefix(suffix, "threads/") && strings.Contains(suffix, "/reactions") && (r.Method == http.MethodPost || r.Method == http.MethodDelete):
+		s.handleAIAgentClientThreadMessageReaction(w, r, taskID, suffix)
 	case suffix == "onboarding-completion" && r.Method == http.MethodPost:
 		s.handleAIAgentClientCompleteOnboardingTask(w, r, taskID)
 	case suffix == "stop" && r.Method == http.MethodPost:

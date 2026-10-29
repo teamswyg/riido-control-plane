@@ -231,6 +231,7 @@ func TestHTTPAIAgentClientGeneratedEndpointSmokeV2(t *testing.T) {
 	}
 	aiAgentSmokeRequest(t, server, http.MethodGet, base+"/tasks/assigned-agent-profiles", token, "", http.StatusOK)
 	aiAgentSmokeRequest(t, server, http.MethodPost, base+"/tasks/"+assignmentTaskID+"/threads/"+assigned.ThreadID+"/messages", token, `{"body":"v2 next instruction","source_message_id":"smoke-v2-message"}`, http.StatusAccepted)
+	assertAIAgentV2SmokeThreadReactions(t, server, base, token, assignmentTaskID)
 	aiAgentSmokeRequest(t, server, http.MethodDelete, base+"/tasks/"+assignmentTaskID+"/assignment", token, `{"agent_id":"agent-public-openclaw","reason":"smoke unassign"}`, http.StatusAccepted)
 
 	multiAgentBody := aiAgentSmokeJSON(t, CreateAgentConfigurationRequest{

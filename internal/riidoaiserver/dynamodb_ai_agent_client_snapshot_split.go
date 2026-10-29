@@ -14,6 +14,7 @@ const (
 	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships   = "TASK_AGENT_MEMBERSHIPS"
 	dynamoDBAIAgentClientSnapshotPartTaskThreads            = "TASK_THREADS"
 	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages     = "TASK_THREAD_MESSAGES"
+	dynamoDBAIAgentClientSnapshotPartTaskThreadReactions    = "TASK_THREAD_REACTIONS"
 	dynamoDBAIAgentClientSnapshotPartEvents                 = "EVENTS"
 	dynamoDBAIAgentClientSnapshotPartOnboardingCreated      = "ONBOARDING_CREATED_IDS"
 	dynamoDBAIAgentClientSnapshotPartOnboardingDone         = "ONBOARDING_COMPLETIONS"
@@ -41,6 +42,7 @@ var dynamoDBAIAgentClientSnapshotOptionalPartNames = []string{
 	dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships,
 	dynamoDBAIAgentClientSnapshotPartDeviceConnections,
 	dynamoDBAIAgentClientSnapshotPartTaskThreadMessages,
+	dynamoDBAIAgentClientSnapshotPartTaskThreadReactions,
 }
 
 var dynamoDBAIAgentClientSnapshotPartNames = append(

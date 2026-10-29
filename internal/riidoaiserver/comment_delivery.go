@@ -113,6 +113,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if found {
+		s.trackCommentDeliveryReaction(ctx, principal.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
 		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
@@ -128,6 +129,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 			writeCommentDeliveryError(w, err)
 			return
 		}
+		s.trackCommentDeliveryReaction(ctx, principal.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
 		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
@@ -148,6 +150,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.captureAssignmentContext(ctx, assignment, composed.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerComment, ID: evidence.CommentID, RequesterAdmin: aiAgentIsAdmin(principal)})
+	s.trackCommentDeliveryReaction(ctx, principal.WorkspaceID, evidence.TaskID, response.ThreadID, evidence.EventID)
 	writeJSON(w, http.StatusAccepted, response)
 }
 

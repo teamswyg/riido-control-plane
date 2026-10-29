@@ -29,6 +29,8 @@ func unmarshalDynamoDBAIAgentClientSnapshotPart(name string, raw []byte, snapsho
 		return json.Unmarshal(raw, &snapshot.TaskThreads)
 	case dynamoDBAIAgentClientSnapshotPartTaskThreadMessages:
 		return json.Unmarshal(raw, &snapshot.TaskThreadMessages)
+	case dynamoDBAIAgentClientSnapshotPartTaskThreadReactions:
+		return json.Unmarshal(raw, &snapshot.TaskThreadReactions)
 	case dynamoDBAIAgentClientSnapshotPartEvents:
 		return json.Unmarshal(raw, &snapshot.Events)
 	case dynamoDBAIAgentClientSnapshotPartOnboardingCreated:

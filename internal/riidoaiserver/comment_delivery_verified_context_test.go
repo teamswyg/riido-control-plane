@@ -22,6 +22,9 @@ func TestCommentDeliveryPreservesVerifiedExtendedContext(t *testing.T) {
 		},
 	}}
 	evidenceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if acceptCommentStatusReaction(w, r) {
+			return
+		}
 		if r.Header.Get(CommentDeliveryKeyHeader) != key || r.Header.Get("Authorization") != "" {
 			t.Error("evidence must use existing server key without user bearer")
 		}

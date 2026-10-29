@@ -52,6 +52,7 @@ type Server struct {
 	providerRead             ProviderStatusReader
 	devices                  DeviceCredentialStore
 	aiAgentGlobalReconcile   *aiAgentGlobalReconcileGate
+	commentReactions         *commentStatusReactionDispatcher
 	taskAgentExecutionGate   taskAgentExecutionGate
 	config                   ServerConfig
 }

@@ -19,7 +19,9 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 		kind = "result_ready"
 	case AgentWorkStatusFailed:
 		kind = "failed"
-	case AgentWorkStatusIdle, AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusOffline:
+	case AgentWorkStatusRunning:
+		kind = s.startedNotificationKindLocked(event, response)
+	case AgentWorkStatusIdle, AgentWorkStatusQueued, AgentWorkStatusOffline:
 		return
 	}
 	if kind == "" {
@@ -31,7 +33,7 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 		if !ok {
 			continue
 		}
-		if notification.EventID == event.EventID || (isTerminal(event.State) && notification.AssignmentID == event.AssignmentID && notification.NotificationType == kind) {
+		if notification.EventID == event.EventID || ((isTerminal(event.State) || kind == agentTaskNotificationStarted) && notification.AssignmentID == event.AssignmentID && notification.NotificationType == kind) {
 			return
 		}
 	}

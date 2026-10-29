@@ -27,6 +27,7 @@ type AIAgentTaskThreadHistoryMessage struct {
 	Body              string                       `json:"body,omitempty"`
 	ResultMessage     string                       `json:"result_message,omitempty"`
 	ObservedAt        time.Time                    `json:"observed_at,omitempty"`
+	Reactions         []AIAgentMessageReaction     `json:"reactions,omitempty"`
 }
 
 type AIAgentTaskThreadHistoryRecord struct {

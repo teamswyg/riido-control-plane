@@ -38,6 +38,7 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 			return
 		}
 	}
+	s.reconcileCommentStatusReactions(response.Event.TaskID)
 	logAgentResponseDelivery(req, response, receivedAt, committedAt, time.Now())
 	writeJSON(w, http.StatusOK, response)
 }

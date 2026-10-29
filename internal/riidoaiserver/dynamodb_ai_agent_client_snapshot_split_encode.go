@@ -42,6 +42,7 @@ func encodeDynamoDBAIAgentClientSnapshotParts(snapshot AIAgentClientSnapshot) ([
 		{name: dynamoDBAIAgentClientSnapshotPartTaskThreads, value: snapshot.TaskThreads},
 		{name: dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships, value: snapshot.TaskAgentMemberships},
 		{name: dynamoDBAIAgentClientSnapshotPartTaskThreadMessages, value: snapshot.TaskThreadMessages},
+		{name: dynamoDBAIAgentClientSnapshotPartTaskThreadReactions, value: snapshot.TaskThreadReactions},
 		{name: dynamoDBAIAgentClientSnapshotPartEvents, value: snapshot.Events},
 		{name: dynamoDBAIAgentClientSnapshotPartOnboardingAgentCreates, value: snapshot.OnboardingAgentCreates},
 		{name: dynamoDBAIAgentClientSnapshotPartOnboardingCreated, value: snapshot.OnboardingCreatedIDs},

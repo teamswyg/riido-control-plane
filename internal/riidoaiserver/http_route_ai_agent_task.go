@@ -59,6 +59,9 @@ func aiAgentClientTaskThreadsRoute(taskBase string, segments []string) string {
 	if len(segments) == 4 && segments[1] == "threads" && segments[3] == "messages" {
 		return taskBase + "/threads/{thread_id}/messages"
 	}
+	if len(segments) >= 6 && segments[1] == "threads" && segments[3] == "messages" && segments[5] == "reactions" {
+		return aiAgentClientTaskThreadReactionRoute(taskBase, len(segments))
+	}
 	return ""
 }
 

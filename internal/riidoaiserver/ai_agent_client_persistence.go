@@ -43,6 +43,7 @@ type AIAgentClientSnapshot struct {
 	TaskAgentMemberships        map[string]map[string]AIAgentTaskMembership  `json:"task_agent_memberships"`
 	TaskThreads                 map[string][]AIAgentTaskThreadRecord         `json:"task_threads"`
 	TaskThreadMessages          map[string][]AIAgentTaskThreadHistoryMessage `json:"task_thread_messages,omitempty"`
+	TaskThreadReactions         map[string]AIAgentTaskThreadReactionState    `json:"task_thread_reactions,omitempty"`
 	Events                      []AIAgentClientEventSnapshot                 `json:"events"`
 	NextDeviceCredentialSeq     int                                          `json:"next_device_credential_seq"`
 	NextDaemonCommand           int                                          `json:"next_daemon_command"`
@@ -319,6 +320,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		OnboardingCompletionThreads: cloneOnboardingCompletionThreads(s.onboardingCompletionThreads),
 		TaskAgentMemberships:        copyTaskAgentMemberships(s.taskAgentMemberships),
 		TaskThreadMessages:          taskThreadMessages,
+		TaskThreadReactions:         retainedTaskThreadReactions(s.taskThreadReactions, taskThreads),
 		Events:                      events,
 		NextDeviceCredentialSeq:     s.nextDeviceCredentialSeq,
 		NextDaemonCommand:           s.nextDaemonCommand,
@@ -479,6 +481,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		s.taskAgentMemberships = legacyTaskAgentMemberships(taskThreads)
 	}
 	s.taskThreadMessages = taskThreadMessages
+	s.taskThreadReactions = retainedTaskThreadReactions(snapshot.TaskThreadReactions, taskThreads)
 	s.ensureAgentProfileColorsLocked()
 	s.taskThreadProgressCache = map[string]taskThreadProgressMessageCache{}
 	s.events = events

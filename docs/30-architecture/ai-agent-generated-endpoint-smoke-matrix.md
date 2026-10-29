@@ -12,9 +12,9 @@ This reader is generated from the smoke matrix gate manifest. OpenAPI and the ma
 
 | Class | Count |
 | --- | ---: |
-| Generated OpenAPI operations | 64 |
+| Generated OpenAPI operations | 66 |
 | v1 operations | 28 |
-| v2 operations | 35 |
+| v2 operations | 37 |
 | Required smoke tests | 3 |
 | Source checks | 5 |
 

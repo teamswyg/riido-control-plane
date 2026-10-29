@@ -18,6 +18,9 @@ func TestCommentDeliveryReadScopeNegotiationAndBoundedFullCapture(t *testing.T) 
 				evidence.Context.ReadScopeEvidence = nil
 			}
 			upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if acceptCommentStatusReaction(w, r) {
+					return
+				}
 				if r.Header.Get(CommentDeliveryKeyHeader) != key {
 					t.Error("service evidence auth missing")
 				}

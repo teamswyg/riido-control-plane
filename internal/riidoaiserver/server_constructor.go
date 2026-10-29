@@ -60,6 +60,7 @@ func NewServer(config ServerConfig) Server {
 		providerRead:             providerRead,
 		devices:                  devices,
 		aiAgentGlobalReconcile:   newAIAgentGlobalReconcileGate(config.AIAgentGlobalReconcileMinInterval),
+		commentReactions:         newCommentStatusReactionDispatcher(),
 		taskAgentExecutionGate:   executionGate,
 		config:                   config,
 	}

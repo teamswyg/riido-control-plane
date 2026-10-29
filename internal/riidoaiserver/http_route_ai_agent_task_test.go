@@ -17,6 +17,8 @@ func TestAIAgentClientTaskHTTPRouteClassifiesTaskScopedRoutes(t *testing.T) {
 		{"tool decision", []string{"task-a", "tool-approvals", "apr-a", "decision"}, taskBase + "/tool-approvals/{approval_id}/decision"},
 		{"threads", []string{"task-a", "threads"}, taskBase + "/threads"},
 		{"thread messages", []string{"task-a", "threads", "thread-a", "messages"}, taskBase + "/threads/{thread_id}/messages"},
+		{"thread reactions", []string{"task-a", "threads", "thread-a", "messages", "msg-a", "reactions"}, taskBase + "/threads/{thread_id}/messages/{message_id}/reactions"},
+		{"thread reaction emoji", []string{"task-a", "threads", "thread-a", "messages", "msg-a", "reactions", "1f44d"}, taskBase + "/threads/{thread_id}/messages/{message_id}/reactions/{emoji}"},
 		{"assignments", []string{"task-a", "agent-assignments"}, taskBase + "/agent-assignments"},
 		{"assignment agent", []string{"task-a", "agent-assignments", "agent-a"}, taskBase + "/agent-assignments/{agent_id}"},
 		{"assignment stop", []string{"task-a", "agent-assignments", "agent-a", "stop"}, taskBase + "/agent-assignments/{agent_id}/stop"},

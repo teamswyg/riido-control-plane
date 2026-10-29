@@ -46,7 +46,7 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(thread AIA
 		AssignmentState:    thread.AssignmentState,
 		StartedAt:          thread.StartedAt,
 		CompletedAt:        thread.CompletedAt,
-		Messages:           s.taskThreadHistoryMessagesLocked(thread),
+		Messages:           withTaskThreadReactions(thread, s.taskThreadHistoryMessagesLocked(thread), s.taskThreadReactions[thread.ThreadID]),
 	}
 	if taskThreadHasActiveStream(thread) {
 		link := activeStreamLinkForThreadHref(thread, streamHref)
