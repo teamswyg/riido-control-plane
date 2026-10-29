@@ -28,6 +28,7 @@ type DevelopmentAIAgentClientStore struct {
 	taskThreadProgressCache     map[string]taskThreadProgressMessageCache
 	taskThreadHistoryCache      map[string]taskThreadHistoryMessageCache
 	taskThreadReactions         map[string]AIAgentTaskThreadReactionState
+	reactionRevision            uint64
 	eventStreamHrefs            map[string]string
 	events                      []ClientStreamEvent
 	subscribers                 map[int]aiAgentClientSubscriber

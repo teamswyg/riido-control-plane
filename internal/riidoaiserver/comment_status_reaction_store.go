@@ -23,6 +23,11 @@ type commentStatusReactionStore interface {
 // RecordCommentDeliveryEvent links a run thread to the monolith delivery that
 // started it. The event id is server-side evidence, never a client value.
 func (s *DevelopmentAIAgentClientStore) RecordCommentDeliveryEvent(ctx context.Context, workspaceID, threadID, eventID string) error {
+	_, err := s.recordCommentDeliveryEvent(ctx, workspaceID, threadID, eventID)
+	return err
+}
+
+func (s *DevelopmentAIAgentClientStore) recordCommentDeliveryEvent(ctx context.Context, workspaceID, threadID, eventID string) (bool, error) {
 	return s.updateTaskThreadReactionState(ctx, workspaceID, threadID, func(state *AIAgentTaskThreadReactionState) bool {
 		if state.CommentEventID != "" || strings.TrimSpace(eventID) == "" {
 			return false
@@ -33,6 +38,11 @@ func (s *DevelopmentAIAgentClientStore) RecordCommentDeliveryEvent(ctx context.C
 }
 
 func (s *DevelopmentAIAgentClientStore) MarkCommentStatusReactionApplied(ctx context.Context, workspaceID, threadID, emoji string) error {
+	_, err := s.markCommentStatusReactionApplied(ctx, workspaceID, threadID, emoji)
+	return err
+}
+
+func (s *DevelopmentAIAgentClientStore) markCommentStatusReactionApplied(ctx context.Context, workspaceID, threadID, emoji string) (bool, error) {
 	return s.updateTaskThreadReactionState(ctx, workspaceID, threadID, func(state *AIAgentTaskThreadReactionState) bool {
 		if state.CommentEventID == "" || state.CommentReactionApplied == emoji {
 			return false
@@ -42,34 +52,17 @@ func (s *DevelopmentAIAgentClientStore) MarkCommentStatusReactionApplied(ctx con
 	})
 }
 
-// CommentStatusReactionPlans reads in-memory state only; it is called from
-// internal hooks that already hold a verified task id.
-func (s *DevelopmentAIAgentClientStore) CommentStatusReactionPlans(taskID string) []commentStatusReactionPlan {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	var plans []commentStatusReactionPlan
-	for _, thread := range s.taskThreads[strings.TrimSpace(taskID)] {
-		state, ok := s.taskThreadReactions[thread.ThreadID]
-		if !ok || state.CommentEventID == "" {
-			continue
-		}
-		if emoji := agentStatusReactionEmoji(thread.AssignmentState); emoji != state.CommentReactionApplied {
-			plans = append(plans, commentStatusReactionPlan{WorkspaceID: s.taskThreadWorkspaceIDLocked(thread), ThreadID: thread.ThreadID, EventID: state.CommentEventID, Emoji: emoji})
-		}
-	}
-	return plans
-}
-
-func (s *DevelopmentAIAgentClientStore) updateTaskThreadReactionState(ctx context.Context, workspaceID, threadID string, update func(*AIAgentTaskThreadReactionState) bool) error {
+func (s *DevelopmentAIAgentClientStore) updateTaskThreadReactionState(ctx context.Context, workspaceID, threadID string, update func(*AIAgentTaskThreadReactionState) bool) (bool, error) {
 	thread, err := s.FindAIAgentTaskThreadByID(ctx, workspaceID, threadID)
 	if err != nil {
-		return err
+		return false, err
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	state := s.taskThreadReactions[thread.ThreadID]
-	if update(&state) {
+	changed := update(&state)
+	if changed {
 		s.setTaskThreadReactionStateLocked(thread.ThreadID, state)
 	}
-	return nil
+	return changed, nil
 }

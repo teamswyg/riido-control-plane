@@ -62,12 +62,13 @@ func TestCommentStatusReactionRewritesStopDuringInFlightWrite(t *testing.T) {
 func TestThreadReactionNotificationsSendLatestInOrder(t *testing.T) {
 	monolith, entered, release, writes := blockingMonolith(t)
 	server := NewServer(ServerConfig{CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: monolith.URL, Key: strings.Repeat("k", 32)}})
-	notification := agentThreadReactionNotification{ThreadID: "thread", MessageID: "msg", ActorPrincipalID: "actor", Emoji: "1f44d"}
+	notification := agentThreadReactionNotification{ThreadID: "thread", MessageID: "msg", ActorPrincipalID: "actor", Emoji: "1f44d", revision: 1}
 	server.queueThreadReactionNotification(notification)
 	<-entered
-	notification.Emoji = "2764"
+	notification.Emoji, notification.revision = "", 3
 	server.queueThreadReactionNotification(notification)
-	notification.Emoji = ""
+	// An add committed before the removal but enqueued after it is dropped.
+	notification.Emoji, notification.revision = "2764", 2
 	server.queueThreadReactionNotification(notification)
 	close(release)
 	server.commentReactions.wg.Wait()

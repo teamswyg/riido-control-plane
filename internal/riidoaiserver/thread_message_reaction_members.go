@@ -16,6 +16,8 @@ type agentThreadReactionNotification struct {
 	ActorPrincipalID     string `json:"actor_principal_id"`
 	Emoji                string `json:"emoji"`
 	Excerpt              string `json:"excerpt"`
+	// revision orders notifications of the same message and actor.
+	revision uint64
 }
 
 // toggledMemberReactions returns a new slice; the stored slice is shared with

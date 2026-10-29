@@ -11,11 +11,12 @@ type commentStatusReactionDispatcher struct {
 	pending map[string]bool
 	wg      sync.WaitGroup
 	// notifications keeps the latest member reaction notification per key.
-	notifications map[string]agentThreadReactionNotification
+	notifications    map[string]agentThreadReactionNotification
+	notificationSent map[string]uint64
 }
 
 func newCommentStatusReactionDispatcher() *commentStatusReactionDispatcher {
-	return &commentStatusReactionDispatcher{running: map[string]bool{}, pending: map[string]bool{}, notifications: map[string]agentThreadReactionNotification{}}
+	return &commentStatusReactionDispatcher{running: map[string]bool{}, pending: map[string]bool{}, notifications: map[string]agentThreadReactionNotification{}, notificationSent: map[string]uint64{}}
 }
 
 func (d *commentStatusReactionDispatcher) start(key string, run func()) {

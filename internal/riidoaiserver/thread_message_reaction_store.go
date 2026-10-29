@@ -60,15 +60,10 @@ func (s *DevelopmentAIAgentClientStore) ReactToAIAgentTaskThreadMessage(ctx cont
 	}
 	if changed {
 		result.Notify = memberReactionNotification(principal, thread, message, members, target)
-	}
-	return result, nil
-}
-
-func findTaskThreadHistoryMessage(messages []AIAgentTaskThreadHistoryMessage, messageID string) (AIAgentTaskThreadHistoryMessage, bool) {
-	for _, message := range messages {
-		if messageID != "" && message.MessageID == messageID {
-			return message, true
+		s.reactionRevision++
+		if result.Notify != nil {
+			result.Notify.revision = s.reactionRevision
 		}
 	}
-	return AIAgentTaskThreadHistoryMessage{}, false
+	return result, nil
 }

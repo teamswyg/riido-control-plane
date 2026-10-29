@@ -49,3 +49,12 @@ func taskThreadStatusReactionTarget(thread AIAgentTaskThreadRecord, messages []A
 	}
 	return ""
 }
+
+func findTaskThreadHistoryMessage(messages []AIAgentTaskThreadHistoryMessage, messageID string) (AIAgentTaskThreadHistoryMessage, bool) {
+	for _, message := range messages {
+		if messageID != "" && message.MessageID == messageID {
+			return message, true
+		}
+	}
+	return AIAgentTaskThreadHistoryMessage{}, false
+}
