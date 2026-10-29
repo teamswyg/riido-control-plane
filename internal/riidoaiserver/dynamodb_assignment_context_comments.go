@@ -44,15 +44,16 @@ func (s *DynamoDBAssignmentOperationStore) SaveAssignmentContextComments(ctx con
 		}
 		writes = append(writes, write)
 	}
+	items := make([]map[string]map[string]string, 0, len(writes))
+	for _, write := range writes {
+		items = append(items, write.Put.Item)
+	}
 	if s.enableAssignmentContextRetention {
-		items := make([]map[string]map[string]string, 0, len(writes))
-		for _, write := range writes {
-			items = append(items, write.Put.Item)
-		}
 		return s.saveContextPayloads(ctx, assignmentID, items)
 	}
+	actions := append(s.contextPublicationFences(assignmentID, items, false), s.contextPayloadPuts(items, false)...)
 	_, err := s.assignmentContextRequest(ctx, dynamoDBTransactWriteTarget, struct {
-		TransactItems []dynamoDBTransactWritePut `json:"TransactItems"`
-	}{writes})
+		TransactItems []dynamoDBTransactWriteItem `json:"TransactItems"`
+	}{actions})
 	return err
 }

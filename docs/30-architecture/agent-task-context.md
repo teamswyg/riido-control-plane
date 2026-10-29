@@ -123,3 +123,69 @@ Only current same-task roots with a positive reply count qualify. Deduplicate an
 Any batch HTTP/GraphQL error, missing/null expected alias, cancellation, deadline or existing 1MiB response limit keeps all replies hidden. Independently verified roots remain available; there is no positive cache across GETs or events. A reply whose parent is outside the existing bounded current root list remains unverified and hidden. Metadata-only replies contain no body hash: an empty body cannot prove `modified_since_read=false`; only a strictly later comparable source timestamp proves true, otherwise freshness stays unknown.
 
 Synthetic regressions cover the readable trigger reply, GET/live/replay revalidation, deletion/403/partial errors, malformed and oversized responses, alias completeness, deduplication and the 200-parent/200-reply/one-call bounds, deadline propagation, unchanged assignment capture and conservative timestamp-only freshness. Actual staging acceptance remains separate.
+
+
+## Bounded typed read scope (RIID-5900)
+
+`RIIDO_AI_SERVER_ASSIGNMENT_READ_SCOPE` defaults to false. When enabled, the
+private context client uses fixed typed GraphQL roots under the authenticated
+requester after verifying the root workspace/team. The producer selects the root,
+structured work mentions, at most five directly related works across relation
+kinds, five direct meetings, direct hierarchy and ten children. Selected leaves
+provide details without expanding another relationship hop. Component, backlog,
+intake and meeting IDs retain their kinds; an ambiguous bare work ID is rejected.
+
+The scope preserves inspector fields, stored GitHub/Figma/link/attachment data,
+versioned editor/description/alternate bodies, comments/replies and meeting board
+cards/groups/participants. Fixed continuation calls happen during initial capture.
+Click-time HTML replaces stored document mentions and is chunked locally after
+producer authorization; an agent never receives a retained user token or a live
+user-auth fallback. External GitHub/Figma page contents are not fetched.
+
+A 256KiB manifest plus at most ten 96KiB payload items remains the total storage
+contract. Multiple logical parts share a physical block; the current conservative
+raw block cap is 64KiB. Manifest identity, logical order, block digest and exact
+replay are checked. New scoped snapshots/pages publish atomically, fence legacy
+payload writers and keep the original first-terminal +24h retention. Corrupt or
+duplicate source manifests cannot be used to read or create served audit rows.
+
+`riido context get` discovers selected sources. A work/meeting read includes small
+first parts within a 48KiB data budget; omitted parts retain their original cursor.
+`riido context part <source-id> --cursor <opaque>` returns only captured pages.
+Complete=false means some content was not captured. Overflow and deadlines do not
+create a cursor for missing data. Normal 30-source fixtures read 120 logical parts
+in 31 context HTTP calls; this is separate from the fixed 100-call per-run limit
+and does not promise unlimited content. Prompt audit includes only rendered
+preview fields; inline/content audit includes only the delivered source pages.
+Viewer HTTP and live/replay SSE recheck the current viewer's readable leaves.
+
+For comment delivery, the existing service-authenticated evidence request opts in
+with `X-Riido-Read-Scope-Version: riido-read-scope.v1`. The header negotiates a
+format and grants no permission. The same verified author/event producer captures
+continuations into `readScopeCapture` using one bounded snapshot. CP materializes
+that typed bundle offline; missing/invalid capture fails closed when enabled.
+Producer complete=false remains incomplete even when the available subset can be
+read. Header absence/default-off preserves the legacy path without invoking the
+new collector. No new service delegation endpoint or user credential is added.
+
+Source verification is not rollout acceptance. Every serving/capture/terminal
+writer must support the new stored schema before activation. Disabling new
+capture keeps existing scoped reads available; unsupported old binaries require
+active scoped runs to drain and are not an automatic safe rollback. No deployment,
+feature activation or Terraform apply is authorized by this source change.
+
+Root identity retains its actual team. A producer-authorized leaf from another
+team in the same workspace retains that leaf's team for each continuation and
+offline evidence lookup. Root team equality is not imposed on those leaves.
+Scoped repository metadata preserves required false values, including public
+repository `isPrivate: false`; legacy prompt projection remains separate.
+
+When typed JSON is fragmented, link/attachment/comment read evidence is recorded
+only for leaf objects whose serialized byte ranges overlap the delivered
+fragment. The owning resource remains recorded for envelope-only fragments.
+This means a partial read of an object is a read; it does not claim full-object
+completion or record unseen objects from later fragments.
+
+### Large typed read-scope slots
+
+A producer may replace work/meeting metadata, one comment page, or one board page with `contentPage`. These are fixed `metadata`, `comments_page`, and `board_page` body parts, bound to resource kind/ID/team and the normalized closed selector. The consumer reassembles UTF-8 chunks, verifies the complete canonical hash, and validates the fixed slot before using placeholders. Unknown fields, recursive references, mismatched identities/selectors and changed hashes are rejected. No stored OAuth or live evidence fallback is added. Captures retain the existing byte and time budgets; an unfinished typed slot stays explicitly incomplete.

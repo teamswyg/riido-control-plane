@@ -51,7 +51,9 @@ func (s Server) assignRequestWithTaskContextPromptForClientResult(
 		if contextSnapshot.Component.ID != contextReq.ComponentID {
 			return composedAssignRequest{}, errors.New("task context component identity mismatch")
 		}
-		contextReq.DocumentSnapshot.apply(&contextSnapshot.Document)
+		if contextSnapshot.ReadScope == nil {
+			contextReq.DocumentSnapshot.apply(&contextSnapshot.Document)
+		}
 	}
 	composedReq, err := composeAssignRequestWithTaskContextResult(taskID, componentID, req, contextSnapshot)
 	if err != nil {

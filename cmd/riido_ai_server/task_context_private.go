@@ -7,10 +7,15 @@ import (
 )
 
 func privateTaskContextReader(baseURL, graphqlURL string, timeout time.Duration) (riidoaiserver.AIAgentTaskContextReader, error) {
+	readScope, err := envOptionalBool(envAssignmentReadScope)
+	if err != nil {
+		return nil, err
+	}
 	client, err := riidoaiserver.NewAIAgentPrivateTaskContextClient(riidoaiserver.AIAgentPrivateTaskContextClientConfig{
-		BaseURL:    baseURL,
-		GraphQLURL: graphqlURL,
-		Timeout:    timeout,
+		AssignmentReadScope: readScope,
+		BaseURL:             baseURL,
+		GraphQLURL:          graphqlURL,
+		Timeout:             timeout,
 	})
 	if err != nil {
 		return nil, wrapEnvError(envTaskContextBaseURL, err)

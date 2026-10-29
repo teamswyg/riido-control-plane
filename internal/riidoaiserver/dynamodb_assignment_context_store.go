@@ -12,6 +12,9 @@ func (s *DynamoDBAssignmentOperationStore) SaveAssignmentContextSnapshot(ctx con
 	if strings.TrimSpace(snapshot.AssignmentID) == "" {
 		return errors.New("assignment_id is required")
 	}
+	if snapshot.Content != nil || snapshot.ContentBlocks != nil {
+		return errAssignmentContentConflict
+	}
 	encoded, err := json.Marshal(snapshot)
 	if err != nil {
 		return err
@@ -32,10 +35,9 @@ func (s *DynamoDBAssignmentOperationStore) SaveAssignmentContextSnapshot(ctx con
 	if s.enableAssignmentContextRetention {
 		return s.saveContextPayloads(ctx, snapshot.AssignmentID, []map[string]map[string]string{item})
 	}
-	_, err = s.assignmentContextRequest(ctx, dynamoDBPutItemTarget, struct {
-		TableName string
-		Item      map[string]map[string]string
-	}{s.tableName, item})
+	put := &dynamoDBTransactWritePutAction{TableName: s.tableName, Item: item}
+	applyLegacyContextPutGuard(put)
+	_, err = s.assignmentContextRequest(ctx, dynamoDBPutItemTarget, put)
 	return err
 }
 

@@ -8,6 +8,7 @@ type runReadMetadata struct {
 	title      string
 	source     AssignmentContextSource
 	comparable bool
+	versions   map[string]bool
 }
 
 func currentRunReadMetadata(current AIAgentTaskContext) map[runReadSourceKey]runReadMetadata {
@@ -26,6 +27,7 @@ func currentRunReadMetadata(current AIAgentTaskContext) map[runReadSourceKey]run
 		addRunReadResourceMetadata(metadata, ref.ref.Resources)
 	}
 	addRunReadExtendedMetadata(metadata, current)
+	addReadScopeCurrentMetadata(metadata, current)
 	return metadata
 }
 

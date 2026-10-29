@@ -50,7 +50,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	assignmentContext, err := assignmentContextStoreFromEnv(assignmentOperationStore)
+	assignmentContext, assignmentReadScope, err := assignmentReadScopeRuntime(taskContextReader, assignmentOperationStore)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -94,6 +94,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AssignmentOperationStore: assignmentOperationStore,
 		AssignmentOutbox:         assignmentOutbox,
 		AssignmentContext:        assignmentContext,
+		AssignmentReadScope:      assignmentReadScope,
 		TaskContextReader:        taskContextReader,
 	}, nil
 }
