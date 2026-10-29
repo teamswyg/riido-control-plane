@@ -33,6 +33,7 @@ func TestEnrollmentKeepsVerifiedDeviceAcrossMachineIDDrift(t *testing.T) {
 		t.Fatal("merged different machines by display name")
 	}
 }
+
 func TestRuntimeModelSnapshotDoesNotInventDefault(t *testing.T) {
 	models := normalizeRuntimeModels(RuntimeKindCursor, []RuntimeModelRecord{{ModelID: "a"}, {ModelID: "cursor-auto"}})
 	for _, model := range models {

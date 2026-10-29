@@ -1,9 +1,10 @@
 package riidoaiserver
 
 import (
-	"github.com/teamswyg/riido-contracts/hostintegration"
 	"strings"
 	"testing"
+
+	"github.com/teamswyg/riido-contracts/hostintegration"
 )
 
 func TestRuntimeSnapshotInvalidVersionDoesNotRejectHeartbeat(t *testing.T) {
