@@ -8,8 +8,9 @@ import (
 func taskConversationMessages(thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history []AIAgentTaskThreadHistoryRecord) []AIAgentTaskThreadHistoryMessage {
 	var messages []AIAgentTaskThreadHistoryMessage
 	seen := make(map[string]bool)
+	linked := taskConversationLinkedThreadIDs(thread, history)
 	for _, record := range history {
-		if record.TaskID != thread.TaskID || (record.AgentID != thread.AgentID && !strings.HasPrefix(thread.ConversationID, "comment:")) {
+		if record.TaskID != thread.TaskID || (record.AgentID != thread.AgentID && !strings.HasPrefix(thread.ConversationID, "comment:") && !linked[record.ThreadID]) {
 			continue
 		}
 		if thread.ConversationID != "" {

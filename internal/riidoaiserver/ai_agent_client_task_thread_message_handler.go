@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -38,35 +39,47 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
-	prepared, err := s.prepareThreadMessage(r.Context(), principal, bearerToken, taskID, threadID, req)
+	replies, err := s.prepareThreadReplies(r.Context(), principal, bearerToken, taskID, threadID, req)
 	if err != nil {
 		writeAIAgentClientError(w, err)
 		return
 	}
-	if prepared.Replay != nil {
-		writeJSON(w, http.StatusAccepted, *prepared.Replay)
-		return
+	for index, reply := range replies {
+		result, err := s.publishThreadReply(r.Context(), principal, taskID, threadID, reply)
+		if err != nil {
+			writeAIAgentClientError(w, err)
+			return
+		}
+		if index == 0 {
+			response = result
+		}
 	}
-	creationContext, creationReceipt := withTaskAgentCreationReceipt(r.Context())
+	writeJSON(w, http.StatusAccepted, response)
+}
+
+func (s Server) publishThreadReply(ctx context.Context, principal AuthorizationResult, taskID, threadID string, reply preparedThreadReply) (AIAgentTaskActionResponse, error) {
+	req, prepared := reply.Message, reply.Prepared
+	if prepared.Replay != nil {
+		return *prepared.Replay, nil
+	}
+	creationContext, creationReceipt := withTaskAgentCreationReceipt(ctx)
 	assignment, err := s.assignThreadMessage(creationContext, taskID, prepared.Request, prepared.StartsNewExecution)
 	if err != nil {
-		writeAIAgentClientError(w, err)
-		return
+		return AIAgentTaskActionResponse{}, err
 	}
 	req.AssignmentID = assignment.ID
 	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() && assignmentSequence(assignment.ID) == 0 {
 		req.membershipPublicationGeneration = taskAgentAssignmentGeneration(assignment)
 	}
 	req.durableState = assignment.State
-	response, err = s.aiAgent.CreateAIAgentTaskThreadMessage(r.Context(), principal, taskID, threadID, req)
+	response, err := s.aiAgent.CreateAIAgentTaskThreadMessage(ctx, principal, taskID, threadID, req)
 	if err != nil {
-		s.recoverTaskAgentPublication(r.Context(), assignment, creationReceipt)
-		writeAIAgentClientError(w, err)
-		return
+		s.recoverTaskAgentPublication(ctx, assignment, creationReceipt)
+		return AIAgentTaskActionResponse{}, err
 	}
 	// A message folded into a running assignment did not get this prompt.
 	if prepared.StartsNewExecution || creationReceipt.ownCreation(assignment) {
-		s.captureAssignmentContext(r.Context(), assignment, prepared.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)})
+		s.captureAssignmentContext(ctx, assignment, prepared.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)})
 	}
-	writeJSON(w, http.StatusAccepted, response)
+	return response, nil
 }

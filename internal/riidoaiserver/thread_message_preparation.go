@@ -14,15 +14,19 @@ func (s Server) prepareThreadMessage(ctx context.Context, principal Authorizatio
 	if err != nil {
 		return preparedThreadMessage{}, err
 	}
+	target := threadMessageExecutionThread(selected, history, req.targetAgentID)
 	// Authorization and thread identity are checked before replay, but mutable task
 	// documents are deliberately not read again after an execution was committed.
-	replay, found, err := s.findTaskRequestReceipt(ctx, principal, taskID, AssignAIAgentTaskRequest{AgentID: selected.AgentID, RequestID: threadMessageRequestID(threadID, req.RequestID)})
+	replay, found, err := s.findTaskRequestReceipt(ctx, principal, taskID, AssignAIAgentTaskRequest{AgentID: target.AgentID, RequestID: threadMessageRequestID(threadID, req.RequestID)})
 	if err != nil {
 		return preparedThreadMessage{}, err
 	}
 	if found {
 		return preparedThreadMessage{Replay: &replay}, nil
 	}
+	if target.AgentID != selected.AgentID && target.ThreadID != "" && !taskThreadMessageStartsNewExecution(target) {
+		return preparedThreadMessage{}, ErrAIAgentTaskThreadConflict
+	}
 	request, taskContext, err := s.assignRequestFromAIAgentTaskThreadMessage(ctx, principal, bearer, taskID, threadID, req, selected, history)
-	return preparedThreadMessage{Request: request, TaskContext: taskContext, StartsNewExecution: taskThreadMessageStartsNewExecution(AIAgentTaskThreadRecord{WorkStatus: selected.WorkStatus, AssignmentState: selected.AssignmentState})}, err
+	return preparedThreadMessage{Request: request, TaskContext: taskContext, StartsNewExecution: target.AgentID != selected.AgentID || taskThreadMessageStartsNewExecution(selected)}, err
 }

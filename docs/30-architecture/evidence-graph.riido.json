@@ -21,7 +21,7 @@
   "chains": [
     {
       "id": "comment_native_conversation_continuity_5891_5892",
-      "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication.",
+      "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication. A human reply in an existing Agent card ignored a typed mention and assigned the original Agent again.",
       "hypothesis": "Bind verified root comments to stable conversation identities while retaining per-Agent native sessions, import visible messages only on the next request, and publish immutable history chunks through the existing atomic manifest. Preserve SSE replay semantics and reject stale writers before they can replace newer conversation history.",
       "claims": [
         "thread_history_must_keep_user_followups",
@@ -56,6 +56,26 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/agent_event_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_mentions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_preparation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_conversation_links.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_thread_message_tool_approval.go"
         }
       ],
       "verifiers": [
@@ -86,6 +106,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/dynamodb_conversation_failure_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_mention_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_mention_policy_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_mention_native_test.go"
         }
       ],
       "evidence": [
@@ -95,7 +127,7 @@
           "redacted": true
         }
       ],
-      "decision": "Retain distinct root-comment, thread, message, execution and provider-session IDs. Handoff inherits the authorized snapshot before creating a child, uses the persisted Agent message ID, and is bounded and idempotent. Large histories remain durable with hashed chunks and a format marker that fences old writers. Deploy a compatible storage baseline first and never roll back below it once new manifests exist. Unit/race/fixture checks do not replace authenticated provider round-trip QA.",
+      "decision": "Retain distinct root-comment, thread, message, execution and provider-session IDs. Handoff inherits the authorized snapshot before creating a child, uses the persisted Agent message ID, and is bounded and idempotent. Large histories remain durable with hashed chunks and a format marker that fences old writers. Deploy a compatible storage baseline first and never roll back below it once new manifests exist. Unit/race/fixture checks do not replace authenticated provider round-trip QA. Explicit typed Agent mentions on the human thread-message endpoint select the named authorized participants before execution. Replies without Agent mentions keep the existing target. Each participant resumes only its own native session; server-recorded parent links preserve shared context and one conversation without admitting unrelated Agent history. Fanout deduplicates the human message and retries, and a request naming another Agent cannot approve the original Agent tool call.",
       "next_loop": "ai_thread_history"
     },
     {

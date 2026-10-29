@@ -17,7 +17,7 @@ func appendTaskConversationContext(out *strings.Builder, thread AIAgentTaskThrea
 			continue
 		}
 		author := string(message.Role)
-		if strings.HasPrefix(thread.ConversationID, "comment:") {
+		if thread.ConversationID != "" {
 			author = conversationMessageAuthor(message, history)
 		}
 		part := "\n### Previous " + author + " message\n" + text + "\n"

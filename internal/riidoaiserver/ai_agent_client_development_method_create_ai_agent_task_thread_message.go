@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 )
 
 func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID string, req CreateAIAgentTaskThreadMessageRequest) (AIAgentTaskActionResponse, error) {
@@ -28,11 +29,15 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
-	agent, ok := s.visibleAgent(principal, thread.AgentID)
+	targetAgentID := thread.AgentID
+	if req.targetAgentID != "" {
+		targetAgentID = req.targetAgentID
+	}
+	agent, ok := s.visibleAgent(principal, targetAgentID)
 	if !ok {
 		return AIAgentTaskActionResponse{}, ErrAIAgentNotFound
 	}
-	receiptKey := taskThreadMessageReceiptKey(principal, taskID, threadID, thread.AgentID, req)
+	receiptKey := taskThreadMessageReceiptKey(principal, taskID, threadID, targetAgentID, req)
 	if response, found := s.taskRequestReceipts[receiptKey]; receiptKey != "" && found {
 		return response, nil
 	}
@@ -41,10 +46,14 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	}
 
 	response := taskThreadMessageInitialResponse(taskID, threadID, thread, agent)
-	threadWasActive := taskThreadHasActiveStream(thread)
+	handoff := targetAgentID != thread.AgentID
+	if handoff {
+		response.AgentSnapshot = s.agentSnapshotFromAgent(agent, time.Now().UTC())
+	}
+	threadWasActive := !handoff && taskThreadHasActiveStream(thread)
 	conversationID := taskThreadConversationID(thread)
 	parentThreadID := ""
-	if !req.toolApproval && taskThreadMessageStartsNewExecution(thread) {
+	if !req.toolApproval && (handoff || taskThreadMessageStartsNewExecution(thread)) {
 		parentThreadID = thread.ThreadID
 		response.AssignmentID = strings.TrimSpace(req.AssignmentID)
 		response.RunID = taskThreadMessageRunID(taskID, response.AssignmentID, len(s.taskThreads[taskID])+1)

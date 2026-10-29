@@ -436,7 +436,7 @@
       },
       {
         "name": "send-thread-message",
-        "detail": "POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run."
+        "detail": "POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run. Visible typed Agent mentions select the named authorized Agent(s); with no Agent mention the selected thread Agent continues. Preserve the human message identity across fanout and retries, publish each target Agent snapshot, and resume only that Agent's native session within this conversation. Linked participant history stays in shared context; quoted/member mentions do not retarget execution. Never silently fall back to the original Agent when a target is unavailable or unauthorized."
       },
       {
         "name": "stop-agent",

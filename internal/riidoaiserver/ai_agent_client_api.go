@@ -433,6 +433,7 @@ type SubmitAIAgentTaskCommentRequest struct {
 
 type CreateAIAgentTaskThreadMessageRequest struct {
 	membershipPublicationGeneration string
+	targetAgentID                   string
 	RequestID                       string                       `json:"request_id,omitempty"`
 	DocumentSnapshot                *AIAgentTaskDocumentSnapshot `json:"document_snapshot,omitempty"`
 	Body                            string                       `json:"body"`
