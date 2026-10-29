@@ -143,6 +143,7 @@ const (
 )
 
 type RuntimeRecord struct {
+	ProviderVersionObservedAt time.Time                              `json:"provider_version_observed_at,omitzero"`
 	RuntimeID                 string                                 `json:"runtime_id"`
 	DeviceID                  string                                 `json:"device_id"`
 	DaemonID                  string                                 `json:"daemon_id,omitempty"`
@@ -162,6 +163,7 @@ type RuntimeRecord struct {
 }
 
 type RuntimeSnapshotRecord struct {
+	ProviderVersionObservedAt string                                 `json:"provider_version_observed_at,omitempty"`
 	RuntimeID                 string                                 `json:"runtime_id"`
 	Kind                      RuntimeKind                            `json:"kind"`
 	Availability              RuntimeAvailability                    `json:"availability,omitempty"`

@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/teamswyg/riido-contracts/hostintegration"
 	"log"
 	"sort"
 	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/teamswyg/riido-contracts/hostintegration"
 
 	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
@@ -542,6 +543,7 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			Availability:              runtime.Availability,
 			DetectionState:            runtime.DetectionState,
 			ProviderVersion:           providerVersion,
+			ProviderVersionObservedAt: normalizeVersionObservedAt(runtime.ProviderVersionObservedAt, providerVersion, now),
 			HealthStatus:              healthStatus,
 			DiagnosticCode:            diagnosticCode,
 			DiagnosticSummary:         diagnosticSummary,

@@ -78,8 +78,8 @@
     },
     {
       "id": "single_pass_response_quality_and_delivery_5827",
-      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint. PR #1102 separates successful assignment commit and client projection timing, but independently truncating fractional milliseconds can make their logged sum differ from total processing time. RIID-5821 observed staging partial projection median676ms and reproduced25 no-op recovery snapshot saves. Adapter elapsed can include downstream event backpressure; it is not independent native inference time.",
-      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages. Measure all intervals on one server clock; derive logged projection milliseconds as total minus logged commit milliseconds so the additive invariant survives truncation without changing field names or units. Recovery-only events are already durable and the development projection returns without mutation; bypassing only the persistent snapshot cycle removes redundant I/O. Separate lock/reload/apply/save clocks identify remaining overhead without changing ordinary projection or ACK behavior.",
+      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint. PR #1102 separates successful assignment commit and client projection timing, but independently truncating fractional milliseconds can make their logged sum differ from total processing time. RIID-5821 observed staging partial projection median676ms and reproduced25 no-op recovery snapshot saves. Adapter elapsed can include downstream event backpressure; it is not independent native inference time. Runtime snapshot reload reproduced loss of a newer in-process heartbeat, and malformed optional version output could reject the whole liveness update. Daemon failures lacked a request correlation ID.",
+      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages. Measure all intervals on one server clock; derive logged projection milliseconds as total minus logged commit milliseconds so the additive invariant survives truncation without changing field names or units. Recovery-only events are already durable and the development projection returns without mutation; bypassing only the persistent snapshot cycle removes redundant I/O. Separate lock/reload/apply/save clocks identify remaining overhead without changing ordinary projection or ACK behavior. Preserve only credential/session-matched newer observations while keeping durable deletion authoritative; isolate optional version metadata and give every server request a generated correlation ID.",
       "claims": [
         "thread_history_must_keep_user_followups",
         "sse_reconnect_must_resume_after_last_event_id",
@@ -117,6 +117,18 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/ai_agent_client_persistent_method_record_ai_agent_assignment_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/runtime_snapshot_liveness.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/request_correlation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/runtime_version_observed_at.go"
         }
       ],
       "verifiers": [
@@ -155,6 +167,22 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/recovery_projection_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_snapshot_reload_liveness_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_snapshot_liveness_authority_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/request_correlation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/runtime_version_observed_at_test.go"
         }
       ],
       "evidence": [
@@ -164,7 +192,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25→0 save-count regression and actual local HTTP recovery replay→wrong-lease403→terminal snapshot503→same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work.",
+      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25→0 save-count regression and actual local HTTP recovery replay→wrong-lease403→terminal snapshot503→same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work. Runtime stability regressions now cover stale reload, credential replacement, malformed version metadata and server-generated request IDs. Version confirmation time remains separate from heartbeat time; missing or invalid legacy timestamps stay unknown.",
       "next_loop": "ai_thread_history"
     },
     {
