@@ -39,6 +39,9 @@ func (s Server) InheritAssignmentContext(ctx context.Context, parentAssignmentID
 	if parent.TaskID != child.TaskID || parent.WorkspaceID != child.WorkspaceID || (requester != "" && requester != parent.RequesterPrincipalID) {
 		return errAssignmentContextParentScope
 	}
+	if len(parent.Content) > 0 || parent.Context.ReadScope != nil {
+		return s.inheritAssignmentContent(ctx, parent, child, triggerID)
+	}
 	pages := make([][]AIAgentTaskContextComment, 0, parent.CommentPages)
 	for page := range parent.CommentPages {
 		comments, found, err := store.LoadAssignmentContextCommentPage(ctx, parent.AssignmentID, page)

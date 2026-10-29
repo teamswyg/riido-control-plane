@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `58`; manifest entries: `58`; secret/credential entries: `8`; operator-only entries: `15`.
+Runtime env reads: `59`; manifest entries: `59`; secret/credential entries: `8`; operator-only entries: `15`.
 
 ## Runtime Env
 
@@ -45,6 +45,7 @@ Runtime env reads: `58`; manifest entries: `58`; secret/credential entries: `8`;
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT` | `false` | `public` | Enables development AI Agent client persistence. |
 | `RIIDO_AI_SERVER_AI_AGENT_CLIENT_DYNAMODB_TABLE` | `empty` | `operator` | DynamoDB table for development snapshot and assignment operation state. |
 | `RIIDO_AI_SERVER_ASSIGNMENT_CONTEXT` | `false` | `public` | Stores each assignment's composed task context and read records for the Riido CLI and serves them, plus live agent directory views for RIID-5892 target selection, to the leased daemon at /v1/agents/{agent_id}/assignment-context; uses the assignment DynamoDB table when configured, otherwise process memory. Disabling capture does not disable terminal retention: snapshot/comment payloads expire 24 hours after terminal commit, while READ audit rows retain execution-history lifetime. |
+| `RIIDO_AI_SERVER_ASSIGNMENT_READ_SCOPE` | `false` | `public` | Enable new requester-authorized typed read-scope capture only when assignment context is enabled and every capture/terminal writer supports packed content blocks. Default false preserves legacy capture; flag-off never disables reading or 24h retention of existing v2 bundles. No rollout or production activation is authorized by a source merge. Drain active v2 assignments before any unsupported old-binary rollback. This is not a runtime CD configuration key. |
 | `RIIDO_AI_SERVER_AI_AGENT_DAEMON_PROFILE` | `empty` | `public` | Expected daemon profile accepted by this control-plane environment; mismatches are rejected and stale profile rows are pruned. |
 | `RIIDO_AI_SERVER_MINIMUM_DAEMON_VERSION` | `v0.0.68` | `public` | Minimum daemon release that supports the current AI Agent client capability. |
 | `RIIDO_AI_SERVER_LATEST_DAEMON_VERSION` | `v0.0.68` | `public` | Latest recommended daemon release displayed as update guidance. |

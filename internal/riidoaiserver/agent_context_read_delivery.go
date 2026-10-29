@@ -24,7 +24,7 @@ func (s Server) clientContextReadForDelivery(r *http.Request, principal Authoriz
 		return ClientStreamEvent{}, false
 	}
 	current.WorkspaceID = principal.WorkspaceID
-	visible, err := s.loadCurrentRunReadSources(ctx, token, current.WorkspaceID, read.TaskID)
+	visible, err := s.loadCurrentRunReadSources(ctx, token, current.WorkspaceID, read.TaskID, read.AssignmentID)
 	if err != nil {
 		return ClientStreamEvent{}, false
 	}

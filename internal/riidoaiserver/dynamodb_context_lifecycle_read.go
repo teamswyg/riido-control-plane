@@ -44,5 +44,12 @@ func (s *DynamoDBAssignmentOperationStore) contextRetentionPayloads(ctx context.
 	if err != nil {
 		return nil, err
 	}
-	return append(items, comments...), nil
+	content, err := s.contextPayloadKeys(ctx, id, assignmentContentPrefix)
+	if err != nil {
+		return nil, err
+	}
+	if len(comments)+len(content) > assignmentContextMaxCommentPages {
+		return nil, errors.New("context shared payload count exceeds retention budget")
+	}
+	return append(append(items, comments...), content...), nil
 }

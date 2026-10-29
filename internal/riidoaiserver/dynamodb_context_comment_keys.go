@@ -7,6 +7,10 @@ import (
 )
 
 func (s *DynamoDBAssignmentOperationStore) contextCommentKeys(ctx context.Context, id string) ([]map[string]map[string]string, error) {
+	return s.contextPayloadKeys(ctx, id, dynamoDBAssignmentContextCommentPrefix)
+}
+
+func (s *DynamoDBAssignmentOperationStore) contextPayloadKeys(ctx context.Context, id, prefix string) ([]map[string]map[string]string, error) {
 	var items []map[string]map[string]string
 	var start map[string]map[string]string
 	seenItems, seenCursors := map[string]bool{}, map[string]bool{}
@@ -19,7 +23,7 @@ func (s *DynamoDBAssignmentOperationStore) contextCommentKeys(ctx context.Contex
 			ProjectionExpression      string
 			Limit                     int
 			ExclusiveStartKey         map[string]map[string]string `json:"ExclusiveStartKey,omitempty"`
-		}{s.tableName, true, "pk = :pk AND begins_with(sk, :read)", map[string]map[string]string{":pk": {"S": dynamoDBAssignmentContextPK(id)}, ":read": {"S": dynamoDBAssignmentContextCommentPrefix}}, "pk, sk", assignmentContextMaxCommentPages + 1, start})
+		}{s.tableName, true, "pk = :pk AND begins_with(sk, :read)", map[string]map[string]string{":pk": {"S": dynamoDBAssignmentContextPK(id)}, ":read": {"S": prefix}}, "pk, sk", assignmentContextMaxCommentPages + 1, start})
 		if err != nil {
 			return nil, err
 		}
@@ -32,7 +36,7 @@ func (s *DynamoDBAssignmentOperationStore) contextCommentKeys(ctx context.Contex
 		}
 		for _, item := range response.Items {
 			key := item["sk"]["S"]
-			if !validContextCommentKey(item, id) || seenItems[key] {
+			if !validContextPayloadKey(item, id, prefix) || seenItems[key] {
 				return nil, errors.New("context comment scope or duplicate mismatch")
 			}
 			seenItems[key] = true
@@ -47,22 +51,10 @@ func (s *DynamoDBAssignmentOperationStore) contextCommentKeys(ctx context.Contex
 		previous := start["sk"]["S"]
 		start = response.LastEvaluatedKey
 		key := start["sk"]["S"]
-		if !validContextCommentKey(start, id) || seenCursors[key] || key <= previous {
+		if !validContextPayloadKey(start, id, prefix) || seenCursors[key] || key <= previous {
 			return nil, errors.New("context comment cursor mismatch")
 		}
 		seenCursors[key] = true
 	}
 	return nil, errors.New("context comment query retry limit exceeded")
-}
-
-func validContextCommentKey(item map[string]map[string]string, id string) bool {
-	if item["pk"]["S"] != dynamoDBAssignmentContextPK(id) {
-		return false
-	}
-	for page := range assignmentContextMaxCommentPages {
-		if item["sk"]["S"] == dynamoDBAssignmentContextCommentSK(page) {
-			return true
-		}
-	}
-	return false
 }

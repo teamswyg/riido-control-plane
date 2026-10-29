@@ -3,9 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -74,6 +72,9 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	req.Header.Set(CommentDeliveryKeyHeader, config.Key)
+	if s.config.AssignmentReadScope {
+		req.Header.Set(commentReadScopeVersionHeader, taskReadScopeSchema)
+	}
 	client := config.HTTPClient
 	if client == nil {
 		client = &http.Client{Timeout: 8 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
@@ -92,9 +93,13 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		writeError(w, status, "comment delivery evidence rejected")
 		return
 	}
-	var evidence verifiedCommentDelivery
-	if json.NewDecoder(io.LimitReader(result.Body, 2<<20)).Decode(&evidence) != nil || evidence.EventID != input.EventID || evidence.PrincipalID == "" || evidence.WorkspaceID == "" || evidence.TaskID == "" || evidence.AgentID == "" || evidence.CommentID == "" || evidence.Context.Component.ID != evidence.TaskID || (evidence.Context.Component.ComponentType != "task" && evidence.Context.Component.ComponentType != "subtask") {
+	evidence, decodeErr := decodeCommentDeliveryEvidence(result.Body)
+	if decodeErr != nil || evidence.EventID != input.EventID || evidence.PrincipalID == "" || evidence.WorkspaceID == "" || evidence.TaskID == "" || evidence.AgentID == "" || evidence.CommentID == "" || evidence.Context.Component.ID != evidence.TaskID || (evidence.Context.Component.ComponentType != "task" && evidence.Context.Component.ComponentType != "subtask") {
 		writeError(w, 502, "invalid comment delivery evidence")
+		return
+	}
+	if s.prepareCommentReadScope(ctx, &evidence) != nil {
+		writeError(w, http.StatusBadGateway, "invalid scoped comment evidence")
 		return
 	}
 	principal := AuthorizationResult{PrincipalID: evidence.PrincipalID, WorkspaceID: evidence.WorkspaceID}

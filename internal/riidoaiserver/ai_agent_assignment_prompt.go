@@ -95,7 +95,9 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	if !strings.HasSuffix(builder.String(), "\n") {
 		builder.WriteString("\n")
 	}
-	if extended := input.Context.Extended; extended != nil {
+	if scope := input.Context.ReadScope; scope != nil {
+		writeReadScopeTaskContext(&builder, scope)
+	} else if extended := input.Context.Extended; extended != nil {
 		writeParentTaskContextSummaries(&builder, hierarchy)
 		writeTaskContextResources(&builder, input.Context.Resources, input.Context.ResourceStatus, 2500)
 		writeExtendedTaskContext(&builder, component, extended, input.UserInstruction)

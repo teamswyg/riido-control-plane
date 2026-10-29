@@ -34,7 +34,8 @@ type ServerConfig struct {
 	AIAgentGlobalReconcileMinInterval time.Duration
 	// AssignmentContext stores per-assignment task context snapshots and read
 	// records for the Riido CLI. Nil disables capture and the daemon endpoint.
-	AssignmentContext AssignmentContextStore
+	AssignmentContext   AssignmentContextStore
+	AssignmentReadScope bool
 	// AgentMentionPrecheck, when set (RIID-5892), adds mention-policy reasons
 	// to the live agent directory; the mention-time check stays authoritative.
 	AgentMentionPrecheck AgentMentionPrecheck

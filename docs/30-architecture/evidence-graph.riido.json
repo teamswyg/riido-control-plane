@@ -26517,8 +26517,8 @@
     },
     {
       "id": "cli_installation_service_link_and_revision_5900",
-      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy.",
-      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects.",
+      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy. The original link receipt cannot recover an intent creation response lost before the monolith learns the random ID/challenge; a digest alone cannot recreate that response.",
+      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects. Bind the monolith persisted request ID to the exact immutable v2 payload and original response, publishing both request and intent atomically. Domain-separated length-prefixed deterministic intent IDs make an intent-only collision fail closed instead of silently issuing a replacement. Retain an uncertain atomic snapshot intent/replay pair in the full actor state so another save cannot erase it; do not acknowledge a retry until the complete snapshot saves successfully.",
       "claims": [
         "cli_installation_link_must_preserve_key_and_policy_fences",
         "request_authorization_must_preserve_security_boundary",
@@ -26649,6 +26649,50 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/server_route_registry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_digest.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_restore.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_intent_replay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_intent_replay_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_intent_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_intent_random.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_intent.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_intent_replay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_state.go"
         }
       ],
       "verifiers": [
@@ -26739,6 +26783,54 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/cli_installation_confirmation_clock_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_concurrent_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_conflict_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_corruption_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_decode_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_expiry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_restore_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_validation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_replay_uncertain_test.go"
         }
       ],
       "evidence": [
@@ -26758,7 +26850,7 @@
           "redacted": true
         }
       ],
-      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed. A new private receipt route reads the original consumed intent/link through the existing actor or durable store without mutation, revision changes, or present permission promotion. Exact service scope and identity, pending/expired rejection, snapshot/Dynamo restart, strict LinkedAt-before-expiry, and one-clock confirm/replay are tested. The route registry adds one entry; no throughput or latency improvement is claimed, and no live AWS or deployment acceptance follows from these fixtures.",
+      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed. A new private receipt route reads the original consumed intent/link through the existing actor or durable store without mutation, revision changes, or present permission promotion. Exact service scope and identity, pending/expired rejection, snapshot/Dynamo restart, strict LinkedAt-before-expiry, and one-clock confirm/replay are tested. The route registry adds one entry; no throughput or latency improvement is claimed, and no live AWS or deployment acceptance follows from these fixtures. Actual v2 HTTP rejection was observed before implementation. Existing v1 regression exposed that the shared JSON decoder requires every declared field; a bounded route-local schema probe now selects the exact v1/v2 key set and the unchanged strict decoder remains authoritative. The tests cover same/consumed/expired replay, eight concurrent requests, failed/acknowledgement-lost transactions, restart, immutable payload conflicts, orphan/corrupt record pairs, legacy snapshot restore, and domain/tuple separation. Snapshot publication and Dynamo two-item CAS preserve the original challenge and expiry without changing link or coverage revisions. No new endpoint, shared contract tag, live deployment, public linking orchestration, OS key acceptance or performance improvement is claimed.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -27223,6 +27315,746 @@
         }
       ],
       "decision": "Source and synthetic HTTP/Dynamo regression evidence cover birth, admission, credential rotation, receipt idempotency, policy/claim interleaving and conservative unknown states. This chain does not assert live AWS/provider termination, fleet activation, Desktop integration or authenticated release acceptance. Per-request monolith consumption and runtime/installation rollout remain separate gates.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "typed_assignment_read_scope_5900",
+      "observation": "Legacy prompt/context snapshots include only bounded root and related summaries; arbitrary live follow-up would retain requester authority and lose captured provenance. Logical part counts must not be confused with the physical payload-item budget.",
+      "hypothesis": "Capture fixed typed one-hop details and continuations into one atomic kind-bound bundle, inline small first parts under a response budget, and retain explicit incomplete status and current viewer authorization.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "ambiguous_task_context_must_ask_before_work",
+        "config_reference_must_preserve_env_manifest_parity"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/assignment_read_scope_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config_parts.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/task_context_private.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_refusal.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_context_read_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_assignment_prompt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_private_task_context_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_current.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_freshness.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_metadata.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_scope.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_visibility.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_context_client.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_context_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_block.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_block_lookup.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_bundle.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_kind.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_memory.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_page_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_comment_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_hierarchy_views.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_inherit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_comments.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_load.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_reads.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_retention.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_memory_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_current_sources.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_error.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_inherit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_manifest.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_views.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_delivery_read_scope.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_content.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_content_items.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_content_load.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_context_comments.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_context_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_comment_keys.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_lifecycle_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_payload_key_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_payload_write.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_publication_fences.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_context_size_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_task_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_type.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_board_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_body_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_body_fetch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_body_fragments.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_body_slots.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_body_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_builder.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_comments_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_comments_fetch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_comments_query.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_comments_sources.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_editor.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_index.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_key.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_pages.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_graphql.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_incomplete.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_json_pages.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_json_source_leaf.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_json_source_ranges.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_json_source_scan.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_meeting_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_meeting_fetch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_meeting_query.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_metadata_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_packing_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_page_wire.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_part_selector.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_part_status.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_part_version.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_prompt.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_query.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_reason_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_repository.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_source.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_summary.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_typed_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_typed_json.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_typed_meeting_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_typed_meeting_restore.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_typed_metadata.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_typed_restore.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_wire.go"
+        },
+        {
+          "kind": "workflow",
+          "path": ".github/workflows/go-ci.yml"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/assignment_read_scope_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_dynamo_conditions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_dynamo_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_integrity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_kind_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_legacy_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_memory_isolation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_memory_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_packing_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_publication_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_retention_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_validation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inherit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_ambiguity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_cursor_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_delivered_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_http_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_part_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_store_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_inline_tamper_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_manifest_duplicate_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_viewer_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_viewer_identity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_viewer_off_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_viewer_off_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_viewer_private_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_read_scope_viewer_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_delivery_read_scope_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_delivery_read_scope_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/context_retention_fixture_conditions_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_boundary_validation_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_budget_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_capture_assert_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_comments_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_cross_team_evidence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_cross_team_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_cross_team_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_editor_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_boundaries_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_evidence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_fragment_audit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_graphql_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_json_source_paths_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_json_source_ranges_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_json_source_repeated_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_meeting_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_meeting_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_metadata_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_packing_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_part_selector_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_prompt_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_reason_wire_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_typed_boundaries_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_typed_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_typed_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_typed_incomplete_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_typed_json_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_typed_prefix_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_whole_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_whole_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_whole_inline_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Implement default-off captured read scope with bounded storage and exact leaf authority. Synthetic HTTP/Dynamo fixtures and separate actual monolith PostgreSQL tests are source evidence, not live deployment or provider acceptance. Actual producer-consumer wire and CLI traversal, complete generated/repository checks, and explicit rollout authorization remain gates; all serving writers must understand the new snapshot schema before activation.",
       "next_loop": "closed_loop_candidate"
     }
   ],

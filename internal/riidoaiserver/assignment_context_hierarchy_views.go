@@ -14,12 +14,13 @@ const (
 	AssignmentContextViewComments  = "comments"
 	AssignmentContextViewAgents    = "agents"
 	AssignmentContextViewAgent     = "agent"
+	AssignmentContextViewContent   = "content"
 )
 
 func validAssignmentContextView(view string) bool {
 	switch view {
 	case AssignmentContextViewMeeting, AssignmentContextViewMeetings, AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
-		AssignmentContextViewAgents, AssignmentContextViewAgent:
+		AssignmentContextViewAgents, AssignmentContextViewAgent, AssignmentContextViewContent:
 		return true
 	}
 	return false

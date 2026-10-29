@@ -27,18 +27,20 @@ const (
 )
 
 type AssignmentContextSnapshot struct {
-	AssignmentID         string             `json:"assignment_id"`
-	TaskID               string             `json:"task_id"`
-	WorkspaceID          string             `json:"workspace_id,omitempty"`
-	AgentID              string             `json:"agent_id"`
-	RequesterPrincipalID string             `json:"requester_principal_id,omitempty"`
-	RequesterAdmin       bool               `json:"requester_admin,omitempty"`
-	TriggerKind          string             `json:"trigger_kind"`
-	TriggerID            string             `json:"trigger_id,omitempty"`
-	CapturedAt           time.Time          `json:"captured_at"`
-	Truncated            bool               `json:"truncated,omitempty"`
-	CommentPages         int                `json:"comment_pages,omitempty"`
-	Context              AIAgentTaskContext `json:"context"`
+	AssignmentID         string                      `json:"assignment_id"`
+	TaskID               string                      `json:"task_id"`
+	WorkspaceID          string                      `json:"workspace_id,omitempty"`
+	AgentID              string                      `json:"agent_id"`
+	RequesterPrincipalID string                      `json:"requester_principal_id,omitempty"`
+	RequesterAdmin       bool                        `json:"requester_admin,omitempty"`
+	TriggerKind          string                      `json:"trigger_kind"`
+	TriggerID            string                      `json:"trigger_id,omitempty"`
+	CapturedAt           time.Time                   `json:"captured_at"`
+	Truncated            bool                        `json:"truncated,omitempty"`
+	CommentPages         int                         `json:"comment_pages,omitempty"`
+	Content              []AssignmentContentManifest `json:"content,omitempty"`
+	ContentBlocks        []AssignmentContentBlockRef `json:"content_blocks,omitempty"`
+	Context              AIAgentTaskContext          `json:"context"`
 }
 
 // AssignmentContextRead is one "source read for this answer" record: who
