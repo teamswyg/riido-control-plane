@@ -35,7 +35,8 @@ func (s Server) queueThreadReactionNotification(notification agentThreadReaction
 			return
 		}
 		if err := s.config.CommentDelivery.postThreadReactionNotification(context.Background(), latest); err != nil {
-			log.Printf("agent thread reaction notification failed message=%s: %v", latest.MessageID, err)
+			log.Printf("agent thread reaction notification failed message=%s attempt=%d: %v", latest.MessageID, latest.attempt+1, err)
+			d.retryThreadReactionNotification(key, latest, err)
 		}
 	})
 }

@@ -22,12 +22,10 @@ func (s *DevelopmentAIAgentClientStore) startedNotificationKindLocked(event Task
 	return ""
 }
 
-// runAlreadyStarted reports that the stored thread already ran this
-// assignment, such as a run that resumes after the user answered. It reads the
-// persisted thread, not the bounded event buffer.
+// runAlreadyStarted reports a run that resumes after the user answered a
+// confirmation. It reads the persisted thread, not the bounded event buffer,
+// so the started push stays once even after it left the buffer. Ready is
+// projected as running too, so the running state alone does not count.
 func runAlreadyStarted(hadThread bool, previous AIAgentTaskThreadRecord, assignmentID string) bool {
-	if !hadThread || previous.AssignmentID != assignmentID {
-		return false
-	}
-	return previous.AssignmentState == AgentAssignmentStateRunning || previous.AssignmentState == AgentAssignmentStateWaiting
+	return hadThread && previous.AssignmentID == assignmentID && previous.WorkStatus == AgentWorkStatusWaitingForUser
 }

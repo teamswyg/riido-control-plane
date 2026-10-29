@@ -16,8 +16,10 @@ type agentThreadReactionNotification struct {
 	ActorPrincipalID     string `json:"actor_principal_id"`
 	Emoji                string `json:"emoji"`
 	Excerpt              string `json:"excerpt"`
-	// revision orders notifications of the same message and actor.
+	// revision orders notifications of the same message and actor; attempt
+	// counts retried deliveries.
 	revision uint64
+	attempt  int
 }
 
 // toggledMemberReactions returns a new slice; the stored slice is shared with

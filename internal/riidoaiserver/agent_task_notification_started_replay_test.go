@@ -16,20 +16,24 @@ func TestStartedNotificationOncePerAssignmentAfterReplayEviction(t *testing.T) {
 	s.agents["agent"] = AgentClientRecord{AgentID: "agent", OwnerPrincipalID: "owner", WorkspaceID: "ws", Visibility: AgentVisibilityPublic}
 	s.taskThreads["task"] = []AIAgentTaskThreadRecord{{ThreadID: "thread", TaskID: "task", AgentID: "agent", AssignmentID: "a", RunID: "run", WorkStatus: AgentWorkStatusQueued, AssignmentState: AgentAssignmentStateQueued}}
 	s.taskThreadMessages["thread"] = []AIAgentTaskThreadHistoryMessage{{MessageID: "msg_user_1", Role: AIAgentTaskThreadMessageRoleUser, AssignmentID: "a", RunID: "run", Body: "please"}}
-	record := func(eventID, eventType string, reason assignmentcontract.ConfirmationReason) {
+	record := func(eventID, eventType string, state AssignmentState, reason assignmentcontract.ConfirmationReason) {
 		t.Helper()
-		event := TaskEvent{EventID: eventID, TaskID: "task", AssignmentID: "a", AgentID: "agent", WorkspaceID: "ws", CreatedBy: "assigner", State: AssignmentRunning, Type: eventType, ConfirmationReason: reason, At: time.Now()}
+		event := TaskEvent{EventID: eventID, TaskID: "task", AssignmentID: "a", AgentID: "agent", WorkspaceID: "ws", CreatedBy: "assigner", State: state, Type: eventType, ConfirmationReason: reason, At: time.Now()}
 		if err := s.RecordAIAgentAssignmentEvent(ctx, "agent", AgentEventRequest{}, event); err != nil {
 			t.Fatal(err)
 		}
 	}
-	record("e1", EventAssignmentRunning, "")
+	record("e0", EventAssignmentReady, AssignmentReady, "")
+	if got := startedNotificationCount(t, s); got != 0 {
+		t.Fatalf("ready pushes no started, got %d", got)
+	}
+	record("e1", EventAssignmentRunning, AssignmentRunning, "")
 	if got := startedNotificationCount(t, s); got != 1 {
 		t.Fatalf("first run pushes started once, got %d", got)
 	}
 	s.events = nil
-	record("e2", assignmentcontract.EventAssignmentWaitingForUser, assignmentcontract.ConfirmationAnswerRequired)
-	record("e3", EventAssignmentRunning, "")
+	record("e2", assignmentcontract.EventAssignmentWaitingForUser, AssignmentRunning, assignmentcontract.ConfirmationAnswerRequired)
+	record("e3", EventAssignmentRunning, AssignmentRunning, "")
 	if got := startedNotificationCount(t, s); got != 0 {
 		t.Fatalf("resumed run pushed started again: %d", got)
 	}
