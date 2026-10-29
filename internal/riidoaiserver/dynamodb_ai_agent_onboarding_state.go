@@ -33,7 +33,7 @@ func (s *DynamoDBAIAgentClientSnapshot) mergeCommittedOnboardingSnapshot(items [
 	parts := dynamoDBAIAgentClientSnapshotItemsByPart(items)
 	var committed AIAgentClientSnapshot
 	for _, name := range onboardingOwnedPartNames {
-		if err := decodeCommittedAIAgentClientPart(name, current, parts[name], &committed); err != nil {
+		if err := decodeCommittedAIAgentClientPart(name, current, parts[name], items, &committed); err != nil {
 			return err
 		}
 	}
@@ -73,6 +73,6 @@ func (s *DynamoDBAIAgentClientSnapshot) mergeCommittedOnboardingSnapshot(items [
 	for key, receipt := range receipts {
 		requested.TaskRequestReceipts[key] = receipt
 	}
-	requested.TaskThreads = mergeCommittedOnboardingThreads(requested.TaskThreads, committed.TaskThreads)
+	requested.TaskThreads = mergeCommittedOnboardingThreads(requested.TaskThreads, committed.TaskThreads, requested.TaskThreadMessages)
 	return nil
 }

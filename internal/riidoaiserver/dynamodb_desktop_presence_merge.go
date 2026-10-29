@@ -7,7 +7,7 @@ func mergeCommittedDeviceConnectionGrants(items []map[string]map[string]string, 
 	current := dynamoDBAIAgentClientSnapshotCurrentItem(items)
 	parts := dynamoDBAIAgentClientSnapshotItemsByPart(items)
 	var committed AIAgentClientSnapshot
-	if err := decodeCommittedAIAgentClientPart(dynamoDBAIAgentClientSnapshotPartDeviceConnections, current, parts[dynamoDBAIAgentClientSnapshotPartDeviceConnections], &committed); err != nil {
+	if err := decodeCommittedAIAgentClientPart(dynamoDBAIAgentClientSnapshotPartDeviceConnections, current, parts[dynamoDBAIAgentClientSnapshotPartDeviceConnections], items, &committed); err != nil {
 		return err
 	}
 	byDevice := map[string]map[string]DeviceConnectionGrant{}

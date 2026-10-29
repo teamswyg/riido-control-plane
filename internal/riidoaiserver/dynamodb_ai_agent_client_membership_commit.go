@@ -5,10 +5,10 @@ import (
 )
 
 func decodeCommittedTaskAgentMemberships(current, item map[string]map[string]string, snapshot *AIAgentClientSnapshot) error {
-	return decodeCommittedAIAgentClientPart(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships, current, item, snapshot)
+	return decodeCommittedAIAgentClientPart(dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships, current, item, nil, snapshot)
 }
 
-func decodeCommittedAIAgentClientPart(name string, current, item map[string]map[string]string, snapshot *AIAgentClientSnapshot) error {
+func decodeCommittedAIAgentClientPart(name string, current, item map[string]map[string]string, items []map[string]map[string]string, snapshot *AIAgentClientSnapshot) error {
 	var hashes map[string]string
 	manifest := dynamoDBStringValue(current, "part_hashes_json")
 	if manifest == "" {
@@ -24,7 +24,7 @@ func decodeCommittedAIAgentClientPart(name string, current, item map[string]map[
 	if expected == "" || item == nil || dynamoDBStringValue(item, "part_hash") != expected {
 		return fmt.Errorf("decode DynamoDB AI Agent client snapshot part %s: committed hash mismatch or missing part", name)
 	}
-	raw, err := gunzipBase64(dynamoDBStringValue(item, "part_gzip"))
+	raw, err := snapshotPartRaw(item, items)
 	if err != nil {
 		return fmt.Errorf("decode DynamoDB AI Agent client snapshot part %s gzip: %w", name, err)
 	}

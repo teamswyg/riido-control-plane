@@ -30,10 +30,6 @@ func (s *DynamoDBAIAgentClientSnapshot) load(ctx context.Context, credentials AW
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, err
 	}
-	items, err = s.loadConversationChunks(ctx, items, credentials)
-	if err != nil {
-		return AIAgentClientSnapshot{}, false, err
-	}
 	snapshot, snapshotBytes, err = decodeSplitDynamoDBAIAgentClientSnapshot(items)
 	if err != nil {
 		return AIAgentClientSnapshot{}, false, err

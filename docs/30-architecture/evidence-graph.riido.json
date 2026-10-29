@@ -21,8 +21,8 @@
   "chains": [
     {
       "id": "comment_native_conversation_continuity_5891_5892",
-      "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication. A human reply in an existing Agent card ignored a typed mention and assigned the original Agent again.",
-      "hypothesis": "Bind verified root comments to stable conversation identities while retaining per-Agent native sessions, import visible messages only on the next request, and publish immutable history chunks through the existing atomic manifest. Preserve SSE replay semantics and reject stale writers before they can replace newer conversation history.",
+      "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication. A human reply in an existing Agent card ignored a typed mention and assigned the original Agent again. After TASK_THREADS exceeded the inline payload budget, startup runtime-snapshot writes returned 503 because the owned-state onboarding merge attempted to gunzip a missing inline field. That merge also reapplied a 50-thread tail to durable conversations.",
+      "hypothesis": "Bind verified root comments to stable conversation identities while retaining per-Agent native sessions, import visible messages only on the next request, and publish immutable history chunks through the existing atomic manifest. Preserve SSE replay semantics and reject stale writers before they can replace newer conversation history. Hydrate verified immutable chunks at the atomic committed-read boundary for ordinary writers as well as loaders, and apply the same conversation retention policy during onboarding merges.",
       "claims": [
         "thread_history_must_keep_user_followups",
         "sse_reconnect_must_resume_after_last_event_id",
@@ -76,6 +76,18 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/server_thread_message_tool_approval.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_merge.go"
         }
       ],
       "verifiers": [
@@ -118,6 +130,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/thread_message_mention_native_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_conversation_runtime_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_conversation_owned_integrity_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_conversation_owned_retention_test.go"
         }
       ],
       "evidence": [
@@ -127,7 +151,7 @@
           "redacted": true
         }
       ],
-      "decision": "Retain distinct root-comment, thread, message, execution and provider-session IDs. Handoff inherits the authorized snapshot before creating a child, uses the persisted Agent message ID, and is bounded and idempotent. Large histories remain durable with hashed chunks and a format marker that fences old writers. Deploy a compatible storage baseline first and never roll back below it once new manifests exist. Unit/race/fixture checks do not replace authenticated provider round-trip QA. Explicit typed Agent mentions on the human thread-message endpoint select the named authorized participants before execution. Replies without Agent mentions keep the existing target. Each participant resumes only its own native session; server-recorded parent links preserve shared context and one conversation without admitting unrelated Agent history. Fanout deduplicates the human message and retries, and a request naming another Agent cannot approve the original Agent tool call.",
+      "decision": "Retain distinct root-comment, thread, message, execution and provider-session IDs. Handoff inherits the authorized snapshot before creating a child, uses the persisted Agent message ID, and is bounded and idempotent. Large histories remain durable with hashed chunks and a format marker that fences old writers. Deploy a compatible storage baseline first and never roll back below it once new manifests exist. Unit/race/fixture checks do not replace authenticated provider round-trip QA. Explicit typed Agent mentions on the human thread-message endpoint select the named authorized participants before execution. Replies without Agent mentions keep the existing target. Each participant resumes only its own native session; server-recorded parent links preserve shared context and one conversation without admitting unrelated Agent history. Fanout deduplicates the human message and retries, and a request naming another Agent cannot approve the original Agent tool call. Runtime registration and heartbeat saves decode the committed chunk payload before any write; missing or corrupt chunks abort without mutation. Comment and native-history threads survive the onboarding merge beyond the ordinary 50-thread tail. This repairs the reader path without rewriting history or changing the storage format.",
       "next_loop": "ai_thread_history"
     },
     {

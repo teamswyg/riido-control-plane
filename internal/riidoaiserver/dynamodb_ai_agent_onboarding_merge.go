@@ -41,7 +41,7 @@ func mergeOnboardingMap[T any](baseline, requested, committed map[string]T) (map
 	return result, nil
 }
 
-func mergeCommittedOnboardingThreads(requested, committed map[string][]AIAgentTaskThreadRecord) map[string][]AIAgentTaskThreadRecord {
+func mergeCommittedOnboardingThreads(requested, committed map[string][]AIAgentTaskThreadRecord, messages map[string][]AIAgentTaskThreadHistoryMessage) map[string][]AIAgentTaskThreadRecord {
 	result := make(map[string][]AIAgentTaskThreadRecord, len(requested))
 	for taskID, threads := range requested {
 		result[taskID] = append([]AIAgentTaskThreadRecord(nil), threads...)
@@ -60,7 +60,7 @@ func mergeCommittedOnboardingThreads(requested, committed map[string][]AIAgentTa
 			sort.SliceStable(result[taskID], func(i, j int) bool { return result[taskID][i].StartedAt.Before(result[taskID][j].StartedAt) })
 			retained := result[taskID][:0]
 			for i, thread := range result[taskID] {
-				if i >= len(result[taskID])-aiAgentClientThreadsPerTaskLimit || taskThreadNeedsRetention(thread) {
+				if i >= len(result[taskID])-aiAgentClientThreadsPerTaskLimit || taskThreadNeedsRetention(thread) || durableConversationHistory(thread, messages[thread.ThreadID]) {
 					retained = append(retained, thread)
 				}
 			}
