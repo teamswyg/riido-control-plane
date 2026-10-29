@@ -941,6 +941,36 @@
   ],
   "components": [
     {
+      "name": "AgentReferenceFolders",
+      "schema": {
+        "name": "AgentReferenceFolders",
+        "description": "Local reference paths bound to one device and runtime. Does not change cwd.",
+        "type": "object",
+        "required": [
+          "device_id",
+          "runtime_id",
+          "paths"
+        ],
+        "properties": [
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "runtime_id",
+            "type": "string"
+          },
+          {
+            "name": "paths",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AIAgentExecutionContext",
       "schema": {
         "name": "AIAgentExecutionContext",
@@ -1115,6 +1145,12 @@
             "items": {
               "ref": "RuntimeModelRecord"
             }
+          },
+          {
+            "name": "provider_version_observed_at",
+            "type": "string",
+            "description": "CLI 버전을 마지막으로 성공적으로 확인한 시각입니다. 실패 후 보존된 버전의 시각은 갱신하지 않으며, 알 수 없으면 생략합니다.",
+            "format": "date-time"
           }
         ]
       }
@@ -1462,6 +1498,10 @@
             "name": "updated_at",
             "type": "string",
             "format": "date-time"
+          },
+          {
+            "name": "reference_folders",
+            "ref": "AgentReferenceFolders"
           }
         ]
       }
@@ -1575,6 +1615,10 @@
             "name": "updated_at",
             "type": "string",
             "format": "date-time"
+          },
+          {
+            "name": "reference_folders",
+            "ref": "AgentReferenceFolders"
           }
         ]
       }
@@ -2213,6 +2257,10 @@
             "name": "profile_color",
             "description": "생성 화면에서 미리 선택한 기본 프로필 그라데이션 색상입니다. 유효한 값을 보내면 그대로 저장하고, 생략하면 서버가 워크스페이스에서 가장 적게 사용한 색상 중 하나를 선택합니다. 생성 후에는 변경되지 않습니다.",
             "ref": "AgentProfileColor"
+          },
+          {
+            "name": "reference_folders",
+            "ref": "AgentReferenceFolders"
           }
         ]
       }
@@ -2266,6 +2314,10 @@
             "name": "profile_color",
             "description": "호환을 위해 받을 수 있는 무시되는 입력입니다. 생성 시 정해진 profile 색상은 이 요청으로 바뀌지 않습니다.",
             "ref": "AgentProfileColor"
+          },
+          {
+            "name": "reference_folders",
+            "ref": "AgentReferenceFolders"
           }
         ]
       }

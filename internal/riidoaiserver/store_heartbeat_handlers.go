@@ -55,7 +55,7 @@ func (s *Store) handleHeartbeat(state *storeState, agentID string, req AgentHear
 		}
 		assignment.UpdatedAt = now
 		state.assignments[assignment.ID] = assignment
-		response.RefreshedAssignments = append(response.RefreshedAssignments, assignment)
+		response.RefreshedAssignments = append(response.RefreshedAssignments, *copyAssignment(assignment))
 	}
 	return response, mutations, nil
 }

@@ -266,6 +266,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
+		agent.ReferenceFolders = agent.ReferenceFolders.Clone()
 		agents = append(agents, agent)
 	}
 	sort.Slice(agents, func(i, j int) bool { return agents[i].AgentID < agents[j].AgentID })
@@ -416,6 +417,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		if agentID == "" {
 			return errors.New("ai agent client snapshot agent_id is required")
 		}
+		agent.ReferenceFolders = agent.ReferenceFolders.Clone()
 		agents[agentID] = agent
 	}
 	taskThreads := make(map[string][]AIAgentTaskThreadRecord, len(snapshot.TaskThreads))

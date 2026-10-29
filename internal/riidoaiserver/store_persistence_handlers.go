@@ -27,7 +27,7 @@ func (s *Store) saveOperation(state *storeState, operationType AssignmentOperati
 		TaskID:           assignment.TaskID,
 		AssignmentID:     assignment.ID,
 		AgentID:          assignment.AgentID,
-		Assignment:       assignment,
+		Assignment:       *copyAssignment(assignment),
 		Events:           append([]TaskEvent(nil), events...),
 		RecordedAt:       recordedAt,
 	})

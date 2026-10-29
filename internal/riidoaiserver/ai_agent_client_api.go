@@ -260,26 +260,27 @@ type DeviceDaemonCommandResponse struct {
 }
 
 type AgentClientRecord struct {
-	AgentID             string            `json:"agent_id"`
-	OwnerPrincipalID    string            `json:"owner_principal_id"`
-	WorkspaceID         string            `json:"workspace_id,omitempty"`
-	IsOwnedByViewer     bool              `json:"is_owned_by_viewer"`
-	Name                string            `json:"name"`
-	ProfileThumbnailURL string            `json:"profile_thumbnail_url,omitempty"`
-	TmpColor            string            `json:"tmp_color,omitempty"`
-	ProfileColor        AgentProfileColor `json:"profile_color"`
-	Description         string            `json:"description,omitempty"`
-	Instruction         string            `json:"instruction,omitempty"`
-	Visibility          AgentVisibility   `json:"visibility"`
-	RuntimeID           string            `json:"runtime_id,omitempty"`
-	RuntimeKind         RuntimeKind       `json:"runtime_kind,omitempty"`
-	ModelID             string            `json:"model_id,omitempty"`
-	ModelLabel          string            `json:"model_label,omitempty"`
-	WorkStatus          AgentWorkStatus   `json:"work_status"`
-	Editability         AgentEditability  `json:"editability"`
-	AssignedTaskCount   int               `json:"assigned_task_count"`
-	CreatedAt           time.Time         `json:"created_at"`
-	UpdatedAt           time.Time         `json:"updated_at"`
+	ReferenceFolders    *assignment.ReferenceFolders `json:"reference_folders,omitempty"`
+	AgentID             string                       `json:"agent_id"`
+	OwnerPrincipalID    string                       `json:"owner_principal_id"`
+	WorkspaceID         string                       `json:"workspace_id,omitempty"`
+	IsOwnedByViewer     bool                         `json:"is_owned_by_viewer"`
+	Name                string                       `json:"name"`
+	ProfileThumbnailURL string                       `json:"profile_thumbnail_url,omitempty"`
+	TmpColor            string                       `json:"tmp_color,omitempty"`
+	ProfileColor        AgentProfileColor            `json:"profile_color"`
+	Description         string                       `json:"description,omitempty"`
+	Instruction         string                       `json:"instruction,omitempty"`
+	Visibility          AgentVisibility              `json:"visibility"`
+	RuntimeID           string                       `json:"runtime_id,omitempty"`
+	RuntimeKind         RuntimeKind                  `json:"runtime_kind,omitempty"`
+	ModelID             string                       `json:"model_id,omitempty"`
+	ModelLabel          string                       `json:"model_label,omitempty"`
+	WorkStatus          AgentWorkStatus              `json:"work_status"`
+	Editability         AgentEditability             `json:"editability"`
+	AssignedTaskCount   int                          `json:"assigned_task_count"`
+	CreatedAt           time.Time                    `json:"created_at"`
+	UpdatedAt           time.Time                    `json:"updated_at"`
 }
 
 type AgentClientRecordResponse struct {
@@ -361,17 +362,19 @@ type AgentProfileThumbnailUploadResponse struct {
 }
 
 type CreateAgentConfigurationRequest struct {
-	ProfileColor        AgentProfileColor `json:"profile_color,omitempty"`
-	Name                string            `json:"name"`
-	ProfileThumbnailURL *string           `json:"profile_thumbnail_url,omitempty"`
-	Description         *string           `json:"description,omitempty"`
-	Instruction         *string           `json:"instruction,omitempty"`
-	Visibility          AgentVisibility   `json:"visibility"`
-	RuntimeID           string            `json:"runtime_id"`
-	ModelID             *string           `json:"model_id,omitempty"`
+	ReferenceFolders    *assignment.ReferenceFolders `json:"reference_folders,omitempty"`
+	ProfileColor        AgentProfileColor            `json:"profile_color,omitempty"`
+	Name                string                       `json:"name"`
+	ProfileThumbnailURL *string                      `json:"profile_thumbnail_url,omitempty"`
+	Description         *string                      `json:"description,omitempty"`
+	Instruction         *string                      `json:"instruction,omitempty"`
+	Visibility          AgentVisibility              `json:"visibility"`
+	RuntimeID           string                       `json:"runtime_id"`
+	ModelID             *string                      `json:"model_id,omitempty"`
 }
 
 type UpdateAgentConfigurationRequest struct {
+	ReferenceFolders *assignment.ReferenceFolders `json:"reference_folders,omitempty"`
 	// ProfileColor is accepted for compatibility and ignored: the color is fixed at creation.
 	ProfileColor        AgentProfileColor `json:"profile_color,omitempty"`
 	Name                string            `json:"name,omitempty"`

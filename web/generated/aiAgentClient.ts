@@ -345,6 +345,7 @@ export interface AgentClientRecord {
    */
   profile_color?: AgentProfileColor;
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
   /**
@@ -395,6 +396,7 @@ export interface AgentClientRecordV2 {
    */
   profile_color: AgentProfileColor;
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
   /**
@@ -611,6 +613,15 @@ export interface AgentProfileThumbnailUploadResponse {
    * 브라우저가 multipart/form-data POST를 보낼 S3 endpoint입니다.
    */
   upload_url: string;
+}
+
+/**
+ * Local reference paths bound to one device and runtime. Does not change cwd.
+ */
+export interface AgentReferenceFolders {
+  device_id: string;
+  paths: string[];
+  runtime_id: string;
 }
 
 /**
@@ -859,6 +870,7 @@ export interface CreateAgentConfigurationRequest {
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   /**
    * agent가 사용할 런타임 dropdown 선택값입니다.
    */
@@ -1244,6 +1256,7 @@ export interface UpdateAgentConfigurationRequest {
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   /**
    * agent가 사용할 런타임 dropdown 선택값입니다.
    */

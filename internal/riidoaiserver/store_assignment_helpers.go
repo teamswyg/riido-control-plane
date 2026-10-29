@@ -37,6 +37,7 @@ func (state *storeState) assignmentForClientStop(taskID string, req CancelAssign
 
 func copyAssignment(a Assignment) *Assignment {
 	cp := a
+	cp.ReferenceFolders = a.ReferenceFolders.Clone()
 	cp.RecoveryPolicy = assignment.CloneProviderRecoveryPolicy(a.RecoveryPolicy)
 	return &cp
 }

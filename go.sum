@@ -31,6 +31,10 @@ github.com/teamswyg/riido-contracts v0.3.7-0.20261020193124-f11c3452c5b2 h1:aJmQ
 github.com/teamswyg/riido-contracts v0.3.7-0.20261020193124-f11c3452c5b2/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
 github.com/teamswyg/riido-contracts v0.3.7-0.20261020194135-c4a242c3304f h1:PLBoz/85kMN0LaFFRHTTolLZ36czgR4pzz+xenGOKUo=
 github.com/teamswyg/riido-contracts v0.3.7-0.20261020194135-c4a242c3304f/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
+github.com/teamswyg/riido-contracts v0.3.8-0.20261029022705-32e0edf23ee5 h1:LpDvbp/fUUT5v95Bj0McfbGu/8GmT3LyVXIjTc1yGAU=
+github.com/teamswyg/riido-contracts v0.3.8-0.20261029022705-32e0edf23ee5/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
+github.com/teamswyg/riido-contracts v0.3.8-0.20261029024842-1d0a3604dd9b h1:PhDVPdGLV0VM4KRDaEeJpoDoSHfB41o/nRUZfbklT3s=
+github.com/teamswyg/riido-contracts v0.3.8-0.20261029024842-1d0a3604dd9b/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.44.0 h1:JjwHmHpA4iZ3wBxluu2fbbE7j4kqlE8jXyAyPXH7HqU=

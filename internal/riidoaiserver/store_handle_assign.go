@@ -45,6 +45,10 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 	if err := validateAssignmentBinding(s.agentRegistry, req.AgentID, req.RuntimeProvider); err != nil {
 		return Assignment{}, err
 	}
+	referenceFolders, err := s.normalizeAssignmentReferenceFolders(req)
+	if err != nil {
+		return Assignment{}, err
+	}
 	if status, ok := state.providerStatuses[req.AgentID]; ok {
 		decision, err := EvaluateStoreSafeRouting(StoreSafeRoutingInput{
 			RuntimeProvider:  capability.ProviderKind(req.RuntimeProvider),
@@ -122,10 +126,11 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 
 	state.nextAssignmentSeq++
 	assignment := Assignment{
-		CreatedBy:   req.CreatedBy,
-		TeamID:      req.TeamID,
-		WorkspaceID: req.WorkspaceID,
-		RequestID:   req.RequestID,
+		ReferenceFolders: referenceFolders.Clone(),
+		CreatedBy:        req.CreatedBy,
+		TeamID:           req.TeamID,
+		WorkspaceID:      req.WorkspaceID,
+		RequestID:        req.RequestID,
 
 		ID:                       identity,
 		TaskID:                   taskID,
@@ -133,7 +138,7 @@ func (s *Store) handleAssign(state *storeState, taskID string, req AssignRequest
 		AgentID:                  req.AgentID,
 		RuntimeProvider:          req.RuntimeProvider,
 		ModelID:                  req.ModelID,
-		Prompt:                   req.Prompt,
+		Prompt:                   promptWithReferenceFolders(req.Prompt, referenceFolders),
 		AgentInstruction:         req.AgentInstruction,
 		AllowExperimentalRuntime: req.AllowExperimentalRuntime,
 		ResumeSessionID:          req.ResumeSessionID,
