@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/teamswyg/riido-contracts/hostintegration"
 	"log"
 	"sort"
 	"strings"
@@ -519,7 +520,14 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 		}
 		providerVersion, err := normalizeRuntimeProviderVersion(runtime.ProviderVersion)
 		if err != nil {
-			return nil, fmt.Errorf("runtimes[%d].provider_version: %w", i, err)
+			// Version is optional display metadata. Legacy probes may send warnings
+			// or control characters; never reject the device heartbeat for that.
+			providerVersion = ""
+			if runtime.HealthStatus == "" || runtime.HealthStatus == hostintegration.ProviderHealthHealthy {
+				runtime.HealthStatus = hostintegration.ProviderHealthUnknown
+				runtime.DiagnosticCode = hostintegration.ProviderDiagnosticVersionProbeFailed
+				runtime.DiagnosticSummary = ""
+			}
 		}
 		healthStatus, diagnosticCode, diagnosticSummary, err := normalizeRuntimeProviderHealth(runtime)
 		if err != nil {
@@ -580,7 +588,6 @@ func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {
 func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []RuntimeModelRecord {
 	out := make([]RuntimeModelRecord, 0, len(models))
 	seen := map[string]struct{}{}
-	hasDefault := false
 	for _, model := range models {
 		model.ModelID = strings.TrimSpace(model.ModelID)
 		model.Label = strings.TrimSpace(model.Label)
@@ -594,16 +601,10 @@ func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []Run
 		if model.Label == "" {
 			model.Label = model.ModelID
 		}
-		if model.IsDefault {
-			hasDefault = true
-		}
 		out = append(out, model)
 	}
 	if len(out) == 0 {
 		return []RuntimeModelRecord{defaultRuntimeModel(kind)}
-	}
-	if !hasDefault {
-		out[0].IsDefault = true
 	}
 	return out
 }
