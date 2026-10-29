@@ -35,6 +35,8 @@ github.com/teamswyg/riido-contracts v0.3.8-0.20261029022705-32e0edf23ee5 h1:LpDv
 github.com/teamswyg/riido-contracts v0.3.8-0.20261029022705-32e0edf23ee5/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
 github.com/teamswyg/riido-contracts v0.3.8-0.20261029024842-1d0a3604dd9b h1:PhDVPdGLV0VM4KRDaEeJpoDoSHfB41o/nRUZfbklT3s=
 github.com/teamswyg/riido-contracts v0.3.8-0.20261029024842-1d0a3604dd9b/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
+github.com/teamswyg/riido-contracts v0.3.8-0.20261029070900-db93a8e67d8a h1:LnRyCaeBzxnCtqG6BChvJrHnS8o2SEyDWvwECmh52eQ=
+github.com/teamswyg/riido-contracts v0.3.8-0.20261029070900-db93a8e67d8a/go.mod h1:E1PR5OpNls64Bun+d7z6Efwy70/fi11v1q1GhVRO3TA=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.44.0 h1:JjwHmHpA4iZ3wBxluu2fbbE7j4kqlE8jXyAyPXH7HqU=

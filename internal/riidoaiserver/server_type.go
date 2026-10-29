@@ -41,6 +41,7 @@ type ServerConfig struct {
 }
 
 type Server struct {
+	commentReactions         *commentReactionDispatcher
 	assignment               AssignmentStore
 	agentCatalog             AgentCatalogStore
 	aiAgent                  AIAgentClientStore

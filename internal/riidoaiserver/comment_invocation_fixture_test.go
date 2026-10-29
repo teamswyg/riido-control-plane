@@ -41,6 +41,13 @@ func newCommentCallFixtureWithContext(t *testing.T, contexts AssignmentContextSt
 	f.evidence = verifiedCommentDelivery{EventID: "human-event", CommentID: "human-reply", RootCommentID: "root", TaskID: "handoff-task", AgentID: "agent-public-openclaw", WorkspaceID: defaultAIAgentClientWorkspaceID, PrincipalID: "user-1", Body: "Compare plans A and B for a ten-person team and produce a cost table.", Context: AIAgentTaskContext{Component: AIAgentTaskContextComponent{ID: "handoff-task", ComponentType: "task", Title: "Compare plans"}, Document: AIAgentTaskContextDocument{Content: "Plan A costs 30 and B costs 50. Team size is ten."}}, ConversationMessages: []verifiedCommentContextMessage{{ID: "ordinary", Body: "Keep the human acceptance criterion", CreatedAt: time.Now().Add(-time.Minute)}}}
 	key := strings.Repeat("k", 32)
 	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPut && r.URL.Path == "/internal/agent-comment-deliveries/human-event/reaction" {
+			if r.Header.Get(CommentDeliveryKeyHeader) != key {
+				t.Error("reaction request missing key")
+			}
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		if r.Header.Get(CommentDeliveryKeyHeader) != key || r.URL.Path != "/internal/agent-comment-deliveries/human-event" {
 			t.Error("unbound evidence lookup")
 		}
@@ -56,6 +63,8 @@ func newCommentCallFixtureWithContext(t *testing.T, contexts AssignmentContextSt
 	f.assignments = &commentCompletionStore{Store: NewStoreWithConfig(StoreConfig{AgentRegistry: f.client})}
 	t.Cleanup(f.assignments.Close)
 	f.s = NewServer(ServerConfig{AIAgentClient: f.client, Assignment: f.assignments, AssignmentContext: contexts, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: endpoint.URL, Key: key}, Authorizer: assignmentHTTPAuthorizer(t, []string{"agent:agent-public-openclaw:events:write"})})
+	// These fixtures mutate projection internals directly; asynchronous reaction delivery has its own concurrency tests.
+	f.s.commentReactions = nil
 	request := httptest.NewRequest(http.MethodPost, "/internal/agent-comment-deliveries", strings.NewReader(`{"event_id":"human-event"}`))
 	request.Header.Set(CommentDeliveryKeyHeader, key)
 	response := httptest.NewRecorder()

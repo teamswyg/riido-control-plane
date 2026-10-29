@@ -50,6 +50,7 @@ func NewServer(config ServerConfig) Server {
 		executionGate = owner.sharedTaskAgentExecutionGate()
 	}
 	return Server{
+		commentReactions:         &commentReactionDispatcher{jobs: map[string]*commentReactionJob{}, sent: map[string]string{}},
 		assignment:               config.Assignment,
 		agentCatalog:             agentCatalog,
 		aiAgent:                  config.AIAgentClient,
