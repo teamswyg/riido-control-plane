@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 func (s *PersistentAIAgentClientStore) ReactToAIAgentTaskThreadMessage(ctx context.Context, principal AuthorizationResult, taskID, threadID, messageID, emoji string, add bool) (threadMessageReactionChange, error) {
 	var change threadMessageReactionChange
@@ -12,13 +15,28 @@ func (s *PersistentAIAgentClientStore) ReactToAIAgentTaskThreadMessage(ctx conte
 	return change, err
 }
 
+// threadReactionSaveAttempts bounds the reload and reapply loop when another
+// replica commits between the reload and the save.
+const threadReactionSaveAttempts = 3
+
 // saveThreadReactionUpdate changes one thread's reaction state on freshly
-// reloaded state and saves only that change of the reactions. A failed save
-// forces the next operation to reload, so the unsaved change is dropped
-// instead of being reported as an already applied no-op.
+// reloaded state and saves it fenced against every part committed since the
+// reload. A rejected save reloads and applies the update again; the updates
+// are idempotent. Any failed save forces the next operation to reload, so the
+// unsaved change is never reported as an already applied no-op.
 func (s *PersistentAIAgentClientStore) saveThreadReactionUpdate(ctx context.Context, threadID string, update func() (bool, error)) error {
 	s.operationMu.Lock()
 	defer s.operationMu.Unlock()
+	var err error
+	for attempt := 0; attempt < threadReactionSaveAttempts; attempt++ {
+		if err = s.saveThreadReactionAttempt(ctx, threadID, update); !errors.Is(err, errTaskAgentSnapshotChanged) {
+			return err
+		}
+	}
+	return err
+}
+
+func (s *PersistentAIAgentClientStore) saveThreadReactionAttempt(ctx context.Context, threadID string, update func() (bool, error)) error {
 	s.requireSnapshotReload()
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return err

@@ -10,6 +10,14 @@ func withThreadReactionMutation(ctx context.Context, mutation threadReactionMuta
 	return context.WithValue(ctx, threadReactionMutationContextKey{}, mutation)
 }
 
+// isThreadReactionMutation fences a reaction write like a scoped membership
+// write: any part another replica committed after the reload rejects the save,
+// so the stale lifecycle parts of this instance never overwrite it.
+func isThreadReactionMutation(ctx context.Context) bool {
+	_, ok := ctx.Value(threadReactionMutationContextKey{}).(threadReactionMutation)
+	return ok
+}
+
 func mergeCommittedSharedSnapshotParts(ctx context.Context, items []map[string]map[string]string, requested *AIAgentClientSnapshot) error {
 	if err := mergeCommittedDeviceConnectionGrants(items, requested); err != nil {
 		return err

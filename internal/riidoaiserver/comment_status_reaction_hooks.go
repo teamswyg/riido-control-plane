@@ -15,7 +15,8 @@ func (s Server) acceptCommentDelivery(ctx context.Context, w http.ResponseWriter
 }
 
 // trackCommentDeliveryReaction links an accepted delivery to its run thread and
-// writes the started reaction. A failure is logged and never fails delivery.
+// writes the started reaction. A failure never fails delivery; the link is
+// retried in the background without running the agent again.
 func (s Server) trackCommentDeliveryReaction(ctx context.Context, workspaceID, taskID, threadID, eventID string) {
 	store, ok := s.aiAgent.(commentStatusReactionStore)
 	if !ok || strings.TrimSpace(threadID) == "" {
@@ -23,6 +24,7 @@ func (s Server) trackCommentDeliveryReaction(ctx context.Context, workspaceID, t
 	}
 	if err := store.RecordCommentDeliveryEvent(ctx, workspaceID, threadID, eventID); err != nil {
 		log.Printf("agent comment delivery reaction source not recorded thread=%s: %v", threadID, err)
+		s.retryCommentDeliveryLink(store, workspaceID, taskID, threadID, eventID)
 		return
 	}
 	s.reconcileCommentStatusReactions(taskID)
