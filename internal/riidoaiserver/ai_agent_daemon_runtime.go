@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/teamswyg/riido-contracts/hostintegration"
-
 	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
