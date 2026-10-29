@@ -34,13 +34,9 @@ func (s *DynamoDBAssignmentOperationStore) claimTransactionPayload(record Assign
 	payload.TransactItems[2].Put.TableName = s.tableName
 	payload.TransactItems[2].Put.ConditionExpression = "attribute_not_exists(pk) AND attribute_not_exists(sk)"
 	payload.TransactItems[2].Put.Item = operationItem
-	if record.ExecutionClaim != nil {
-		item, err := executionClaimItem(*record.ExecutionClaim)
-		if err != nil {
-			return nil, err
-		}
-		sidecar := dynamoDBTransactWriteItem{Put: &dynamoDBTransactWritePutAction{TableName: s.tableName, ConditionExpression: "attribute_not_exists(pk) AND attribute_not_exists(sk)", Item: item}}
-		payload.TransactItems = append(payload.TransactItems, sidecar, s.devicePolicyAdvanceAction(record.ExecutionClaim.DeviceID))
+	payload.TransactItems, err = s.appendExecutionClaimAction(payload.TransactItems, record.ExecutionClaim, record.executionAdmission)
+	if err != nil {
+		return nil, err
 	}
 	return json.Marshal(payload)
 }

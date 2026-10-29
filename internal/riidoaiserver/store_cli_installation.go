@@ -9,6 +9,12 @@ func (s *Store) commitCLIInstallation(state *storeState, msg cliInstallationComm
 	if msg.read != nil {
 		return s.readLocalCLIInstallation(state, *msg.read)
 	}
+	if msg.receipt != nil {
+		return s.readLocalCLIInstallationReceipt(state, *msg.receipt)
+	}
+	if msg.replay != nil {
+		return s.commitCLIInstallationIntentReplay(state, msg.ctx, *msg.replay)
+	}
 	trial := *state
 	trial.cliInstallationIntents = maps.Clone(state.cliInstallationIntents)
 	trial.cliInstallationLinks = maps.Clone(state.cliInstallationLinks)

@@ -22,7 +22,7 @@ func TestAuthenticatedExecutionClaimDynamoTransaction(t *testing.T) {
 			}
 		},
 	})
-	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"device-a", "owner"})
+	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device-a", ownerPrincipalID: "owner"})
 	claim, err := store.ClaimNextAssignment(ctx, assignment.AgentID, now.Add(time.Second))
 	if err != nil || !claim.Claimed {
 		t.Fatalf("claim failed: %v", err)

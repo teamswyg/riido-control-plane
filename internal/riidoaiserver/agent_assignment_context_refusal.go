@@ -11,6 +11,9 @@ func (s Server) writeAssignmentContextRefusal(w http.ResponseWriter, r *http.Req
 	if target := strings.TrimSpace(req.Target); target != "" {
 		source = AssignmentContextSource{Kind: "target", ID: target, Part: req.View}
 	}
+	if req.View == AssignmentContextViewContent {
+		source.Part = "metadata" // No captured leaf was served; retain the public audit enum.
+	}
 	reads := assignmentContextReadRecords(snapshot, []AssignmentContextSource{source}, AssignmentContextViaCLI, status, req.RequestID, at)
 	if s.config.AssignmentContext.AppendAssignmentContextReads(r.Context(), reads) != nil {
 		writeError(w, http.StatusServiceUnavailable, "assignment context read record unavailable")

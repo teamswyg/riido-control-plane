@@ -34,7 +34,7 @@ func TestExecutionClaimPersistenceFailureCannotDispatchOrPoisonRetry(t *testing.
 		t.Fatal(err)
 	}
 	defer cancel()
-	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{"device", "owner"})
+	ctx := context.WithValue(context.Background(), authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: "device", ownerPrincipalID: "owner"})
 	failing.fail = true
 	poll, err := actor.PollAgent(ctx, "agent", PollRequest{})
 	if err == nil || poll.Action == PollStart || poll.Assignment != nil {

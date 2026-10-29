@@ -1,14 +1,13 @@
 package riidoaiserver
 
 import (
-	"context"
 	"testing"
 )
 
 func TestDynamoDBAssignmentOperationStoreClaimRepairsStaleBlockedAssignment(t *testing.T) {
 	fixture, store, requests := newStaleBlockedClaimFixture(t)
 
-	claim, err := store.ClaimNextAssignment(context.Background(), "jykim-new", fixture.Now)
+	claim, err := store.ClaimNextAssignment(legacyClaimFixtureContext(), "jykim-new", fixture.Now)
 	if err != nil {
 		t.Fatalf("ClaimNextAssignment repaired: %v", err)
 	}

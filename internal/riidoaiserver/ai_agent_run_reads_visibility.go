@@ -7,9 +7,9 @@ import (
 
 type runReadSourceKey struct{ kind, id, part string }
 
-func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, workspaceID, taskID string) (map[runReadSourceKey]runReadMetadata, bool) {
+func (s Server) currentRunReadSources(w http.ResponseWriter, r *http.Request, workspaceID, taskID, assignmentID string) (map[runReadSourceKey]runReadMetadata, bool) {
 	token, _ := requestBearerToken(r)
-	current, err := s.loadCurrentRunReadContext(r.Context(), token, workspaceID, taskID)
+	current, err := s.loadCurrentRunReadContext(r.Context(), token, workspaceID, taskID, assignmentID)
 	if errors.Is(err, ErrAuthorizationForbidden) {
 		writeError(w, http.StatusForbidden, "forbidden")
 		return nil, false
@@ -58,6 +58,9 @@ func visibleRunReadSources(current AIAgentTaskContext) map[runReadSourceKey]bool
 		for _, source := range assignmentContextCommentSources(current.Extended.Comments) {
 			add(source)
 		}
+	}
+	for _, item := range assignmentReadScopeCurrentSources(current) {
+		add(item.source)
 	}
 	return visible
 }

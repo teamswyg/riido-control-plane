@@ -15,9 +15,9 @@ func validateExecutionClaimTerminalBudget(actions []json.RawMessage) error {
 		if err := json.Unmarshal(raw, &action); err != nil {
 			return err
 		}
-		if action.Update != nil && strings.HasPrefix(dynamoDBStringValue(action.Update.Key, "pk"), "DEVICE_POLICY#") {
+		if strings.HasPrefix(devicePolicyActionKey(action), "DEVICE_POLICY#") {
 			policies++
-			if len(raw) > 4<<10 || !isDevicePolicyAdvance(action) {
+			if len(raw) > 4<<10 || (!isDevicePolicyAdvance(action) && !isBoundedCoverageClaimAction(action)) {
 				return errors.New("invalid bounded device policy action")
 			}
 			continue

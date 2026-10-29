@@ -16,6 +16,9 @@ func (m *MemoryAssignmentContextStore) SaveAssignmentContextComments(ctx context
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.snapshots[strings.TrimSpace(assignmentID)].Content != nil {
+		return errAssignmentContentConflict
+	}
 	if m.comments == nil {
 		m.comments = map[string][][]AIAgentTaskContextComment{}
 	}

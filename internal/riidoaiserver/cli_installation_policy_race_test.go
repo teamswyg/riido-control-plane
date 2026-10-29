@@ -26,7 +26,7 @@ func TestCLIInstallationPolicyFencesClaimDuringRead(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			claimCtx := context.WithValue(ctx, authenticatedClaimDeviceKey{}, authenticatedClaimDevice{id, "owner"})
+			claimCtx := context.WithValue(ctx, authenticatedClaimDeviceKey{}, authenticatedClaimDevice{deviceID: id, ownerPrincipalID: "owner"})
 			if _, err = f.actor.PollAgent(claimCtx, "agent", PollRequest{}); err != nil {
 				t.Fatal(err)
 			}

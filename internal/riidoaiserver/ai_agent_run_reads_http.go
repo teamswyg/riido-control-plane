@@ -54,7 +54,7 @@ func (s Server) handleAIAgentClientRuns(w http.ResponseWriter, r *http.Request) 
 	if _, ok := s.authorizeAIAgentClient(w, r, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, TaskID: thread.TaskID}); !ok {
 		return
 	}
-	visible, ok := s.currentRunReadSources(w, r, principal.WorkspaceID, thread.TaskID)
+	visible, ok := s.currentRunReadSources(w, r, principal.WorkspaceID, thread.TaskID, thread.AssignmentID)
 	if !ok {
 		return
 	}

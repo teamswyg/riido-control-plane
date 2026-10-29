@@ -40,13 +40,17 @@ func (s *Store) mutateDurableAssignment(ctx context.Context, state *storeState, 
 		}
 		events := eventsAfterSeq(&trial, before)
 		if len(events) == 0 {
+			if err := s.authorizeCoveredAssignment(ctx, expected.Assignment); err != nil {
+				return Assignment{}, err
+			}
 			applyAssignmentProjectionToState(state, expected)
 			return assignment, nil
 		}
 		record := AssignmentOperationRecord{
-			SchemaVersion: AssignmentOperationSchemaVersion,
-			OperationID:   assignmentOperationID(kind, assignment, events),
-			OperationType: kind, TaskID: assignment.TaskID, AssignmentID: assignment.ID,
+			executionAdmission: executionAdmissionFromContext(ctx),
+			SchemaVersion:      AssignmentOperationSchemaVersion,
+			OperationID:        assignmentOperationID(kind, assignment, events),
+			OperationType:      kind, TaskID: assignment.TaskID, AssignmentID: assignment.ID,
 			AgentID: assignment.AgentID, Assignment: assignment, Events: events,
 			RecordedAt: s.now(), ExpectedProjection: &expected, eventACK: quiet.eventACK,
 		}
@@ -66,15 +70,7 @@ func (s *Store) mutateDurableAssignment(ctx context.Context, state *storeState, 
 		if err = s.saveSnapshot(&trial); err != nil {
 			return Assignment{}, assignmentDependencyFailure(err)
 		}
-		applyAssignmentToState(state, assignment)
-		state.agentEventsTotal = trial.agentEventsTotal
-		for _, event := range events {
-			s.appendRecordedEvent(state, event)
-			for _, observer := range observe {
-				observer(event)
-			}
-		}
-		s.signalAgentWaiters(state, assignment.AgentID)
+		s.publishDurableAssignmentMutation(state, &trial, assignment, events, observe...)
 		return assignment, nil
 	}
 	return Assignment{}, errAssignmentProjectionConflict

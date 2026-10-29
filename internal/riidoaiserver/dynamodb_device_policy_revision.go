@@ -24,6 +24,10 @@ func devicePolicyRevision(item map[string]map[string]string, device string) (uin
 	if len(item) == 0 {
 		return 0, nil
 	}
+	if dynamoDBStringValue(item, "policy_schema") == executionCoverageSchema {
+		coverage, err := executionCoverageFromItem(item, device)
+		return coverage.Revision, err
+	}
 	if dynamoDBStringValue(item, "pk") != "DEVICE_POLICY#"+device || dynamoDBStringValue(item, "sk") != "REVISION" || dynamoDBStringValue(item, "policy_schema") != devicePolicyRevisionSchema || dynamoDBStringValue(item, "coverage_state") != "unknown" {
 		return 0, errCLIInstallationUnavailable
 	}

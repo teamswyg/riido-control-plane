@@ -19,6 +19,15 @@ type AssignmentContextCommentPage struct {
 // assignmentContextViewData answers every view; only comments need the
 // stored pages, so only that view touches the store.
 func (s Server) assignmentContextViewData(ctx context.Context, snapshot AssignmentContextSnapshot, req AgentAssignmentContextRequest) (any, []AssignmentContextSource, bool, error) {
+	if err := validateAssignmentReadScopeManifest(snapshot); err != nil {
+		return nil, nil, false, err
+	}
+	if req.View == AssignmentContextViewContent {
+		return s.assignmentContentView(ctx, snapshot, req)
+	}
+	if snapshot.Context.ReadScope != nil {
+		return s.assignmentReadScopeView(ctx, snapshot, req)
+	}
 	if req.View != AssignmentContextViewComments {
 		data, sources, ok := selectAssignmentContextView(snapshot.Context, req.View, req.Target)
 		return data, sources, ok, nil

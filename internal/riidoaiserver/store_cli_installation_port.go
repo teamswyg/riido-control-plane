@@ -13,22 +13,28 @@ type cliInstallationRead struct {
 	expected *cliInstallationReadSet
 }
 type cliInstallationReadSet struct {
-	link        cliInstallationLink
-	revision    uint64
-	found       bool
-	observation deviceExecutionObservation
+	link              cliInstallationLink
+	revision          uint64
+	found             bool
+	observation       deviceExecutionObservation
+	coverage          *executionCoverage
+	coverageAuthority bool
 }
 type cliInstallationCommand struct {
 	ctx     context.Context
 	create  *cliInstallationIntent
+	replay  *cliInstallationIntentReplay
 	confirm *cliInstallationConfirmation
 	read    *cliInstallationRead
+	receipt *cliInstallationReceiptRequest
 	reply   chan cliInstallationResult
 }
 type cliInstallationResult struct {
-	link cliInstallationLink
-	read cliInstallationReadSet
-	err  error
+	link    cliInstallationLink
+	read    cliInstallationReadSet
+	receipt cliInstallationReceipt
+	replay  cliInstallationIntentReplayResponse
+	err     error
 }
 
 func (s *Store) executeCLIInstallation(ctx context.Context, command cliInstallationCommand) (cliInstallationResult, error) {
@@ -45,17 +51,6 @@ func (s *Store) executeCLIInstallation(ctx context.Context, command cliInstallat
 	case <-ctx.Done():
 		return cliInstallationResult{}, ctx.Err()
 	}
-}
-
-func (s *Store) createCLIInstallationIntent(ctx context.Context, intent cliInstallationIntent) error {
-	if s.snapshotStore != nil && s.operationStore != nil {
-		return errCLIInstallationUnavailable
-	}
-	if durable, ok := s.operationStore.(cliInstallationRepository); ok {
-		return durable.createCLIInstallationIntent(ctx, intent)
-	}
-	_, err := s.executeCLIInstallation(ctx, cliInstallationCommand{create: &intent})
-	return err
 }
 
 func (s *Store) confirmCLIInstallationLink(ctx context.Context, id string, device authenticatedClaimDevice, signature, resource string) (cliInstallationLink, error) {

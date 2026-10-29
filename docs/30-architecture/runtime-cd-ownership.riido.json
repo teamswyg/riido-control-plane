@@ -5,8 +5,24 @@
   "generated_doc": "docs/30-architecture/runtime-cd-ownership.md",
   "workflow": ".github/workflows/architecture-docs.yml",
   "evidence_artifact": "runtime-cd-ownership-evidence",
-  "hardening_tasks": ["RIID-4833", "RIID-4835", "RIID-4836", "RIID-4837", "RIID-4839", "RIID-4842", "RIID-4844", "RIID-4845", "RIID-4853", "RIID-4855"],
-  "supersedes_tasks": ["RIID-4814", "RIID-4815", "RIID-4822", "RIID-4824"],
+  "hardening_tasks": [
+    "RIID-4833",
+    "RIID-4835",
+    "RIID-4836",
+    "RIID-4837",
+    "RIID-4839",
+    "RIID-4842",
+    "RIID-4844",
+    "RIID-4845",
+    "RIID-4853",
+    "RIID-4855"
+  ],
+  "supersedes_tasks": [
+    "RIID-4814",
+    "RIID-4815",
+    "RIID-4822",
+    "RIID-4824"
+  ],
   "runtime_service": "riido_ai_server",
   "current_strategy": {
     "id": "ecs-rolling-task-definition-revision",
@@ -389,8 +405,14 @@
       "docs/migration/control-plane.md"
     ],
     "allowed_public_non_cd_runtime_keys": [
-      {"name": "RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL", "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."},
-      {"name": "RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY", "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."},
+      {
+        "name": "RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL",
+        "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."
+      },
+      {
+        "name": "RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY",
+        "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."
+      },
       {
         "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT",
         "reason": "development runtime feature flag documented for testnet/development API startup; it is not a deploy/smoke GitHub configuration key"
@@ -438,6 +460,10 @@
       {
         "name": "RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY",
         "reason": "container runtime secret name for the server-to-server external authorizer hop; it is not a deploy/smoke GitHub configuration key"
+      },
+      {
+        "name": "RIIDO_AI_SERVER_EXECUTION_COVERAGE_ENROLLMENT",
+        "reason": "Default-off runtime capability for atomic new-device execution coverage; not a deploy or smoke GitHub key. Enabling requires the separately approved serving-fleet admission gate and does not remove enforcement for existing covered devices when disabled."
       }
     ],
     "forbidden_public_information": [

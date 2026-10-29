@@ -14,6 +14,9 @@ func runReadModifiedSinceRead(read AssignmentContextRead, current runReadMetadat
 	if timesComparable && after.After(before) {
 		return runReadModified(true)
 	}
+	if read.Status != "truncated" && read.SourceVersion != "" && current.versions[read.SourceVersion] {
+		return runReadModified(false)
+	}
 	if read.Status != "truncated" && current.comparable && read.SourceVersion != "" && current.source.Version != "" {
 		if read.SourceVersion == current.source.Version {
 			return runReadModified(false)

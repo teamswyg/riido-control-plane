@@ -11,6 +11,8 @@ type executionTerminationReadSet struct {
 	projection map[string]map[string]string
 	receipt    map[string]map[string]string
 	value      executionTerminationReceipt
+	coverage   *executionCoverage
+	claimValue executionClaim
 }
 
 func (s *DynamoDBAssignmentOperationStore) recordExecutionTermination(ctx context.Context, id executionTerminationIdentity, req executionTerminationRequest) (executionTerminationReceipt, error) {

@@ -38,7 +38,12 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 		RequesterAdmin:       trigger.RequesterAdmin,
 		CapturedAt:           now,
 	}
+	if taskContext.ReadScope != nil {
+		s.captureAssignmentReadScope(ctx, snapshot, taskContext)
+		return
+	}
 	contextOnly, comments := splitAssignmentContextComments(*taskContext, trigger)
+	contextOnly.ReadScopeEvidence = nil
 	snapshot.Context, snapshot.Truncated = boundAssignmentContext(contextOnly)
 	snapshot.CommentPages = s.saveAssignmentContextComments(ctx, &snapshot, comments)
 	if err := store.SaveAssignmentContextSnapshot(ctx, snapshot); err != nil {

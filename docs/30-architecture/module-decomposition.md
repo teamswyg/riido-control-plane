@@ -12,13 +12,13 @@ This reader is generated from the package boundary manifest and current Go packa
 
 Packages: `111`; runtime: `1`; internal: `6`; tools: `103`; forbidden import hits: `0`.
 
-File line budget target: `75`; files over target: `181`; max file lines: `710`.
+File line budget target: `75`; files over target: `195`; max file lines: `710`.
 
 ### Line Budget Ratchet
 
 | Metric | Current | Limit | Slack |
 | --- | ---: | ---: | ---: |
-| Files over target | 181 | 99 | -82 |
+| Files over target | 195 | 99 | -96 |
 | Max file lines | 710 | 2481 | 1771 |
 
 Files over target is reported as surface evidence, but the ratchet fails on max-line or hotspot total-over regressions.
@@ -27,10 +27,10 @@ Files over target is reported as surface evidence, but the ratchet fails on max-
 
 | Directory | Files | Files limit | Max lines | Max limit | Over-target | Over limit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 170 | 85 | 710 | 838 | 14828 | 14828 |
+| `internal/riidoaiserver` | 184 | 95 | 710 | 838 | 15095 | 15400 |
 | `internal/authpep` | 6 | 6 | 291 | 306 | 687 | 687 |
 | `tools/reactquerygen` | 1 | 3 | 83 | 1395 | 8 | 2766 |
-| `cmd/riido_ai_server` | 4 | 3 | 144 | 791 | 121 | 1474 |
+| `cmd/riido_ai_server` | 4 | 3 | 144 | 791 | 127 | 1474 |
 | `tools/containercontract` | 0 | 0 | 0 | 75 | 0 | 0 |
 | `tools/generatedclienthandoff` | 0 | 2 | 0 | 601 | 0 | 578 |
 | `awsadapters` | 0 | 1 | 0 | 84 | 0 | 9 |
@@ -50,10 +50,10 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 | `internal/riidoaiserver/dynamodb_outbox.go` | 671 |
 | `internal/riidoaiserver/ai_agent_client_persistence_test.go` | 661 |
 | `internal/riidoaiserver/ai_agent_daemon_runtime.go` | 642 |
-| `internal/riidoaiserver/ai_agent_client_api.go` | 633 |
-| `internal/riidoaiserver/ai_agent_client_persistence.go` | 551 |
+| `internal/riidoaiserver/ai_agent_client_api.go` | 634 |
+| `internal/riidoaiserver/ai_agent_client_persistence.go` | 558 |
 | `internal/riidoaiserver/dynamodb_stream_relay.go` | 519 |
-| `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 485 |
+| `internal/riidoaiserver/ai_agent_client_generated_smoke_test.go` | 486 |
 | `internal/riidoaiserver/ai_agent_client_multi_agent_test.go` | 431 |
 | `internal/riidoaiserver/server_test.go` | 403 |
 
@@ -61,9 +61,9 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 
 | Directory | Files over target | Max lines | Total over target lines |
 | --- | ---: | ---: | ---: |
-| `internal/riidoaiserver` | 170 | 710 | 14828 |
+| `internal/riidoaiserver` | 184 | 710 | 15095 |
 | `internal/authpep` | 6 | 291 | 687 |
-| `cmd/riido_ai_server` | 4 | 144 | 121 |
+| `cmd/riido_ai_server` | 4 | 144 | 127 |
 | `tools/reactquerygen` | 1 | 83 | 8 |
 
 ## Packages

@@ -12,6 +12,7 @@ func openAIAgentClient(ctx context.Context, config runtimeConfig) (riidoaiserver
 		return nil, nil
 	}
 	base := riidoaiserver.NewDevelopmentAIAgentClientStore()
+	base.ConfigureExecutionCoverageEnrollment(config.ExecutionCoverageEnrollment)
 	if err := base.ConfigureDaemonProfile(config.AIAgentDaemonProfile); err != nil {
 		return nil, fmt.Errorf("configure AI Agent daemon profile: %w", err)
 	}

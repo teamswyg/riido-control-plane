@@ -80,6 +80,7 @@ type AssignmentOperationRecord struct {
 	ExecutionClaim     *executionClaim       `json:"execution_claim,omitempty"`
 	ExpectedProjection *AssignmentProjection `json:"-"`
 	eventACK           *assignmentEventACKReceipt
+	executionAdmission *executionAdmission
 	createsExecution   bool
 	SchemaVersion      string                  `json:"schema_version"`
 	OperationID        string                  `json:"operation_id"`

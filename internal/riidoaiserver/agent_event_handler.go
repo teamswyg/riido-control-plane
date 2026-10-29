@@ -10,7 +10,8 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
 		return
 	}
-	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionEventsWrite, AgentID: agentID}); !ok {
+	auth, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionEventsWrite, AgentID: agentID})
+	if !ok {
 		return
 	}
 	var req AgentEventRequest
@@ -18,8 +19,12 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	ctx, ok := authenticatedCoverageEventContext(w, r, req, auth)
+	if !ok {
+		return
+	}
 	receivedAt := time.Now()
-	response, err := s.assignment.RecordAgentEvent(r.Context(), agentID, req)
+	response, err := s.assignment.RecordAgentEvent(ctx, agentID, req)
 	if err != nil {
 		status, message := agentEventErrorResponse(err)
 		logAgentEventRejected(agentID, req, err, status)

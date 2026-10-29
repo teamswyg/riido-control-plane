@@ -19,14 +19,19 @@ const (
 )
 
 func validateContextPayloadBudget(items []map[string]map[string]string) error {
-	if len(items) > assignmentContextMaxCommentPages {
+	if len(items) > assignmentContextMaxCommentPages+1 {
 		return errors.New("context capture item limit exceeded")
 	}
+	snapshots, payloads := 0, 0
 	for _, item := range items {
 		limit := contextCommentItemBytes
-		if item["sk"]["S"] == dynamoDBAssignmentContextSnapshotSK {
+		switch {
+		case item["sk"]["S"] == dynamoDBAssignmentContextSnapshotSK:
+			snapshots++
 			limit = contextSnapshotItemBytes
-		} else if !strings.HasPrefix(item["sk"]["S"], dynamoDBAssignmentContextCommentPrefix) {
+		case strings.HasPrefix(item["sk"]["S"], dynamoDBAssignmentContextCommentPrefix), strings.HasPrefix(item["sk"]["S"], assignmentContentPrefix):
+			payloads++
+		default:
 			return errors.New("invalid context payload kind")
 		}
 		encoded, err := json.Marshal(item)
@@ -36,6 +41,9 @@ func validateContextPayloadBudget(items []map[string]map[string]string) error {
 		if len(encoded) > limit-128 {
 			return errors.New("context capture byte budget exceeded")
 		}
+	}
+	if snapshots > 1 || payloads > assignmentContextMaxCommentPages {
+		return errors.New("context capture shared payload budget exceeded")
 	}
 	return nil
 }

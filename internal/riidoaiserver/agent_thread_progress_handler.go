@@ -7,7 +7,8 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusServiceUnavailable, "assignment store is not configured")
 		return
 	}
-	if _, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionEventsWrite, AgentID: agentID}); !ok {
+	auth, ok := s.authorizeRequest(w, r, AuthorizationRequest{Resource: AuthorizationResourceAgent, Action: AuthorizationActionEventsWrite, AgentID: agentID})
+	if !ok {
 		return
 	}
 	var req AgentThreadProgressBatchRequest
@@ -19,7 +20,11 @@ func (s Server) handleAgentThreadProgress(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := s.recordAgentThreadProgressEvents(r.Context(), agentID, req); err != nil {
+	ctx, ok := authenticatedCoverageEventContext(w, r, AgentEventRequest{DeviceID: req.DeviceID}, auth)
+	if !ok {
+		return
+	}
+	if err := s.recordAgentThreadProgressEvents(ctx, agentID, req); err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}

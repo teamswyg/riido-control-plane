@@ -38,5 +38,6 @@ func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgent
 		LongPollMaxHold:          config.LongPollMaxHold,
 		LongPollTick:             config.LongPollTick,
 		AssignmentContext:        config.AssignmentContext,
+		AssignmentReadScope:      config.AssignmentReadScope,
 	}).Handler()
 }

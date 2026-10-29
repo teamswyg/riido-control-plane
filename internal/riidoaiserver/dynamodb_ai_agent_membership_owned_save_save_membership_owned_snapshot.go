@@ -94,6 +94,13 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		}
 
 		actions := []dynamoDBTransactWriteItem{}
+		coverageAction, err := s.enrollmentCoverageAction(ctx, snapshot, credentials)
+		if err != nil {
+			return stats, encoded, err
+		}
+		if coverageAction != nil {
+			actions = append(actions, *coverageAction)
+		}
 		if scoped {
 			condition := "attribute_not_exists(pk) AND attribute_not_exists(sk)"
 			var values map[string]map[string]string

@@ -18,6 +18,7 @@ type MemoryAssignmentContextStore struct {
 	snapshots       map[string]AssignmentContextSnapshot
 	reads           map[string][]AssignmentContextRead
 	comments        map[string][][]AIAgentTaskContextComment
+	content         map[string][]AssignmentContentPage
 	readAttempts    map[string]int
 }
 
@@ -30,6 +31,9 @@ func NewMemoryAssignmentContextStore() *MemoryAssignmentContextStore {
 }
 
 func (m *MemoryAssignmentContextStore) SaveAssignmentContextSnapshot(ctx context.Context, snapshot AssignmentContextSnapshot) error {
+	if snapshot.Content != nil || snapshot.ContentBlocks != nil {
+		return errAssignmentContentConflict
+	}
 	if expired, err := m.expirePayloads(ctx, snapshot.AssignmentID); err != nil {
 		return err
 	} else if expired {
@@ -44,30 +48,9 @@ func (m *MemoryAssignmentContextStore) SaveAssignmentContextSnapshot(ctx context
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if m.snapshots[id].Content != nil {
+		return errAssignmentContentConflict
+	}
 	m.snapshots[id] = snapshot
 	return nil
-}
-
-func (m *MemoryAssignmentContextStore) AppendAssignmentContextReads(ctx context.Context, reads []AssignmentContextRead) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	for _, read := range reads {
-		if strings.TrimSpace(read.AssignmentID) == "" {
-			return errors.New("assignment_id is required")
-		}
-		m.reads[read.AssignmentID] = append(m.reads[read.AssignmentID], read)
-	}
-	return nil
-}
-
-func (m *MemoryAssignmentContextStore) ListAssignmentContextReads(ctx context.Context, assignmentID string) ([]AssignmentContextRead, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	return append([]AssignmentContextRead(nil), m.reads[strings.TrimSpace(assignmentID)]...), nil
 }

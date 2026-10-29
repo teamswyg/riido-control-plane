@@ -23,7 +23,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	var assignmentOperationStore riidoaiserver.AssignmentOperationStore
 	var assignmentOutbox riidoaiserver.EventSink
 	if parts.localDir == "" {
-		assignmentOperationStore, err = assignmentOperationStoreFromEnv(parts.aiAgentClientDev, timing.AssignmentActiveLease)
+		assignmentOperationStore, err = executionCoverageAssignmentStoreFromEnv(parts, timing.AssignmentActiveLease)
 		if err != nil {
 			return runtimeConfig{}, err
 		}
@@ -50,7 +50,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	assignmentContext, err := assignmentContextStoreFromEnv(assignmentOperationStore)
+	assignmentContext, assignmentReadScope, err := assignmentReadScopeRuntime(taskContextReader, assignmentOperationStore)
 	if err != nil {
 		return runtimeConfig{}, err
 	}
@@ -58,14 +58,19 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err := commentDelivery.Validate(); err != nil {
 		return runtimeConfig{}, err
 	}
+	coverageEnrollment, err := executionCoverageEnrollmentFromEnv(parts.aiAgentClientStore, assignmentOperationStore)
+	if err != nil {
+		return runtimeConfig{}, err
+	}
 	installationService, err := cliInstallationServiceFromEnv()
 	if err != nil {
 		return runtimeConfig{}, err
 	}
 	return runtimeConfig{
-		CLIInstallationService:  installationService,
-		CommentDelivery:         commentDelivery,
-		AssignmentSnapshotStore: snapshotStore,
+		ExecutionCoverageEnrollment: coverageEnrollment,
+		CLIInstallationService:      installationService,
+		CommentDelivery:             commentDelivery,
+		AssignmentSnapshotStore:     snapshotStore,
 
 		Addr:                     getenvDefault(envAddr, ":8080"),
 		ShutdownTimeout:          timing.ShutdownTimeout,
@@ -89,6 +94,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AssignmentOperationStore: assignmentOperationStore,
 		AssignmentOutbox:         assignmentOutbox,
 		AssignmentContext:        assignmentContext,
+		AssignmentReadScope:      assignmentReadScope,
 		TaskContextReader:        taskContextReader,
 	}, nil
 }

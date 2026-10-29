@@ -43,7 +43,7 @@ func TestCLIInstallationCanonicalProofBindsDomainAndEveryIdentityField(t *testin
 		case "expiry":
 			changed.ExpiresAt = changed.ExpiresAt.Add(time.Second)
 		}
-		if err := verifyCLIInstallationProof(changed, authenticatedClaimDevice{"fixture-device", "owner"}, sig); err == nil {
+		if err := verifyCLIInstallationProof(changed, authenticatedClaimDevice{deviceID: "fixture-device", ownerPrincipalID: "owner"}, sig); err == nil {
 			t.Fatalf("unsigned %s substitution accepted", field)
 		}
 	}

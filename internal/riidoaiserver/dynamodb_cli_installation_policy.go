@@ -24,15 +24,32 @@ func (s *DynamoDBAssignmentOperationStore) readCLIInstallationPolicy(ctx context
 			if err != nil || set.revision == 0 {
 				return cliInstallationPolicy{}, errCLIInstallationUnavailable
 			}
+			if dynamoDBStringValue(revision, "policy_schema") == executionCoverageSchema {
+				coverage, err := executionCoverageFromItem(revision, link.DeviceID)
+				if err != nil {
+					return cliInstallationPolicy{}, err
+				}
+				set.coverage = &coverage
+				set.coverageAuthority, err = currentCLIInstallationCoverage(ctx, owners, coverage)
+				if err != nil {
+					return cliInstallationPolicy{}, err
+				}
+			}
 			owner, err = owners.cliInstallationDeviceOwner(ctx, link.DeviceID)
 			if err != nil {
 				return cliInstallationPolicy{}, err
 			}
-			set.observation, err = s.installationExecutionObservation(ctx, link.DeviceID)
-			if err != nil {
-				return cliInstallationPolicy{}, err
+			if set.coverage == nil || set.coverage.Unresolved > 0 {
+				set.observation, err = s.installationExecutionObservation(ctx, link.DeviceID)
+				if err != nil {
+					return cliInstallationPolicy{}, err
+				}
 			}
-			actions = append(actions, s.devicePolicyFence(link.DeviceID, set.revision))
+			if set.coverage != nil {
+				actions = append(actions, dynamoDBTransactWriteItem{ConditionCheck: executionCoverageCondition(s.tableName, *set.coverage)})
+			} else {
+				actions = append(actions, s.devicePolicyFence(link.DeviceID, set.revision))
+			}
 		}
 		_, err = s.assignmentContextRequest(ctx, dynamoDBTransactWriteTarget, struct{ TransactItems []dynamoDBTransactWriteItem }{actions})
 		if err == nil {
@@ -40,29 +57,4 @@ func (s *DynamoDBAssignmentOperationStore) readCLIInstallationPolicy(ctx context
 		}
 	}
 	return cliInstallationPolicy{}, errCLIInstallationUnavailable
-}
-
-func (s *DynamoDBAssignmentOperationStore) installationExecutionObservation(ctx context.Context, device string) (deviceExecutionObservation, error) {
-	claims, err := s.loadDeviceExecutionClaims(ctx, device)
-	if err != nil {
-		return deviceExecutionUnknown, err
-	}
-	for _, claim := range claims {
-		projection, found, err := s.LoadAssignmentProjection(ctx, claim.AssignmentID)
-		if err != nil {
-			return deviceExecutionUnknown, err
-		}
-		if !found || !claimMatchesNonOwnerAssignment(claim, projection.Assignment) {
-			continue
-		}
-		lease, found, err := s.LoadAgentActiveAssignment(ctx, claim.AgentID)
-		if err != nil {
-			return deviceExecutionUnknown, err
-		}
-		if found && lease.ActiveAssignmentID == claim.AssignmentID && lease.LeaseToken != "" &&
-			leaseEpoch(lease.LeaseToken) == claim.LeaseEpoch && !lease.Expired(s.now()) {
-			return deviceExecutionBlocked, nil
-		}
-	}
-	return deviceExecutionUnknown, nil
 }

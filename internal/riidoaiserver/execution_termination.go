@@ -34,7 +34,10 @@ type executionTerminationReceipt struct {
 	RecordedAt         time.Time `json:"recorded_at"`
 }
 
-type executionTerminationIdentity struct{ deviceID, ownerPrincipalID, assignmentID, epoch string }
+type executionTerminationIdentity struct {
+	deviceID, ownerPrincipalID, assignmentID, epoch string
+	coverage                                        executionCoverageAuth
+}
 
 type executionTerminationRecorder interface {
 	recordExecutionTermination(context.Context, executionTerminationIdentity, executionTerminationRequest) (executionTerminationReceipt, error)

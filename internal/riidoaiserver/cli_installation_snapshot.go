@@ -3,13 +3,14 @@ package riidoaiserver
 import "maps"
 
 type cliInstallationSnapshot struct {
-	Intents         map[string]cliInstallationIntent `json:"intents,omitempty"`
-	Links           map[string]cliInstallationLink   `json:"links,omitempty"`
-	DeviceRevisions map[string]uint64                `json:"device_revisions,omitempty"`
+	Intents         map[string]cliInstallationIntent       `json:"intents,omitempty"`
+	Links           map[string]cliInstallationLink         `json:"links,omitempty"`
+	DeviceRevisions map[string]uint64                      `json:"device_revisions,omitempty"`
+	IntentReplays   map[string]cliInstallationIntentReplay `json:"intent_replays,omitempty"`
 }
 
 func cliInstallationSnapshotFromState(state *storeState) cliInstallationSnapshot {
-	return cliInstallationSnapshot{maps.Clone(state.cliInstallationIntents), maps.Clone(state.cliInstallationLinks), maps.Clone(state.devicePolicyRevisions)}
+	return cliInstallationSnapshot{maps.Clone(state.cliInstallationIntents), maps.Clone(state.cliInstallationLinks), maps.Clone(state.devicePolicyRevisions), maps.Clone(state.cliInstallationReplays)}
 }
 
 func restoreCLIInstallations(state *storeState, snapshot cliInstallationSnapshot) error {
@@ -21,6 +22,9 @@ func restoreCLIInstallations(state *storeState, snapshot cliInstallationSnapshot
 			return err
 		}
 		state.cliInstallationIntents[id] = intent
+	}
+	if err := restoreCLIInstallationIntentReplays(state, snapshot); err != nil {
+		return err
 	}
 	for id, link := range snapshot.Links {
 		if id != link.key() {
@@ -43,7 +47,7 @@ func restoreCLIInstallations(state *storeState, snapshot cliInstallationSnapshot
 	for _, intent := range state.cliInstallationIntents {
 		if intent.Consumed {
 			link, ok := state.cliInstallationLinks[intent.Request.key()]
-			device := authenticatedClaimDevice{intent.Request.ExpectedDeviceID, intent.Request.ApprovedPrincipalID}
+			device := authenticatedClaimDevice{deviceID: intent.Request.ExpectedDeviceID, ownerPrincipalID: intent.Request.ApprovedPrincipalID}
 			if !ok || !matchingCLIInstallationLink(link, intent, device) {
 				return errCLIInstallationUnavailable
 			}
