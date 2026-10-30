@@ -17,6 +17,12 @@ type AIAgentRunRead struct {
 	ServedAt          time.Time `json:"served_at"`
 	Title             string    `json:"title,omitempty"`
 	ModifiedSinceRead *bool     `json:"modified_since_read,omitempty"`
+	// OwnerKind/OwnerID name the work, meeting or Agent list a link, attachment,
+	// comment or Agent profile belongs to. Omitted when the record is its own group.
+	OwnerKind string `json:"owner_kind,omitempty"`
+	OwnerID   string `json:"owner_id,omitempty"`
+	// Listed is false for title/summary-only prompt evidence the read UI omits.
+	Listed bool `json:"listed"`
 }
 
 type AIAgentRunReadsResponse struct {
@@ -29,4 +35,7 @@ type AIAgentRunReadsResponse struct {
 	Page          int              `json:"page"`
 	PageSize      int              `json:"page_size"`
 	HasMore       bool             `json:"has_more"`
+	// SourceTotal counts the viewer-visible groups (owner, else the record
+	// itself) that hold at least one listed record, across all pages.
+	SourceTotal int `json:"source_total"`
 }
