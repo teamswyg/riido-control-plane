@@ -5161,7 +5161,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "783525cd7748937a23b5fcf49ea4f9b25a1735ddc3b2fd17d4bfb674f9b08ac0"
+      "semantic_hash": "b17eccf4c65f4eb9c601b0dfd97620ada3b980698891b0eed0b8ad6e7d9e03be"
     },
     {
       "id": "public_aws_adapter_facade_must_preserve_contract",
@@ -6521,7 +6521,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "5afd700a39aa357e6a2815957c55091890362ce0ff377226331c22c4d732c634"
+      "semantic_hash": "7627e3431d1cf6016262e910f1495b8e8cd1289738efccc21c46df4f880895a0"
     },
     {
       "id": "web_frontend_api_must_preserve_cors_contract",

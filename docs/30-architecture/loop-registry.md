@@ -257,7 +257,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `114` | `46` | `febadf67c734` |
 | `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `27` | `7` | `705075318cb3` |
 | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` | `closed_loop_candidate` | `32` | `12` | `cb924df7f6be` |
-| `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `64` | `29` | `783525cd7748` |
+| `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `64` | `29` | `b17eccf4c65f` |
 | `public_aws_adapter_facade_must_preserve_contract` | `closed_loop_candidate` | `16` | `3` | `5cfe84f5deef` |
 | `review_account_seed_must_preserve_redacted_seed_evidence` | `closed_loop_candidate` | `31` | `10` | `1aea4f109350` |
 | `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `85` | `20` | `fe28b5521a67` |
@@ -274,7 +274,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `snapshot_cqrs_gate_must_scope_store_split_decisions` | `closed_loop_candidate` | `14` | `1` | `39a9e481c249` |
 | `store_safe_routing_must_preserve_provider_status_decisions` | `closed_loop_candidate` | `33` | `21` | `e6fd66c8f169` |
 | `go_ci_baseline_must_preserve_broad_ci_contract` | `closed_loop_candidate` | `19` | `2` | `1be2b5288d9d` |
-| `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `5afd700a39aa` |
+| `module_decomposition_must_preserve_surface_area_ratchet` | `closed_loop_candidate` | `47` | `11` | `7627e3431d1c` |
 | `web_frontend_api_must_preserve_cors_contract` | `closed_loop_candidate` | `20` | `4` | `ad3f6fb1cd97` |
 | `ai_agent_risk_evidence_must_preserve_boundary_manifest` | `closed_loop_candidate` | `20` | `3` | `fcdefd19e84d` |
 | `migration_ledger_must_preserve_historical_evidence` | `closed_loop_candidate` | `20` | `2` | `6ce00287c8ba` |
