@@ -10,9 +10,18 @@ const cliInstallationRetirementSchema = "riido-cli-installation-link-intent-reti
 type cliInstallationRetirementRequest cliInstallationReceiptRequest
 
 type cliInstallationRetirement struct {
-	cliInstallationRetirementRequest
-	Status  string                  `json:"status"`
-	Receipt *cliInstallationReceipt `json:"receipt,omitempty"`
+	SchemaVersion string `json:"schema_version"`
+	IntentID      string `json:"intent_id"`
+	Status        string `json:"status"`
+	// A consumed receipt already carries this complete binding. Duplicating
+	// it can exceed the HTTP budget for otherwise valid opaque identities.
+	InstallationID      string                  `json:"installation_id,omitempty"`
+	Resource            string                  `json:"resource,omitempty"`
+	ClientID            string                  `json:"client_id,omitempty"`
+	KeyFingerprint      string                  `json:"key_fingerprint,omitempty"`
+	ExpectedDeviceID    string                  `json:"expected_device_id,omitempty"`
+	ApprovedPrincipalID string                  `json:"approved_principal_id,omitempty"`
+	Receipt             *cliInstallationReceipt `json:"receipt,omitempty"`
 }
 
 func (req cliInstallationRetirementRequest) valid() bool {
@@ -35,13 +44,17 @@ func checkCLIInstallationRetirement(req cliInstallationRetirementRequest, intent
 }
 
 func cliInstallationRetirementResult(req cliInstallationRetirementRequest, intent cliInstallationIntent, link cliInstallationLink) (cliInstallationRetirement, error) {
-	result := cliInstallationRetirement{cliInstallationRetirementRequest: req, Status: "retired"}
+	result := cliInstallationRetirement{SchemaVersion: req.SchemaVersion, IntentID: req.IntentID, Status: "retired"}
 	if intent.Consumed {
 		receipt, err := originalCLIInstallationReceipt(intent, link)
 		if err != nil {
 			return cliInstallationRetirement{}, err
 		}
 		result.Status, result.Receipt = "consumed", &receipt
+	} else {
+		result.InstallationID, result.Resource = req.InstallationID, req.Resource
+		result.ClientID, result.KeyFingerprint = req.ClientID, req.KeyFingerprint
+		result.ExpectedDeviceID, result.ApprovedPrincipalID = req.ExpectedDeviceID, req.ApprovedPrincipalID
 	}
 	return result, nil
 }
