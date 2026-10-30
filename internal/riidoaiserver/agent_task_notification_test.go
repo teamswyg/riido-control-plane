@@ -282,6 +282,7 @@ func TestTaskNotificationReactionLifecycleExclusions(t *testing.T) {
 		want       int
 	}{
 		{name: "started once", target: "message", state: AssignmentRunning, work: AgentWorkStatusRunning, want: 1},
+		{name: "human followup", target: "message", invocation: &CommentInvocation{HumanFollowup: true}, state: AssignmentRunning, work: AgentWorkStatusRunning, want: 1},
 		{name: "without reaction target", state: AssignmentRunning, work: AgentWorkStatusRunning, want: 0},
 		{name: "agent to agent", target: "message", invocation: &CommentInvocation{OriginMessageID: "parent-message"}, state: AssignmentCompleted, work: AgentWorkStatusCompleted, want: 0},
 		{name: "cancelled", target: "message", state: AssignmentCancelled, work: AgentWorkStatusCompleted, want: 0},

@@ -209,7 +209,8 @@
     "read_scope_audit": "Every served content leaf records its source kind/id/part/version. Viewer HTTP/SSE visibility is rechecked with the current viewer and scoped source set; captured data never grants present access. Scoped prompts describe the root body as a preview and advertise the stored context index, source reads and opaque part continuation; a missing copied parent body is not labeled unavailable. Prompt records include only fields actually rendered. Copying an assignment for a same-task/workspace/requester agent mention copies its stored content pages and manifest as one bundle. Existing stored scoped snapshots select the typed current-viewer API even when new capture is disabled; only exact assignment/workspace/task/schema identity selects that API shape, never retained permission or source contents. HTTP history and SSE both carry the current viewer token and fail closed on snapshot identity or storage errors.",
     "read_scope_rollout": "Source implementation and main merge are not rollout acceptance. Keep new scoped capture disabled until every control-plane terminal/capture writer understands content blocks and their lifecycle/24h retention; mixed old writers cannot be claimed safe and old schema downgrade is not an approved recovery path. No deployment or capability activation is authorized by these source changes.",
     "large_typed_parts": "Large metadata/comments_page/board_page payloads use the four fixed kind-specific body roots with a normalized typed selector. Reconstruct contentPage before interpreting placeholder fields. Bind each full canonical JSON version to kind/id/actual team/part/normalized selector/source/format, validate every continuation and current requester, and preserve fixed logical comment/board pagination. Captured evidence replays exact selector-bound pages offline. Resource summaries retain original identity when capture budget ends before metadata is complete. Existing total storage/call/retention budgets are unchanged: keep captured prefixes explicitly incomplete and never advertise uncaptured bytes as complete. This extension requires actual producer HTTP/PG/evidence plus CP/CLI integration before full-read acceptance.",
-    "click_snapshot_body": "RIID-5892/5900: click-time HTML selects mentions; an authorized producer may return its persisted root document with unchanged source/version and authenticated server continuation. Supplying an editor snapshot does not require a client_snapshot response. Legacy client_snapshot responses remain bound to the exact input version and prefix and continue locally. Identity, permission, page and version validation remain required."
+    "click_snapshot_body": "RIID-5892/5900: click-time HTML selects mentions; an authorized producer may return its persisted root document with unchanged source/version and authenticated server continuation. Supplying an editor snapshot does not require a client_snapshot response. Legacy client_snapshot responses remain bound to the exact input version and prefix and continue locally. Identity, permission, page and version validation remain required.",
+    "human_comment_followup": "RIID-5892: a new human execution preserves revalidated server-owned original comment evidence while resetting automatic depth/budget/ancestors. Immutable evidence Agent identity is independent of the new chain. Older missing bindings follow persisted same-task/root parent edges only; another requester cannot inherit the original capability. Active execution/tool approval does not reset limits. Fresh authorized follow-up snapshots are inherited by children. Human follow-up status targets its new message, with ordinary user notifications; automatic children target the calling Agent message."
   },
   "verification": {
     "synthetic_only": true,
@@ -325,7 +326,11 @@
       "TestTaskReadScopeTypedIncompleteMetadataPreservesUnverifiedPrefix",
       "TestTaskReadScopeTypedJSONRestoresLargeCanonicalPayload",
       "TestTaskReadScopeTypedPrefixRetainsCorrectAuditPart",
-      "TestTaskReadScopeTypedSlotsCaptureAndOfflineReplay"
+      "TestTaskReadScopeTypedSlotsCaptureAndOfflineReplay",
+      "TestCommentFollowupRestoresInvocationAndDispatches",
+      "TestCommentFollowupResetsOnlyHumanChainAndKeepsEvidenceIdentity",
+      "TestCommentFollowupCannotTransferEvidenceOrIgnoreRevocation",
+      "TestCommentFollowupDoesNotWriteStatusToOriginalComment"
     ]
   },
   "limits": [

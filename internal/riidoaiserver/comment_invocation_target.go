@@ -48,6 +48,7 @@ func (s Server) dispatchCommentTarget(ctx context.Context, principal Authorizati
 	}
 	evidence.AgentID = target
 	child := copyCommentInvocation(call)
+	child.HumanFollowup = false
 	child.Ancestors = append(child.Ancestors, target)
 	child.Depth++
 	child.Remaining = budget

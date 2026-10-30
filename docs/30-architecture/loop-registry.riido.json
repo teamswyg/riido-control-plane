@@ -814,7 +814,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "8bb847eb4f402044cd39473d660240ece7dd40b5e9d0bb3a03eb67f73963d6b2"
+      "semantic_hash": "7e3f2b52ece0a15ffeea3d6c21103e99b1635ab0b271931ea7252cd3ebd57cb3"
     },
     {
       "id": "same_provider_agents_must_keep_distinct_threads",
@@ -1029,7 +1029,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "e785d7a53e268d74897335b8e5ff3132b663e045f83fcb434f6b0acb1698b10d"
+      "semantic_hash": "ba79d480f94c78c0dcd14453d77f710564ea9991ff6637545df60622e8e4a0a6"
     },
     {
       "id": "thread_history_v3_must_preserve_run_identity_and_message_order",
@@ -1064,7 +1064,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1bb703f2ef95c3d0b6b96956bfec1b71c30dae415af1cc2c1d6fd2d524d9d9d0"
+      "semantic_hash": "b30ea0b7aabacfbe591ae8b41820bdd5ab07977024ed3672ff34436c63cc57c9"
     },
     {
       "id": "stop_reassign_must_not_revive_or_mutate_inactive_threads",
@@ -2608,7 +2608,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "3b55fcc56005af6fe69f2e22f333477627c4312cfb7e07c8cbea016ff6b32e44"
+      "semantic_hash": "8d14f7c4a7055499c4103e97da594f5e030e6ef556a9d68531e6b5927fba4530"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -5161,7 +5161,7 @@
         "docs/30-architecture/evidence-graph.md",
         "docs/30-architecture/module-decomposition.md"
       ],
-      "semantic_hash": "b17eccf4c65f4eb9c601b0dfd97620ada3b980698891b0eed0b8ad6e7d9e03be"
+      "semantic_hash": "8e69947eb7f35a51e991c462357678e3767e78a20d5abf44ffd0fd36b7e32b64"
     },
     {
       "id": "public_aws_adapter_facade_must_preserve_contract",
@@ -8064,7 +8064,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "e51b669f43f24e35b00692de0d596d73779b525a5e420ee095b8c79a6e01f2c4"
+      "semantic_hash": "01f089a7e3e9d7d53101dfd55c87326aa6c761fcca70baee3a7a910e959aaa93"
     }
   ],
   "evidence_graph": [
