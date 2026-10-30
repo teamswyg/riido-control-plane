@@ -51,6 +51,7 @@ var serverRoutes = []serverRoute{
 	{"POST /v1/daemon/execution-claims/{assignment_id}/termination", Server.handleExecutionTermination},
 	{"/v1/daemon/runtime-snapshot", Server.handleDaemonRuntimeSnapshot},
 	{"/v1/daemon/agent-bindings", Server.handleDaemonAgentBindings},
+	{"/v1/daemon/assignment-events", Server.handleDaemonAssignmentEvents},
 	{"/v1/agent-catalog", Server.handleAgentCatalog},
 	{"/v1/agent-catalog/", Server.handleAgentCatalog},
 	{"/v1/component-tasks/", Server.handleComponentTasks},

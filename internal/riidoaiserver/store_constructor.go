@@ -24,6 +24,7 @@ func newStoreWithConfig(config StoreConfig, initial storeState) *Store {
 		activeLeaseDuration = time.Duration(DefaultAssignmentActiveLeaseSeconds) * time.Second
 	}
 	s := &Store{
+		assignmentChanges:      newAssignmentChangeHub(),
 		commands:               make(chan any, 64),
 		done:                   make(chan struct{}),
 		now:                    now,

@@ -3,6 +3,7 @@ package riidoaiserver
 import "time"
 
 type Store struct {
+	assignmentChanges   *assignmentChangeHub
 	commands            chan any
 	done                chan struct{}
 	now                 func() time.Time
