@@ -28204,6 +28204,151 @@
       ],
       "decision": "The optional max_bytes field (content view only, 8-256 KiB) returns pages[] of one part starting at the requested cursor; the requested page is always included, the batch never crosses a part boundary, next_cursor and complete describe the remainder, one read attempt is consumed and one read record is written per distinct source. Without max_bytes the single-page response is unchanged. A damaged later page ends the batch instead of failing it; reading that page's own cursor still reports the failure. The daemon falls back to single pages when an older control plane rejects the unknown field during decoding, before quota or audit.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "agent_thread_message_reactions",
+      "observation": "Agent task threads had no reactions: a person could not react to an agent thread message, the message or monolith comment that started a run showed nothing while the agent worked, and the person who asked got no push when work started. The contract (riido-contracts#229) and the monolith storage and notification APIs (riido-monolith-service#885) were already deployed.",
+      "hypothesis": "Storing only member reactions per thread and computing the agent status reaction from the current assignment state at read time keeps one status reaction per run without new write paths on every state change. Keying agent-message reactions by assignment keeps them across the per-state message id change. Fencing reaction saves like scoped membership writes keeps them from overwriting another replica's commit.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_status.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_overlay.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_members.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_reaction_state_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_thread_reaction_merge.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_persistent_method_thread_message_reaction.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_status_reaction_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_status_reaction_plans.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_status_reaction_apply.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_status_reaction_hooks.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_delivery_monolith_client.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_reaction_notification_dispatch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_task_notification_started.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_run_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_run_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_stale_id_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_persistence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_reaction_replica_fence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/dynamodb_thread_reaction_merge_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_status_reaction_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_status_reaction_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_task_notification_started_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_task_notification_started_replay_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_reaction_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Thread history messages carry reactions; members add or delete only their own reaction (contract emoji format only, no progress messages, 1000 member reactions per thread). The agent keeps one status reaction on the first user message of its assignment: 1f440 while queued, running or waiting, 2705 completed, 274c failed, none when stopping, stopped or unassigned. A run started by a monolith comment writes the same reaction to that comment through the internal API and none to thread messages. Member reactions on another member's user message create or clear a monolith unread notification. The started push is sent once per eligible assignment and not again on a confirmation resume. The thread reaction part is a separate DynamoDB split part; reaction saves reload, apply, and are rejected and retried when any part changed since the reload.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
