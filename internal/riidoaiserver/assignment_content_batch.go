@@ -50,19 +50,19 @@ func (s Server) assignmentContentBatchView(ctx context.Context, store Assignment
 				return nil, nil, err
 			}
 			if !found {
-				invalid = errors.New("assignment content page unavailable")
+				invalid = errAssignmentContentPageMissing
 			}
 			if !found || !visit(page) {
 				break
 			}
 		}
 	}
-	if invalid != nil && len(out.Pages) == 0 {
+	// A damaged later page only ends the batch; reading its own cursor reports it.
+	if len(out.Pages) == 0 {
+		if invalid == nil {
+			invalid = errAssignmentContentPageMissing
+		}
 		return nil, nil, invalid
-	}
-	if invalid != nil {
-		// A damaged later page ends the batch; its cursor still reports the failure.
-		invalid = nil
 	}
 	last := out.Pages[len(out.Pages)-1]
 	out.Complete = last.Complete
