@@ -45,6 +45,8 @@ func daemonHTTPRoute(method, path string) string {
 		return "/v1/daemon/execution-claims/{assignment_id}/termination"
 	case method == http.MethodPost && path == "/v1/daemon/runtime-snapshot":
 		return "/v1/daemon/runtime-snapshot"
+	case method == http.MethodGet && path == "/v1/daemon/assignment-events":
+		return "/v1/daemon/assignment-events"
 	case method == http.MethodGet && path == "/v1/daemon/agent-bindings":
 		return "/v1/daemon/agent-bindings"
 	default:
