@@ -3,11 +3,13 @@ package riidoaiserver
 import "context"
 
 type commentMentionPrecheckCacheKey struct{}
+
 type commentMentionPrecheckCache struct {
 	loaded   bool
 	snapshot commentMentionPrecheckSnapshot
 	err      error
 }
+
 type commentMentionPrecheckSnapshot struct {
 	principal AuthorizationResult
 	call      *CommentInvocation

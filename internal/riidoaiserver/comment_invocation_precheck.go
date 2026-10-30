@@ -43,11 +43,11 @@ func (s Server) precheckCommentMention(ctx context.Context, current Assignment, 
 	}
 	selected, err := selectAssignableAgent(agents.Agents, target)
 	if err != nil {
-		return []string{"target_unavailable"}, nil
+		return []string{"target_unavailable"}, nil //nolint:nilerr // An unavailable candidate is a policy result, not a failed directory read.
 	}
 	binding, _, err := s.resolveAgentRuntimeFact(target)
 	if err != nil {
-		return []string{AgentDirectoryReasonRuntimeOffline}, nil
+		return []string{AgentDirectoryReasonRuntimeOffline}, nil //nolint:nilerr // A disconnected runtime is reported as a candidate exclusion.
 	}
 	request := AssignRequest{AgentID: target, WorkspaceID: current.WorkspaceID, RuntimeProvider: binding.RuntimeProvider, ModelID: selected.ModelID}
 	composed, err := composeAssignRequestWithTaskContextResult(current.TaskID, current.TaskID, request, snapshot.evidence.Context)
