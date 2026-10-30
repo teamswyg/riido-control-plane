@@ -18,6 +18,7 @@ func (s Server) applyAgentMentionPolicy(ctx context.Context, current Assignment,
 	if precheck == nil {
 		return false, nil
 	}
+	ctx = context.WithValue(ctx, commentMentionPrecheckCacheKey{}, &commentMentionPrecheckCache{})
 	for i := range entries {
 		if entries[i].IsCurrentAgent {
 			continue

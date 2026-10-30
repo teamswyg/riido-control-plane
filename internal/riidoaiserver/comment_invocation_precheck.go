@@ -29,28 +29,11 @@ func commentMentionLimitReasons(call *CommentInvocation, target string, count in
 // the CLI. Reuse the same conversation/native-session preparation as dispatch,
 // without publishing an assignment or consuming its remaining call budget.
 func (s Server) precheckCommentMention(ctx context.Context, current Assignment, target string) ([]string, error) {
-	principal, err := assignmentRequesterPrincipal(current, false)
+	snapshot, err := s.commentMentionPrecheckSnapshot(ctx, current)
 	if err != nil {
 		return nil, err
 	}
-	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, current.TaskID)
-	if err != nil {
-		return nil, err
-	}
-	var call *CommentInvocation
-	for _, thread := range threads.Threads {
-		if thread.AssignmentID != current.ID {
-			continue
-		}
-		if thread.TaskID != current.TaskID || thread.AgentID != current.AgentID {
-			return nil, ErrAuthorizationForbidden
-		}
-		call = thread.CommentInvocation
-		if call != nil && (call.PrincipalID != current.CreatedBy || call.WorkspaceID != current.WorkspaceID || thread.ConversationID != "comment:"+call.RootCommentID) {
-			return nil, ErrAuthorizationForbidden
-		}
-		break
-	}
+	call, principal := snapshot.call, snapshot.principal
 	if reasons := commentMentionLimitReasons(call, target, 1); len(reasons) > 0 {
 		return reasons, nil
 	}
@@ -66,11 +49,16 @@ func (s Server) precheckCommentMention(ctx context.Context, current Assignment, 
 	if err != nil {
 		return []string{AgentDirectoryReasonRuntimeOffline}, nil
 	}
-	request := AssignRequest{AgentID: target, WorkspaceID: current.WorkspaceID, RuntimeProvider: binding.RuntimeProvider, ModelID: selected.ModelID, Worktree: current.Worktree}
-	evidence := verifiedCommentDelivery{TaskID: current.TaskID, AgentID: target, RootCommentID: call.RootCommentID}
+	request := AssignRequest{AgentID: target, WorkspaceID: current.WorkspaceID, RuntimeProvider: binding.RuntimeProvider, ModelID: selected.ModelID}
+	composed, err := composeAssignRequestWithTaskContextResult(current.TaskID, current.TaskID, request, snapshot.evidence.Context)
+	if err != nil {
+		return nil, err
+	}
+	request = composed.Request
+	evidence := snapshot.evidence
+	evidence.AgentID = target
 	publication := AssignAIAgentTaskRequest{}
-	// Starting the current comment invocation already adopted legacy rows from
-	// verified root membership, so this read uses that stored conversation ID.
+	// Use the same freshly verified task and root membership as execution.
 	err = s.prepareCommentConversation(ctx, principal, evidence, &publication, &request, selected.OwnerPrincipalID)
 	switch {
 	case errors.Is(err, ErrAIAgentTaskThreadConflict), errors.Is(err, errNativeSessionUnavailable):
