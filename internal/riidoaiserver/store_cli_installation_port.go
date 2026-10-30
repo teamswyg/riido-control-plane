@@ -27,6 +27,7 @@ type cliInstallationCommand struct {
 	confirm *cliInstallationConfirmation
 	read    *cliInstallationRead
 	receipt *cliInstallationReceiptRequest
+	retire  *cliInstallationRetirementRequest
 	reply   chan cliInstallationResult
 }
 type cliInstallationResult struct {
@@ -34,6 +35,7 @@ type cliInstallationResult struct {
 	read    cliInstallationReadSet
 	receipt cliInstallationReceipt
 	replay  cliInstallationIntentReplayResponse
+	retired cliInstallationRetirement
 	err     error
 }
 

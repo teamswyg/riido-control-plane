@@ -43,6 +43,7 @@ type cliInstallationIntent struct {
 	ChallengeDigest string                       `json:"challenge_digest"`
 	ExpiresAt       time.Time                    `json:"expires_at"`
 	Consumed        bool                         `json:"consumed"`
+	Retired         bool                         `json:"retired,omitempty"`
 	ReplayKey       string                       `json:"replay_key,omitempty"`
 }
 
@@ -62,6 +63,7 @@ type cliInstallationRepository interface {
 	confirmCLIInstallationLink(context.Context, string, authenticatedClaimDevice, string, string) (cliInstallationLink, error)
 	readCLIInstallationPolicy(context.Context, cliInstallationIdentity, cliInstallationDeviceOwnerReader) (cliInstallationPolicy, error)
 	readCLIInstallationReceipt(context.Context, cliInstallationReceiptRequest) (cliInstallationReceipt, error)
+	retireCLIInstallationIntent(context.Context, cliInstallationRetirementRequest) (cliInstallationRetirement, error)
 }
 
 type cliInstallationDeviceOwnerReader interface {
