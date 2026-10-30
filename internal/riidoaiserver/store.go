@@ -9,6 +9,8 @@ func (s *Store) loop(state storeState) {
 	defer close(s.done)
 	for cmd := range s.commands {
 		switch msg := cmd.(type) {
+		case assignmentSignalsCmd:
+			msg.reply <- s.localAssignmentSignalVersions(&state, msg.agentIDs)
 		case recoverTaskAgentPublicationCmd:
 			msg.reply <- s.applyTaskAgentPublicationRecovery(&state, msg.ctx, msg.assignment)
 		case assignCmd:

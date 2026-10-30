@@ -31,6 +31,7 @@ func (s *Store) handleUnregisterWaiter(state *storeState, agentID string, id int
 // non-blocking broadcast: a waiter whose buffer is already full is left as-is
 // (it will re-evaluate anyway). Called from the queued-producing transitions.
 func (s *Store) signalAgentWaiters(state *storeState, agentID string) {
+	s.assignmentChanges.signal(agentID)
 	for _, ch := range state.agentWaiters[agentID] {
 		select {
 		case ch <- struct{}{}:
