@@ -49,7 +49,7 @@ func NewServer(config ServerConfig) Server {
 	if owner, ok := config.Assignment.(interface{ sharedTaskAgentExecutionGate() taskAgentExecutionGate }); ok {
 		executionGate = owner.sharedTaskAgentExecutionGate()
 	}
-	return Server{
+	server := Server{
 		commentReactions:         &commentReactionDispatcher{jobs: map[string]*commentReactionJob{}, sent: map[string]string{}},
 		assignment:               config.Assignment,
 		agentCatalog:             agentCatalog,
@@ -64,4 +64,8 @@ func NewServer(config ServerConfig) Server {
 		taskAgentExecutionGate:   executionGate,
 		config:                   config,
 	}
+	if server.config.AgentMentionPrecheck == nil && server.aiAgent != nil && server.assignment != nil && config.CommentDelivery.Key != "" {
+		server.config.AgentMentionPrecheck = server.precheckCommentMention
+	}
+	return server
 }

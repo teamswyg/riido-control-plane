@@ -54,7 +54,7 @@ func (s Server) dispatchCommentMentions(ctx context.Context, event TaskEvent) er
 	if call.Outcomes["policy"] != "" {
 		return nil
 	}
-	if call.Depth >= 3 || len(ids) > call.Remaining {
+	if len(commentMentionLimitReasons(call, "", len(ids))) > 0 {
 		return notice("policy", "call_limit", "Riido: 자동 Agent 호출 한도에 도달했습니다. 같은 댓글에 새 요청을 남기면 이어갈 수 있습니다.")
 	}
 	if s.config.CommentDelivery.Key == "" || s.config.CommentDelivery.Validate() != nil {

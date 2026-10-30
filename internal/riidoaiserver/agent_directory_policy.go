@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "context"
+import (
+	"context"
+	"slices"
+)
 
 // AgentMentionPrecheck reports why mentioning targetAgentID from the current
 // run would be refused now (for example budget_exhausted, depth_limit, cycle,
@@ -23,7 +26,11 @@ func (s Server) applyAgentMentionPolicy(ctx context.Context, current Assignment,
 		if err != nil {
 			return false, err
 		}
-		entries[i].UnavailableReasons = append(entries[i].UnavailableReasons, reasons...)
+		for _, reason := range reasons {
+			if !slices.Contains(entries[i].UnavailableReasons, reason) {
+				entries[i].UnavailableReasons = append(entries[i].UnavailableReasons, reason)
+			}
+		}
 		entries[i].Callable = len(entries[i].UnavailableReasons) == 0
 	}
 	return true, nil
