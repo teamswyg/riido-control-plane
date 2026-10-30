@@ -2608,7 +2608,7 @@
         "docs/20-domain/ai-agent-client-api.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "96c58953062e65d77218f9237b7497efc609b13bbb62e1527e3c8ad6c7539004"
+      "semantic_hash": "3b55fcc56005af6fe69f2e22f333477627c4312cfb7e07c8cbea016ff6b32e44"
     },
     {
       "id": "claim_surface_evidence_must_expose_code_test_doc_binding",
@@ -8064,7 +8064,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "27d199e6b1f002b27021eb8f5eaf28a804505e8bc0942902e296f906b22383b6"
+      "semantic_hash": "e51b669f43f24e35b00692de0d596d73779b525a5e420ee095b8c79a6e01f2c4"
     }
   ],
   "evidence_graph": [

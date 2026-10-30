@@ -138,9 +138,12 @@ intake and meeting IDs retain their kinds; an ambiguous bare work ID is rejected
 The scope preserves inspector fields, stored GitHub/Figma/link/attachment data,
 versioned editor/description/alternate bodies, comments/replies and meeting board
 cards/groups/participants. Fixed continuation calls happen during initial capture.
-Click-time HTML replaces stored document mentions and is chunked locally after
-producer authorization; an agent never receives a retained user token or a live
-user-auth fallback. External GitHub/Figma page contents are not fetched.
+Click-time HTML replaces stored document mentions for reference selection. The
+producer may return its persisted document with its original source/version and
+server continuation; this remains valid even when a click snapshot was supplied.
+A legacy producer that explicitly returns `client_snapshot` still requires an
+exact snapshot version/prefix match and uses only validated local continuation.
+An agent never receives a retained user token or a live user-auth fallback. External GitHub/Figma page contents are not fetched.
 
 A 256KiB manifest plus at most ten 96KiB payload items remains the total storage
 contract. Multiple logical parts share a physical block; the current conservative

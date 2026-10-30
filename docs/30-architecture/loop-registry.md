@@ -212,7 +212,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `16` | `10` | `61ce25286b04` |
 | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `a44f22517a5e` |
 | `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `ed800b9fea16` |
-| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `158` | `51` | `96c58953062e` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `158` | `51` | `3b55fcc56005` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `e12c8f452485` |
 | `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `4929e62eeffa` |
 | `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `16` | `7` | `bdc0c95a5cb7` |
@@ -289,7 +289,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `desktop_presence_must_observe_committed_account_connections` | `closed_loop_candidate` | `47` | `22` | `e4bbbbd3a99e` |
 | `cli_installation_link_must_preserve_key_and_policy_fences` | `closed_loop_candidate` | `87` | `42` | `c0c3d0eec2c7` |
 | `execution_coverage_must_fence_installation_permission` | `closed_loop_candidate` | `115` | `26` | `563c39c1c7bb` |
-| `assignment_read_scope_must_preserve_captured_leaf_authority` | `closed_loop_candidate` | `180` | `66` | `27d199e6b1f0` |
+| `assignment_read_scope_must_preserve_captured_leaf_authority` | `closed_loop_candidate` | `180` | `66` | `e51b669f43f2` |
 
 ## Claim Surface Evidence
 
