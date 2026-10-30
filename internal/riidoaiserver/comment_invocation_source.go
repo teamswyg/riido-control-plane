@@ -21,5 +21,9 @@ func commentInvocationEvidenceMatches(evidence verifiedCommentDelivery, taskID s
 	if root == "" {
 		root = evidence.CommentID
 	}
-	return evidence.TaskID == taskID && evidence.PrincipalID == call.PrincipalID && evidence.WorkspaceID == call.WorkspaceID && root == call.RootCommentID && len(call.Ancestors) > 0 && evidence.AgentID == call.Ancestors[0]
+	agentID := call.EvidenceAgentID
+	if agentID == "" && len(call.Ancestors) > 0 {
+		agentID = call.Ancestors[0]
+	}
+	return evidence.TaskID == taskID && evidence.PrincipalID == call.PrincipalID && evidence.WorkspaceID == call.WorkspaceID && root == call.RootCommentID && len(call.Ancestors) > 0 && evidence.AgentID == agentID
 }

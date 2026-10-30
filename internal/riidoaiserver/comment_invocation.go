@@ -10,6 +10,8 @@ import (
 // CommentInvocation is created only from authenticated Monolith evidence. It is
 // retained with the execution snapshot, never accepted from a client or daemon.
 type CommentInvocation struct {
+	EvidenceAgentID    string            `json:"evidence_agent_id,omitempty"`
+	HumanFollowup      bool              `json:"human_followup,omitempty"`
 	OriginAssignmentID string            `json:"origin_assignment_id,omitempty"`
 	OriginThreadID     string            `json:"origin_thread_id,omitempty"`
 	OriginMessageID    string            `json:"origin_message_id,omitempty"`

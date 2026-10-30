@@ -38,13 +38,15 @@ func projectReadScopeWork(out *AIAgentTaskContext, resource AssignmentScopedReso
 }
 
 func validateReadScopeEditor(resource AssignmentScopedResource, body *taskReadBodyPage, editor *AIAgentTaskDocumentSnapshot) error {
-	if editor == nil {
-		if body.Source == "client_snapshot" {
-			return taskContextReadError{"invalid"}
-		}
+	// The producer uses the click snapshot to select references, but may return
+	// the persisted body. Its identity, version and pages use normal scope checks.
+	if body.Source != "client_snapshot" {
 		return nil
 	}
-	if body.Source != "client_snapshot" || body.Format != editor.ContentFormat || body.Part != "document" || body.Version != readScopeBodyVersion(resource.Kind, resource.ID, "document", "client_snapshot", editor.ContentFormat, editor.Content) || len(body.Content) > len(editor.Content) || editor.Content[:len(body.Content)] != body.Content {
+	if editor == nil {
+		return taskContextReadError{"invalid"}
+	}
+	if body.Format != editor.ContentFormat || body.Part != "document" || body.Version != readScopeBodyVersion(resource.Kind, resource.ID, "document", "client_snapshot", editor.ContentFormat, editor.Content) || len(body.Content) > len(editor.Content) || editor.Content[:len(body.Content)] != body.Content {
 		return taskContextReadError{"invalid"}
 	}
 	return nil

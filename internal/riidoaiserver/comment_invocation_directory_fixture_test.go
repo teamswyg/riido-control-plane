@@ -32,7 +32,7 @@ func (f *commentCallFixture) readHandoffCandidate(t *testing.T, target string) {
 		}
 		if view == AssignmentContextViewAgent {
 			var out struct{ Data AgentDirectoryDetail }
-			if err := json.Unmarshal(w.Body.Bytes(), &out); err != nil || !out.Data.Agent.Callable || out.Data.Agent.Description == "" || out.Data.Agent.RoleStatus != AgentDirectoryRoleDescribed {
+			if err := json.Unmarshal(w.Body.Bytes(), &out); err != nil || !out.Data.PolicyChecked || !out.Data.Agent.Callable || out.Data.Agent.Description == "" || out.Data.Agent.RoleStatus != AgentDirectoryRoleDescribed {
 				t.Fatalf("missing current selection evidence: %s", w.Body.String())
 			}
 		}
