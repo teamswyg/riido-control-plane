@@ -17,6 +17,10 @@ func (s Server) assignmentContentView(ctx context.Context, snapshot AssignmentCo
 			if !ok {
 				return nil, nil, false, errors.New("assignment content store unavailable")
 			}
+			if req.MaxBytes > 0 {
+				value, sources, err := s.assignmentContentBatchView(ctx, store, snapshot, part, i, index, req.MaxBytes)
+				return value, sources, err == nil, err
+			}
 			page, found, err := store.LoadAssignmentContentPage(ctx, snapshot.AssignmentID, index)
 			if err != nil {
 				return nil, nil, false, err
