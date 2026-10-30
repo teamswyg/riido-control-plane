@@ -28293,6 +28293,80 @@
       ],
       "decision": "Owners are attached only to keys already visible in the current viewer context: current-task links, attachments and comments belong to the task, hierarchy links to their project, milestone or parent task, read-scope child sources to their page's work or meeting, and every Agent profile to one agent_directory group. listed is false only for via=prompt title or summary reads. source_total counts visible groups with a listed read across all pages in the existing loop. Read-scope prompt evidence is limited to the task document, hierarchy titles and the triggering comment. SSE, storage and the default-off read-scope flag are unchanged; the canonical contract is riido-contracts#235 without a new tag.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "riido_cli_content_batch_read",
+      "observation": "A development agent read a 146 KB editor body (about 230 KB as JSON) with 29 riido context part calls because the content view returned one 8 KiB captured logical page per call. Each call also consumed one of the run's 100 assignment-context reads and reloaded the snapshot and the 64 KiB physical block from DynamoDB.",
+      "hypothesis": "Returning consecutive captured pages of the same part up to a caller-chosen encoded size cuts agent calls and read-quota use by the batch factor without changing capture, cursors, versions, scope or retention. Visiting pages through one snapshot read and one block read per physical block keeps the store cost proportional to blocks, not pages.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_batch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_batch_budget.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_range.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_memory_range.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_content_block.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_assignment_content_load.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_content_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_types.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_batch_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_batch_shape_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_range_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_dynamo_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The optional max_bytes field (content view only, 8-256 KiB) returns pages[] of one part starting at the requested cursor; the requested page is always included, the batch never crosses a part boundary, next_cursor and complete describe the remainder, one read attempt is consumed and one read record is written per distinct source. Without max_bytes the single-page response is unchanged. A damaged later page ends the batch instead of failing it; reading that page's own cursor still reports the failure. The daemon falls back to single pages when an older control plane rejects the unknown field during decoding, before quota or audit.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
