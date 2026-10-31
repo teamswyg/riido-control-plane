@@ -9,15 +9,15 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | Target | Package | Coverage | Syntax Hash | Semantic Claim |
 | --- | --- | ---: | --- | --- |
 | `contextmap_spike` | `tools/contextmap` | 100% | `73463c272c08` | `context_map_must_guard_public_boundaries` |
-| `auth_jwt_pep_guard` | `internal/authpep` | 100% | `89f8908cf84d` | `request_authorization_must_preserve_security_boundary` |
+| `auth_jwt_pep_guard` | `internal/authpep` | 100% | `dfc5d39959e0` | `request_authorization_must_preserve_security_boundary` |
 | `syntaxhash_tool_self` | `tools/syntaxhash` | 100% | `0828144b09ce` | `context_map_must_guard_public_boundaries` |
 | `syntaxhash_duplicate_shapes_policy` | `tools/syntaxhash/duplicates` | 100% | `f506f1540fac` | `context_map_must_guard_public_boundaries` |
 | `loop_registry_tool_guard` | `tools/loopregistry` | 100% | `62066456283d` | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` |
 | `awsadapters_facade` | `awsadapters` | 100% | `6e8fc7dd43bf` | `public_aws_adapter_facade_must_preserve_contract` |
-| `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `bf2e306bcb6d` | `runtime_adapter_config_must_preserve_public_env_contract` |
+| `runtime_adapter_config` | `cmd/riido_ai_server` | 100% | `f41a150f459e` | `runtime_adapter_config_must_preserve_public_env_contract` |
 | `repo_identity_guard` | `internal/repoidentity` | 100% | `2402928360f7` | `repo_identity_must_anchor_public_module_boundary` |
 | `contracts_compat_mirror` | `internal/contractscompat` | 100% | `664fe505058d` | `shared_contract_compat_must_preserve_generated_contract_surface` |
-| `request_authorization_guard` | `tools/requestauth` | 100% | `2239ceed1945` | `request_authorization_must_preserve_security_boundary` |
+| `request_authorization_guard` | `tools/requestauth` | 100% | `8111fde5b857` | `request_authorization_must_preserve_security_boundary` |
 | `health_ready_command_guard` | `tools/healthreadycmd` | 100% | `aab4f106f850` | `health_ready_command_must_preserve_public_runtime_probe` |
 | `runtime_deployment_boundary_guard` | `tools/runtimeboundary` | 100% | `d0e61dbc8b0c` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `runtime_cd_ownership_guard` | `tools/runtimecdownership` | 100% | `dbf313d91637` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
@@ -116,14 +116,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d23929aab84a` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `8751c190fef2` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `6f981ed3bf6e` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `4462`
-- tracked files: `4462`
+- Go files: `4479`
+- tracked files: `4479`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -132,7 +132,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 - status: `evidence_only`
 - group by: `ast_shape_hash`
 - duplicate groups: `92`
-- duplicate files: `317`
+- duplicate files: `318`
 - internal groups: `7`
 
 | Shape Hash | Files | Packages |
@@ -169,16 +169,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `4462`
-- unique syntax hashes: `4259`
+- tracked files: `4479`
+- unique syntax hashes: `4276`
 - compression gain: `203`
-- analysis reduction: `4.54%`
+- analysis reduction: `4.53%`
 - collision count: `0`
-- relocation mappings: `4462`
+- relocation mappings: `4479`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `111`
 - missing golden commands: `0`
-- efficiency score: `454`
+- efficiency score: `453`
 - compression score: `203`
-- weighted score: `657`
+- weighted score: `656`

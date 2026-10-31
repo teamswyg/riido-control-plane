@@ -16,6 +16,14 @@ on:
       - "cmd/riido_ai_server/authorizer_auth.go"
       - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
+      - "cmd/riido_ai_server/cli_thread_read*.go"
+      - "internal/riidoaiserver/server_cli_thread_read*.go"
+      - "internal/riidoaiserver/server_authorization_http.go"
+      - "internal/riidoaiserver/server_type.go"
+      - "internal/riidoaiserver/server_config_nil.go"
+      - "cmd/riido_ai_server/runtime_config.go"
+      - "cmd/riido_ai_server/runtime_config_parts.go"
+      - "cmd/riido_ai_server/runtime_http.go"
       - "internal/riidoaiserver/*cli_installation*.go"
       - "internal/riidoaiserver/*coverage*.go"
       - "cmd/riido_ai_server/execution_coverage*.go"
@@ -47,6 +55,14 @@ on:
       - "cmd/riido_ai_server/authorizer_auth.go"
       - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
+      - "cmd/riido_ai_server/cli_thread_read*.go"
+      - "internal/riidoaiserver/server_cli_thread_read*.go"
+      - "internal/riidoaiserver/server_authorization_http.go"
+      - "internal/riidoaiserver/server_type.go"
+      - "internal/riidoaiserver/server_config_nil.go"
+      - "cmd/riido_ai_server/runtime_config.go"
+      - "cmd/riido_ai_server/runtime_config_parts.go"
+      - "cmd/riido_ai_server/runtime_http.go"
       - "internal/riidoaiserver/*cli_installation*.go"
       - "internal/riidoaiserver/*coverage*.go"
       - "cmd/riido_ai_server/execution_coverage*.go"
@@ -91,7 +107,7 @@ jobs:
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
       - name: Test request authorization adapters
-        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'Coverage|Covered|CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
+        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'CLIThreadRead|Coverage|Covered|CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

@@ -10,12 +10,16 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `59`; manifest entries: `59`; secret/credential entries: `8`; operator-only entries: `15`.
+Runtime env reads: `63`; manifest entries: `63`; secret/credential entries: `9`; operator-only entries: `18`.
 
 ## Runtime Env
 
 | Variable | Default | Sensitivity | Meaning |
 | --- | --- | --- | --- |
+| `RIIDO_AI_SERVER_CLI_THREAD_READ_ENABLED` | `false` | `operator` | Enable only the dedicated opaque CLI task-thread reader after the legacy CLI JWT guard and monolith ticket service are deployed; does not grant general application authority. |
+| `RIIDO_AI_SERVER_CLI_THREAD_READ_MONOLITH_ORIGIN` | `unset` | `operator` | Exact HTTPS monolith origin for fixed internal thread-read authorization; no path, query, redirects or cookies. |
+| `RIIDO_AI_SERVER_CLI_THREAD_READ_RESOURCE` | `unset` | `operator` | Exact HTTPS control-plane resource, distinct from monolith; must match the ticket producer and each authorization reply. |
+| `RIIDO_AI_SERVER_CLI_THREAD_READ_SERVICE_TOKEN` | `unset` | `secret` | Dedicated 32-512 printable ASCII service credential, distinct from external PDP and static credentials including their normalized hashes and review-account credentials; never a caller application token. |
 | `RIIDO_AI_SERVER_EXECUTION_COVERAGE_ENROLLMENT` | `false` | `operator` | Opt-in creation of server-issued execution coverage for newly enrolled devices that negotiate riido-execution-coverage.v1. Requires native credential snapshot and assignment stores sharing the exact Dynamo authority factory; matching table, region or endpoint strings alone are insufficient. Enable only after every claim writer in the fleet enforces coverage admission and rollback cannot restore an older unfenced writer. Existing or legacy devices are not upgraded by this flag, and disabling it does not bypass atomic covered-credential rotation. Source support does not authorize deployment or flag activation. |
 | `RIIDO_AI_SERVER_CLI_INSTALLATION_RESOURCE` | `empty` | `public` | Exact canonical OAuth resource for private CLI installation service; required with service:riido-monolith in AUTHZ_TOKENS_JSON. Missing config fails closed without user/device fallback. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL` | `empty` | `operator` | Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery. |

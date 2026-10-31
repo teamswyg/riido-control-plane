@@ -7,6 +7,7 @@ import (
 )
 
 type runtimeConfig struct {
+	CLIThreadReadAuthorizer     riidoaiserver.RequestAuthorizer
 	ExecutionCoverageEnrollment bool
 	CLIInstallationService      riidoaiserver.CLIInstallationServiceConfig
 	CommentDelivery             riidoaiserver.CommentDeliveryConfig
