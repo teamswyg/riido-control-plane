@@ -20,6 +20,72 @@
   ],
   "chains": [
     {
+      "id": "cli_monolith_grant_legacy_boundary_5972",
+      "observation": "A synthetic signed monolith CLI read grant passed both read and create through the legacy HTTP app PDP in legacy-only and dual-auth configurations. The app PDP does not own CLI grant revocation or installation policy. This is conditional source/fixture evidence, not a live production exploit.",
+      "hypothesis": "Reject CLI markers before the entire legacy fallback chain while preserving normal app, opaque and Auth-v2 credentials. Unverified claim inspection can deny but never authenticate. CP thread reads require a separate resource/purpose-bound exchange and current grant/domain checks.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_legacy_cli.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_legacy_cli_claims.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/authorizer_scheme.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/requestauth/constants_auth_scheme.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_legacy_cli_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_cli_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Read/create acceptance was observed before correction. CLI marker null/invalid/duplicate/escaped/case-variant cases now fail before static/external authorization, while ordinary application authorization and Auth-v2 remain intact. JWT-shaped legacy credentials above16KiB also fail closed. The line budget is preserved by separating the wrapper and classifier. Existing policy review_by expiry also fails on an unchanged main baseline; it is not concealed as a passing full suite. No endpoint, credentials, environment activation, DB or deployment change is included. Generated surfaces/hashes and exact golden evidence reflect the new denial boundary without relaxing verifier conditions.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "cli_claim_local_termination_observation_5900",
       "observation": "A terminal task event can precede direct-child termination, while host continuation, lost Submit replies, resumed epochs and pending host work prevent the last Session alone from proving claim quiescence. Terminal ACK also clears daemon lease state.",
       "hypothesis": "Accept a device-authenticated claim-scoped local observation only against the immutable original claim and an atomically checked projection, retaining one immutable epoch receipt. Keep unknown and access policy separate; a daemon sender must aggregate all local invocation and host-work boundaries before terminal delivery.",
