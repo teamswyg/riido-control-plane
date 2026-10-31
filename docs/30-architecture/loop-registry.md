@@ -263,7 +263,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `85` | `20` | `c0f6937ee7b2` |
 | `repo_identity_must_anchor_public_module_boundary` | `closed_loop_candidate` | `5` | `2` | `f667cbe6d285` |
 | `shared_contract_compat_must_preserve_generated_contract_surface` | `closed_loop_candidate` | `10` | `6` | `bbe1d4789b21` |
-| `request_authorization_must_preserve_security_boundary` | `closed_loop_candidate` | `90` | `42` | `d2dd48d7cdc3` |
+| `request_authorization_must_preserve_security_boundary` | `closed_loop_candidate` | `90` | `42` | `e29978207186` |
 | `health_ready_command_must_preserve_public_runtime_probe` | `closed_loop_candidate` | `20` | `4` | `8eff032c00aa` |
 | `runtime_deployment_boundary_must_preserve_public_private_ownership` | `closed_loop_candidate` | `36` | `4` | `951631b42bbe` |
 | `config_reference_must_preserve_env_manifest_parity` | `closed_loop_candidate` | `25` | `14` | `599764947fce` |
@@ -287,8 +287,8 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `device_client_status_must_distinguish_install_update_and_ready` | `closed_loop_candidate` | `6` | `5` | `9eebd300b5a0` |
 | `onboarding_completion_must_be_durable_and_idempotent` | `ai_thread_history` | `51` | `25` | `888337b0e8d2` |
 | `desktop_presence_must_observe_committed_account_connections` | `closed_loop_candidate` | `47` | `22` | `99ea57510a80` |
-| `cli_installation_link_must_preserve_key_and_policy_fences` | `closed_loop_candidate` | `100` | `51` | `fbac2bf2a77a` |
-| `execution_coverage_must_fence_installation_permission` | `closed_loop_candidate` | `115` | `26` | `1061d4cf7cf9` |
+| `cli_installation_link_must_preserve_key_and_policy_fences` | `closed_loop_candidate` | `100` | `51` | `294dfe9cc3b6` |
+| `execution_coverage_must_fence_installation_permission` | `closed_loop_candidate` | `115` | `26` | `a2bb72f0c731` |
 | `assignment_read_scope_must_preserve_captured_leaf_authority` | `closed_loop_candidate` | `180` | `66` | `31e0c5fcbf66` |
 
 ## Claim Surface Evidence

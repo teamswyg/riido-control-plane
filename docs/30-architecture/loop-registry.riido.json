@@ -5665,7 +5665,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "d2dd48d7cdc31be07ceb6d2cd0ed546e6b39471a27562b2ca78cd6b37861960d"
+      "semantic_hash": "e29978207186bd969bf27a163eb0ac111d57fd66cc39372e3c8061c0df731df9"
     },
     {
       "id": "health_ready_command_must_preserve_public_runtime_probe",
@@ -7649,7 +7649,7 @@
         "docs/30-architecture/config-reference.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "fbac2bf2a77a4a557ed3f57d3ca300a36e8ebda1d14408746b33d971505e3530"
+      "semantic_hash": "294dfe9cc3b6b75fa23b5526e16a82cfb24c4af648d1b64228b0cdbccb29efae"
     },
     {
       "id": "execution_coverage_must_fence_installation_permission",
@@ -7820,7 +7820,7 @@
         "docs/30-architecture/config-reference.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "1061d4cf7cf935947e5a187fd944070b02963be91e44822eb0d6ff6a9d7fe95e"
+      "semantic_hash": "a2bb72f0c7312a8dafb90aac7155a82ad42c24409f731ecaec564ed3acf1985a"
     },
     {
       "id": "assignment_read_scope_must_preserve_captured_leaf_authority",
