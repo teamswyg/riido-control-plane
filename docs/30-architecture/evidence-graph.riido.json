@@ -28256,6 +28256,115 @@
       ],
       "decision": "The optional max_bytes field (content view only, 8-256 KiB) returns pages[] of one part starting at the requested cursor; the requested page is always included, the batch never crosses a part boundary, next_cursor and complete describe the remainder, one read attempt is consumed and one read record is written per distinct source. Without max_bytes the single-page response is unchanged. A damaged later page ends the batch instead of failing it; reading that page's own cursor still reports the failure. The daemon falls back to single pages when an older control plane rejects the unknown field during decoding, before quota or audit.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "cli_task_thread_read_opaque_boundary",
+      "observation": "Standalone CLI OAuth is scoped to monolith. Passing it to the generic application authorization fallback does not establish the current CLI grant, installation or task policy.",
+      "hypothesis": "A short-lived opaque task-bound ticket and dedicated current-policy service check can expose the existing thread projection without granting application write, stream or device authority.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/cli_thread_read_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_thread_read_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_thread_read_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_authorization_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_type.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_config_nil.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config_parts.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_http.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/cli_thread_read_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_decode_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_integration_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_thread_read_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_thread_read_request_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_denial_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Default off. Only canonical workspace/task v3 GET is admitted; every read checks the original grant, installation and task via the separate monolith service. No fallback, auth cache, redirect, cookie or retry. Preserve existing retained history and owner/public/admin visibility. Local CP HTTP uses a synthetic TLS policy server; live monolith, daemon commands and real-account acceptance remain separate. Deploy the raw CLI JWT guard before activation.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
