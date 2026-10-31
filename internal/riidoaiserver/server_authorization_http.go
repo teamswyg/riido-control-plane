@@ -36,6 +36,9 @@ func (s Server) authorizeAIAgentClient(w http.ResponseWriter, r *http.Request, r
 }
 
 func (s Server) authorizeRequest(w http.ResponseWriter, r *http.Request, req AuthorizationRequest) (AuthorizationResult, bool) {
+	if result, handled := s.authorizeCLIThreadRead(w, r, req); handled {
+		return result, result.PrincipalID != ""
+	}
 	if req.Resource == AuthorizationResourceAgent {
 		if result, handled := s.authorizeDeviceCredential(w, r, req); handled {
 			if strings.TrimSpace(result.PrincipalID) == "" {

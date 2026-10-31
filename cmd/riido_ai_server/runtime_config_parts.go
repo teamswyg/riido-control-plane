@@ -66,7 +66,7 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	return runtimeConfig{
+	return runtimeCLIThreadRead(runtimeConfig{
 		ExecutionCoverageEnrollment: coverageEnrollment,
 		CLIInstallationService:      installationService,
 		CommentDelivery:             commentDelivery,
@@ -96,5 +96,5 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AssignmentContext:        assignmentContext,
 		AssignmentReadScope:      assignmentReadScope,
 		TaskContextReader:        taskContextReader,
-	}, nil
+	})
 }

@@ -75,6 +75,10 @@
     {
       "name": "CoalescingAuthorizer",
       "role": "in-flight duplicate authorization collapse without TTL caching"
+    },
+    {
+      "name": "CLIThreadReadAuthorizer",
+      "role": "Default-off opaque ticket consumer for exact task thread reads; current monolith grant, installation and task policy precede unchanged thread visibility."
     }
   ],
   "resources": [
@@ -83,7 +87,8 @@
     "agent_catalog",
     "component_task",
     "component_task_events",
-    "metrics"
+    "metrics",
+    "cli_task_thread_read"
   ],
   "token_transports": [
     {
@@ -115,11 +120,16 @@
     "RIIDO_AI_SERVER_AUTH_AUTHORIZATION_PROFILE",
     "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_ID",
     "RIIDO_AI_SERVER_AUTH_INTROSPECTION_CLIENT_SECRET",
-    "RIIDO_AI_SERVER_AUTH_HTTP_TIMEOUT_SECONDS"
+    "RIIDO_AI_SERVER_AUTH_HTTP_TIMEOUT_SECONDS",
+    "RIIDO_AI_SERVER_CLI_THREAD_READ_ENABLED",
+    "RIIDO_AI_SERVER_CLI_THREAD_READ_MONOLITH_ORIGIN",
+    "RIIDO_AI_SERVER_CLI_THREAD_READ_RESOURCE",
+    "RIIDO_AI_SERVER_CLI_THREAD_READ_SERVICE_TOKEN"
   ],
   "external_contract_versions": [
     "riido-external-authorizer-request.v1",
-    "riido-external-authorizer-response.v1"
+    "riido-external-authorizer-response.v1",
+    "riido-cli-thread-read.v1"
   ],
   "rule_groups": [
     {
@@ -291,6 +301,23 @@
         "uncertain-snapshot-save-retains-original-pair-in-full-actor-state",
         "snapshot-replay-ack-requires-successful-save-of-the-same-pair",
         "replay-never-renews-expiry-or-promotes-current-permission"
+      ]
+    },
+    {
+      "id": "cli-thread-read",
+      "rules": [
+        "default-off-dedicated-reader",
+        "opaque-ticket-before-generic-or-device",
+        "exact-v3-task-threads-get-only",
+        "canonical-single-bearer-no-query-origin-or-upgrade",
+        "monolith-current-grant-installation-task-check-every-read",
+        "no-authorization-cache-retry-or-fallback",
+        "fixed-https-origin-no-redirect-or-cookie",
+        "service-credential-separate-from-app-and-installation",
+        "exact-ten-field-response-and-five-second-clock-bound",
+        "resource-purpose-workspace-task-and-one-minute-expiry",
+        "current-owner-public-admin-thread-visibility-preserved",
+        "no-store-private-errors"
       ]
     }
   ],
@@ -751,13 +778,89 @@
         "TestCLIInstallationIntentV2ReplaysOriginalResponse",
         "TestCLIInstallationIntentV1RejectsReplayRequestID"
       ]
+    },
+    {
+      "name": "cli-thread-entry",
+      "file": "internal/riidoaiserver/server_cli_thread_read_auth.go",
+      "contains": [
+        "authorizeCLIThreadRead",
+        "hasCLIThreadReadCredential",
+        "CLIThreadReadAuthorizer",
+        "no-store"
+      ]
+    },
+    {
+      "name": "cli-thread-exact-request",
+      "file": "internal/riidoaiserver/server_cli_thread_read_request.go",
+      "contains": [
+        "cliThreadReadRequestToken",
+        "http.MethodGet",
+        "r.RequestURI != path",
+        "base64.RawURLEncoding.EncodeToString"
+      ]
+    },
+    {
+      "name": "cli-thread-current-pdp",
+      "file": "internal/authpep/cli_thread_read_http.go",
+      "contains": [
+        "context.WithTimeout",
+        "/internal/cli/thread-read/authorize",
+        "io.LimitReader",
+        "validCLIThreadReadRequest"
+      ]
+    },
+    {
+      "name": "cli-thread-bound-response",
+      "file": "internal/authpep/cli_thread_read_decode.go",
+      "contains": [
+        "rejectDuplicateTopLevelJWTKeys",
+        "len(fields) != 10",
+        "result.WorkspaceID != req.WorkspaceID",
+        "result.TaskID != req.TaskID",
+        "result.ExpiresAt.Sub(result.CheckedAt) > time.Minute"
+      ]
+    },
+    {
+      "name": "cli-thread-private-transport",
+      "file": "internal/authpep/cli_thread_read_config.go",
+      "contains": [
+        "client.Jar = nil",
+        "http.ErrUseLastResponse",
+        "cliThreadReadOrigin"
+      ]
+    },
+    {
+      "name": "cli-thread-runtime",
+      "file": "cmd/riido_ai_server/cli_thread_read_config.go",
+      "contains": [
+        "RIIDO_AI_SERVER_CLI_THREAD_READ_ENABLED",
+        "RIIDO_AI_SERVER_CLI_THREAD_READ_MONOLITH_ORIGIN",
+        "RIIDO_AI_SERVER_CLI_THREAD_READ_RESOURCE",
+        "RIIDO_AI_SERVER_CLI_THREAD_READ_SERVICE_TOKEN",
+        "strings.EqualFold(tokenHash, credential.TokenSHA256)"
+      ]
+    },
+    {
+      "name": "cli-thread-http-counterexamples",
+      "file": "internal/authpep/cli_thread_read_integration_test.go",
+      "contains": [
+        "TestCLIThreadReadActualHTTPPreservesVisibilityAndIdentifiers",
+        "legacy.calls != 0"
+      ]
+    },
+    {
+      "name": "cli-thread-fallback-counterexamples",
+      "file": "internal/riidoaiserver/server_cli_thread_read_boundary_test.go",
+      "contains": [
+        "TestCLIThreadReadCredentialNeverFallsBack"
+      ]
     }
   ],
   "loop": {
     "observation": "Production JWT verification existed, but provider ownership was implicit across the JWT authorizer and a shared fallback chain, making the legacy_v1 versus auth_service_v2 assembly boundary harder for agents and operators to discover. Production also observed two external-authorizer failures completing in 2ms with outcome=error; current logs could not distinguish transport, upstream status and invalid response. Production observed repeated client task subscription401s whose selected credential transport and unverified expiry shape were unavailable. Staging HTTP503 traces included request cancellation and external-authorizer2s timeouts. An isolated regression reproduces a cancelled first request poisoning another live identical waiter. Historical 2s timeout spans do not identify DNS, connection, TLS, headers or body delay; controlled synthetic authorization probes currently complete in 7-83ms, and historical upstream root cause remains unconfirmed.",
     "hypothesis": "An explicit scheme selector port and router can preserve legacy behavior while making Auth issuer ownership and no-downgrade semantics independently testable without granting trust to unverified claims.",
-    "execute": "Add the legacy_v1/auth_service_v2 scheme coordinate, issuer classifier adapter and fail-closed router; compose legacy fallback only inside legacy_v1 and keep the existing JWT/JWKS/introspection/domain PEP inside auth_service_v2. Add private typed failures with Unwrap and fixed error text, failure_kind=transport/upstream_http/invalid_response/internal/unclassified/none, response_error=decode/schema/contract/none and numeric upstream_http_status100..599 or0 when absent. Log/span attributes use only these values; generic HTTP503 authorization responses use the fixed authorization dependency unavailable message. Add finite token_source/token_format/expiry_hint/token_header_relation only to authorization-failure logs. Decode at most4096 payload characters from tokens bounded to8192 bytes; no token, raw claim, exp timestamp, issuer or subject is emitted. Desktop account connection: POST /v2/desktop/workspaces/{workspace_id}/devices/connect accepts an existing device_id with X-Riido-Device-Secret in addition to the current user's X-Riido-AI-Agent-Token. Both user workspace authorization and device possession must pass; device proof never replaces user authorization. This connects the actual running device even if the shared machine UUID changed, preserving the device ID, owner, secret, runtime snapshots and existing account grants. Missing or invalid proof is rejected without falling back to machine-ID creation. Legacy machine_id requests remain supported. Desktop logout retires pending session work without revoking durable connection grants. RIID-5821: use an in-flight shared context retaining request values but independent of individual caller cancellation; reference-count waiters and cancel/remove on last departure. Keep provider-owned timeout, no new retry or TTL cache. Finish conditionally by call identity and release panicking shared work with a fixed private failure. Add finite HTTP network phase and nonnegative observed timing fields only. Missing timing is -1, not zero. Do not record addresses, hosts, headers, tokens, payloads or arbitrary errors; preserve configured timeout, single attempt and authorization decisions.",
-    "evaluate": "Counterexamples prove legacy requests are unchanged, configured Auth issuer and duplicate-issuer tokens select v2, foreign or opaque credentials select v1, v2 denial never invokes v1, and missing or unknown v2 providers fail closed. Existing algorithm, kid, claim, JWKS, introspection and domain-substitution tests remain in the same evidence chain. Secret-bearing fake URL/body/schema/role/credential counterexamples must stay absent from logs, span errors/attributes and HTTP503 responses. Exact401/403 sentinels, cancellation/deadline identity, existing status decisions, timeout and retryability remain unchanged. Denied synthetic expired/future/malformed/opaque/oversized and conflicting-header fixtures preserve401 and existing explicit-header precedence while canaries stay absent. Expiry hints are unverified shape hints, never verification or authorization facts. Desktop HTTP regression tests exercise owner/guest account round trips after machine identity drift and reject missing or invalid user/device proof. Persistent-store regression tests verify account grants survive reopening without rotating the credential or changing the original owner. Cancelled owners must return cancellation while live followers succeed from one upstream call; last-waiter cancellation reaches upstream, late abandoned completion cannot evict a newer call, caller deadline wins a ready result, and panic text must never escape. This fixes a reproducible concurrency defect without proving the historical upstream timeout root cause. Exercise actual HTTP header/body deadlines, reused connections, missing custom-transport hooks, concurrent callbacks, and privacy canaries. The final finite phase is diagnostic evidence, not proof that a historical failure had the same cause.",
+    "execute": "Add the legacy_v1/auth_service_v2 scheme coordinate, issuer classifier adapter and fail-closed router; compose legacy fallback only inside legacy_v1 and keep the existing JWT/JWKS/introspection/domain PEP inside auth_service_v2. Add private typed failures with Unwrap and fixed error text, failure_kind=transport/upstream_http/invalid_response/internal/unclassified/none, response_error=decode/schema/contract/none and numeric upstream_http_status100..599 or0 when absent. Log/span attributes use only these values; generic HTTP503 authorization responses use the fixed authorization dependency unavailable message. Add finite token_source/token_format/expiry_hint/token_header_relation only to authorization-failure logs. Decode at most4096 payload characters from tokens bounded to8192 bytes; no token, raw claim, exp timestamp, issuer or subject is emitted. Desktop account connection: POST /v2/desktop/workspaces/{workspace_id}/devices/connect accepts an existing device_id with X-Riido-Device-Secret in addition to the current user's X-Riido-AI-Agent-Token. Both user workspace authorization and device possession must pass; device proof never replaces user authorization. This connects the actual running device even if the shared machine UUID changed, preserving the device ID, owner, secret, runtime snapshots and existing account grants. Missing or invalid proof is rejected without falling back to machine-ID creation. Legacy machine_id requests remain supported. Desktop logout retires pending session work without revoking durable connection grants. RIID-5821: use an in-flight shared context retaining request values but independent of individual caller cancellation; reference-count waiters and cancel/remove on last departure. Keep provider-owned timeout, no new retry or TTL cache. Finish conditionally by call identity and release panicking shared work with a fixed private failure. Add finite HTTP network phase and nonnegative observed timing fields only. Missing timing is -1, not zero. Do not record addresses, hosts, headers, tokens, payloads or arbitrary errors; preserve configured timeout, single attempt and authorization decisions. RIID-5972: route opaque CLI thread tickets only to the exact workspace/task v3 GET, using a dedicated default-off monolith current-policy adapter before all generic/device authorization. Validate ten canonical response fields, current binding/time/roles, a separate service credential, no redirect/cookie/retry/cache and existing thread visibility.",
+    "evaluate": "Counterexamples prove legacy requests are unchanged, configured Auth issuer and duplicate-issuer tokens select v2, foreign or opaque credentials select v1, v2 denial never invokes v1, and missing or unknown v2 providers fail closed. Existing algorithm, kid, claim, JWKS, introspection and domain-substitution tests remain in the same evidence chain. Secret-bearing fake URL/body/schema/role/credential counterexamples must stay absent from logs, span errors/attributes and HTTP503 responses. Exact401/403 sentinels, cancellation/deadline identity, existing status decisions, timeout and retryability remain unchanged. Denied synthetic expired/future/malformed/opaque/oversized and conflicting-header fixtures preserve401 and existing explicit-header precedence while canaries stay absent. Expiry hints are unverified shape hints, never verification or authorization facts. Desktop HTTP regression tests exercise owner/guest account round trips after machine identity drift and reject missing or invalid user/device proof. Persistent-store regression tests verify account grants survive reopening without rotating the credential or changing the original owner. Cancelled owners must return cancellation while live followers succeed from one upstream call; last-waiter cancellation reaches upstream, late abandoned completion cannot evict a newer call, caller deadline wins a ready result, and panic text must never escape. This fixes a reproducible concurrency defect without proving the historical upstream timeout root cause. Exercise actual HTTP header/body deadlines, reused connections, missing custom-transport hooks, concurrent callbacks, and privacy canaries. The final finite phase is diagnostic evidence, not proof that a historical failure had the same cause. Real local CP HTTP against a synthetic TLS policy service covers owner/private/public/admin history and preserved identifiers; this is not a live monolith/real-account receipt. Revocation, scope substitution, disabled reader and transport failures never enter generic authorization.",
     "retrospective": "Control-plane now expresses provider ownership at the composition root while retaining Riido 1.0 authentication. Production gate activation remains a separate live valid-token and revoked-replay evidence decision. New diagnostics distinguish future failures without establishing the root cause of the historical2ms503 observations;401client denials remain separate from dependency503s. A client renewal/reconnect defect can be reproduced separately; historical401s are not called expired-token failures without fresh observations, and diagnostics alone do not resolve the frontend defect."
   },
   "non_goals": [
@@ -766,6 +869,7 @@
     "Terraform state",
     "secret values",
     "production token values",
-    "generated frontend implementation"
+    "generated frontend implementation",
+    "CLI thread ticket activation, OAuth registration, raw CLI JWT legacy guard delivery, full-history export and daemon thread commands are separate gates; the retained v3 projection is not an all-time archive."
   ]
 }

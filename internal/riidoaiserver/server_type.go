@@ -6,6 +6,7 @@ import (
 )
 
 type ServerConfig struct {
+	CLIThreadReadAuthorizer  RequestAuthorizer
 	CLIInstallationService   CLIInstallationServiceConfig
 	CommentDelivery          CommentDeliveryConfig
 	Authorizer               RequestAuthorizer
