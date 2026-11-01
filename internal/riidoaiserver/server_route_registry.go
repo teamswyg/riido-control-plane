@@ -45,6 +45,7 @@ var serverRoutes = []serverRoute{
 	{"/v1/client/ai-agent/agents/", Server.handleAIAgentClientAgents},
 	{"/v1/client/ai-agent/events", Server.handleAIAgentClientEvents},
 	{"POST /v1/internal/cli-installations/link-intents", Server.handleCLIInstallationIntent},
+	{"POST /v1/internal/cli-installations/link-intent-evidence", Server.handleCLIInstallationIntentEvidence},
 	{"POST /v1/internal/cli-installations/policy", Server.handleCLIInstallationPolicy},
 	{"POST /v1/internal/cli-installations/link-receipts", Server.handleCLIInstallationReceipt},
 	{"POST /v1/internal/cli-installations/link-intent-retirements", Server.handleCLIInstallationRetirement},
