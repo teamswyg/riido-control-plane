@@ -310,7 +310,15 @@
         "atomic-original-intent-response-replay-with-exact-immutable-payload",
         "uncertain-snapshot-save-retains-original-pair-in-full-actor-state",
         "snapshot-replay-ack-requires-successful-save-of-the-same-pair",
-        "replay-never-renews-expiry-or-promotes-current-permission"
+        "replay-never-renews-expiry-or-promotes-current-permission",
+        "exact-request-evidence-requires-complete-v2-key-device-human-tuple",
+        "evidence-preserves-original-challenge-expiry-without-create-replay-save",
+        "absent-replay-and-intent-return-found-false-without-enumeration",
+        "orphan-corrupt-conflicting-evidence-fails-closed",
+        "durable-snapshot-schema-and-pair-must-match-actor-evidence",
+        "dynamo-evidence-uses-only-exact-consistent-gets",
+        "expired-retired-consumed-evidence-never-renews-permission",
+        "evidence-preflight-and-browser-origin-rejected"
       ]
     },
     {
@@ -955,6 +963,14 @@
       "file": "internal/riidoaiserver/server_cli_agent_detail_test.go",
       "contains": [
         "TestCLIAgentReadDetailUsesCurrentTitleAndHidesExistence"
+      ]
+    },
+    {
+      "name": "cli-installation-evidence-regressions",
+      "file": "internal/riidoaiserver/cli_installation_intent_evidence_snapshot_test.go",
+      "contains": [
+        "TestCLIInstallationIntentEvidenceRequiresPersistedSnapshot",
+        "snapshot.saves"
       ]
     }
   ],
