@@ -22,6 +22,9 @@ func (s Server) assignmentContextViewData(ctx context.Context, snapshot Assignme
 	if err := validateAssignmentReadScopeManifest(snapshot); err != nil {
 		return nil, nil, false, err
 	}
+	if req.View == AssignmentContextViewChanges {
+		return s.assignmentContextChangesView(ctx, snapshot, req)
+	}
 	if req.View == AssignmentContextViewContent {
 		return s.assignmentContentView(ctx, snapshot, req)
 	}

@@ -16,13 +16,10 @@ func assignmentContentItems(snapshot AssignmentContextSnapshot, pages []Assignme
 	if err != nil {
 		return nil, err
 	}
-	snapshot.ContentBlocks = refs
-	item, err := assignmentContentItem(snapshot.AssignmentID, dynamoDBAssignmentContextSnapshotSK, "assignment_context_snapshot/v2", snapshot)
+	item, err := assignmentContentSnapshotItem(snapshot, refs)
 	if err != nil {
 		return nil, err
 	}
-	item["context_task"], item["context_agent"] = map[string]string{"S": snapshot.TaskID}, map[string]string{"S": snapshot.AgentID}
-	item["context_stored"] = map[string]string{"S": snapshot.CapturedAt.Format(dynamoDBAssignmentContextTimeFormat)}
 	items := []map[string]map[string]string{item}
 	for i, block := range blocks {
 		item, err = assignmentContentItem(snapshot.AssignmentID, assignmentContentSK(i), "assignment_context_content_block/v1", block)
@@ -32,6 +29,17 @@ func assignmentContentItems(snapshot AssignmentContextSnapshot, pages []Assignme
 		items = append(items, item)
 	}
 	return items, validateContextPayloadBudget(items)
+}
+
+func assignmentContentSnapshotItem(snapshot AssignmentContextSnapshot, refs []AssignmentContentBlockRef) (map[string]map[string]string, error) {
+	snapshot.ContentBlocks = refs
+	item, err := assignmentContentItem(snapshot.AssignmentID, dynamoDBAssignmentContextSnapshotSK, "assignment_context_snapshot/v2", snapshot)
+	if err != nil {
+		return nil, err
+	}
+	item["context_task"], item["context_agent"] = map[string]string{"S": snapshot.TaskID}, map[string]string{"S": snapshot.AgentID}
+	item["context_stored"] = map[string]string{"S": snapshot.CapturedAt.Format(dynamoDBAssignmentContextTimeFormat)}
+	return item, nil
 }
 
 func assignmentContentItem(id, sk, schema string, value any) (map[string]map[string]string, error) {
