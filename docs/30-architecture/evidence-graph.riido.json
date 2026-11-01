@@ -6125,6 +6125,14 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/thread_message_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_agent_read_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_agent_read_auth.go"
         }
       ],
       "verifiers": [
@@ -6231,6 +6239,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/thread_snapshot_cancelled_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_directory_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_detail_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_read_boundary_test.go"
         }
       ],
       "evidence": [
