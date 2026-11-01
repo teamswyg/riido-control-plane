@@ -17,6 +17,10 @@ on:
       - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
       - "cmd/riido_ai_server/cli_thread_read*.go"
+      - "cmd/riido_ai_server/cli_agent_read*.go"
+      - "internal/riidoaiserver/server_cli_agent*.go"
+      - "internal/riidoaiserver/http_route_cli_agent.go"
+      - "internal/riidoaiserver/server_route_registry.go"
       - "internal/riidoaiserver/server_cli_thread_read*.go"
       - "internal/riidoaiserver/server_authorization_http.go"
       - "internal/riidoaiserver/server_type.go"
@@ -56,6 +60,10 @@ on:
       - "cmd/riido_ai_server/authorizer_config.go"
       - "cmd/riido_ai_server/web_origin_config.go"
       - "cmd/riido_ai_server/cli_thread_read*.go"
+      - "cmd/riido_ai_server/cli_agent_read*.go"
+      - "internal/riidoaiserver/server_cli_agent*.go"
+      - "internal/riidoaiserver/http_route_cli_agent.go"
+      - "internal/riidoaiserver/server_route_registry.go"
       - "internal/riidoaiserver/server_cli_thread_read*.go"
       - "internal/riidoaiserver/server_authorization_http.go"
       - "internal/riidoaiserver/server_type.go"
@@ -107,7 +115,7 @@ jobs:
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
       - name: Test request authorization adapters
-        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'CLIThreadRead|Coverage|Covered|CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
+        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'CLIAgentRead|CLIThreadRead|Coverage|Covered|CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

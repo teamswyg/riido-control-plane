@@ -29,6 +29,8 @@ func TestCLIThreadReadConfigDefaultOffAndSeparateServiceAuthority(t *testing.T) 
 		{envCLIThreadReadResource, "https://monolith.example.test"},
 		{envCLIThreadReadServiceToken, "short"},
 		{envExternalAuthzAPIKey, token},
+		{envCLIAgentReadServiceToken, token},
+		{envCLIAgentReadServiceToken, " " + token + " "},
 		{envAuthzTokensJSON, `[{"principal_id":"service:riido-monolith","token":"` + token + `","scopes":["cli-installation:policy-read"]}]`},
 		{envAuthzTokensJSON, `[{"principal_id":"service:riido-monolith","token_sha256":"` + fmt.Sprintf("%x", sha256.Sum256([]byte(token))) + `","scopes":["cli-installation:policy-read"]}]`},
 		{envAuthzTokensJSON, `[{"principal_id":"service:riido-monolith","token":" ` + token + ` ","scopes":["cli-installation:policy-read"]}]`},

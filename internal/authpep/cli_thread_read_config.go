@@ -23,7 +23,7 @@ func NewCLIThreadReadAuthorizer(config CLIThreadReadConfig) (*CLIThreadReadAutho
 	client.Jar = nil
 	client.Timeout = 5 * time.Second
 	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	return &CLIThreadReadAuthorizer{origin: config.MonolithOrigin, resource: config.Resource, token: config.ServiceToken, client: &client, now: time.Now}, nil
+	return &CLIThreadReadAuthorizer{origin: config.MonolithOrigin, resource: config.Resource, token: config.ServiceToken, client: &client, now: time.Now, contract: cliThreadReadContract()}, nil
 }
 
 func cliThreadReadOrigin(raw string) bool {

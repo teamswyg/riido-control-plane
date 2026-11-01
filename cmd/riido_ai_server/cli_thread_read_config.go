@@ -26,7 +26,7 @@ func cliThreadReadAuthorizerFromEnv() (riidoaiserver.RequestAuthorizer, error) {
 		return nil, fmt.Errorf("%s must be true or false", envCLIThreadReadEnabled)
 	}
 	token := os.Getenv(envCLIThreadReadServiceToken)
-	if token == strings.TrimSpace(os.Getenv(envExternalAuthzAPIKey)) {
+	if token == strings.TrimSpace(os.Getenv(envExternalAuthzAPIKey)) || token == strings.TrimSpace(os.Getenv(envCLIAgentReadServiceToken)) {
 		return nil, fmt.Errorf("CLI thread read requires a dedicated service credential")
 	}
 	credentials, err := parseAuthzTokenCredentialsJSON(os.Getenv(envAuthzTokensJSON))
@@ -61,5 +61,5 @@ func runtimeCLIThreadRead(config runtimeConfig) (runtimeConfig, error) {
 		return runtimeConfig{}, err
 	}
 	config.CLIThreadReadAuthorizer = authorizer
-	return config, nil
+	return runtimeCLIAgentRead(config)
 }

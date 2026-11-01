@@ -10,8 +10,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/teamswyg/riido-control-plane/internal/riidoaiserver"
 )
 
 func (a *CLIThreadReadAuthorizer) Authorize(ctx context.Context, token string, req AuthorizationRequest) (AuthorizationResult, error) {
@@ -21,16 +19,16 @@ func (a *CLIThreadReadAuthorizer) Authorize(ctx context.Context, token string, r
 	if a == nil || a.client == nil {
 		return AuthorizationResult{}, errCLIThreadReadUnavailable
 	}
-	if !validCLIThreadReadRequest(token, req) {
+	if !validCLITaskReadRequest(token, req, a.contract) {
 		return AuthorizationResult{}, ErrAuthorizationForbidden
 	}
-	body, err := json.Marshal(map[string]string{"ticket": token, "resource": a.resource, "purpose": cliThreadReadPurpose, "workspace_id": req.WorkspaceID, "task_id": req.TaskID})
+	body, err := json.Marshal(map[string]string{"ticket": token, "resource": a.resource, "purpose": a.contract.purpose, "workspace_id": req.WorkspaceID, "task_id": req.TaskID})
 	if err != nil {
 		return AuthorizationResult{}, errCLIThreadReadUnavailable
 	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	r, err := http.NewRequestWithContext(ctx, http.MethodPost, a.origin+"/internal/cli/thread-read/authorize", bytes.NewReader(body))
+	r, err := http.NewRequestWithContext(ctx, http.MethodPost, a.origin+a.contract.path, bytes.NewReader(body))
 	if err != nil {
 		return AuthorizationResult{}, errCLIThreadReadUnavailable
 	}
@@ -59,10 +57,14 @@ func (a *CLIThreadReadAuthorizer) Authorize(ctx context.Context, token string, r
 }
 
 func validCLIThreadReadRequest(token string, req AuthorizationRequest) bool {
-	if req.Resource != riidoaiserver.AuthorizationResourceCLIThreadRead || req.Action != AuthorizationActionRead || req.AgentID != "" || req.DeviceID != "" || !cliThreadReadID(req.WorkspaceID) || !cliThreadReadID(req.TaskID) || !strings.HasPrefix(token, riidoaiserver.CLIThreadReadTokenPrefix) {
+	return validCLITaskReadRequest(token, req, cliThreadReadContract())
+}
+
+func validCLITaskReadRequest(token string, req AuthorizationRequest, contract cliTaskReadContract) bool {
+	if req.Resource != contract.resource || req.Action != AuthorizationActionRead || (req.AgentID != "" && (!contract.allowAgentID || !cliThreadReadID(req.AgentID))) || req.DeviceID != "" || !cliThreadReadID(req.WorkspaceID) || !cliThreadReadID(req.TaskID) || !strings.HasPrefix(token, contract.prefix) {
 		return false
 	}
-	random := strings.TrimPrefix(token, riidoaiserver.CLIThreadReadTokenPrefix)
+	random := strings.TrimPrefix(token, contract.prefix)
 	if len(random) != 43 {
 		return false
 	}

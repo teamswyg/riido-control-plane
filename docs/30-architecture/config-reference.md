@@ -10,12 +10,16 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `63`; manifest entries: `63`; secret/credential entries: `9`; operator-only entries: `18`.
+Runtime env reads: `67`; manifest entries: `67`; secret/credential entries: `10`; operator-only entries: `21`.
 
 ## Runtime Env
 
 | Variable | Default | Sensitivity | Meaning |
 | --- | --- | --- | --- |
+| `RIIDO_AI_SERVER_CLI_AGENT_READ_ENABLED` | `false` | `operator` | Enable the dedicated user CLI Agent-directory reader after its separate monolith ticket service is ready. Does not authorize normal application or Agent run requests. |
+| `RIIDO_AI_SERVER_CLI_AGENT_READ_MONOLITH_ORIGIN` | `unset` | `operator` | Exact HTTPS monolith origin for fixed /internal/cli/agent-read/authorize; no caller-selected path, redirect or cookie. |
+| `RIIDO_AI_SERVER_CLI_AGENT_READ_RESOURCE` | `unset` | `operator` | Exact HTTPS CP origin, distinct from monolith, checked against each purpose-bound authorization reply. |
+| `RIIDO_AI_SERVER_CLI_AGENT_READ_SERVICE_TOKEN` | `unset` | `secret` | Dedicated printable 32-512 character service token; separate from thread-read, external PDP, normalized static and review-account credentials. |
 | `RIIDO_AI_SERVER_CLI_THREAD_READ_ENABLED` | `false` | `operator` | Enable only the dedicated opaque CLI task-thread reader after the legacy CLI JWT guard and monolith ticket service are deployed; does not grant general application authority. |
 | `RIIDO_AI_SERVER_CLI_THREAD_READ_MONOLITH_ORIGIN` | `unset` | `operator` | Exact HTTPS monolith origin for fixed internal thread-read authorization; no path, query, redirects or cookies. |
 | `RIIDO_AI_SERVER_CLI_THREAD_READ_RESOURCE` | `unset` | `operator` | Exact HTTPS control-plane resource, distinct from monolith; must match the ticket producer and each authorization reply. |

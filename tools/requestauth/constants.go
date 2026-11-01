@@ -22,6 +22,7 @@ var requiredSurfaces = append([]string{
 	"ExternalHTTPAuthorizer",
 	"ExternalHTTPAuthorizerConfig",
 	"CoalescingAuthorizer",
+	"NewCLIAgentReadAuthorizer",
 }, append(authorizationSchemeRequiredSurfaces, cliThreadReadRequiredSurfaces...)...)
 
 var requiredResources = append([]string{
@@ -31,7 +32,7 @@ var requiredResources = append([]string{
 	"component_task",
 	"component_task_events",
 	"metrics",
-}, "cli_task_thread_read")
+}, "cli_task_thread_read", "cli_task_agents_read")
 
 var requiredTransports = []string{
 	"generated-client-token",
@@ -44,7 +45,7 @@ var requiredTransports = []string{
 var requiredContractVersions = append([]string{
 	"riido-external-authorizer-request.v1",
 	"riido-external-authorizer-response.v1",
-}, "riido-cli-thread-read.v1")
+}, "riido-cli-thread-read.v1", "riido-cli-agent-read.v1")
 
 var requiredRuleGroups = mergeRequiredRuleGroups(map[string][]string{
 	"static-token": {
@@ -71,4 +72,4 @@ var requiredRuleGroups = mergeRequiredRuleGroups(map[string][]string{
 		"device-headers-server-only", "both-device-fields-required",
 		"device-auth-before-token-auth", "browser-jwt-not-daemon-auth",
 	},
-}, authorizationSchemeRequiredRuleGroups, jwtRequiredRuleGroups, cliThreadReadRequiredRuleGroups)
+}, authorizationSchemeRequiredRuleGroups, jwtRequiredRuleGroups, cliThreadReadRequiredRuleGroups, cliAgentReadRequiredRuleGroups)
