@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-const requestAuthGoldenSHA256 = "aaf61f8c30f934bd6246c46c6f3a72ffd833277d8e85dea978484ab43aed8ad1"
+const requestAuthGoldenSHA256 = "18d51e0a6fb13a69ab9b5c0bc8b4e777567e2811fc87267211490905920ec5e1"
 
 func TestRunWritesEvidence(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")

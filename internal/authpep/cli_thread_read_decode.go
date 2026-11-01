@@ -23,7 +23,7 @@ func (a *CLIThreadReadAuthorizer) decode(raw []byte, req AuthorizationRequest) (
 		}
 	}
 	var result cliThreadReadResponse
-	if json.Unmarshal(raw, &result) != nil || result.Schema != cliThreadReadSchema || !result.Allowed || !cliThreadReadID(result.PrincipalID) || result.Resource != a.resource || result.Purpose != cliThreadReadPurpose || result.WorkspaceID != req.WorkspaceID || result.TaskID != req.TaskID {
+	if json.Unmarshal(raw, &result) != nil || result.Schema != a.contract.schema || !result.Allowed || !cliThreadReadID(result.PrincipalID) || result.Resource != a.resource || result.Purpose != a.contract.purpose || result.WorkspaceID != req.WorkspaceID || result.TaskID != req.TaskID {
 		return AuthorizationResult{}, ErrAuthorizationForbidden
 	}
 	now := a.now().UTC()

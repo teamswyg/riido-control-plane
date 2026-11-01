@@ -31,6 +31,7 @@ var serverRoutes = []serverRoute{
 	{"/v2/desktop/workspaces/", Server.handleDesktopWorkspaceRoutes},
 	{"/v2/client/workspaces/", Server.handleAIAgentClientWorkspaceRoutes},
 	{"/v3/client/workspaces/", Server.handleAIAgentClientWorkspaceRoutes},
+	{"/v1/cli/workspaces/", Server.handleCLIAgentDirectory},
 	{"/v1/client/ai-agent/bootstrap", Server.handleAIAgentClientBootstrap},
 	{"/v1/client/ai-agent/devices", Server.handleAIAgentClientDevices},
 	{"/v1/client/ai-agent/devices/", Server.handleAIAgentClientDeviceRoutes},
