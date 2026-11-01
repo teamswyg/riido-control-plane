@@ -21,22 +21,24 @@ type cliInstallationReadSet struct {
 	coverageAuthority bool
 }
 type cliInstallationCommand struct {
-	ctx     context.Context
-	create  *cliInstallationIntent
-	replay  *cliInstallationIntentReplay
-	confirm *cliInstallationConfirmation
-	read    *cliInstallationRead
-	receipt *cliInstallationReceiptRequest
-	retire  *cliInstallationRetirementRequest
-	reply   chan cliInstallationResult
+	ctx      context.Context
+	create   *cliInstallationIntent
+	replay   *cliInstallationIntentReplay
+	evidence *cliInstallationIntentCreateRequest
+	confirm  *cliInstallationConfirmation
+	read     *cliInstallationRead
+	receipt  *cliInstallationReceiptRequest
+	retire   *cliInstallationRetirementRequest
+	reply    chan cliInstallationResult
 }
 type cliInstallationResult struct {
-	link    cliInstallationLink
-	read    cliInstallationReadSet
-	receipt cliInstallationReceipt
-	replay  cliInstallationIntentReplayResponse
-	retired cliInstallationRetirement
-	err     error
+	link     cliInstallationLink
+	read     cliInstallationReadSet
+	receipt  cliInstallationReceipt
+	replay   cliInstallationIntentReplayResponse
+	evidence cliInstallationIntentEvidence
+	retired  cliInstallationRetirement
+	err      error
 }
 
 func (s *Store) executeCLIInstallation(ctx context.Context, command cliInstallationCommand) (cliInstallationResult, error) {
