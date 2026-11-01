@@ -3,6 +3,30 @@
 RIID-5818 owns readable, bounded task context and conversation continuity.
 The assignment remains one task; references do not authorize additional work.
 
+RIID-5972 records snapshot conversation provenance only from authenticated
+server-selected threads and successful publication responses. Initial task
+assignments seed their own conversation; follow-ups retain the selected parent
+assignment/thread and conversation. CLI input and provider resume IDs do not
+establish lineage. Agent-to-agent inherited snapshots do not inherit this
+human conversation baseline. Legacy snapshots without provenance require a
+full context read.
+
+The changes view compares only captured, authorized snapshots for the same
+requester, workspace/team, task, agent and verified conversation. Comparison
+follows at most 32 stored parent edges; a sibling is not an ancestor. It is charged to
+the current active lease read budget. Missing, expired or unrelated baselines
+fail closed with a full-context recovery action. Changed-part metadata never
+returns old source bodies or authorizes deeper reads. A source omitted from
+the new selection is unknown, not evidence of deletion or revoked permission;
+partial captures require a full refresh. Exact deleted/denied attribution
+needs explicit producer evidence. Comparisons use digests of every captured
+page, including replies, rather than a parent comment version alone. Cursors
+and capture timestamps do not stand for content changes. This does not enable
+source caching, provider-session reuse or prompt compaction. If optional comparison
+metadata exceeds the existing item budget, the captured pages remain readable
+without comparison support. Comment-trigger lineage requires a later producer
+contract; it is not inferred from a provider session ID.
+
 RIID-5900 limits CLI reads to 100 authenticated active-lease attempts per durable
 assignment ID. All views share the counter, including live agent discovery,
 reused request IDs, denied targets and unavailable data. Prompt capture, viewer

@@ -28256,6 +28256,104 @@
       ],
       "decision": "The optional max_bytes field (content view only, 8-256 KiB) returns pages[] of one part starting at the requested cursor; the requested page is always included, the batch never crosses a part boundary, next_cursor and complete describe the remainder, one read attempt is consumed and one read record is written per distinct source. Without max_bytes the single-page response is unchanged. A damaged later page ends the batch instead of failing it; reading that page's own cursor still reports the failure. The daemon falls back to single pages when an older control plane rejects the unknown field during decoding, before quota or audit.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_context_changes_5972",
+      "observation": "Snapshot IDs did not retain authenticated conversation ancestry, and a parent comment version can remain unchanged after a captured reply changes. Optional digest and lineage metadata can push a previously valid capture past raw or encoded Dynamo item budgets.",
+      "hypothesis": "Retaining server-selected lineage and hashing all captured pages permits same-scope metadata comparisons under the current lease without granting access to old bodies. Unknown omissions and incomplete digests must require a full read. Optional comparison metadata can be omitted when either storage limit would otherwise discard readable context.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_baseline.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_lineage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_digest.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_captured_json.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_captured_object.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_compare.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_comparison_budget.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_baseline_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_baseline_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_digest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_request_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_encoded_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_comparison_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_incomplete_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Follow at most 32 server-recorded parent edges, preserving requester/admin, workspace/team, task and agent identity and rejecting sibling, inherited, expired or unknown baselines with 410. Return only current part metadata; omissions have no old title or deleted/denied claim. Current-title reads preserve their original audit kind. Hash canonical captured pages with exact numbers, reject duplicate keys, and distinguish incomplete comparison from unchanged. Preserve original pages and cursors when raw or actual encoded snapshot size requires dropping optional metadata. Legacy snapshots do not store unusable lineage. Local regression and HTTP/Dynamo serialization evidence do not establish deployed CLI, cache, provider-session reuse or comment-trigger lineage.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

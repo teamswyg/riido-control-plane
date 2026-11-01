@@ -22,6 +22,7 @@ func newTaskReadScopeBuilder() (*taskReadScopeBuilder, error) {
 }
 
 func (b *taskReadScopeBuilder) addPart(resource AssignmentScopedResource, part AssignmentContentPart, version string, pages []AssignmentContentPage, complete bool) AssignmentContentManifest {
+	start := len(b.capture.Pages)
 	manifest := AssignmentContentManifest{ResourceKind: resource.Kind, SourceID: resource.ID, Part: part, Version: version, Status: "partial", Cursors: []string{}}
 	for i, page := range pages {
 		page.ResourceKind, page.SourceID, page.Part, page.Version = resource.Kind, resource.ID, part, version
@@ -50,6 +51,9 @@ func (b *taskReadScopeBuilder) addPart(resource AssignmentScopedResource, part A
 	}
 	if len(manifest.Cursors) > 0 {
 		manifest.NextAction = "riido context part " + resource.ID + " --cursor " + manifest.Cursors[0]
+	}
+	if digest, err := assignmentCapturedPartDigest(resource, manifest, b.capture.Pages[start:]); err == nil {
+		manifest.Digest = digest
 	}
 	b.capture.Manifest = append(b.capture.Manifest, manifest)
 	return manifest

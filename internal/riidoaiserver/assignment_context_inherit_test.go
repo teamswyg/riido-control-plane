@@ -11,6 +11,7 @@ func TestInheritAssignmentContextCopiesParentSnapshotForMentionedAgent(t *testin
 	store := NewMemoryAssignmentContextStore()
 	parent := AssignmentContextSnapshot{AssignmentID: "asg-a", TaskID: "task-1", WorkspaceID: "ws", AgentID: "agent-a", RequesterPrincipalID: "user-1", TriggerKind: AssignmentContextTriggerComment, TriggerID: "comment-r", CommentPages: 2, Context: AIAgentTaskContext{Component: AIAgentTaskContextComponent{ID: "task-1"}}}
 	pages := [][]AIAgentTaskContextComment{{{ID: "c1"}}, {{ID: "c2"}}}
+	parent.ConversationID, parent.ThreadID, parent.PreviousAssignmentID, parent.PreviousThreadID = "conversation", "thread", "previous", "previous-thread"
 	if err := store.SaveAssignmentContextComments(ctx, parent.AssignmentID, pages); err != nil {
 		t.Fatal(err)
 	}
@@ -23,6 +24,9 @@ func TestInheritAssignmentContextCopiesParentSnapshotForMentionedAgent(t *testin
 		t.Fatal(err)
 	}
 	got, found, err := store.LoadAssignmentContextSnapshot(ctx, "asg-b")
+	if got.ConversationID != "" || got.ThreadID != "" || got.PreviousAssignmentID != "" || got.PreviousThreadID != "" {
+		t.Fatal("legacy inheritance retained human lineage")
+	}
 	if err != nil || !found || got.AgentID != "agent-b" || got.RequesterPrincipalID != "user-1" || got.TriggerKind != AssignmentContextTriggerAgentMention || got.TriggerID != "run-a" || got.CommentPages != 2 {
 		t.Fatalf("child snapshot: %+v found=%v err=%v", got, found, err)
 	}

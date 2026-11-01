@@ -8,6 +8,7 @@ const (
 	AssignmentContextViewMeetings  = "meetings"
 	AssignmentContextViewMeeting   = "meeting"
 	AssignmentContextViewBase      = "base"
+	AssignmentContextViewChanges   = "changes"
 	AssignmentContextViewTask      = "task"
 	AssignmentContextViewTree      = "tree"
 	AssignmentContextViewResources = "resources"
@@ -19,7 +20,7 @@ const (
 
 func validAssignmentContextView(view string) bool {
 	switch view {
-	case AssignmentContextViewMeeting, AssignmentContextViewMeetings, AssignmentContextViewBase, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
+	case AssignmentContextViewMeeting, AssignmentContextViewMeetings, AssignmentContextViewBase, AssignmentContextViewChanges, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
 		AssignmentContextViewAgents, AssignmentContextViewAgent, AssignmentContextViewContent:
 		return true
 	}
