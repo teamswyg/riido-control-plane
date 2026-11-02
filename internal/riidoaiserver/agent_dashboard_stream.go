@@ -7,7 +7,7 @@ import (
 
 type dashboardStreamScope struct{}
 
-// Register the live subscriber before signalling ready. The client then takes
+// Register the live subscriber before signaling ready. The client then takes
 // an authorized snapshot and reconciles events that arrived during that read.
 func (s Server) handleDashboardStream(w http.ResponseWriter, r *http.Request, agentID string) {
 	workspace := aiAgentWorkspaceIDFromRequest(r)

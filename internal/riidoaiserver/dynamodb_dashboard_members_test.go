@@ -36,7 +36,9 @@ func TestDashboardReadsCreationKeysAndRetainsLegacyRuns(t *testing.T) {
 			if input.Key["pk"]["S"] != dynamoDBAssignmentProjectionPK("remote") {
 				t.Error("reread terminal projection")
 			}
-			json.NewEncoder(w).Encode(map[string]any{"Item": sampleAssignmentProjectionDynamoDBItem(t, fresh, 9)})
+			if err := json.NewEncoder(w).Encode(map[string]any{"Item": sampleAssignmentProjectionDynamoDBItem(t, fresh, 9)}); err != nil {
+				t.Error(err)
+			}
 		default:
 			t.Error("unexpected write")
 		}

@@ -16,6 +16,7 @@ func (p *dashboardDetailProbe) dashboardDetails(_ context.Context, _ string, tas
 	p.fetched = append(p.fetched, task.AssignmentID)
 	return task, nil
 }
+
 func TestDashboardHydratesOnlyRequestedAccessiblePage(t *testing.T) {
 	probe := &dashboardDetailProbe{}
 	history := AgentDashboardHistory{detailReader: probe, missing: map[string]int64{}}
