@@ -10,7 +10,7 @@ func (s *PersistentAIAgentClientStore) MutateTaskMessageReaction(ctx context.Con
 	defer s.operationMu.Unlock()
 	var response AIAgentTaskThreadMessageReactionsResponse
 	var err error
-	for attempt := 0; attempt < threadReactionSaveAttempts; attempt++ {
+	for attempt := 0; attempt < threadSnapshotSaveAttempts; attempt++ {
 		response, err = s.mutateTaskMessageReactionAttempt(ctx, principal, taskID, threadID, messageID, emoji, remove)
 		if !errors.Is(err, errTaskAgentSnapshotChanged) && !errors.Is(err, errAIAgentSnapshotConflict) {
 			return response, err
@@ -19,9 +19,8 @@ func (s *PersistentAIAgentClientStore) MutateTaskMessageReaction(ctx context.Con
 	return response, err
 }
 
-// threadReactionSaveAttempts bounds the reload and reapply loop when another
-// replica commits between the reload and the save.
-const threadReactionSaveAttempts = 3
+// Bound reply and reaction retries when another replica commits after reload.
+const threadSnapshotSaveAttempts = 3
 
 // A reaction is applied to freshly reloaded state and saved fenced against
 // every part committed since the reload, so it never overwrites another

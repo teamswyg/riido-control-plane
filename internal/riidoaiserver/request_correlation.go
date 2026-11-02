@@ -15,7 +15,7 @@ func withRequestCorrelation(next http.Handler) http.Handler {
 		var bytes [16]byte
 		if _, err := rand.Read(bytes[:]); err == nil {
 			id := hex.EncodeToString(bytes[:])
-			w.Header().Set("X-Riido-Request-ID", id)
+			w.Header().Set("X-Riido-Request-Id", id)
 			r = r.WithContext(context.WithValue(r.Context(), requestCorrelationKey{}, id))
 		}
 		next.ServeHTTP(w, r)
