@@ -1,13 +1,13 @@
 package riidoaiserver
 
 import (
-	"errors"
+	"fmt"
 	"unicode/utf8"
 )
 
-func validateAgentInstruction(value string) error {
+func validateAgentInstruction(field, value string) error {
 	if utf8.RuneCountInString(value) > AgentInstructionMaxCharacters {
-		return errors.New("instruction must be 1000 characters or fewer")
+		return fmt.Errorf("%s must be %d characters or fewer", field, AgentInstructionMaxCharacters)
 	}
 	return nil
 }
