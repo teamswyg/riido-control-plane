@@ -28515,6 +28515,95 @@
       "next_loop": "closed_loop_candidate"
     },
     {
+      "id": "riido_cli_context_source_states_5972",
+      "observation": "context changes reported every source missing from the newer capture as an unknown omission, so an Agent had to repeat a full context get after a source was deleted or merely left the read scope, and could keep relying on a source that no longer exists.",
+      "hypothesis": "Asking the monolith once at follow-up capture time, with a dedicated service key and only workspace, requester and source identity, can separate deleted and unselected sources from unknown omissions without returning titles or bodies. Sources the requester can no longer read must disappear without a reason, and any lookup doubt must keep the full-read recovery.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "config_reference_must_preserve_env_manifest_parity",
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_source_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_source_state_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_source_state_lookup.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_omissions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_version.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_compare.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_lineage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/agent_source_state_config.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_compare_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_lookup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_scope_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/agent_source_state_config_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Only a thread follow-up whose server-selected previous capture shares conversation, requester/admin, workspace/team, task and agent asks about the previous sources the new capture omits, at most 32, within 3 seconds. The monolith answer must repeat the same identities in order with visible, deleted or hidden; visible becomes unselected, deleted stays deleted and hidden is omitted. States are stored once with the snapshot, dropped with lineage under the item budget and never hide a source that is still captured. Only a changes request with X-Riido-Context-Changes-Version 2 receives the new statuses; older daemons keep the previous unknown omissions. Failures, malformed answers, oversized sets, sources outside the previous capture and unset config keep unavailable with full_refresh_required. Local regression evidence does not establish staging configuration, deployed daemon support or real-account acceptance.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "cli_task_thread_read_opaque_boundary",
       "observation": "Standalone CLI OAuth is scoped to monolith. Passing it to the generic application authorization fallback does not establish the current CLI grant, installation or task policy.",
       "hypothesis": "A short-lived opaque task-bound ticket and dedicated current-policy service check can expose the existing thread projection without granting application write, stream or device authority.",
