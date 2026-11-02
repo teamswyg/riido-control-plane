@@ -46,6 +46,16 @@ func (s *DevelopmentAIAgentClientStore) deliverDashboardEventLocked(id int, sub 
 // Restoring a shared snapshot can reveal transitions committed on another
 // replica. Keep existing subscribers, and forward only events past the local cursor.
 func (s *DevelopmentAIAgentClientStore) deliverRestoredDashboardEventsLocked(next int64) {
+	if len(s.events) > 0 && s.events[0].Seq > next {
+		for id, subscriber := range s.subscribers {
+			if subscriber.dashboardAgentID != "" {
+				delete(s.subscribers, id)
+				close(subscriber.events)
+			}
+		}
+		return
+	}
+
 	for _, e := range s.events {
 		if e.Seq < next {
 			continue

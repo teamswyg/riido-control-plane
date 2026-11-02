@@ -17,15 +17,16 @@ type DynamoDBAssignmentOperationStoreConfig struct {
 }
 
 type DynamoDBAssignmentOperationStore struct {
-	enableAgentHistory  bool
-	commands            chan dynamoDBAssignmentOperationCommand
-	done                chan struct{}
-	region              string
-	tableName           string
-	endpoint            string
-	endpointHost        string
-	httpClient          *http.Client
-	now                 func() time.Time
-	activeLeaseDuration time.Duration
-	credentialsProvider AWSCredentialsProvider
+	dashboardTerminalTimes dashboardTerminalCache
+	enableAgentHistory     bool
+	commands               chan dynamoDBAssignmentOperationCommand
+	done                   chan struct{}
+	region                 string
+	tableName              string
+	endpoint               string
+	endpointHost           string
+	httpClient             *http.Client
+	now                    func() time.Time
+	activeLeaseDuration    time.Duration
+	credentialsProvider    AWSCredentialsProvider
 }
