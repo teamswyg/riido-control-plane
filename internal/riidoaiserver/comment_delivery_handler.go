@@ -26,6 +26,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 400, "event_id is required")
 		return
 	}
+	started := time.Now()
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 	evidence, ok := s.fetchCommentDeliveryEvidence(ctx, w, input.EventID)
@@ -38,6 +39,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 	}
 	release, err := s.taskAgentExecutionGate.beginPublication(ctx, evidence.TaskID)
 	if err != nil {
+		logCommentDeliveryFailure(ctx, "comment", "publication_gate", "comment:"+input.EventID, started, err)
 		writeCommentDeliveryError(w, err)
 		return
 	}
