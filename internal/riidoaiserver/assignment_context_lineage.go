@@ -21,4 +21,5 @@ func (trigger assignmentContextTrigger) withThread(assignment Assignment, respon
 func clearAssignmentContextLineage(snapshot *AssignmentContextSnapshot) {
 	snapshot.ConversationID, snapshot.ThreadID = "", ""
 	snapshot.PreviousAssignmentID, snapshot.PreviousThreadID = "", ""
+	snapshot.SourceStates = nil
 }

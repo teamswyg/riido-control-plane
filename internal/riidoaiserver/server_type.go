@@ -10,6 +10,7 @@ type ServerConfig struct {
 	CLIAgentReadAuthorizer   RequestAuthorizer
 	CLIInstallationService   CLIInstallationServiceConfig
 	CommentDelivery          CommentDeliveryConfig
+	AgentSourceState         AgentSourceStateConfig
 	Authorizer               RequestAuthorizer
 	AgentCatalogStore        AgentCatalogStore
 	AIAgentClient            AIAgentClientStore

@@ -26,13 +26,7 @@ func compareAssignmentContextParts(baseline, current AssignmentContextSnapshot) 
 			}
 		}
 	}
-	for _, part := range baseline.Content {
-		if present[readScopeManifestKey(part)] {
-			continue
-		}
-		out.Changes = append(out.Changes, AssignmentContextChange{ResourceKind: part.ResourceKind, SourceID: part.SourceID, Part: part.Part, Status: "unavailable", Reason: "not_in_current_capture"})
-		out.FullRefreshRequired = true
-	}
+	appendAssignmentOmissions(&out, baseline, present, current.SourceStates)
 	if current.Truncated || baseline.Truncated || current.Context.ReadScope.Status != "available" || baseline.Context.ReadScope.Status != "available" {
 		out.FullRefreshRequired = true
 	}

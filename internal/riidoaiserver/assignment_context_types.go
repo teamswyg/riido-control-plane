@@ -43,5 +43,8 @@ type AssignmentContextSnapshot struct {
 	CommentPages         int                         `json:"comment_pages,omitempty"`
 	Content              []AssignmentContentManifest `json:"content,omitempty"`
 	ContentBlocks        []AssignmentContentBlockRef `json:"content_blocks,omitempty"`
-	Context              AIAgentTaskContext          `json:"context"`
+	// SourceStates explains sources of the previous capture that this one no
+	// longer has; decided once at capture time (RIID-5972).
+	SourceStates []AssignmentSourceState `json:"source_states,omitempty"`
+	Context      AIAgentTaskContext      `json:"context"`
 }
