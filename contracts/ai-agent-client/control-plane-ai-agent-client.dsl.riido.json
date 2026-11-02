@@ -6597,7 +6597,14 @@
         "status": 200,
         "ref": "ClientStreamEvent",
         "content_type": "text/event-stream"
-      }
+      },
+      "description": "Set dashboard_agent_id to subscribe to one agent's authorized dashboard changes. The server opens the live-only SSE response after registering the subscriber. Fetch the snapshot when the connection opens and again after reconnect. Queued state changes are included for this subscriber.",
+      "query_parameters": [
+        {
+          "name": "dashboard_agent_id",
+          "type": "string"
+        }
+      ]
     },
     {
       "operation_id": "createAIAgentTaskAgentAssignmentV2",
@@ -6879,7 +6886,7 @@
       "operation_id": "getAgentDashboardV2",
       "kind": "query",
       "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
-      "description": "page query parameter is a positive integer (default 1); page_size is 10. Filter task read permissions before pagination and aggregates. Counts are completed assignment runs. Asia/Seoul dates cover this month and the previous five months. Duration excludes queue time and includes response waits. observed_since is the oldest retained accessible record, not proof of complete prior history.",
+      "description": "page query parameter is a positive integer (default 1); page_size is 10. Filter task read permissions before pagination and aggregates. Counts are completed assignment runs. Asia/Seoul dates cover this month and the previous five months. Duration excludes queue time and includes response waits. observed_since is the oldest retained accessible record, not proof of complete prior history. Set section=active to return current work and the queue without loading completed runs. Omit section for the paginated dashboard and its aggregates.",
       "method": "GET",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard",
       "resource": "agent",
@@ -6911,6 +6918,10 @@
           "type": "integer",
           "minimum": 1,
           "default": 1
+        },
+        {
+          "name": "section",
+          "type": "string"
         }
       ]
     },
@@ -6918,7 +6929,7 @@
       "operation_id": "getAgentDashboard",
       "kind": "query",
       "summary": "에이전트 현재 작업·큐·실행 기록·활동을 조회합니다.",
-      "description": "page query parameter is a positive integer (default 1); page_size is 10. Filter task read permissions before pagination and aggregates. Counts are completed assignment runs. Asia/Seoul dates cover this month and the previous five months. Duration excludes queue time and includes response waits. observed_since is the oldest retained accessible record, not proof of complete prior history.",
+      "description": "page query parameter is a positive integer (default 1); page_size is 10. Filter task read permissions before pagination and aggregates. Counts are completed assignment runs. Asia/Seoul dates cover this month and the previous five months. Duration excludes queue time and includes response waits. observed_since is the oldest retained accessible record, not proof of complete prior history. Set section=active to return current work and the queue without loading completed runs. Omit section for the paginated dashboard and its aggregates.",
       "method": "GET",
       "path": "/v1/client/ai-agent/agents/{agent_id}/dashboard",
       "resource": "agent",
@@ -6949,6 +6960,10 @@
           "type": "integer",
           "minimum": 1,
           "default": 1
+        },
+        {
+          "name": "section",
+          "type": "string"
         }
       ]
     },

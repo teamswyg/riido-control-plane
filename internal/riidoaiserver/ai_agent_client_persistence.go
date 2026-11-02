@@ -62,6 +62,7 @@ type PersistentAIAgentClientStore struct {
 	snapshotReloadMu              sync.Mutex
 	snapshotReloadInterval        time.Duration
 	snapshotHeartbeatSaveInterval time.Duration
+	dashboardLastRefresh          time.Time // guarded by operationMu; shared by all dashboard subscribers
 	snapshotLastReloadAt          time.Time
 	snapshotLastSavedAt           time.Time
 	snapshotClock                 func() time.Time
@@ -481,10 +482,12 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 	s.taskThreadMessages = taskThreadMessages
 	s.ensureAgentProfileColorsLocked()
 	s.taskThreadProgressCache = map[string]taskThreadProgressMessageCache{}
+	nextLocalSeq := s.nextClientEventSeqLocked()
 	s.events = events
 	if preserveSubscribers {
 		s.subscribers = subscribers
 		s.nextSubscriberID = nextSubscriberID
+		s.deliverRestoredDashboardEventsLocked(nextLocalSeq)
 	} else {
 		s.subscribers = map[int]aiAgentClientSubscriber{}
 		s.nextSubscriberID = 0

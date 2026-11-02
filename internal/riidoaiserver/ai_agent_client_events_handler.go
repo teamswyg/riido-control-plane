@@ -14,6 +14,10 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 		writeMethodNotAllowed(w)
 		return
 	}
+	if id := r.URL.Query().Get("dashboard_agent_id"); id != "" {
+		s.handleDashboardStream(w, r, id)
+		return
+	}
 	if r.URL.Query().Get("notifications") == "1" {
 		s.handleTaskNotificationStream(w, r)
 		return

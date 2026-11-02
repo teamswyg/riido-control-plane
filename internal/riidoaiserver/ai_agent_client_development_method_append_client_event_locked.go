@@ -20,6 +20,10 @@ func (s *DevelopmentAIAgentClientStore) fanoutClientEventLocked(event ClientStre
 	fanoutEvent, progressFanout := clientEventForLiveFanout(event)
 	cache := subscriberEventCache{}
 	for id, subscriber := range s.subscribers {
+		if subscriber.dashboardAgentID != "" {
+			s.deliverDashboardEventLocked(id, subscriber, event)
+			continue
+		}
 		visible, ok := cache.eventFor(s, subscriber, event, fanoutEvent, progressFanout)
 		if !ok {
 			continue
