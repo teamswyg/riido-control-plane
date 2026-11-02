@@ -28801,6 +28801,124 @@
       ],
       "decision": "Accept optional content_digest/not_modified only for version-1 captured content. A matching representation uses HTTP 200 with data:null only after current device, lease/run, quota, scope/page and audit checks; each call still records its request and exact page sources. Missing or unsupported negotiation keeps legacy response fields. No cross-run authority, live-body cache, HTTP-call reduction, production activation or authenticated consumer acceptance is implied. Request/response and boundary-fixture helpers preserve the existing code budget instead of raising its limits.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "thread_history_requester_confirmation_reason_6001",
+      "observation": "The task-detail activity tab (client RIID-5842) shows each agent run with the user who started it and whether a waiting run needs an answer or an approval. v3 thread history exposed neither the requesting principal nor the stored confirmation reason, so clients could not render them.",
+      "hypothesis": "Record the requesting user principal once per thread at assign, comment mention and thread reply, and project it with the existing confirmation_reason as optional v3 history fields. Later resume, stop or unassign must not overwrite the first requester, runs created only by runtime events stay without one, and user follow-up preservation and conversation grouping stay unchanged.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "thread_history_v3_must_expose_stable_conversation_grouping",
+        "api_client_delivery_must_preserve_generated_handoff_boundary",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json"
+        },
+        {
+          "kind": "api",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_assign_ai_agent_task_2.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_submit_ai_agent_task_comment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_record_task_thread_requester.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_requester_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/generated_files_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_requester_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/reactquerygen"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/generatedclienthandoff"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Add requested_by and confirmation_reason as omitempty response fields only; no existing field, ordering or follow-up behavior changes. New tests cover per-run requester recording, no overwrite by later actions, omission when unknown, and confirmation reason projection. The contract DSL regenerates IR, OpenAPI and the generated client; generated docs and golden hashes are refreshed by their own tools without relaxing gates.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
