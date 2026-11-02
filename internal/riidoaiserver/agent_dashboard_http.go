@@ -1,6 +1,7 @@
 package riidoaiserver
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -46,7 +47,23 @@ func (s Server) handleAgentDashboard(w http.ResponseWriter, r *http.Request, age
 		writeError(w, http.StatusNotFound, "agent not found")
 		return
 	}
-	history, err := reader.LoadAgentDashboardHistory(r.Context(), agentID)
+	load := reader.LoadAgentDashboardHistory
+	section := r.URL.Query().Get("section")
+	if section != "" && section != "active" {
+		writeError(w, http.StatusBadRequest, "invalid dashboard section")
+		return
+	}
+	if section == "active" {
+		if active, ok := s.assignment.(interface {
+			LoadAgentDashboardActive(context.Context, string) (AgentDashboardHistory, error)
+		}); ok {
+			load = active.LoadAgentDashboardActive
+		} else {
+			writeError(w, http.StatusServiceUnavailable, "dashboard history is unavailable")
+			return
+		}
+	}
+	history, err := load(r.Context(), agentID)
 	if err != nil {
 		writeError(w, http.StatusServiceUnavailable, "dashboard history is unavailable")
 		return
@@ -70,40 +87,22 @@ func (s Server) handleAgentDashboard(w http.ResponseWriter, r *http.Request, age
 			continue
 		}
 		checked[assignment.TaskID] = true
-		_, err := s.config.Authorizer.Authorize(r.Context(), token, AuthorizationRequest{Resource: AuthorizationResourceAIAgentClient, Action: AuthorizationActionRead, WorkspaceID: principal.WorkspaceID, TaskID: assignment.TaskID})
+		task, err := s.dashboardTaskForViewer(r.Context(), token, principal.WorkspaceID, assignment.TaskID)
 		if errors.Is(err, ErrAuthorizationForbidden) {
 			continue
 		}
 		if err != nil {
-			writeError(w, http.StatusServiceUnavailable, "task access could not be verified")
+			writeError(w, http.StatusServiceUnavailable, err.Error())
 			return
 		}
-		// Require the viewer's credentials for metadata as well; workspace service keys
-		// must never expand access for a shared agent's history.
-		contextReader, ok := s.taskContext.(AIAgentTaskContextRequestReader)
-		if !ok {
-			writeError(w, http.StatusServiceUnavailable, "request-scoped task context is unavailable")
-			return
-		}
-		request := AIAgentTaskContextRequest{ComponentID: assignment.TaskID, WorkspaceID: principal.WorkspaceID, BearerToken: token}
-		readTask := contextReader.GetAIAgentTaskContextForRequest
-		if metadata, ok := s.taskContext.(agentDashboardTaskReader); ok {
-			readTask = metadata.GetAgentDashboardTask
-		}
-		context, err := readTask(r.Context(), request)
-		if errors.Is(err, ErrAuthorizationForbidden) || errors.Is(err, errDashboardTaskUnavailable) {
-			continue
-		}
-		if err != nil {
-			writeError(w, http.StatusServiceUnavailable, "task context could not be verified")
-			return
-		}
-		if context.Component.ID != assignment.TaskID {
-			continue
-		}
-		tasks[assignment.TaskID] = context.Component
+		tasks[assignment.TaskID] = task
 	}
-	writeJSON(w, http.StatusOK, buildAgentDashboard(agent, history, tasks, page, time.Now().UTC()))
+	view := buildAgentDashboard(agent, history, tasks, page, time.Now().UTC())
+	if err := history.fillVisibleDetails(r.Context(), agentID, &view); err != nil {
+		writeError(w, http.StatusServiceUnavailable, "dashboard history is unavailable")
+		return
+	}
+	writeJSON(w, http.StatusOK, view)
 }
 
 var errDashboardTaskUnavailable = errors.New("dashboard task unavailable")

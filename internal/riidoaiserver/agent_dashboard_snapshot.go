@@ -10,12 +10,12 @@ type agentAssignmentHistoryReader interface {
 	LoadAgentAssignmentOperations(context.Context, string) ([]AssignmentOperationRecord, error)
 }
 
-func agentDashboardSnapshotFromState(state *storeState, agentID string, now time.Time) StoreSnapshot {
+func scopedDashboardSnapshot(state *storeState, agentID string, now time.Time, activeOnly bool) StoreSnapshot {
 	out := StoreSnapshot{SavedAt: now, Events: map[string][]TaskEvent{}}
 	ids := map[string]bool{}
 	for _, id := range state.agentAssignments[agentID] {
 		a, ok := state.assignments[id]
-		if ok && a.AgentID == agentID {
+		if ok && a.AgentID == agentID && (!activeOnly || !isDashboardTerminal(a.State)) {
 			out.Assignments = append(out.Assignments, a)
 			ids[id] = true
 		}

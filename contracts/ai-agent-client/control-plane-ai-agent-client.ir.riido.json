@@ -6417,7 +6417,13 @@
         "status": 200,
         "ref": "ClientStreamEvent",
         "content_type": "text/event-stream"
-      }
+      },
+      "query_parameters": [
+        {
+          "name": "dashboard_agent_id",
+          "type": "string"
+        }
+      ]
     },
     {
       "operation_id": "createAIAgentTaskAgentAssignmentV2",
@@ -6651,6 +6657,10 @@
           "type": "integer",
           "minimum": 1,
           "default": 1
+        },
+        {
+          "name": "section",
+          "type": "string"
         }
       ],
       "operation_id": "getAgentDashboardV2",
@@ -6690,6 +6700,10 @@
           "type": "integer",
           "minimum": 1,
           "default": 1
+        },
+        {
+          "name": "section",
+          "type": "string"
         }
       ],
       "operation_id": "getAgentDashboard",

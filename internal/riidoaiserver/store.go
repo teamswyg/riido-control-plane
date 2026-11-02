@@ -140,7 +140,7 @@ func (s *Store) loop(state storeState) {
 			err := s.handleApplyReviewAccountProvisioning(&state, msg.provisioning)
 			msg.reply <- applyReviewAccountProvisioningResult{err: err}
 		case agentDashboardSnapshotCmd:
-			msg.reply <- agentDashboardSnapshotFromState(&state, msg.agentID, s.now())
+			msg.reply <- scopedDashboardSnapshot(&state, msg.agentID, s.now(), msg.activeOnly)
 		case subscribeCmd:
 			history, events, subID, err := s.handleSubscribe(&state, msg.taskID)
 			msg.reply <- subscribeResult{history: history, events: events, subID: subID, err: err}
