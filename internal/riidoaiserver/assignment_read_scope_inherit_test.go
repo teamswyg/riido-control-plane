@@ -7,6 +7,7 @@ func TestAssignmentReadScopeInheritancePublishesAllPartsAtomically(t *testing.T)
 	snapshot, pages := assignmentContentTestBundle()
 	snapshot.RequesterPrincipalID = "requester"
 	snapshot.WorkspaceID = "workspace"
+	snapshot.ConversationID, snapshot.ThreadID, snapshot.PreviousAssignmentID, snapshot.PreviousThreadID = "conversation", "thread", "previous", "previous-thread"
 	if err := store.SaveAssignmentContentBundle(t.Context(), snapshot, pages); err != nil {
 		t.Fatal(err)
 	}
@@ -14,6 +15,10 @@ func TestAssignmentReadScopeInheritancePublishesAllPartsAtomically(t *testing.T)
 	child := Assignment{ID: "child", TaskID: snapshot.TaskID, WorkspaceID: "workspace", CreatedBy: "requester", AgentID: "agent-b"}
 	if err := server.InheritAssignmentContext(t.Context(), snapshot.AssignmentID, child, "mention"); err != nil {
 		t.Fatal(err)
+	}
+	gotSnapshot, found, err := store.LoadAssignmentContextSnapshot(t.Context(), child.ID)
+	if err != nil || !found || gotSnapshot.ConversationID != "" || gotSnapshot.ThreadID != "" || gotSnapshot.PreviousAssignmentID != "" || gotSnapshot.PreviousThreadID != "" {
+		t.Fatal("agent inheritance retained human lineage", err)
 	}
 	for i, want := range pages {
 		got, found, err := store.LoadAssignmentContentPage(t.Context(), child.ID, i)

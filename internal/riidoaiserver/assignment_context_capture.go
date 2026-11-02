@@ -10,9 +10,13 @@ import (
 // RequesterAdmin is the requester's admin role at request time; roles are
 // only known while the user's request is authorized, like the snapshot.
 type assignmentContextTrigger struct {
-	Kind           string
-	ID             string
-	RequesterAdmin bool
+	ConversationID       string
+	ThreadID             string
+	PreviousAssignmentID string
+	PreviousThreadID     string
+	Kind                 string
+	ID                   string
+	RequesterAdmin       bool
 }
 
 // captureAssignmentContext stores the prompt's task context and records its
@@ -28,6 +32,8 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 	}
 	now := time.Now().UTC()
 	snapshot := AssignmentContextSnapshot{
+		ConversationID: trigger.ConversationID, ThreadID: trigger.ThreadID,
+		PreviousAssignmentID: trigger.PreviousAssignmentID, PreviousThreadID: trigger.PreviousThreadID,
 		AssignmentID:         assignment.ID,
 		TaskID:               assignment.TaskID,
 		WorkspaceID:          assignment.WorkspaceID,
@@ -42,6 +48,8 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 		s.captureAssignmentReadScope(ctx, snapshot, taskContext)
 		return
 	}
+	// Legacy captures cannot be compared; preserve their existing storage budget.
+	clearAssignmentContextLineage(&snapshot)
 	contextOnly, comments := splitAssignmentContextComments(*taskContext, trigger)
 	contextOnly.ReadScopeEvidence = nil
 	snapshot.Context, snapshot.Truncated = boundAssignmentContext(contextOnly)

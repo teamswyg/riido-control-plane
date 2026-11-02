@@ -1,6 +1,12 @@
 package riidoaiserver
 
 func normalizeServerConfigNilInterfaces(config ServerConfig) ServerConfig {
+	if isNilInterface(config.CLIAgentReadAuthorizer) {
+		config.CLIAgentReadAuthorizer = nil
+	}
+	if isNilInterface(config.CLIThreadReadAuthorizer) {
+		config.CLIThreadReadAuthorizer = nil
+	}
 	if isNilInterface(config.Authorizer) {
 		config.Authorizer = nil
 	}
