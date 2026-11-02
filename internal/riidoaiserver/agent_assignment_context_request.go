@@ -12,6 +12,7 @@ func parseAssignmentContextRequest(w http.ResponseWriter, r *http.Request) (Agen
 		writeError(w, http.StatusBadRequest, "assignment_id, lease_token and a supported view are required")
 		return req, assignmentContextCache{}, false
 	}
+	req.sourceStates = assignmentContextChangesV2(r.Header, req.View)
 	cache, err := assignmentContextCacheRequest(r.Header, req.View)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "invalid assignment context cache digest")

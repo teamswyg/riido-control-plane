@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-const deployPolicyGoldenSHA256 = "136e81a8b6ffe5d35bbb74931db0333a286f8b75a922407d5feddb82274fa5dc"
+const deployPolicyGoldenSHA256 = "a050646ba60de8ef1fb58ce94e36ec2943c9f2f71b1d4b90fc1d7a92f93746c2"
 
 func TestDeployPolicyBehaviorGolden(t *testing.T) {
 	parsed := loadRuntimeCDOwnership(t)

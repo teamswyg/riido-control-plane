@@ -32,6 +32,7 @@ func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgent
 		AIAgentProfileThumbnails: config.AIAgentProfileThumbnails,
 		TaskContext:              config.TaskContextReader,
 		CommentDelivery:          config.CommentDelivery,
+		AgentSourceState:         config.AgentSourceState,
 		Authorizer:               config.Authorizer,
 		WebAllowedOrigins:        config.WebAllowedOrigins,
 		HTTPTransactions:         httpTransactions,
