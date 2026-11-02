@@ -779,6 +779,14 @@
               "minimum": 1,
               "type": "integer"
             }
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -821,7 +829,8 @@
           ],
           "generated_path": "aiAgent.agents.dashboard",
           "cache_tag": "aiAgent.agents.dashboard"
-        }
+        },
+        "description": " Set section=active to return current work and the queue without loading completed runs. Omit section for the paginated dashboard and its aggregates."
       }
     },
     "/v1/client/ai-agent/agents/{agent_id}/editability": {
@@ -2823,6 +2832,14 @@
               "minimum": 1,
               "type": "integer"
             }
+          },
+          {
+            "name": "section",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2866,7 +2883,8 @@
           ],
           "generated_path": "v2.aiAgent.agents.dashboard",
           "cache_tag": "v2.agents.dashboard"
-        }
+        },
+        "description": " Set section=active to return current work and the queue without loading completed runs. Omit section for the paginated dashboard and its aggregates."
       }
     },
     "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/editability": {
@@ -3531,6 +3549,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "dashboard_agent_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3574,7 +3600,8 @@
           ],
           "generated_path": "v2.aiAgent.events.stream",
           "cache_tag": "v2.aiAgent.events.stream"
-        }
+        },
+        "description": "Set dashboard_agent_id to subscribe to one agent's authorized dashboard changes. The server opens the live-only SSE response after registering the subscriber. Fetch the snapshot when the connection opens and again after reconnect. Queued state changes are included for this subscriber."
       }
     },
     "/v2/client/workspaces/{workspace_id}/ai-agent/onboarding/fixtures": {
