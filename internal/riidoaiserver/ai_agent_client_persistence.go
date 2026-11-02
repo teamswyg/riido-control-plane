@@ -62,6 +62,7 @@ type PersistentAIAgentClientStore struct {
 	snapshotReloadMu              sync.Mutex
 	snapshotReloadInterval        time.Duration
 	snapshotHeartbeatSaveInterval time.Duration
+	dashboardLastRefresh          time.Time // guarded by operationMu; shared by all dashboard subscribers
 	snapshotLastReloadAt          time.Time
 	snapshotLastSavedAt           time.Time
 	snapshotClock                 func() time.Time
