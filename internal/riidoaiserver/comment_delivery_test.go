@@ -14,6 +14,13 @@ func TestCommentDeliveryVerifiedEvidenceAndRetry(t *testing.T) {
 	key := strings.Repeat("k", 32)
 	evidence := verifiedCommentDelivery{EventID: "event", CommentID: "comment", TaskID: "task", AgentID: "agent-public-openclaw", WorkspaceID: "workspace-dev-riid", PrincipalID: "user-1", Body: "A안과 B안의 장단점 표로 비교 부탁. 비용과 접근성이 기준.", Context: AIAgentTaskContext{Component: AIAgentTaskContextComponent{ID: "task", ComponentType: "task", Title: "마케팅 방향"}, Document: AIAgentTaskContextDocument{Content: "A안 월 3만원, B안 월 5만원. 사용자 10명."}}}
 	evidenceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPut && r.URL.Path == "/internal/agent-comment-deliveries/event/reaction" {
+			if r.Header.Get(CommentDeliveryKeyHeader) != key {
+				t.Error("reaction request missing key")
+			}
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		if r.Header.Get(CommentDeliveryKeyHeader) != key || r.URL.Path != "/internal/agent-comment-deliveries/event" {
 			t.Error("evidence request missing binding")
 		}

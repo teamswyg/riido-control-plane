@@ -3,6 +3,7 @@ package riidoaiserver
 import "context"
 
 func (s Server) deliverCommentInvocation(ctx context.Context, principal AuthorizationResult, evidence verifiedCommentDelivery, request AssignAIAgentTaskRequest) (AIAgentTaskActionResponse, error) {
+	defer s.scheduleCommentStatusReactions(ctx, principal, evidence.TaskID)
 	response, found, lookupErr := s.findTaskRequestReceipt(ctx, principal, evidence.TaskID, request)
 	if lookupErr != nil {
 		return AIAgentTaskActionResponse{}, lookupErr

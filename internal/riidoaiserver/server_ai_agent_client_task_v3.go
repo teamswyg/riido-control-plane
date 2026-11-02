@@ -41,5 +41,6 @@ func (s Server) handleAIAgentClientTaskThreadsV3(w http.ResponseWriter, r *http.
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	s.syncCommentStatusReactions(r.Context(), principal, taskID)
 	writeJSON(w, http.StatusOK, response)
 }

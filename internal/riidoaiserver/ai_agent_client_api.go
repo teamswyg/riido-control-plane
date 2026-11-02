@@ -512,30 +512,31 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 }
 
 type AIAgentTaskThreadRecord struct {
-	CommentInvocation  *CommentInvocation                   `json:"comment_invocation,omitempty"`
-	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
-	ThreadID           string                               `json:"thread_id"`
-	ConversationID     string                               `json:"conversation_id,omitempty"`
-	ParentThreadID     string                               `json:"parent_thread_id,omitempty"`
-	TaskID             string                               `json:"task_id"`
-	AssignmentID       string                               `json:"assignment_id,omitempty"`
-	AgentID            string                               `json:"agent_id"`
-	AgentSnapshot      *AIAgentTaskThreadAgentSnapshot      `json:"agent_snapshot,omitempty"`
-	AgentSnapshotID    string                               `json:"-"`
-	RunID              string                               `json:"run_id"`
-	SourceCommentID    string                               `json:"source_comment_id,omitempty"`
-	SourceMessageID    string                               `json:"source_message_id,omitempty"`
-	WorkStatus         AgentWorkStatus                      `json:"work_status"`
-	AssignmentState    AgentAssignmentState                 `json:"assignment_state"`
-	QueueDiagnostics   *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`
-	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
-	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
-	CommentKind        AgentTaskCommentKind                 `json:"comment_kind"`
-	Message            string                               `json:"message"`
-	ResultMessage      string                               `json:"result_message,omitempty"`
-	StartedAt          time.Time                            `json:"started_at,omitempty"`
-	CompletedAt        time.Time                            `json:"completed_at,omitempty"`
-	Lines              []AgentThreadProgressLine            `json:"lines"`
+	ReactionSourceMessageID *string                              `json:"reaction_source_message_id,omitempty"`
+	CommentInvocation       *CommentInvocation                   `json:"comment_invocation,omitempty"`
+	ConfirmationReason      string                               `json:"confirmation_reason,omitempty"`
+	ThreadID                string                               `json:"thread_id"`
+	ConversationID          string                               `json:"conversation_id,omitempty"`
+	ParentThreadID          string                               `json:"parent_thread_id,omitempty"`
+	TaskID                  string                               `json:"task_id"`
+	AssignmentID            string                               `json:"assignment_id,omitempty"`
+	AgentID                 string                               `json:"agent_id"`
+	AgentSnapshot           *AIAgentTaskThreadAgentSnapshot      `json:"agent_snapshot,omitempty"`
+	AgentSnapshotID         string                               `json:"-"`
+	RunID                   string                               `json:"run_id"`
+	SourceCommentID         string                               `json:"source_comment_id,omitempty"`
+	SourceMessageID         string                               `json:"source_message_id,omitempty"`
+	WorkStatus              AgentWorkStatus                      `json:"work_status"`
+	AssignmentState         AgentAssignmentState                 `json:"assignment_state"`
+	QueueDiagnostics        *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`
+	FailureDiagnostics      *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext        *assignment.ExecutionContext         `json:"execution_context,omitempty"`
+	CommentKind             AgentTaskCommentKind                 `json:"comment_kind"`
+	Message                 string                               `json:"message"`
+	ResultMessage           string                               `json:"result_message,omitempty"`
+	StartedAt               time.Time                            `json:"started_at,omitempty"`
+	CompletedAt             time.Time                            `json:"completed_at,omitempty"`
+	Lines                   []AgentThreadProgressLine            `json:"lines"`
 }
 
 type AIAgentTaskThreadCollectionResponse struct {

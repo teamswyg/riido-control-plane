@@ -100,6 +100,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	s.assignTaskAgentMemberLocked(taskID, agent)
 
 	s.appendAgentTaskActionEvent(response)
+	s.appendTaskNotificationLocked(TaskEvent{EventID: "started:" + response.AssignmentID, AssignmentID: response.AssignmentID, TaskID: taskID, AgentID: response.AgentID, WorkspaceID: principal.WorkspaceID, CreatedBy: principal.PrincipalID, At: time.Now().UTC()}, response)
 	s.rememberTaskRequestReceiptLocked(receiptKey, response)
 	return clientVisibleQueuedActionResponse(response), nil
 }

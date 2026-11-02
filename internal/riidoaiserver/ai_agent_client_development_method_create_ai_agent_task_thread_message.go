@@ -80,5 +80,6 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 		s.assignTaskAgentMemberLocked(taskID, agent)
 	}
 	s.appendAgentTaskActionEvent(response)
+	s.appendTaskNotificationLocked(TaskEvent{EventID: "started:" + response.AssignmentID, AssignmentID: response.AssignmentID, TaskID: taskID, AgentID: response.AgentID, WorkspaceID: principal.WorkspaceID, CreatedBy: principal.PrincipalID, At: time.Now().UTC()}, response)
 	return s.rememberTaskRequestReceiptLocked(receiptKey, clientVisibleQueuedActionResponse(response)), nil
 }

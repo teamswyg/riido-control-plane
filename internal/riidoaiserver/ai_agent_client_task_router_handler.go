@@ -16,6 +16,8 @@ func (s Server) handleAIAgentClientTasks(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	switch {
+	case strings.HasPrefix(suffix, "threads/") && strings.Contains(suffix, "/reactions"):
+		s.handleTaskMessageReaction(w, r, taskID, suffix)
 	case suffix == "assignable-agents" && r.Method == http.MethodGet:
 		s.handleAIAgentClientTaskAssignableAgents(w, r, taskID)
 	case suffix == "assignment" && r.Method == http.MethodPost:
