@@ -37,7 +37,7 @@ func applyAgentOptionalTextPatch(agent *AgentClientRecord, req UpdateAgentConfig
 		agent.Description = *req.Description
 	}
 	if req.Instruction != nil {
-		if err := validateAgentInstruction(*req.Instruction); err != nil {
+		if err := validateAgentInstruction("instruction", *req.Instruction); err != nil {
 			return err
 		}
 		agent.Instruction = *req.Instruction
