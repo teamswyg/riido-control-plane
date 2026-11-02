@@ -46,8 +46,10 @@ func TestHTTPDirectAssignmentValidatesCallerInstruction(t *testing.T) {
 			server := newAIAgentClientHTTPTestServer(t, []StaticTokenCredential{{
 				PrincipalID: "user-1", Token: "owner", Scopes: []string{"riido:*"},
 			}})
-			body := aiAgentSmokeJSON(t, AssignRequest{ComponentID: "component-a", AgentID: "agent-owned-codex",
-				RuntimeProvider: "codex", Prompt: "test budget", AgentInstruction: strings.Repeat("지", n)})
+			body := aiAgentSmokeJSON(t, AssignRequest{
+				ComponentID: "component-a", AgentID: "agent-owned-codex",
+				RuntimeProvider: "codex", Prompt: "test budget", AgentInstruction: strings.Repeat("지", n),
+			})
 			want := http.StatusOK
 			if n > AgentInstructionMaxCharacters {
 				want = http.StatusBadRequest
