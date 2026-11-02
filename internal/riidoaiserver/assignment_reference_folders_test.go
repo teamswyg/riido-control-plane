@@ -2,9 +2,10 @@ package riidoaiserver
 
 import (
 	"context"
-	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 	"strings"
 	"testing"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 
 func TestReferenceFoldersAssignmentSnapshot(t *testing.T) {

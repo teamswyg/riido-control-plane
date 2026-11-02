@@ -20,7 +20,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		}
 		current := dynamoDBAIAgentClientSnapshotCurrentItem(committed)
 		oldMember := dynamoDBAIAgentClientSnapshotItemsByPart(committed)[dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships]
-		if (scoped || createMutation) && current != nil {
+		if (scoped || createMutation || isThreadReactionMutation(ctx)) && current != nil {
 			var committedHashes map[string]string
 			if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
@@ -35,6 +35,10 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 			}
 		}
 		snapshot := requested
+		preservedThreadHashes, err := s.mergeCommittedThreadParts(committed, requested, &snapshot)
+		if err != nil {
+			return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
+		}
 		if current != nil {
 			var relation AIAgentClientSnapshot
 			if err := decodeCommittedTaskAgentMemberships(current, oldMember, &relation); err != nil {
@@ -73,8 +77,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 			if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 			}
-			// Even an ordinary heartbeat/event writer must not replace conversation
-			// parts that another replica advanced after this writer's last load.
+			// Durable conversation writers retain their existing strict fence.
 			if snapshotHasConversationHistory(snapshot) || strings.Contains(dynamoDBStringValue(current, "part_hashes_json"), conversationHistoryManifestGuard) {
 				for _, part := range []string{dynamoDBAIAgentClientSnapshotPartTaskThreads, dynamoDBAIAgentClientSnapshotPartTaskThreadMessages} {
 					if s.partHashes[part] != committedHashes[part] {
@@ -139,6 +142,9 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		_, err = doDynamoDBJSON(ctx, dynamoDBRequest{endpoint: s.endpoint, endpointHost: s.endpointHost, region: s.region, target: dynamoDBTransactWriteTarget, payload: payload, credentials: credentials, httpClient: s.httpClient, now: s.now})
 		if err == nil {
 			s.partHashes = hashes
+			for part, hash := range preservedThreadHashes {
+				s.partHashes[part] = hash
+			}
 			// The caller still holds its requested cache; retain that observation as
 			// the delta baseline, not values preserved from another replica.
 			s.onboardingBaseline = onboardingOwnedSnapshot(requested)

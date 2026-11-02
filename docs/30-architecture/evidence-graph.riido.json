@@ -26878,6 +26878,179 @@
       ],
       "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "agent_thread_message_reactions",
+      "observation": "Agent task threads had no reactions: a person could not react to an agent thread message, the message or monolith comment that started a run showed nothing while the agent worked, and the person who asked got no push when work started. Review of the first version reproduced a reaction save on a stale replica deleting another replica's new message, a follow-up without a source id getting no status reaction or started push, member reaction notifications arriving out of order or lost on a monolith 503, and a second started push once the event buffer rolled.",
+      "hypothesis": "Computing the agent status reaction from the execution projection at read time keeps one status reaction per run. Reloading before a reaction write and fencing the save like scoped membership writes keeps it from overwriting another replica's commit. Binding a generated follow-up message as the run's reaction source, ordering notifications by store revision with retries, and persisting the started push on the thread keep each signal correct after retries and restarts.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_handler.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/message_reaction_monolith.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_reaction_dispatch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_reaction_notification_dispatch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_task_notification.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_ai_agent_membership_owned_save_save_membership_owned_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_append_thread_history_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_thread_message_from_action.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_thread_message_update.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_copy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_edit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_development.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_persistent.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_message_reaction_source.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_reaction_delivery.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_reaction_sent.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_reaction_notification.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/thread_reaction_notification_retry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_task_notification_started.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_handler_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_followup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_reaction_replica_fence_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_reaction_notification_dispatch_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_task_notification_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_task_notification_started_once_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_reaction_dispatch_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_generated_smoke_reaction_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_rules_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_trigger_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_reaction_notification_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_reaction_notification_retry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_task_notification_reaction_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Thread history messages carry reactions; members add or delete only their own reaction (contract emoji format with monolith normalization, no progress messages). The agent keeps one status reaction on the message that started its run: 1f440 while queued, running or waiting, 2705 completed, 274c failed, none when stopping, stopped or cancelled; a follow-up without a source id uses its generated message. A run started by a monolith comment writes the same reaction to that comment. Member reactions on another member's user message create or clear a monolith notification, sent per message and member in revision order and retried on transient failures. The started push is sent once per assignment and recorded on the persisted thread. Reaction saves reload, apply, and are rejected and retried when any part changed since the reload.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

@@ -489,7 +489,7 @@
       "method": "POST",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages/{message_id}/reactions",
       "evidence_tests": [
-        "TestMessageReactionHTTPAuthorizesAndPersistsActor"
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
       ]
     },
     {
@@ -497,7 +497,7 @@
       "method": "DELETE",
       "path": "/v2/client/workspaces/{workspace_id}/ai-agent/tasks/{task_id}/threads/{thread_id}/messages/{message_id}/reactions/{emoji}",
       "evidence_tests": [
-        "TestMessageReactionHTTPAuthorizesAndPersistsActor"
+        "TestHTTPAIAgentClientGeneratedEndpointSmokeV2"
       ]
     },
     {

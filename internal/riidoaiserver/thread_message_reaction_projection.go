@@ -14,6 +14,8 @@ func agentStatusReaction(thread AIAgentTaskThreadRecord) (string, bool) {
 		return "274c", true
 	case AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
 		return "1f440", true
+	case AgentWorkStatusIdle, AgentWorkStatusOffline:
+		return "", false
 	}
 	return "", false
 }

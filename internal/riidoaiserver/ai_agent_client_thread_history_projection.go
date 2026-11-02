@@ -67,18 +67,7 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryMessagesLocked(thread A
 		progress,
 	)
 	if message, ok := taskThreadProjectionMessage(thread); ok {
-		found := false
-		for i := range out {
-			if out[i].MessageID == message.MessageID {
-				message.Reactions = out[i].Reactions
-				out[i] = message
-				found = true
-				break
-			}
-		}
-		if !found {
-			out = append(out, message)
-		}
+		out = upsertProjectionMessage(out, message)
 	}
 	sortTaskThreadHistoryMessages(out)
 	return out
