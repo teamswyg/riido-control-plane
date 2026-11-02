@@ -1,21 +1,25 @@
 package riidoaiserver
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
 )
 
-func (s Server) deliverDashboardEvents(w http.ResponseWriter, r *http.Request, live <-chan ClientStreamEvent, workspace, agentID string) {
+func (s Server) deliverDashboardEvents(w http.ResponseWriter, r *http.Request, live <-chan ClientStreamEvent, workspace, agentID string, keepalive <-chan time.Time) {
 	ctx := r.Context()
 	token, _ := requestToken(r)
-	keepalive := time.NewTicker(sseKeepaliveInterval)
-	defer keepalive.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-keepalive.C:
+		case <-keepalive:
+			if remote, ok := s.aiAgent.(interface{ refreshDashboardSubscription(context.Context) error }); ok {
+				if err := remote.refreshDashboardSubscription(ctx); err != nil {
+					return
+				}
+			}
 			if _, err := w.Write([]byte(": keepalive\n\n")); err != nil {
 				return
 			}

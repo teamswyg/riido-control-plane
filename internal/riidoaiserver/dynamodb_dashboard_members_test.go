@@ -13,7 +13,7 @@ func TestDashboardReadsCreationKeysAndRetainsLegacyRuns(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	snapshot := StoreSnapshot{Assignments: []Assignment{{ID: "legacy", TaskID: "t", AgentID: "agent", State: AssignmentCompleted}}, Events: map[string][]TaskEvent{}}
-	fresh := Assignment{ID: "remote", TaskID: "t", AgentID: "agent", State: AssignmentCompleted, UpdatedAt: now}
+	fresh := Assignment{ID: "remote", TaskID: "t", AgentID: "agent", State: AssignmentRunning, UpdatedAt: now}
 	var gets, queries int
 	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var input struct {

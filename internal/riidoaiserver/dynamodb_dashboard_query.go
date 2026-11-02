@@ -7,12 +7,22 @@ import (
 )
 
 func (s *DynamoDBAssignmentOperationStore) dashboardItems(ctx context.Context, credentials AWSCredentials, agentID, prefix, fields string, visit func(map[string]map[string]string) error) error {
+	return s.dashboardQueryItems(ctx, credentials, agentID, prefix, fields, false, visit)
+}
+func (s *DynamoDBAssignmentOperationStore) dashboardQueryItems(ctx context.Context, credentials AWSCredentials, agentID, prefix, fields string, onlyTerminal bool, visit func(map[string]map[string]string) error) error {
 	query := struct {
 		TableName, KeyConditionExpression, ProjectionExpression string
 		ExpressionAttributeValues                               map[string]map[string]string
 		ConsistentRead                                          bool
+		FilterExpression                                        string                       `json:"FilterExpression,omitempty"`
 		ExclusiveStartKey                                       map[string]map[string]string `json:"ExclusiveStartKey,omitempty"`
-	}{s.tableName, "pk = :pk AND begins_with(sk, :prefix)", fields, map[string]map[string]string{":pk": {"S": agentHistoryPK(agentID)}, ":prefix": {"S": prefix}}, true, nil}
+	}{s.tableName, "pk = :pk AND begins_with(sk, :prefix)", fields, map[string]map[string]string{":pk": {"S": agentHistoryPK(agentID)}, ":prefix": {"S": prefix}}, true, "", nil}
+	if onlyTerminal {
+		query.FilterExpression = "assignment_state IN (:done,:failed,:cancelled)"
+		for token, state := range map[string]AssignmentState{":done": AssignmentCompleted, ":failed": AssignmentFailed, ":cancelled": AssignmentCancelled} {
+			query.ExpressionAttributeValues[token] = map[string]string{"S": string(state)}
+		}
+	}
 	for {
 		payload, err := json.Marshal(query)
 		if err != nil {

@@ -13,10 +13,10 @@ func (s *DevelopmentAIAgentClientStore) SubscribeAIAgentClientEvents(
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.compensateRecentTerminalProgressLocked()
 	agentID, _ := ctx.Value(dashboardStreamScope{}).(string)
 	var history []ClientStreamEvent
 	if agentID == "" {
+		s.compensateRecentTerminalProgressLocked()
 		history = s.clientEventsForPrincipalLocked(principal)
 	}
 	s.nextSubscriberID++

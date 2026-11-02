@@ -72,9 +72,14 @@ func (s *DynamoDBAssignmentOperationStore) dashboardSnapshot(ctx context.Context
 		}
 		if !exists || projection.LastEventSeq > seenSeq[id] {
 			missing[id] = projection.LastEventSeq
-			// Terminal mutations record their end time on the assignment as well.
-			if isDashboardTerminal(a.State) {
-				local.Events[a.TaskID] = append(local.Events[a.TaskID], TaskEvent{AssignmentID: id, TaskID: a.TaskID, AgentID: agentID, State: a.State, At: a.UpdatedAt})
+			if isDashboardTerminal(a.State) && !activeOnly {
+				at, err := s.firstDashboardTerminal(ctx, credentials, a, projection.LastEventSeq)
+				if err != nil {
+					return local, nil, err
+				}
+				if !at.IsZero() {
+					local.Events[a.TaskID] = append(local.Events[a.TaskID], TaskEvent{AssignmentID: id, TaskID: a.TaskID, AgentID: agentID, State: a.State, At: at})
+				}
 			}
 		}
 	}

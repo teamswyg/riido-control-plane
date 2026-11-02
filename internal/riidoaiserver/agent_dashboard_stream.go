@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"net/http"
+	"time"
 )
 
 type dashboardStreamScope struct{}
@@ -42,5 +43,7 @@ func (s Server) handleDashboardStream(w http.ResponseWriter, r *http.Request, ag
 		return
 	}
 	flushAIAgentClientStream(w)
-	s.deliverDashboardEvents(w, r, live, workspace, agentID)
+	ticker := time.NewTicker(sseKeepaliveInterval)
+	defer ticker.Stop()
+	s.deliverDashboardEvents(w, r, live, workspace, agentID, ticker.C)
 }
