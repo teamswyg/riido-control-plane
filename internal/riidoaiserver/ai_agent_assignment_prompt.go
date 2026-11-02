@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	assignmentInstructionHeading                      = "[사용자 추가 요청]"
 	TaskContextRepositorySourceConnectedPullRequest   = "connected_pull_request"
 	TaskContextRepositorySourceWorkspaceConnectedRepo = "workspace_connected_repository"
 	taskContextPromptFallbackNotProvided              = "not provided"
@@ -109,7 +110,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	writePromptInteractionPolicy(&builder)
 
 	if instruction := strings.TrimSpace(input.UserInstruction); instruction != "" {
-		builder.WriteString("\n\n[사용자 추가 요청]\n" + instruction)
+		builder.WriteString("\n\n" + assignmentInstructionHeading + "\n" + instruction)
 	}
 
 	return AIAgentAssignmentPrompt{

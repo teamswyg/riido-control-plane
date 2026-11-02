@@ -30,6 +30,15 @@ func TestCommentCompletedHTTPDispatchesOnceAndRestoresAfterRestart(t *testing.T)
 	if err != nil || !found || !strings.Contains(projection.Assignment.Prompt, f.evidence.Body) || !strings.Contains(projection.Assignment.Prompt, "Find the lower-cost plan") || !strings.Contains(projection.Assignment.Prompt, "Keep the human acceptance criterion") || !strings.Contains(projection.Assignment.Prompt, "data-mention-id") {
 		t.Fatalf("missing real assignment/context: %+v %v", projection, err)
 	}
+	// The caller's earlier instructions remain readable, but cannot become the
+	// recipient's current task when history and the catalog follow the handoff.
+	prompt := projection.Assignment.Prompt
+	directive := strings.LastIndex(prompt, "You are the recipient of this handoff")
+	if history := strings.Index(prompt, "## Recent conversation context"); history < 0 || directive <= history ||
+		directive <= strings.LastIndex(prompt, "data-mention-id") || !strings.Contains(prompt[directive:], "[사용자 추가 요청]") ||
+		strings.Contains(prompt, "the New User Instruction below") {
+		t.Fatal("child prompt does not distinguish the current handoff from historical requests")
+	}
 	if len(f.client.taskThreadMessages[child.ThreadID]) != 0 {
 		t.Fatal("Agent request duplicated as a human reply")
 	}
