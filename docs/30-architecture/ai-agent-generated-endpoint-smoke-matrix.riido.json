@@ -10,9 +10,9 @@
   "smoke_matrix": "contracts/ai-agent-client/control-plane-ai-agent-client.smoke-matrix.riido.json",
   "smoke_schema_version": "riido-ai-agent-generated-endpoint-smoke-matrix.v1",
   "operation_counts": {
-    "total": 64,
+    "total": 66,
     "v1": 28,
-    "v2": 35
+    "v2": 37
   },
   "required_evidence_tests": [
     "TestHTTPAIAgentClientGeneratedEndpointSmokeV1",
