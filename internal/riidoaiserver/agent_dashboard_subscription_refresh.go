@@ -46,9 +46,11 @@ func (s *DynamoDBAIAgentClientSnapshot) dashboardSnapshotVersion(ctx context.Con
 	if err != nil {
 		return 0, err
 	}
-	payload, err := json.Marshal(map[string]any{"TableName": s.tableName, "ConsistentRead": true,
+	payload, err := json.Marshal(map[string]any{
+		"TableName": s.tableName, "ConsistentRead": true,
 		"Key":                  map[string]map[string]string{"pk": {"S": dynamoDBAIAgentClientSnapshotPK}, "sk": {"S": dynamoDBAIAgentClientSnapshotSK}},
-		"ProjectionExpression": "#v", "ExpressionAttributeNames": map[string]string{"#v": "version"}})
+		"ProjectionExpression": "#v", "ExpressionAttributeNames": map[string]string{"#v": "version"},
+	})
 	if err != nil {
 		return 0, err
 	}

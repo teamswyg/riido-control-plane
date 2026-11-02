@@ -9,6 +9,7 @@ import (
 func (s *DynamoDBAssignmentOperationStore) dashboardItems(ctx context.Context, credentials AWSCredentials, agentID, prefix, fields string, visit func(map[string]map[string]string) error) error {
 	return s.dashboardQueryItems(ctx, credentials, agentID, prefix, fields, false, visit)
 }
+
 func (s *DynamoDBAssignmentOperationStore) dashboardQueryItems(ctx context.Context, credentials AWSCredentials, agentID, prefix, fields string, onlyTerminal bool, visit func(map[string]map[string]string) error) error {
 	query := struct {
 		TableName, KeyConditionExpression, ProjectionExpression string
