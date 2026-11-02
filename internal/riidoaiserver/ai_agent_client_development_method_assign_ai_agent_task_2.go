@@ -79,6 +79,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	agent.AssignedTaskCount++
 	s.agents[agent.AgentID] = agent
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
+	s.recordTaskThreadRequesterLocked(response.TaskID, response.ThreadID, principal.PrincipalID)
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 	s.agents[agent.AgentID] = agent
 	s.assignTaskAgentMemberLocked(taskID, agent)
