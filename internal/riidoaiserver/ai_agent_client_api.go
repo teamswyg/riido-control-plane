@@ -527,6 +527,7 @@ type AIAgentTaskThreadRecord struct {
 	RunID                   string                               `json:"run_id"`
 	SourceCommentID         string                               `json:"source_comment_id,omitempty"`
 	SourceMessageID         string                               `json:"source_message_id,omitempty"`
+	RequestedBy             string                               `json:"requested_by,omitempty"`
 	WorkStatus              AgentWorkStatus                      `json:"work_status"`
 	AssignmentState         AgentAssignmentState                 `json:"assignment_state"`
 	QueueDiagnostics        *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`

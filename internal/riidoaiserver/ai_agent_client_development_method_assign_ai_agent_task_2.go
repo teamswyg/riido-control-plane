@@ -95,6 +95,7 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 			s.taskThreads[taskID][i].CommentInvocation = copyCommentInvocation(req.commentInvocation)
 		}
 	}
+	s.recordTaskThreadRequesterLocked(response.TaskID, response.ThreadID, principal.PrincipalID)
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 	s.agents[agent.AgentID] = agent
 	s.assignTaskAgentMemberLocked(taskID, agent)

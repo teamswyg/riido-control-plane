@@ -83,6 +83,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 			}
 		}
 	}
+	s.recordTaskThreadRequesterLocked(response.TaskID, response.ThreadID, principal.PrincipalID)
 	if !req.toolApproval && !req.toolApprovalWithoutPending {
 		s.assignTaskAgentMemberLocked(taskID, agent)
 	}
