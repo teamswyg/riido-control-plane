@@ -28,6 +28,8 @@ type AgentAssignmentContextResponse struct {
 	Live          bool                      `json:"live,omitempty"`
 	Data          any                       `json:"data"`
 	Sources       []AssignmentContextSource `json:"sources"`
+	ContentDigest string                    `json:"content_digest,omitempty"`
+	NotModified   bool                      `json:"not_modified,omitempty"`
 }
 
 // normalizeAssignmentContextRequest defaults the view to base and reports
