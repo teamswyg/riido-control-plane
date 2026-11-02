@@ -50,6 +50,7 @@ func (s *DevelopmentAIAgentClientStore) SubmitAIAgentTaskComment(ctx context.Con
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.appendThreadUserMessageLocked(response, principal, req.Body, req.SourceCommentID)
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
+	s.recordTaskThreadRequesterLocked(response.TaskID, response.ThreadID, principal.PrincipalID)
 	s.appendAgentTaskActionEvent(response)
 	return clientVisibleQueuedActionResponse(response), nil
 }
