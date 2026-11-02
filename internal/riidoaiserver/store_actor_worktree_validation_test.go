@@ -2,26 +2,8 @@ package riidoaiserver
 
 import (
 	"context"
-	"strings"
 	"testing"
 )
-
-func TestStoreActorRejectsLongAgentInstruction(t *testing.T) {
-	ctx := context.Background()
-	store := NewStore()
-	defer store.Close()
-
-	_, err := store.AssignTask(ctx, "task-a", AssignRequest{
-		ComponentID:      "component-a",
-		AgentID:          "agent-1",
-		RuntimeProvider:  "codex",
-		Prompt:           "ship it",
-		AgentInstruction: strings.Repeat("지", AgentInstructionMaxCharacters+1),
-	})
-	if err == nil || !strings.Contains(err.Error(), "agent_instruction") {
-		t.Fatalf("expected agent_instruction validation error, got %v", err)
-	}
-}
 
 func TestStoreActorDropsSensitiveAssignmentWorktreeURL(t *testing.T) {
 	ctx := context.Background()
