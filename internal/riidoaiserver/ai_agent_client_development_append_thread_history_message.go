@@ -11,10 +11,10 @@ func (s *DevelopmentAIAgentClientStore) appendThreadUserMessageLocked(
 	body string,
 	sourceMessageID string,
 	observedAt ...time.Time,
-) {
+) string {
 	body = strings.TrimSpace(body)
 	if body == "" || strings.TrimSpace(response.ThreadID) == "" {
-		return
+		return ""
 	}
 	now := time.Now().UTC()
 	if len(observedAt) > 0 && !observedAt[0].IsZero() {
@@ -31,6 +31,7 @@ func (s *DevelopmentAIAgentClientStore) appendThreadUserMessageLocked(
 		ObservedAt:        now,
 	}
 	s.appendThreadHistoryMessageLocked(response.ThreadID, message)
+	return message.MessageID
 }
 
 func (s *DevelopmentAIAgentClientStore) appendThreadHistoryMessageLocked(threadID string, message AIAgentTaskThreadHistoryMessage) {

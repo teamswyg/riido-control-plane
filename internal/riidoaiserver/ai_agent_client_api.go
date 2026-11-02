@@ -513,6 +513,7 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 
 type AIAgentTaskThreadRecord struct {
 	ReactionSourceMessageID *string                              `json:"reaction_source_message_id,omitempty"`
+	StartedNotificationSent bool                                 `json:"started_notification_sent,omitempty"`
 	CommentInvocation       *CommentInvocation                   `json:"comment_invocation,omitempty"`
 	ConfirmationReason      string                               `json:"confirmation_reason,omitempty"`
 	ThreadID                string                               `json:"thread_id"`

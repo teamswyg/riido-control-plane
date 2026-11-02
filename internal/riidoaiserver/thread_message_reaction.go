@@ -3,10 +3,11 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"github.com/teamswyg/riido-contracts/reactionemoji"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/teamswyg/riido-contracts/reactionemoji"
 )
 
 type AIAgentMessageReactionActor struct {
@@ -24,6 +25,8 @@ type AIAgentTaskThreadMessageReactionsResponse struct {
 	ThreadID      string                   `json:"thread_id"`
 	MessageID     string                   `json:"message_id"`
 	Reactions     []AIAgentMessageReaction `json:"reactions"`
+	// revision orders member reaction notifications within one instance.
+	revision uint64
 }
 type taskMessageReactionStore interface {
 	MutateTaskMessageReaction(context.Context, AuthorizationResult, string, string, string, string, bool) (AIAgentTaskThreadMessageReactionsResponse, error)
@@ -120,7 +123,8 @@ func (s *DevelopmentAIAgentClientStore) MutateTaskMessageReaction(ctx context.Co
 				}
 			}
 		}
-		return AIAgentTaskThreadMessageReactionsResponse{SchemaVersion: SchemaVersion, TaskID: taskID, ThreadID: threadID, MessageID: messageID, Reactions: message.Reactions}, nil
+		s.messageReactionRevision++
+		return AIAgentTaskThreadMessageReactionsResponse{SchemaVersion: SchemaVersion, TaskID: taskID, ThreadID: threadID, MessageID: messageID, Reactions: message.Reactions, revision: s.messageReactionRevision}, nil
 	}
 	return AIAgentTaskThreadMessageReactionsResponse{}, ErrAIAgentNotFound
 }
@@ -128,6 +132,26 @@ func (s *DevelopmentAIAgentClientStore) MutateTaskMessageReaction(ctx context.Co
 func (s *PersistentAIAgentClientStore) MutateTaskMessageReaction(ctx context.Context, principal AuthorizationResult, taskID, threadID, messageID, emoji string, remove bool) (AIAgentTaskThreadMessageReactionsResponse, error) {
 	s.operationMu.Lock()
 	defer s.operationMu.Unlock()
+	var response AIAgentTaskThreadMessageReactionsResponse
+	var err error
+	for attempt := 0; attempt < threadReactionSaveAttempts; attempt++ {
+		response, err = s.mutateTaskMessageReactionAttempt(ctx, principal, taskID, threadID, messageID, emoji, remove)
+		if !errors.Is(err, errTaskAgentSnapshotChanged) && !errors.Is(err, errAIAgentSnapshotConflict) {
+			return response, err
+		}
+	}
+	return response, err
+}
+
+// threadReactionSaveAttempts bounds the reload and reapply loop when another
+// replica commits between the reload and the save.
+const threadReactionSaveAttempts = 3
+
+// A reaction is applied to freshly reloaded state and saved fenced against
+// every part committed since the reload, so it never overwrites another
+// replica's messages. A rejected save reloads and applies the reaction again.
+func (s *PersistentAIAgentClientStore) mutateTaskMessageReactionAttempt(ctx context.Context, principal AuthorizationResult, taskID, threadID, messageID, emoji string, remove bool) (AIAgentTaskThreadMessageReactionsResponse, error) {
+	s.requireSnapshotReload()
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return AIAgentTaskThreadMessageReactionsResponse{}, err
 	}
@@ -135,5 +159,33 @@ func (s *PersistentAIAgentClientStore) MutateTaskMessageReaction(ctx context.Con
 	if err != nil {
 		return response, err
 	}
-	return response, s.saveSnapshot(ctx)
+	if err := s.saveSnapshot(withThreadReactionMutation(ctx)); err != nil {
+		s.requireSnapshotReload()
+		return response, err
+	}
+	return response, nil
+}
+
+func (s *PersistentAIAgentClientStore) requireSnapshotReload() {
+	if s == nil || s.snapshotStore == nil {
+		return
+	}
+	s.snapshotReloadMu.Lock()
+	s.snapshotReloadRequired = true
+	s.snapshotReloadMu.Unlock()
+}
+
+// threadReactionMutationContextKey marks a save that only adds a reaction.
+type threadReactionMutationContextKey struct{}
+
+func withThreadReactionMutation(ctx context.Context) context.Context {
+	return context.WithValue(ctx, threadReactionMutationContextKey{}, true)
+}
+
+// isThreadReactionMutation fences a reaction write like a scoped membership
+// write: any part another replica committed after the reload rejects the save,
+// so the stale parts of this instance never overwrite it.
+func isThreadReactionMutation(ctx context.Context) bool {
+	marked, _ := ctx.Value(threadReactionMutationContextKey{}).(bool)
+	return marked
 }

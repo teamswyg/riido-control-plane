@@ -41,7 +41,7 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 	case AgentWorkStatusIdle, AgentWorkStatusOffline:
 		return
 	}
-	if kind == "" {
+	if kind == "" || (kind == "started" && s.startedNotificationSentLocked(event.TaskID, event.AssignmentID)) {
 		return
 	}
 
@@ -68,6 +68,35 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 		NotificationType: kind, ConfirmationReason: response.ConfirmationReason,
 		WorkStatus: response.WorkStatus, AssignmentState: assignmentState,
 	})
+	if kind == "started" {
+		s.markStartedNotificationSentLocked(event.TaskID, event.AssignmentID)
+	}
+}
+
+// The event buffer keeps only recent events, so the started push is recorded
+// on the persisted thread to stay at most once per assignment.
+func (s *DevelopmentAIAgentClientStore) startedNotificationSentLocked(taskID, assignmentID string) bool {
+	if assignmentID == "" {
+		return false
+	}
+	for _, thread := range s.taskThreads[taskID] {
+		if thread.AssignmentID == assignmentID && thread.StartedNotificationSent {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *DevelopmentAIAgentClientStore) markStartedNotificationSentLocked(taskID, assignmentID string) {
+	if assignmentID == "" {
+		return
+	}
+	threads := s.taskThreads[taskID]
+	for i := range threads {
+		if threads[i].AssignmentID == assignmentID {
+			threads[i].StartedNotificationSent = true
+		}
+	}
 }
 
 // Recheck task access at delivery time. Workspace membership or access to the

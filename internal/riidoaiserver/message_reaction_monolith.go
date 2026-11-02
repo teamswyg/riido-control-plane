@@ -41,9 +41,21 @@ func (s Server) writeMonolithReaction(ctx context.Context, method, path string, 
 	defer response.Body.Close()
 	_, _ = io.Copy(io.Discard, io.LimitReader(response.Body, 4096))
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return fmt.Errorf("reaction delivery returned %d", response.StatusCode)
+		return monolithReactionStatusError{status: response.StatusCode}
 	}
 	return nil
+}
+
+// monolithReactionStatusError keeps the status so a permanent rejection is
+// not retried.
+type monolithReactionStatusError struct{ status int }
+
+func (err monolithReactionStatusError) Error() string {
+	return fmt.Sprintf("reaction delivery returned %d", err.status)
+}
+
+func (err monolithReactionStatusError) permanent() bool {
+	return err.status == http.StatusBadRequest || err.status == http.StatusNotFound
 }
 
 // Read the current projection rather than the arriving event, which can be a retry
@@ -74,32 +86,35 @@ func (s Server) deliverCommentStatusReactions(ctx context.Context, principal Aut
 }
 
 func (s Server) notifyMemberMessageReaction(ctx context.Context, principal AuthorizationResult, response AIAgentTaskThreadMessageReactionsResponse, emoji string, remove bool) {
+	if remove {
+		emoji = memberReactionEmoji(response.Reactions, principal.PrincipalID)
+	}
 	history, err := s.aiAgent.ListAIAgentTaskThreadHistory(ctx, principal, response.TaskID)
 	if err != nil {
 		return
 	}
 	for _, thread := range history.Threads {
-		if thread.ThreadID == response.ThreadID {
-			for _, message := range thread.Messages {
-				if message.MessageID != response.MessageID || message.Role != AIAgentTaskThreadMessageRoleUser || message.AuthorPrincipalID == "" || message.AuthorPrincipalID == principal.PrincipalID {
-					continue
-				}
-				if remove {
-					emoji = ""
-					for _, reaction := range message.Reactions {
-						for _, actor := range reaction.Actors {
-							if actor.Kind == "member" && actor.ID == principal.PrincipalID {
-								emoji = reaction.Emoji
-								break
-							}
-						}
-					}
-				}
-				body := map[string]string{"workspace_id": principal.WorkspaceID, "task_id": response.TaskID, "thread_id": response.ThreadID, "message_id": response.MessageID, "recipient_principal_id": message.AuthorPrincipalID, "actor_principal_id": principal.PrincipalID, "emoji": emoji, "excerpt": message.Body}
-				if err := s.writeMonolithReaction(ctx, http.MethodPost, "/internal/agent-thread-reaction-notifications", body); err != nil {
-					slog.WarnContext(ctx, "thread reaction notification pending", "message_id", response.MessageID, "error", err)
-				}
+		if thread.ThreadID != response.ThreadID {
+			continue
+		}
+		for _, message := range thread.Messages {
+			if message.MessageID != response.MessageID || message.Role != AIAgentTaskThreadMessageRoleUser || message.AuthorPrincipalID == "" || message.AuthorPrincipalID == principal.PrincipalID {
+				continue
+			}
+			body := map[string]string{"workspace_id": principal.WorkspaceID, "task_id": response.TaskID, "thread_id": response.ThreadID, "message_id": response.MessageID, "recipient_principal_id": message.AuthorPrincipalID, "actor_principal_id": principal.PrincipalID, "emoji": emoji, "excerpt": message.Body}
+			s.queueMemberReactionNotification(memberReactionNotification{key: response.ThreadID + "/" + response.MessageID + "/" + principal.PrincipalID, revision: response.revision, body: body})
+		}
+	}
+}
+
+// After a removal the member's remaining reaction, if any, stays notified.
+func memberReactionEmoji(reactions []AIAgentMessageReaction, principalID string) string {
+	for _, reaction := range reactions {
+		for _, actor := range reaction.Actors {
+			if actor.Kind == "member" && actor.ID == principalID {
+				return reaction.Emoji
 			}
 		}
 	}
+	return ""
 }

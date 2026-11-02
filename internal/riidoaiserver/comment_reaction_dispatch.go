@@ -14,6 +14,11 @@ type commentReactionDispatcher struct {
 	mu   sync.Mutex
 	jobs map[string]*commentReactionJob
 	sent map[string]string
+	// notifications keeps the latest member reaction notification per key.
+	notifications       map[string]memberReactionNotification
+	notificationSent    map[string]uint64
+	notificationRunning map[string]bool
+	notificationWG      sync.WaitGroup
 }
 
 func (d *commentReactionDispatcher) alreadySent(id, emoji string) bool {
@@ -25,6 +30,7 @@ func (d *commentReactionDispatcher) alreadySent(id, emoji string) bool {
 	value, ok := d.sent[id]
 	return ok && value == emoji
 }
+
 func (d *commentReactionDispatcher) markSent(id, emoji string) {
 	if d == nil {
 		return
@@ -36,6 +42,7 @@ func (d *commentReactionDispatcher) markSent(id, emoji string) {
 	}
 	d.sent[id] = emoji
 }
+
 func (s Server) scheduleCommentStatusReactions(ctx context.Context, principal AuthorizationResult, taskID string) <-chan struct{} {
 	d := s.commentReactions
 	if d == nil || s.config.CommentDelivery.EvidenceBaseURL == "" {
@@ -72,6 +79,7 @@ func (s Server) scheduleCommentStatusReactions(ctx context.Context, principal Au
 	}()
 	return job.done
 }
+
 func (s Server) syncCommentStatusReactions(ctx context.Context, principal AuthorizationResult, taskID string) {
 	done := s.scheduleCommentStatusReactions(ctx, principal, taskID)
 	select {

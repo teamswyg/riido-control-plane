@@ -9,6 +9,7 @@ type DevelopmentAIAgentClientStore struct {
 	onboardingAgentCreates  map[string]onboardingAgentCreateReceipt
 	taskRequestReceipts     map[string]AIAgentTaskActionResponse
 	mu                      sync.Mutex
+	messageReactionRevision uint64
 	workspaceID             string
 	expectedDaemonProfile   string
 	daemonClientPolicy      DaemonClientCompatibilityPolicy

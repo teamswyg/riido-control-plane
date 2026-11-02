@@ -20,7 +20,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 		}
 		current := dynamoDBAIAgentClientSnapshotCurrentItem(committed)
 		oldMember := dynamoDBAIAgentClientSnapshotItemsByPart(committed)[dynamoDBAIAgentClientSnapshotPartTaskAgentMemberships]
-		if (scoped || createMutation) && current != nil {
+		if (scoped || createMutation || isThreadReactionMutation(ctx)) && current != nil {
 			var committedHashes map[string]string
 			if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &committedHashes); err != nil {
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err

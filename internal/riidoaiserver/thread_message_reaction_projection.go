@@ -14,6 +14,8 @@ func agentStatusReaction(thread AIAgentTaskThreadRecord) (string, bool) {
 		return "274c", true
 	case AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusWaitingForUser:
 		return "1f440", true
+	case AgentWorkStatusIdle, AgentWorkStatusOffline:
+		return "", false
 	}
 	return "", false
 }
@@ -58,5 +60,21 @@ func (s *DevelopmentAIAgentClientStore) projectAgentMessageReactionsLocked(recor
 				}
 			}
 		}
+	}
+}
+
+// A follow-up without request_id or source_message_id still has a generated
+// user message. A new execution without an explicit source reacts to it.
+func (s *DevelopmentAIAgentClientStore) bindGeneratedReactionSourceLocked(taskID, threadID, messageID string) {
+	if messageID == "" {
+		return
+	}
+	threads := s.taskThreads[taskID]
+	for i := range threads {
+		if threads[i].ThreadID != threadID || threads[i].ReactionSourceMessageID == nil || *threads[i].ReactionSourceMessageID != "" {
+			continue
+		}
+		source := messageID
+		threads[i].ReactionSourceMessageID = &source
 	}
 }
