@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -64,7 +65,7 @@ func TestDashboardIdleReplicaRefreshesAtKeepalive(t *testing.T) {
 	snap.Version = db.snapshot.Version + 1
 	db.snapshot = snap
 	server := NewServer(ServerConfig{AIAgentClient: store, Authorizer: dashboardTestAuthorizer{}, TaskContext: &dashboardTestContext{}})
-	req := httptest.NewRequest("GET", "/events", nil).WithContext(ctx)
+	req := httptest.NewRequest(http.MethodGet, "/events", nil).WithContext(ctx)
 	req.Header.Set("Authorization", "Bearer viewer-token")
 	rec := dashboardEventRecorder{httptest.NewRecorder(), make(chan struct{}, 1)}
 	ticks := make(chan time.Time, 1)
