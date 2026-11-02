@@ -35,6 +35,10 @@ func (s Server) handleComponentTaskAssign(w http.ResponseWriter, r *http.Request
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if err := validateAgentInstruction("agent_instruction", req.AgentInstruction); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	if req.RecoveryPolicy != nil {
 		normalized, err := normalizedRecoveryPolicy(req.RecoveryPolicy)
 		if err != nil || len(normalized.Fallbacks) != 0 {
