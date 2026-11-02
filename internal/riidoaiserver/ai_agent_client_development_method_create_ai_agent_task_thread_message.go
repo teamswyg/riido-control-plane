@@ -76,9 +76,7 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	messageID := s.appendThreadUserMessageLocked(response, principal, req.Body, req.SourceMessageID)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID, conversationID, parentThreadID)
-	if parentThreadID != "" {
-		s.bindGeneratedReactionSourceLocked(taskID, response.ThreadID, messageID)
-	}
+	s.bindGeneratedReactionSourceLocked(taskID, response.ThreadID, parentThreadID, messageID)
 	if !req.toolApproval && !req.toolApprovalWithoutPending {
 		s.assignTaskAgentMemberLocked(taskID, agent)
 	}

@@ -8,19 +8,6 @@ import (
 	"time"
 )
 
-const memberReactionNotificationMaxAttempts = 4
-
-// memberReactionNotificationRetryDelay is the wait before the first retry; it
-// doubles for each later retry. Tests shorten it.
-var memberReactionNotificationRetryDelay = time.Second
-
-type memberReactionNotification struct {
-	key      string
-	revision uint64
-	attempt  int
-	body     map[string]string
-}
-
 // queueMemberReactionNotification sends one notification at a time per
 // message and member and always sends the latest by store revision, so a
 // handler that arrives late never sends an older add after a later removal.
