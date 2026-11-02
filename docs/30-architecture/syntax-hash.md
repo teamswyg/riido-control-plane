@@ -116,14 +116,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d23929aab84a` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `edc98d544733` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `716b69f2d9b1` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `4557`
-- tracked files: `4557`
+- Go files: `4566`
+- tracked files: `4566`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -169,16 +169,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `4557`
-- unique syntax hashes: `4354`
+- tracked files: `4566`
+- unique syntax hashes: `4363`
 - compression gain: `203`
-- analysis reduction: `4.45%`
+- analysis reduction: `4.44%`
 - collision count: `0`
-- relocation mappings: `4557`
+- relocation mappings: `4566`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
 - golden commands: `111`
 - missing golden commands: `0`
-- efficiency score: `445`
+- efficiency score: `444`
 - compression score: `203`
-- weighted score: `648`
+- weighted score: `647`

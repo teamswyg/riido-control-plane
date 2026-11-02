@@ -28622,6 +28622,96 @@
       ],
       "decision": "Default off. Only canonical workspace/task v3 GET is admitted; every read checks the original grant, installation and task via the separate monolith service. No fallback, auth cache, redirect, cookie or retry. Preserve existing retained history and owner/public/admin visibility. Local CP HTTP uses a synthetic TLS policy server; live monolith, daemon commands and real-account acceptance remain separate. Deploy the raw CLI JWT guard before activation.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_conditional_content_cache_5972",
+      "observation": "Repeated captured-content reads retransmitted identical page bodies. Reusing a daemon body without the existing CP request would bypass current execution authority, quota and read-record delivery. The shared client API description is also bound to thread-history claims, so this representation-only extension must leave conversation identity and history unchanged.",
+      "hypothesis": "An explicitly negotiated conditional response can omit an identical body after the existing read path has completed. Binding the digest to agent/assignment, selector, cursor, byte budget and the full current response makes a candidate representation-specific without treating it as authorization.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_cache.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_types.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_changes_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_authority_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_store_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Accept optional content_digest/not_modified only for version-1 captured content. A matching representation uses HTTP 200 with data:null only after current device, lease/run, quota, scope/page and audit checks; each call still records its request and exact page sources. Missing or unsupported negotiation keeps legacy response fields. No cross-run authority, live-body cache, HTTP-call reduction, production activation or authenticated consumer acceptance is implied. Request/response and boundary-fixture helpers preserve the existing code budget instead of raising its limits.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
