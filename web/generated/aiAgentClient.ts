@@ -1579,6 +1579,7 @@ export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, opti
 export interface GetAgentDashboardPathParams {
   agent_id: string;
   page?: number;
+  section?: string;
 }
 
 /**
@@ -1588,6 +1589,7 @@ export async function getAgentDashboard(config: RiidoClientConfig, params: GetAg
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/dashboard`;
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set("page", String(params.page));
+  if (params.section !== undefined) query.set("section", String(params.section));
   const requestPath = query.size ? `${path}?${query.toString()}` : path;
   return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
@@ -2791,6 +2793,7 @@ export interface GetAgentDashboardV2PathParams {
   workspace_id: string;
   agent_id: string;
   page?: number;
+  section?: string;
 }
 
 /**
@@ -2800,6 +2803,7 @@ export async function getAgentDashboardV2(config: RiidoClientConfig, params: Get
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/dashboard`;
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set("page", String(params.page));
+  if (params.section !== undefined) query.set("section", String(params.section));
   const requestPath = query.size ? `${path}?${query.toString()}` : path;
   return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
@@ -3260,6 +3264,7 @@ export function listAIAgentDeviceDaemonsV2QueryOptions(config: RiidoClientConfig
  */
 export interface StreamAIAgentClientEventsV2PathParams {
   workspace_id: string;
+  dashboard_agent_id?: string;
 }
 
 /**
@@ -3267,7 +3272,10 @@ export interface StreamAIAgentClientEventsV2PathParams {
  */
 export async function streamAIAgentClientEventsV2(config: RiidoClientConfig, params: StreamAIAgentClientEventsV2PathParams, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/events`;
-  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+  const query = new URLSearchParams();
+  if (params.dashboard_agent_id !== undefined) query.set("dashboard_agent_id", String(params.dashboard_agent_id));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRawRequest(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**

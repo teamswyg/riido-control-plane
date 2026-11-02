@@ -67,6 +67,9 @@ func buildAgentDashboard(agent AgentClientRecord, history AgentDashboardHistory,
 	}
 	sort.Slice(out.Queue, func(i, j int) bool { return out.Queue[i].QueuePosition < out.Queue[j].QueuePosition })
 	out.WaitingCount = len(out.Queue)
+	if history.activeOnly {
+		return out
+	}
 	sort.Slice(out.History, func(i, j int) bool {
 		left, right := out.History[i], out.History[j]
 		if left.EndedAt != nil && right.EndedAt != nil && !left.EndedAt.Equal(*right.EndedAt) {
