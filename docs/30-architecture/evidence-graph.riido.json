@@ -20,6 +20,80 @@
   ],
   "chains": [
     {
+      "id": "cli_monolith_grant_legacy_boundary_5972",
+      "observation": "A synthetic signed monolith CLI read grant passed both read and create through the legacy HTTP app PDP in legacy-only and dual-auth configurations. The app PDP does not own CLI grant revocation or installation policy. This is conditional source/fixture evidence, not a live production exploit. After dedicated thread and Agent readers landed, the legacy denial wrapper also needs evidence at the real environment-factory and HTTP-server composition boundary.",
+      "hypothesis": "Reject CLI markers before the entire legacy fallback chain while preserving normal app, opaque and Auth-v2 credentials. Unverified claim inspection can deny but never authenticate. CP thread reads require a separate resource/purpose-bound exchange and current grant/domain checks. Locally served TLS dependencies can test credential routing and fresh authority without live accounts or external side effects.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_legacy_cli.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/authorization_legacy_cli_claims.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/authorizer_scheme.go"
+        },
+        {
+          "kind": "code",
+          "path": "tools/requestauth/constants_auth_scheme.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/authpep/authorization_legacy_cli_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_cli_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/requestauth/main_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_cli_runtime_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_cli_runtime_fixture_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Read/create acceptance was observed before correction. CLI marker null/invalid/duplicate/escaped/case-variant cases now fail before static/external authorization, while ordinary application authorization and Auth-v2 remain intact. JWT-shaped legacy credentials above16KiB also fail closed. The line budget is preserved by separating the wrapper and classifier. No endpoint, credentials, environment activation, DB or deployment change is included. Generated surfaces/hashes and exact golden evidence reflect the new denial boundary without relaxing verifier conditions. The refreshed candidate integrates the date-renewal and dedicated read contracts. Runtime regression covers normal app controls, raw CLI app read/write denial, wrong-purpose/mixed tickets, dedicated projection, fresh revocation, disabled/unavailable readers and substituted tasks. Auth-v2 runtime evidence is rejection/no-downgrade only; real accounts, shared DB and activation remain outside this local fixture.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
       "id": "cli_claim_local_termination_observation_5900",
       "observation": "A terminal task event can precede direct-child termination, while host continuation, lost Submit replies, resumed epochs and pending host work prevent the last Session alone from proving claim quiescence. Terminal ACK also clears daemon lease state.",
       "hypothesis": "Accept a device-authenticated claim-scoped local observation only against the immutable original claim and an atomically checked projection, retaining one immutable epoch receipt. Keep unknown and access policy separate; a daemon sender must aggregate all local invocation and host-work boundaries before terminal delivery.",
@@ -6125,6 +6199,14 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/thread_message_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_agent_read_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_agent_read_auth.go"
         }
       ],
       "verifiers": [
@@ -6231,6 +6313,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/thread_snapshot_cancelled_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_directory_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_detail_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_read_boundary_test.go"
         }
       ],
       "evidence": [
@@ -6240,7 +6334,7 @@
           "redacted": true
         }
       ],
-      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. The v3 user-message row now carries author_principal_id so another member's reply can be rendered as that member after refresh. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history. RIID-5820 keeps paths/commands local, sanitizes shared enums, retains legacy progress evidence and clears prior verification on a new run. Automatic provider recovery remains separate. RIID-5819 HTTP assign/poll/Ready/native-pin/terminal/follow-up regressions now preserve the selected native ID for completed, failed and cancelled runs, allow another authorized requester, reject scope/configuration mismatch and preserve 503/504/408 without private error bodies. Resume-only failed preparation sources use the shared native-ID fallback. Real two-turn Codex acceptance separately confirmed one native session and retained clone with two host-verified file changes; that compiled happy-path fixture predates the resume-only fallback, which is covered by deterministic tests. No new live Claude/Cursor/OpenClaw resume or historical device/account identity guarantee is inferred. RIID-5860 keeps public Agents callable by other authorized workspace members and private Agents owner-only. A connected-account HTTP regression enrolls the original device, creates a private Agent as another connected account, completes the first run and two native-session follow-ups, and rejects the physical device owner with privacy-preserving 404. Separate scope cases allow distinct Agent/runtime owners and reject missing current Agent ownership. The previous owner/runtime equality guard is RED on this supported flow; the corrected Agent/profile comparison is GREEN. This is deterministic server proof, not deployed end-to-end acceptance. RIID-5860 queue-copy regressions exercise assign/complete/reply/poll/Ready/Running over HTTP and both legacy/v3 cold reads plus live progress projection. Legacy queued comment kinds and scheduler/authorization/stop semantics remain compatible; no contention inference is made from queued state alone. Existing running snapshots normalize exact stale queue copy at read time without modifying durable provider lines. Contextual progress now projects only known 1101/1103 description and 1104 summary arguments as bounded plain-text display_message. Unknown or malformed payloads and client-supplied summaries do not gain this projection. Thread/event persistence restores the saved projection, and cache identity invalidates when contextual copy changes. Existing message body, user replies, author identity, sequence and stop/follow-up execution semantics remain unchanged; fixtures verify projection and persistence, not real provider-generated summary quality. RIID-5839 uses receipt-first replay and stable user-message identity to reuse execution and deduplicate publication. Invalid raw UTF-8 is rejected before JSON replacement and before execution/history creation; focused replay, publication-failure, and raw-byte HTTP regressions cover this boundary. Keyed followup assignment rejects unpublished cancelled/cancelling results with HTTP 503 before message publication, preserving cancellation and identity instead of automatically restarting work. A recovery-cancellation HTTP regression verifies no second publication or execution, alongside normal receipt replay coverage.",
+      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. The v3 user-message row now carries author_principal_id so another member's reply can be rendered as that member after refresh. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history. RIID-5820 keeps paths/commands local, sanitizes shared enums, retains legacy progress evidence and clears prior verification on a new run. Automatic provider recovery remains separate. RIID-5819 HTTP assign/poll/Ready/native-pin/terminal/follow-up regressions now preserve the selected native ID for completed, failed and cancelled runs, allow another authorized requester, reject scope/configuration mismatch and preserve 503/504/408 without private error bodies. Resume-only failed preparation sources use the shared native-ID fallback. Real two-turn Codex acceptance separately confirmed one native session and retained clone with two host-verified file changes; that compiled happy-path fixture predates the resume-only fallback, which is covered by deterministic tests. No new live Claude/Cursor/OpenClaw resume or historical device/account identity guarantee is inferred. RIID-5860 keeps public Agents callable by other authorized workspace members and private Agents owner-only. A connected-account HTTP regression enrolls the original device, creates a private Agent as another connected account, completes the first run and two native-session follow-ups, and rejects the physical device owner with privacy-preserving 404. Separate scope cases allow distinct Agent/runtime owners and reject missing current Agent ownership. The previous owner/runtime equality guard is RED on this supported flow; the corrected Agent/profile comparison is GREEN. This is deterministic server proof, not deployed end-to-end acceptance. RIID-5860 queue-copy regressions exercise assign/complete/reply/poll/Ready/Running over HTTP and both legacy/v3 cold reads plus live progress projection. Legacy queued comment kinds and scheduler/authorization/stop semantics remain compatible; no contention inference is made from queued state alone. Existing running snapshots normalize exact stale queue copy at read time without modifying durable provider lines. Contextual progress now projects only known 1101/1103 description and 1104 summary arguments as bounded plain-text display_message. Unknown or malformed payloads and client-supplied summaries do not gain this projection. Thread/event persistence restores the saved projection, and cache identity invalidates when contextual copy changes. Existing message body, user replies, author identity, sequence and stop/follow-up execution semantics remain unchanged; fixtures verify projection and persistence, not real provider-generated summary quality. RIID-5839 uses receipt-first replay and stable user-message identity to reuse execution and deduplicate publication. Invalid raw UTF-8 is rejected before JSON replacement and before execution/history creation; focused replay, publication-failure, and raw-byte HTTP regressions cover this boundary. Keyed followup assignment rejects unpublished cancelled/cancelling results with HTTP 503 before message publication, preserving cancellation and identity instead of automatically restarting work. A recovery-cancellation HTTP regression verifies no second publication or execution, alongside normal receipt replay coverage. User-mode CLI Agent directory is a separate read-only /v1/cli/workspaces/{workspace}/tasks/{task}/agents surface with an Agent-purpose ticket and a fresh monolith current-policy check on every request. Its addition to the shared generated API document does not create an execution, publish a message, replace history, or reuse thread credentials; existing user-followup retention and private/public thread visibility remain unchanged. Directory list/detail/boundary tests and the existing history regressions cover this separation.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -22172,8 +22266,8 @@
     },
     {
       "id": "sse_last_event_id_reconnect_loop",
-      "observation": "Production opened 513 AI Agent SSE streams over seven days and replayed 51,422 retained events, averaging 100.2378 events per open with p95 and max both at 175. Terminal lifecycle evidence recorded 1,956 replay deliveries against 69 live terminal deliveries. The server emitted numeric SSE ids and allowed Last-Event-ID through CORS, but did not apply that cursor before replay. RIID-5822/5823 read-only log analysis also found raw SSE URL paths and write-error text, terminal delivery identifiers without request trace correlation, unchanged provider snapshots producing repeated spans, and long-lived SSE connections mixed into ordinary request latency. HTTP 502/503 and provider failure observations lacked enough bounded stage/cause evidence to establish a shared cause. A two-replica fixture reproduced recovery journal retries committing two events because the event-key deduplication cache was local; a rejected durable failure write still emitted a failure log. A committed provider_result_failed terminal response returns HTTP 200; without an ERROR child span, error-tail sampling could discard that failure with ordinary successful requests. RIID-5824 acceptance review reproduced Ready storage errors returned as 400 and a legacy snapshot failure cached an unpersisted Ready ACK. Open SSE logs used unfinished connection spans, and intentional daemon poll waits contaminated normal request latency; observed cancelled v3 projection reads were classified as 502.",
-      "hypothesis": "Filtering the bounded replay tail to events whose sequence is greater than a valid Last-Event-ID will prevent reconnects from repeatedly delivering already observed progress and terminal state while preserving initial replay, invalid-cursor compatibility, live fanout, v3 refresh truth, and every public endpoint and payload. Route templates, hashed opaque references, bounded close/error categories and actual trace/span IDs can make delivery and failure paths diagnosable without retaining credentials, customer paths or bodies. Separating stream lifetime from aggregate request latency prevents a healthy long connection from appearing as a slow ordinary request. Recovery phases can use the existing journal without changing task state if accepted policy/owner/device/runtime/lease fences run before dispatch approval and a bounded CAS-preserved receipt watermark deduplicates retries across replicas; logs and spans must follow durable commit. A fixed-message ERROR child span emitted by the committed-event observer can retain real domain failures despite HTTP 200, provided speculative writes, duplicate ACKs, cancellation and needs_input emit none. Typed dependency responses and a private legacy copy-on-write trial keep event retries safe. A non-projection dual-store configuration must reject before either write because no atomic receipt port exists. Completed SSE observation spans and separate poll_wait/stream_lifetime durations preserve diagnosability without another model call.",
+      "observation": "Production opened 513 AI Agent SSE streams over seven days and replayed 51,422 retained events, averaging 100.2378 events per open with p95 and max both at 175. Terminal lifecycle evidence recorded 1,956 replay deliveries against 69 live terminal deliveries. The server emitted numeric SSE ids and allowed Last-Event-ID through CORS, but did not apply that cursor before replay. RIID-5822/5823 read-only log analysis also found raw SSE URL paths and write-error text, terminal delivery identifiers without request trace correlation, unchanged provider snapshots producing repeated spans, and long-lived SSE connections mixed into ordinary request latency. HTTP 502/503 and provider failure observations lacked enough bounded stage/cause evidence to establish a shared cause. A two-replica fixture reproduced recovery journal retries committing two events because the event-key deduplication cache was local; a rejected durable failure write still emitted a failure log. A committed provider_result_failed terminal response returns HTTP 200; without an ERROR child span, error-tail sampling could discard that failure with ordinary successful requests. RIID-5824 acceptance review reproduced Ready storage errors returned as 400 and a legacy snapshot failure cached an unpersisted Ready ACK. Open SSE logs used unfinished connection spans, and intentional daemon poll waits contaminated normal request latency; observed cancelled v3 projection reads were classified as 502. RIID-5830 dashboard polling reread the per-agent journal even during idle periods and was correlated with throttled reads.",
+      "hypothesis": "Filtering the bounded replay tail to events whose sequence is greater than a valid Last-Event-ID will prevent reconnects from repeatedly delivering already observed progress and terminal state while preserving initial replay, invalid-cursor compatibility, live fanout, v3 refresh truth, and every public endpoint and payload. Route templates, hashed opaque references, bounded close/error categories and actual trace/span IDs can make delivery and failure paths diagnosable without retaining credentials, customer paths or bodies. Separating stream lifetime from aggregate request latency prevents a healthy long connection from appearing as a slow ordinary request. Recovery phases can use the existing journal without changing task state if accepted policy/owner/device/runtime/lease fences run before dispatch approval and a bounded CAS-preserved receipt watermark deduplicates retries across replicas; logs and spans must follow durable commit. A fixed-message ERROR child span emitted by the committed-event observer can retain real domain failures despite HTTP 200, provided speculative writes, duplicate ACKs, cancellation and needs_input emit none. Typed dependency responses and a private legacy copy-on-write trial keep event retries safe. A non-projection dual-store configuration must reject before either write because no atomic receipt port exists. Completed SSE observation spans and separate poll_wait/stream_lifetime durations preserve diagnosability without another model call. A live-only dashboard subscriber can register before taking its viewer-scoped snapshot and repeat that snapshot on reconnect, while ordinary clients retain cursor replay. Idle subscribers share a lightweight snapshot revision probe on keepalive so that a remote writer can wake the dashboard without replaying the assignment history.",
       "claims": [
         "sse_reconnect_must_resume_after_last_event_id",
         "assignment_operation_journal_must_preserve_replay_and_claim_ports",
@@ -22340,6 +22434,10 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ready_active_lease_deadline_test.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_dashboard_stream.go"
         }
       ],
       "verifiers": [
@@ -22537,6 +22635,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/ready_active_lease_dependency_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_dashboard_stream_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_dashboard_replica_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_dashboard_idle_replica_test.go"
         }
       ],
       "decision": "Honor valid numeric Last-Event-ID values at the control-plane replay boundary and retain the existing bounded full replay for missing, malformed, or negative cursors. Log only cursor presence and the filtered replay count so production can prove reduction without recording cursor values, credentials, or message bodies. Keep endpoint paths, SSE event ids, payloads, terminal priority delivery, and v3 refresh behavior unchanged. RIID-5822/5823 keeps those replay semantics and adds bounded lifecycle/terminal diagnostics, request-stage failure categories, and actual OTel correlation; the fixtures verify redaction and cancellation/timeout classification, not a production root-cause claim. SSE request/status counts and per-route stream_lifetime remain visible while aggregate ordinary-request latency excludes stream duration. Recovery inventory rechecks are limited to the selected approved candidate before checking/switching; final diagnostics remain recordable when an auth probe becomes uncertain. Internal hashed receipts are capped at sixteen, preserved by conditional projection writes and legacy repairs, and return the original event identity/sequence/time/context/key on replay; they are absent from public Assignment payloads. Tests prove post-commit-only observations, cross-replica and delayed-key deduplication, stopped-run fences, and normal completed/failed terminal delivery. No actual provider model execution, automatic replay after an ambiguous spawn, production fix for the previously observed 502/503 cause, or web/desktop deployment is claimed by these fixture results. The assignment failure child span records only bounded result/failure category and riido.assignment.provider for the original lease provider; the compatible failure log provider field has that same scope. Any actual fallback provider remains in its separate recovery journal. CAS rejection and duplicate fixtures require zero new error spans, a successful durable failure requires exactly one, and the HTTP terminal fixture distinguishes failed from completed while both return 200. Acceptance regressions are RED before the fix and GREEN after it: failed Ready writes leave no state/receipt/publication, same-key success persists once, unknown dual-store atomicity fails closed, poll waits remain visible separately, and SSE logs reference completed event spans. Actual X-Ray retention, source attribution, model semantics and runtime latency still require deployment evidence; these deterministic tests do not claim them. Active-lease read dependency errors retain retryability. The DynamoDB HTTP default has a ten-second per-request limit but does not bound total operation-store actor queueing; the stale active-lease read now has a two-second total context deadline. A blocking-reader regression proves timeout 504, no false ACK/state commit, released actor and exactly-once same-key recovery. Caller-context propagation through every actor operation remains outside this narrow fix.",
@@ -22544,7 +22654,7 @@
     },
     {
       "id": "closed_loop_candidate_review_expiry_recovery_loop",
-      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates. On 2026-10-16 both previous main 2c0a7f4a and new main 4eb11c66 failed the same unchanged July 29 policy; current redacted sources again contain nine pressure, nine readiness partial, and one stale refresh-source candidate, while four sources have none. On 2026-10-26 scheduled run 40261892535 at current main bcc42ca8 fails the unchanged October 23 deadline. The latest existing scheduled source artifacts contain nine pressure, nine external/partial readiness, and two stale refresh-source candidates; smoke, load, performance and closure have zero candidates.",
+      "observation": "The closed-loop candidate decision schedule failed on seven consecutive days from 2026-07-16 through 2026-07-22 because every deferred or triage-required decision still carried the 2026-07-15 review deadline. The latest redacted artifacts contained nine pressure candidates, nine operational-readiness candidates, and one stale refresh-source candidate; smoke, load, performance, and loop-closure artifacts had no open candidates. On 2026-10-16 both previous main 2c0a7f4a and new main 4eb11c66 failed the same unchanged July 29 policy; current redacted sources again contain nine pressure, nine readiness partial, and one stale refresh-source candidate, while four sources have none. On 2026-10-26 scheduled run 40261892535 at current main bcc42ca8 fails the unchanged October 23 deadline. The latest existing scheduled source artifacts contain nine pressure, nine external/partial readiness, and two stale refresh-source candidates; smoke, load, performance and closure have zero candidates. On 2026-10-31 and 2026-11-01 scheduled runs 41161758549 and 41266782944 at current main 54c701df fail the unchanged October 30 deadline. The latest 2026-10-31 scheduled source artifacts again contain nine pressure, nine external/partial readiness, and two stale refresh-source candidates; smoke, load, performance and closure have zero candidates.",
       "hypothesis": "Re-reviewing the current redacted queue and advancing only its owner-bound review deadline will restore fail-closed decision verification without hiding candidates, weakening expiry enforcement, changing dispositions, or claiming runtime readiness. Item-level observations, retained acceptance gaps, seven-day review ownership, and current UTC/expiry regression make the renewed review traceable without treating a date change as completed readiness. A reviewer-selected one-to-seven-day interval can honor the user-selected October 30 follow-up after an actual October 26 review without inventing an earlier review date or extending the seven-day upper bound.",
       "claims": [
         "candidate_decisions_must_match_consumed_candidates",
@@ -22654,9 +22764,14 @@
           "kind": "artifact",
           "path": "closed-loop-candidate-review-2026-10-26",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "closed-loop-candidate-review-2026-11-01",
+          "redacted": true
         }
       ],
-      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation. The 2026-10-16 source/evidence review retains all 25 pending records and three templates, leaves the adopted record untouched, and sets the next review to October 23 UTC. Current-time verification passes all 19 real redacted candidates without a clock override; the original manifest and renewed post-deadline policy still fail. Provider/model, visual, alarm apply, capacity and chaos acceptance gaps remain open; no producer rerun or workload mutation is performed. The 2026-10-26 read-only item review preserves the same 25 pending records, three templates and historical adopted decision. It reads current main manifests, all seven latest existing producer artifacts, redacted summary claims, current local pressure measurements and the still-open visual issue 711. The user-selected next review is October 30 UTC (four days); exact interval/date matching, the seven-day maximum, real current-clock verification and post-deadline rejection remain required. Two stale refresh sources remain unresolved, not silently regenerated; no runtime/provider dispatch, merge, apply, deployment or customer mutation is performed.",
+      "decision": "Keep all current dispositions, priorities, owners, next artifacts, and executable next commands unchanged. Advance deferred and triage-required review dates to 2026-07-29 after verifying all 19 open live candidates against the refreshed manifest. Preserve the adopted syntax-hash decision date, retain the visual item under client-qa-loop without design work, and make no runtime, AWS, credential, or protected-repository mutation. The 2026-10-16 source/evidence review retains all 25 pending records and three templates, leaves the adopted record untouched, and sets the next review to October 23 UTC. Current-time verification passes all 19 real redacted candidates without a clock override; the original manifest and renewed post-deadline policy still fail. Provider/model, visual, alarm apply, capacity and chaos acceptance gaps remain open; no producer rerun or workload mutation is performed. The 2026-10-26 read-only item review preserves the same 25 pending records, three templates and historical adopted decision. It reads current main manifests, all seven latest existing producer artifacts, redacted summary claims, current local pressure measurements and the still-open visual issue 711. The user-selected next review is October 30 UTC (four days); exact interval/date matching, the seven-day maximum, real current-clock verification and post-deadline rejection remain required. Two stale refresh sources remain unresolved, not silently regenerated; no runtime/provider dispatch, merge, apply, deployment or customer mutation is performed. The 2026-11-01 read-only item review repeats the 2026-10-26 procedure on the 2026-10-31 producer artifacts at 54c701df, preserves the same 25 pending records, three templates and historical adopted decision, and verifies all 20 open candidates with the real UTC clock. With no user-selected date, the next review uses the seven-day maximum (November 8 UTC); the window check, current-clock verification and post-deadline rejection are unchanged. No runtime/provider dispatch, deployment or customer mutation is performed.",
       "next_loop": "closed_loop_candidate_decision"
     },
     {
@@ -23651,6 +23766,10 @@
         {
           "kind": "tool",
           "path": "tools/loopregistry"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_instruction_budget_http_test.go"
         }
       ],
       "evidence": [
@@ -23660,7 +23779,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence. RIID-5829 preserves state replay but makes recipient-scoped task notifications live-only, rechecks task authorization at delivery, and multiplexes workspace subscriptions to prevent HTTP/1 connection starvation. Notification transition, snapshot race, nine-workspace delivery and denied-task tests passed locally; this is not production deployment evidence. RIID-5830 adds a read-only dashboard over the same assignment journal and requester-authorized task metadata without changing event replay cursors or conversation grouping. Dashboard permission, rerun, lifecycle/restart and GraphQL metadata tests passed; two real persisted runs were read through the integrated local API and client. Queue/waiting UI states remain controlled-test evidence, and deployment credit remains zero.",
+      "decision": "Keep current main conversation/replay and authorization contracts. Only assistant.partial/runtime.activity presentation keys cross the public wire; template arguments remain hidden. Local snapshot file IO is an adapter and does not authorize production multi-replica persistence. RIID-5829 preserves state replay but makes recipient-scoped task notifications live-only, rechecks task authorization at delivery, and multiplexes workspace subscriptions to prevent HTTP/1 connection starvation. Notification transition, snapshot race, nine-workspace delivery and denied-task tests passed locally; this is not production deployment evidence. RIID-5830 adds a read-only dashboard over the same assignment journal and requester-authorized task metadata without changing event replay cursors or conversation grouping. Dashboard permission, rerun, lifecycle/restart and GraphQL metadata tests passed; two real persisted runs were read through the integrated local API and client. Queue/waiting UI states remain controlled-test evidence, and deployment credit remains zero. Validate the 1,000-character budget on user instructions at profile and request boundaries before composing the execution snapshot. Assignment polling must preserve both the full user text and the server guidelines.",
       "next_loop": "ai_agent_load_harness"
     },
     {
@@ -26517,8 +26636,8 @@
     },
     {
       "id": "cli_installation_service_link_and_revision_5900",
-      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy. The original link receipt cannot recover an intent creation response lost before the monolith learns the random ID/challenge; a digest alone cannot recreate that response.",
-      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects. Bind the monolith persisted request ID to the exact immutable v2 payload and original response, publishing both request and intent atomically. Domain-separated length-prefixed deterministic intent IDs make an intent-only collision fail closed instead of silently issuing a replacement. Retain an uncertain atomic snapshot intent/replay pair in the full actor state so another save cannot erase it; do not acknowledge a retry until the complete snapshot saves successfully.",
+      "observation": "An immutable execution history and termination receipt alone cannot authorize a standalone CLI installation. A policy read can race a new execution claim, and a signed key must be tied to a currently approved device owner without interpreting first approver provenance as exclusive ownership. The monolith can lose a successful link-confirm ACK while retaining the original pending intent, so it needs an authenticated way to recover that exact historical link without changing present execution policy. The original link receipt cannot recover an intent creation response lost before the monolith learns the random ID/challenge; a digest alone cannot recreate that response. A read-only expired receipt (410) cannot prove that a confirmation started before expiry will not commit later, so it cannot authorize repair replacement.",
+      "hypothesis": "Add exact service-scoped intent and policy routes, device-and-key confirmation, immutable link consumption, and atomic device revision advancement in actual claim/receipt transactions. Recheck revision after reading evidence and fail closed until complete coverage exists. Reading a consumed immutable intent and its original link through the existing actor or strongly consistent Dynamo reads can recover the ACK; one confirmation clock sample and strict expiry chronology prevent a producer from issuing an ACK that recovery rejects. Bind the monolith persisted request ID to the exact immutable v2 payload and original response, publishing both request and intent atomically. Domain-separated length-prefixed deterministic intent IDs make an intent-only collision fail closed instead of silently issuing a replacement. Retain an uncertain atomic snapshot intent/replay pair in the full actor state so another save cannot erase it; do not acknowledge a retry until the complete snapshot saves successfully. Conditionally retire an expired unconsumed intent using the same full payload CAS as confirmation. Preserve a winning original consumed receipt and a durable retirement fence across lost acknowledgements and restart.",
       "claims": [
         "cli_installation_link_must_preserve_key_and_policy_fences",
         "request_authorization_must_preserve_security_boundary",
@@ -26693,6 +26812,38 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/store_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_retirement.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_retirement.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_retirement.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_retirement.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_cli_installation_intent_evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_installation_intent_evidence.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_cli_installation_intent_evidence.go"
         }
       ],
       "verifiers": [
@@ -26831,6 +26982,66 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/cli_installation_intent_replay_uncertain_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_auth_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_dynamo_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_race_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_barrier_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_consumed_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_retire_response_size_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence_auth_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence_corruption_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence_history_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence_snapshot_drift_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence_snapshot_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/cli_installation_intent_evidence_test.go"
         }
       ],
       "evidence": [
@@ -26850,7 +27061,7 @@
           "redacted": true
         }
       ],
-      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed. A new private receipt route reads the original consumed intent/link through the existing actor or durable store without mutation, revision changes, or present permission promotion. Exact service scope and identity, pending/expired rejection, snapshot/Dynamo restart, strict LinkedAt-before-expiry, and one-clock confirm/replay are tested. The route registry adds one entry; no throughput or latency improvement is claimed, and no live AWS or deployment acceptance follows from these fixtures. Actual v2 HTTP rejection was observed before implementation. Existing v1 regression exposed that the shared JSON decoder requires every declared field; a bounded route-local schema probe now selects the exact v1/v2 key set and the unchanged strict decoder remains authoritative. The tests cover same/consumed/expired replay, eight concurrent requests, failed/acknowledgement-lost transactions, restart, immutable payload conflicts, orphan/corrupt record pairs, legacy snapshot restore, and domain/tuple separation. Snapshot publication and Dynamo two-item CAS preserve the original challenge and expiry without changing link or coverage revisions. No new endpoint, shared contract tag, live deployment, public linking orchestration, OS key acceptance or performance improvement is claimed.",
+      "decision": "Route absence, missing storage, replacement-key status mismatch, dual-persistence acceptance and browser preflight exposure and stale schema overwrite and noncanonical resource acceptance were observed before correction. Synthetic HTTP/storage fixtures exercise lost acknowledgements, concurrent consumption, snapshot restart/failure and revision races. No allowed verdict, service credential deployment, monolith consumer, live Dynamo request or production acceptance is claimed. A new private receipt route reads the original consumed intent/link through the existing actor or durable store without mutation, revision changes, or present permission promotion. Exact service scope and identity, pending/expired rejection, snapshot/Dynamo restart, strict LinkedAt-before-expiry, and one-clock confirm/replay are tested. The route registry adds one entry; no throughput or latency improvement is claimed, and no live AWS or deployment acceptance follows from these fixtures. Actual v2 HTTP rejection was observed before implementation. Existing v1 regression exposed that the shared JSON decoder requires every declared field; a bounded route-local schema probe now selects the exact v1/v2 key set and the unchanged strict decoder remains authoritative. The tests cover same/consumed/expired replay, eight concurrent requests, failed/acknowledgement-lost transactions, restart, immutable payload conflicts, orphan/corrupt record pairs, legacy snapshot restore, and domain/tuple separation. Snapshot publication and Dynamo two-item CAS preserve the original challenge and expiry without changing link or coverage revisions. No new endpoint, shared contract tag, live deployment, public linking orchestration, OS key acceptance or performance improvement is claimed. RIID-5971 adds POST /v1/internal/cli-installations/link-intent-retirements with the existing dedicated link service scope and exact tuple. This foundation returns retired or consumed with the original receipt, and changes no link, coverage revision, grant, current permission or installation state. Synthetic HTTP transaction barriers verify both winning orders against a confirmation already in flight before expiry. Failed/lost ACK persistence, restart, v2 replay and identity/scope/browser rejection are covered. Consumer repair, fresh human consent/key proof, live Dynamo and deployment remain separate. The local size-bound regression was observed before correction: retirement now validates the complete changed record before publishing state. A size-bound failure leaves the original unknown handoff for explicit follow-up and never acknowledges retirement. Before consumer activation every CP replica must support the terminal marker; downgrade to an older reader that ignores it is not safe rollback. Codex review 4422872807 reproduced a valid create/confirm/ordinary-receipt followed by retirement 503 on local and Dynamo fixtures, because the consumed envelope duplicated the full identity. The correction removes only that outer duplicate, keeps exact nested receipt binding and the existing 4 KiB budget, and passes the HTTP boundary regression. The retired shape is unchanged. RIID-5971 adds service-only POST link-intent-evidence, preserving the original request/challenge/expiry with no writes. Route absence, configured-origin preflight acceptance and unsupported snapshot schema acceptance were reproduced before correction. Exact consistent Dynamo fixture reads, orphan detection and snapshot durable readback distinguish absent evidence from corruption or uncertain publication. No monolith reconciliation, live AWS, deployment, signed OS or account acceptance is claimed by this prerequisite.",
       "next_loop": "closed_loop_candidate"
     },
     {
@@ -28203,6 +28414,563 @@
         }
       ],
       "decision": "The optional max_bytes field (content view only, 8-256 KiB) returns pages[] of one part starting at the requested cursor; the requested page is always included, the batch never crosses a part boundary, next_cursor and complete describe the remainder, one read attempt is consumed and one read record is written per distinct source. Without max_bytes the single-page response is unchanged. A damaged later page ends the batch instead of failing it; reading that page's own cursor still reports the failure. The daemon falls back to single pages when an older control plane rejects the unknown field during decoding, before quota or audit.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_context_changes_5972",
+      "observation": "Snapshot IDs did not retain authenticated conversation ancestry, and a parent comment version can remain unchanged after a captured reply changes. Optional digest and lineage metadata can push a previously valid capture past raw or encoded Dynamo item budgets.",
+      "hypothesis": "Retaining server-selected lineage and hashing all captured pages permits same-scope metadata comparisons under the current lease without granting access to old bodies. Unknown omissions and incomplete digests must require a full read. Optional comparison metadata can be omitted when either storage limit would otherwise discard readable context.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_baseline.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_lineage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_digest.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_captured_json.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_captured_object.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_compare.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_types.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_comparison_budget.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_capture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_baseline_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_baseline_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_digest_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_request_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_encoded_budget_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_comparison_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_context_changes_incomplete_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Follow at most 32 server-recorded parent edges, preserving requester/admin, workspace/team, task and agent identity and rejecting sibling, inherited, expired or unknown baselines with 410. Return only current part metadata; omissions have no old title or deleted/denied claim. Current-title reads preserve their original audit kind. Hash canonical captured pages with exact numbers, reject duplicate keys, and distinguish incomplete comparison from unchanged. Preserve original pages and cursors when raw or actual encoded snapshot size requires dropping optional metadata. Legacy snapshots do not store unusable lineage. Local regression and HTTP/Dynamo serialization evidence do not establish deployed CLI, cache, provider-session reuse or comment-trigger lineage.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_context_source_states_5972",
+      "observation": "context changes reported every source missing from the newer capture as an unknown omission, so an Agent had to repeat a full context get after a source was deleted or merely left the read scope, and could keep relying on a source that no longer exists.",
+      "hypothesis": "Asking the monolith once at follow-up capture time, with a dedicated service key and only workspace, requester and source identity, can separate deleted and unselected sources from unknown omissions without returning titles or bodies. Sources the requester can no longer read must disappear without a reason, and any lookup doubt must keep the full-read recovery.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "config_reference_must_preserve_env_manifest_parity",
+        "runtime_deployment_boundary_must_preserve_public_private_ownership"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_source_state.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_source_state_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_source_state_lookup.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_omissions.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_version.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_compare.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_changes_view.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_context_lineage.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_read_scope_capture.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/agent_source_state_config.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_compare_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_lookup_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_scope_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_source_state_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/agent_source_state_config_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Only a thread follow-up whose server-selected previous capture shares conversation, requester/admin, workspace/team, task and agent asks about the previous sources the new capture omits, at most 32, within 3 seconds. The monolith answer must repeat the same identities in order with visible, deleted or hidden; visible becomes unselected, deleted stays deleted and hidden is omitted. States are stored once with the snapshot, dropped with lineage under the item budget and never hide a source that is still captured. Only a changes request with X-Riido-Context-Changes-Version 2 receives the new statuses; older daemons keep the previous unknown omissions. Failures, malformed answers, oversized sets, sources outside the previous capture and unset config keep unavailable with full_refresh_required. Local regression evidence does not establish staging configuration, deployed daemon support or real-account acceptance.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "cli_task_thread_read_opaque_boundary",
+      "observation": "Standalone CLI OAuth is scoped to monolith. Passing it to the generic application authorization fallback does not establish the current CLI grant, installation or task policy.",
+      "hypothesis": "A short-lived opaque task-bound ticket and dedicated current-policy service check can expose the existing thread projection without granting application write, stream or device authority.",
+      "claims": [
+        "request_authorization_must_preserve_security_boundary"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/cli_thread_read_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read_decode.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/authpep/cli_thread_read_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_thread_read_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_thread_read_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_authorization_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_type.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_config_nil.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_config_parts.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_http.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/cli_thread_read_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_config_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_decode_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_integration_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_thread_read_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_thread_read_request_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/authpep/cli_thread_read_denial_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "request-authorization-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Default off. Only canonical workspace/task v3 GET is admitted; every read checks the original grant, installation and task via the separate monolith service. No fallback, auth cache, redirect, cookie or retry. Preserve existing retained history and owner/public/admin visibility. Local CP HTTP uses a synthetic TLS policy server; live monolith, daemon commands and real-account acceptance remain separate. Deploy the raw CLI JWT guard before activation.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_cli_conditional_content_cache_5972",
+      "observation": "Repeated captured-content reads retransmitted identical page bodies. Reusing a daemon body without the existing CP request would bypass current execution authority, quota and read-record delivery. The shared client API description is also bound to thread-history claims, so this representation-only extension must leave conversation identity and history unchanged.",
+      "hypothesis": "An explicitly negotiated conditional response can omit an identical body after the existing read path has completed. Binding the digest to agent/assignment, selector, cursor, byte budget and the full current response makes a candidate representation-specific without treating it as authorization.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_cache.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_response.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_context_types.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_changes_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_fixture_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_authority_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/assignment_content_cache_store_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Accept optional content_digest/not_modified only for version-1 captured content. A matching representation uses HTTP 200 with data:null only after current device, lease/run, quota, scope/page and audit checks; each call still records its request and exact page sources. Missing or unsupported negotiation keeps legacy response fields. No cross-run authority, live-body cache, HTTP-call reduction, production activation or authenticated consumer acceptance is implied. Request/response and boundary-fixture helpers preserve the existing code budget instead of raising its limits.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "thread_history_requester_confirmation_reason_6001",
+      "observation": "The task-detail activity tab (client RIID-5842) shows each agent run with the user who started it and whether a waiting run needs an answer or an approval. v3 thread history exposed neither the requesting principal nor the stored confirmation reason, so clients could not render them.",
+      "hypothesis": "Record the requesting user principal once per thread at assign, comment mention and thread reply, and project it with the existing confirmation_reason as optional v3 history fields. Later resume, stop or unassign must not overwrite the first requester, runs created only by runtime events stay without one, and user follow-up preservation and conversation grouping stay unchanged.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "thread_history_v3_must_expose_stable_conversation_grouping",
+        "api_client_delivery_must_preserve_generated_handoff_boundary",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
+      ],
+      "changes": [
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.dsl.riido.json"
+        },
+        {
+          "kind": "manifest",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.ir.riido.json"
+        },
+        {
+          "kind": "api",
+          "path": "contracts/ai-agent-client/control-plane-ai-agent-client.openapi.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_assign_ai_agent_task_2.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_method_submit_ai_agent_task_comment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_record_task_thread_requester.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_api.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_projection.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_requester_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/reactquerygen/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "tools/generatedclienthandoff/generated_files_test.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/30-architecture/loop-registry.riido.json"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/loop-registry.md"
+        },
+        {
+          "kind": "generated_doc",
+          "path": "docs/30-architecture/syntax-hash.md"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_requester_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_client_thread_history_v3_test.go"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/reactquerygen"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/generatedclienthandoff"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "tool",
+          "path": "tools/loopregistry"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "ai-agent-client-api-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Add requested_by and confirmation_reason as omitempty response fields only; no existing field, ordering or follow-up behavior changes. New tests cover per-run requester recording, no overwrite by later actions, omission when unknown, and confirmation reason projection. The contract DSL regenerates IR, OpenAPI and the generated client; generated docs and golden hashes are refreshed by their own tools without relaxing gates.",
+      "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_read_scope_failure_status_6008",
+      "observation": "Every requester-authorized read-scope failure was wrapped as a latest-document failure and answered 503 retry the same request_id, so a permission denial or stored data the monolith cannot serve safely (onboarding work authored by official members, a second live body) was retried indefinitely and could never succeed.",
+      "hypothesis": "Classifying only the read-scope failure by the monolith GraphQL code and integrity reason lets assignment return 403, 404 or 422 for failures retrying cannot fix while every transient read-scope failure and every other task-context read keeps the retryable 503, and none of them falls back to an assignment without task context.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_failure.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_graphql.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_error.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_failure_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_graphql_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_latest_document_failure_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Only failures of getComponentReadScope itself are classified: permission_denied/authentication or FORBIDDEN 403, not_found 404, conflict with reason read_scope_integrity 422. A conflict without that reason, other codes, timeouts and every non-read-scope task-context read keep 503. All classified errors remain latestTaskDocumentError so composition still refuses to assign without task context. Monolith and CLI changes are separate PRs; this change is local regression evidence only and does not establish deployment.",
       "next_loop": "closed_loop_candidate"
     }
   ],

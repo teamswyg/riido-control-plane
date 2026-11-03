@@ -230,6 +230,10 @@ export interface AIAgentTaskThreadHistoryRecord {
   assignment_state: AgentAssignmentState;
   completed_at?: string;
   /**
+   * assignment_state=waiting_for_user인 실행이 답변(answer_required)과 승인(approval_required) 중 무엇을 기다리는지입니다. 기다리는 상태가 아니면 생략합니다.
+   */
+  confirmation_reason?: "answer_required" | "approval_required";
+  /**
    * 같은 AI Agent 댓글 카드 안에서 이어지는 reply chain을 묶는 stable key입니다. 새 배정은 새 conversation_id를 만들고, 기존 thread 답글은 기존 conversation_id를 상속합니다.
    */
   conversation_id: string;
@@ -240,6 +244,10 @@ export interface AIAgentTaskThreadHistoryRecord {
    * 후속 답글 실행이면 사용자가 답글을 단 원본/직전 thread_id입니다. 새 배정이면 생략합니다.
    */
   parent_thread_id?: string;
+  /**
+   * 이 실행을 시작한 사용자 principal_id입니다. 배정·댓글 멘션·답글 재실행 시점에 기록하며, 이후 재개·중지·해제로 바뀌지 않습니다. 기록 이전 실행과 runtime 이벤트만으로 생긴 실행은 생략합니다.
+   */
+  requested_by?: string;
   run_id: string;
   started_at?: string;
   task_id: string;
@@ -1658,6 +1666,7 @@ export function stopAIAgentDaemonMutationOptions(config: RiidoClientConfig, opti
 export interface GetAgentDashboardPathParams {
   agent_id: string;
   page?: number;
+  section?: string;
 }
 
 /**
@@ -1667,6 +1676,7 @@ export async function getAgentDashboard(config: RiidoClientConfig, params: GetAg
   const path = `/v1/client/ai-agent/agents/${params.agent_id}/dashboard`;
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set("page", String(params.page));
+  if (params.section !== undefined) query.set("section", String(params.section));
   const requestPath = query.size ? `${path}?${query.toString()}` : path;
   return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
@@ -2920,6 +2930,7 @@ export interface GetAgentDashboardV2PathParams {
   workspace_id: string;
   agent_id: string;
   page?: number;
+  section?: string;
 }
 
 /**
@@ -2929,6 +2940,7 @@ export async function getAgentDashboardV2(config: RiidoClientConfig, params: Get
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/agents/${params.agent_id}/dashboard`;
   const query = new URLSearchParams();
   if (params.page !== undefined) query.set("page", String(params.page));
+  if (params.section !== undefined) query.set("section", String(params.section));
   const requestPath = query.size ? `${path}?${query.toString()}` : path;
   return riidoRequest<AgentDashboardResponse>(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
@@ -3389,6 +3401,7 @@ export function listAIAgentDeviceDaemonsV2QueryOptions(config: RiidoClientConfig
  */
 export interface StreamAIAgentClientEventsV2PathParams {
   workspace_id: string;
+  dashboard_agent_id?: string;
 }
 
 /**
@@ -3396,7 +3409,10 @@ export interface StreamAIAgentClientEventsV2PathParams {
  */
 export async function streamAIAgentClientEventsV2(config: RiidoClientConfig, params: StreamAIAgentClientEventsV2PathParams, options: RiidoRequestOptions = {}): Promise<Response> {
   const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/events`;
-  return riidoRawRequest(config, path, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
+  const query = new URLSearchParams();
+  if (params.dashboard_agent_id !== undefined) query.set("dashboard_agent_id", String(params.dashboard_agent_id));
+  const requestPath = query.size ? `${path}?${query.toString()}` : path;
+  return riidoRawRequest(config, requestPath, { method: 'GET', signal: options.signal, headers: riidoViewerHeaders(options) });
 }
 
 /**

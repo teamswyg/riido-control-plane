@@ -20,6 +20,9 @@ func (s *DynamoDBAssignmentOperationStore) confirmCLIInstallationLink(ctx contex
 		if err = verifyCLIInstallationProof(intent, device, signature); err != nil {
 			return cliInstallationLink{}, err
 		}
+		if intent.Retired {
+			return cliInstallationLink{}, errCLIInstallationExpired
+		}
 		link, oldLink, err := s.loadCLIInstallationLink(ctx, intent.Request.cliInstallationIdentity)
 		if errors.Is(err, ErrAuthorizationForbidden) {
 			return cliInstallationLink{}, errCLIInstallationConflict

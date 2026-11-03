@@ -24,10 +24,12 @@ type AssignmentContentManifest struct {
 	SourceID     string                `json:"source_id"`
 	Part         AssignmentContentPart `json:"part"`
 	Version      string                `json:"version"`
-	Status       string                `json:"status"`
-	Complete     bool                  `json:"complete"`
-	Cursors      []string              `json:"cursors"`
-	NextAction   string                `json:"next_action,omitempty"`
+	// Digest identifies every captured page, not only a parent source version.
+	Digest     string   `json:"digest,omitempty"`
+	Status     string   `json:"status"`
+	Complete   bool     `json:"complete"`
+	Cursors    []string `json:"cursors"`
+	NextAction string   `json:"next_action,omitempty"`
 }
 
 type AssignmentContentPage struct {

@@ -31,6 +31,9 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 	if err != nil {
 		return composedAssignRequest{}, err
 	}
+	if err := validateAgentInstruction("instruction", selected.Instruction); err != nil {
+		return composedAssignRequest{}, err
+	}
 	binding, runtime, err := s.resolveAgentRuntimeFact(selected.AgentID)
 	if err != nil {
 		return composedAssignRequest{}, err

@@ -23,6 +23,8 @@ func (s Server) captureAssignmentReadScope(ctx context.Context, snapshot Assignm
 			snapshot.Truncated = true
 		}
 	}
+	snapshot.SourceStates = s.assignmentSourceStates(ctx, snapshot)
+	snapshot = boundAssignmentComparisonMetadata(snapshot, taskContext.readScopeCapture.Pages)
 	if err := store.SaveAssignmentContentBundle(ctx, snapshot, taskContext.readScopeCapture.Pages); err != nil {
 		log.Printf("event=assignment_context_capture_failed assignment_id=%q stage=scoped_bundle error_type=%T", snapshot.AssignmentID, err)
 		return

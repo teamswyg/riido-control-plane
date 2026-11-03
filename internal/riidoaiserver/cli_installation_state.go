@@ -20,6 +20,9 @@ func bumpDevicePolicyRevision(state *storeState, device string) error {
 }
 
 func (intent cliInstallationIntent) valid() error {
+	if intent.Retired && intent.Consumed {
+		return errCLIInstallationInvalid
+	}
 	if _, err := installationPublicKey(intent.Request); err != nil {
 		return err
 	}

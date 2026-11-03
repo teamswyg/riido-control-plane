@@ -42,6 +42,8 @@ func (s *DevelopmentAIAgentClientStore) taskThreadHistoryRecordLocked(thread AIA
 		AgentID:            thread.AgentID,
 		AgentSnapshotID:    thread.AgentSnapshotID,
 		RunID:              thread.RunID,
+		RequestedBy:        thread.RequestedBy,
+		ConfirmationReason: thread.ConfirmationReason,
 		WorkStatus:         thread.WorkStatus,
 		AssignmentState:    thread.AssignmentState,
 		StartedAt:          thread.StartedAt,

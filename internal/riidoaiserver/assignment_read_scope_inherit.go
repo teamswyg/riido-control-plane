@@ -25,6 +25,7 @@ func (s Server) inheritAssignmentContent(ctx context.Context, parent AssignmentC
 		}
 	}
 	snapshot := parent
+	clearAssignmentContextLineage(&snapshot)
 	snapshot.AssignmentID, snapshot.AgentID = child.ID, child.AgentID
 	snapshot.TriggerKind, snapshot.TriggerID = AssignmentContextTriggerAgentMention, strings.TrimSpace(triggerID)
 	snapshot.CapturedAt = time.Now().UTC()

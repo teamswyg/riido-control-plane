@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-const configReferenceGoldenSHA256 = "d276fbe188a382abdfab4d438f2de58fd0ce65dad2ace8c7426f86e0c1ce82d5"
+const configReferenceGoldenSHA256 = "368ed55bd29d3bcbb15eb0100cceba87083a5bd2521fb2e01924a6ce7757d05e"
 
 func TestConfigReferenceEvidence(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "evidence.json")

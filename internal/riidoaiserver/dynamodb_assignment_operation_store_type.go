@@ -18,6 +18,7 @@ type DynamoDBAssignmentOperationStoreConfig struct {
 }
 
 type DynamoDBAssignmentOperationStore struct {
+	dashboardTerminalTimes           dashboardTerminalCache
 	executionCoverageAuthority       *DynamoDBAIAgentClientSnapshot
 	enableAssignmentContextRetention bool
 	enableAgentHistory               bool

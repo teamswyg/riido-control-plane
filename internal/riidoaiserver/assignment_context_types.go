@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"context"
 	"time"
 )
 
@@ -28,6 +27,10 @@ const (
 
 type AssignmentContextSnapshot struct {
 	AssignmentID         string                      `json:"assignment_id"`
+	ConversationID       string                      `json:"conversation_id,omitempty"`
+	ThreadID             string                      `json:"thread_id,omitempty"`
+	PreviousAssignmentID string                      `json:"previous_assignment_id,omitempty"`
+	PreviousThreadID     string                      `json:"previous_thread_id,omitempty"`
 	TaskID               string                      `json:"task_id"`
 	WorkspaceID          string                      `json:"workspace_id,omitempty"`
 	AgentID              string                      `json:"agent_id"`
@@ -40,36 +43,8 @@ type AssignmentContextSnapshot struct {
 	CommentPages         int                         `json:"comment_pages,omitempty"`
 	Content              []AssignmentContentManifest `json:"content,omitempty"`
 	ContentBlocks        []AssignmentContentBlockRef `json:"content_blocks,omitempty"`
-	Context              AIAgentTaskContext          `json:"context"`
-}
-
-// AssignmentContextRead is one "source read for this answer" record: who
-// (agent and requester), what (source kind/id/part/version), when, and which
-// run (assignment plus the triggering comment or thread message).
-type AssignmentContextRead struct {
-	AssignmentID         string    `json:"assignment_id"`
-	TaskID               string    `json:"task_id"`
-	AgentID              string    `json:"agent_id"`
-	RequesterPrincipalID string    `json:"requester_principal_id,omitempty"`
-	TriggerKind          string    `json:"trigger_kind"`
-	TriggerID            string    `json:"trigger_id,omitempty"`
-	SourceKind           string    `json:"source_kind"`
-	SourceID             string    `json:"source_id,omitempty"`
-	SourcePart           string    `json:"source_part"`
-	SourceVersion        string    `json:"source_version,omitempty"`
-	SourceUpdatedAt      string    `json:"source_updated_at,omitempty"`
-	Via                  string    `json:"via"`
-	Status               string    `json:"status"`
-	ServedAt             time.Time `json:"served_at"`
-	RequestID            string    `json:"request_id,omitempty"`
-}
-
-type AssignmentContextStore interface {
-	ConsumeAssignmentContextRead(ctx context.Context, assignmentID string) (bool, error)
-	SaveAssignmentContextSnapshot(ctx context.Context, snapshot AssignmentContextSnapshot) error
-	LoadAssignmentContextSnapshot(ctx context.Context, assignmentID string) (AssignmentContextSnapshot, bool, error)
-	AppendAssignmentContextReads(ctx context.Context, reads []AssignmentContextRead) error
-	ListAssignmentContextReads(ctx context.Context, assignmentID string) ([]AssignmentContextRead, error)
-	SaveAssignmentContextComments(ctx context.Context, assignmentID string, pages [][]AIAgentTaskContextComment) error
-	LoadAssignmentContextCommentPage(ctx context.Context, assignmentID string, page int) ([]AIAgentTaskContextComment, bool, error)
+	// SourceStates explains sources of the previous capture that this one no
+	// longer has; decided once at capture time (RIID-5972).
+	SourceStates []AssignmentSourceState `json:"source_states,omitempty"`
+	Context      AIAgentTaskContext      `json:"context"`
 }

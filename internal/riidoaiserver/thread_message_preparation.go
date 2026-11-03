@@ -3,6 +3,7 @@ package riidoaiserver
 import "context"
 
 type preparedThreadMessage struct {
+	Selected           AIAgentTaskThreadRecord
 	Request            AssignRequest
 	TaskContext        *AIAgentTaskContext
 	StartsNewExecution bool
@@ -24,5 +25,5 @@ func (s Server) prepareThreadMessage(ctx context.Context, principal Authorizatio
 		return preparedThreadMessage{Replay: &replay}, nil
 	}
 	request, taskContext, err := s.assignRequestFromAIAgentTaskThreadMessage(ctx, principal, bearer, taskID, threadID, req, selected, history)
-	return preparedThreadMessage{Request: request, TaskContext: taskContext, StartsNewExecution: taskThreadMessageStartsNewExecution(AIAgentTaskThreadRecord{WorkStatus: selected.WorkStatus, AssignmentState: selected.AssignmentState})}, err
+	return preparedThreadMessage{Selected: selected, Request: request, TaskContext: taskContext, StartsNewExecution: taskThreadMessageStartsNewExecution(AIAgentTaskThreadRecord{WorkStatus: selected.WorkStatus, AssignmentState: selected.AssignmentState})}, err
 }

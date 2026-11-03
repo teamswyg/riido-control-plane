@@ -24,12 +24,15 @@ func newRuntimeHTTPServers(config runtimeConfig, store *riidoaiserver.Store, aiA
 
 func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgentClient riidoaiserver.AIAgentClientStore, httpTransactions *riidoaiserver.HTTPTransactionMetrics, traceRecorder riidoaiserver.TraceRecorder) http.Handler {
 	return riidoaiserver.NewServer(riidoaiserver.ServerConfig{
+		CLIThreadReadAuthorizer:  config.CLIThreadReadAuthorizer,
+		CLIAgentReadAuthorizer:   config.CLIAgentReadAuthorizer,
 		CLIInstallationService:   config.CLIInstallationService,
 		Assignment:               store,
 		AIAgentClient:            aiAgentClient,
 		AIAgentProfileThumbnails: config.AIAgentProfileThumbnails,
 		TaskContext:              config.TaskContextReader,
 		CommentDelivery:          config.CommentDelivery,
+		AgentSourceState:         config.AgentSourceState,
 		Authorizer:               config.Authorizer,
 		WebAllowedOrigins:        config.WebAllowedOrigins,
 		HTTPTransactions:         httpTransactions,

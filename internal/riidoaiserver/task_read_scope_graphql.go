@@ -31,7 +31,8 @@ func (c *AIAgentPrivateTaskContextClient) readScopeGraphQL(ctx context.Context, 
 		Data   map[string]json.RawMessage `json:"data"`
 		Errors []struct {
 			Extensions struct {
-				Code string `json:"code"`
+				Code   string `json:"code"`
+				Reason string `json:"reason"`
 			} `json:"extensions"`
 		} `json:"errors"`
 	}
@@ -44,6 +45,12 @@ func (c *AIAgentPrivateTaskContextClient) readScopeGraphQL(ctx context.Context, 
 			return taskContextReadError{"denied"}
 		case "not_found":
 			return taskContextReadError{"missing"}
+		case "conflict":
+			// RIID-6008: stored data the monolith cannot serve safely. Retrying
+			// the same request will not fix it.
+			if envelope.Errors[0].Extensions.Reason == readScopeIntegrityReason {
+				return taskContextReadError{"integrity"}
+			}
 		}
 		return taskContextReadError{"unavailable"}
 	}

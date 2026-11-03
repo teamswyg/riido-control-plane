@@ -40,6 +40,8 @@ type AIAgentTaskThreadHistoryRecord struct {
 	AgentID            string                               `json:"agent_id"`
 	AgentSnapshotID    string                               `json:"agent_snapshot_id,omitempty"`
 	RunID              string                               `json:"run_id"`
+	RequestedBy        string                               `json:"requested_by,omitempty"`
+	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
 	WorkStatus         AgentWorkStatus                      `json:"work_status"`
 	AssignmentState    AgentAssignmentState                 `json:"assignment_state"`
 	StartedAt          time.Time                            `json:"started_at,omitempty"`

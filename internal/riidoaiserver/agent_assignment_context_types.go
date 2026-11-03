@@ -11,10 +11,13 @@ type AgentAssignmentContextRequest struct {
 	View         string `json:"view"`
 	Target       string `json:"target,omitempty"`
 	Cursor       string `json:"cursor,omitempty"`
+	Since        string `json:"since,omitempty"`
 	RequestID    string `json:"request_id,omitempty"`
 	// MaxBytes asks a content read for consecutive pages of the same part up to
 	// this encoded size. Zero keeps the single-page response.
 	MaxBytes int `json:"max_bytes,omitempty"`
+	// sourceStates comes from the changes version header, never from JSON.
+	sourceStates bool
 }
 
 type AgentAssignmentContextResponse struct {
@@ -27,6 +30,8 @@ type AgentAssignmentContextResponse struct {
 	Live          bool                      `json:"live,omitempty"`
 	Data          any                       `json:"data"`
 	Sources       []AssignmentContextSource `json:"sources"`
+	ContentDigest string                    `json:"content_digest,omitempty"`
+	NotModified   bool                      `json:"not_modified,omitempty"`
 }
 
 // normalizeAssignmentContextRequest defaults the view to base and reports
@@ -35,6 +40,9 @@ func normalizeAssignmentContextRequest(req *AgentAssignmentContextRequest) bool 
 	req.View = strings.TrimSpace(req.View)
 	if req.View == "" {
 		req.View = AssignmentContextViewBase
+	}
+	if !validAssignmentContextSince(*req) {
+		return false
 	}
 	return strings.TrimSpace(req.AssignmentID) != "" && strings.TrimSpace(req.LeaseToken) != "" && validAssignmentContextView(req.View) && validAssignmentContentBatchBytes(req.View, req.MaxBytes)
 }

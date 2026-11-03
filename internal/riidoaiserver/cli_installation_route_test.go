@@ -16,6 +16,7 @@ func TestCLIInstallationRoutesFailClosedWithoutAuthority(t *testing.T) {
 		{"/v1/internal/cli-installations/link-intents", http.StatusServiceUnavailable},
 		{"/v1/internal/cli-installations/policy", http.StatusServiceUnavailable},
 		{"/v1/internal/cli-installations/link-receipts", http.StatusServiceUnavailable},
+		{"/v1/internal/cli-installations/link-intent-retirements", http.StatusServiceUnavailable},
 		{"/v1/daemon/cli-installation-links/fixture/confirm", http.StatusUnauthorized},
 	} {
 		t.Run(tc.path, func(t *testing.T) {

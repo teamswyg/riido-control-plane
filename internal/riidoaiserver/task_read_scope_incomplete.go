@@ -12,6 +12,7 @@ func readScopeIncomplete(ctx context.Context, err error) bool {
 func (b *taskReadScopeBuilder) missingPart(resource AssignmentScopedResource, part AssignmentContentPart, status string) AssignmentContentManifest {
 	manifest := b.addPart(resource, part, "", nil, false)
 	manifest.Status = status
+	manifest.Digest, _ = assignmentCapturedPartDigest(resource, manifest, nil)
 	b.capture.Manifest[len(b.capture.Manifest)-1] = manifest
 	return manifest
 }

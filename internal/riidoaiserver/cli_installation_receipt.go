@@ -35,7 +35,7 @@ func checkCLIInstallationReceiptIntent(req cliInstallationReceiptRequest, intent
 		return ErrAuthorizationForbidden
 	}
 	if !intent.Consumed {
-		if !now.Before(intent.ExpiresAt) {
+		if intent.Retired || !now.Before(intent.ExpiresAt) {
 			return errCLIInstallationExpired
 		}
 		return errCLIInstallationConflict
