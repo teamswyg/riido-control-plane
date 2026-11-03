@@ -13,6 +13,12 @@ func (s Server) prepareCommentConversation(ctx context.Context, principal Author
 		root = evidence.CommentID
 	} // Rolling compatibility with old evidence services.
 	publication.conversationID = "comment:" + root
+	if evidence.directConversationID != "" {
+		publication.conversationID = evidence.directConversationID
+		if call := publication.commentInvocation; call != nil {
+			publication.parentThreadID = call.OriginThreadID
+		}
+	}
 	publication.sourceMessageObservedAt = evidence.CommentCreatedAt
 	for _, message := range evidence.ConversationMessages {
 		if message.ID == evidence.CommentID && publication.sourceMessageObservedAt.IsZero() {

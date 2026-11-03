@@ -10,7 +10,7 @@ import (
 // from the HTTP request or transfer another requester's evidence.
 func (s Server) prepareCommentFollowup(ctx context.Context, principal AuthorizationResult, selected AIAgentTaskThreadRecord, target string) (*CommentInvocation, error) {
 	if !strings.HasPrefix(selected.ConversationID, "comment:") {
-		return nil, nil
+		return s.directAssignmentFollowup(ctx, principal, selected, target)
 	}
 	collection, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, selected.TaskID)
 	if err != nil {

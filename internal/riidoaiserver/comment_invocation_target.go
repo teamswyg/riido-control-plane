@@ -12,7 +12,7 @@ func (s Server) dispatchCommentTarget(ctx context.Context, principal Authorizati
 	if slices.Contains(commentMentionLimitReasons(call, target, 1), "cycle") {
 		return false, notice(key, "cycle", "Riido: 자기 자신 또는 앞서 호출한 Agent로 이어지는 반복 호출을 중단했습니다.")
 	}
-	evidence, err := s.readCommentDeliveryEvidence(ctx, call.EvidenceEventID)
+	evidence, err := s.readInvocationEvidence(ctx, event.TaskID, call)
 	if errors.Is(err, ErrAuthorizationForbidden) {
 		return true, notice("policy", "access_revoked", "Riido: 원댓글 또는 요청자의 현재 접근 권한을 확인할 수 없어 자동 호출을 중단했습니다.")
 	}
