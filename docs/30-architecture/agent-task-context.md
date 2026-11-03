@@ -25,6 +25,20 @@ or making anonymous reads. Only older evidence with no `extended` field receives
 the trigger-only fallback. The original comment remains the execution trigger;
 normal snapshot capture, read audit and current viewer filtering still apply.
 
+A human follow-up in a verified comment conversation keeps its server-owned
+comment evidence binding. Only a new execution resets the automatic call chain
+(depth 0, budget 8, ancestors containing the selected Agent); active-run messages
+and tool approvals keep their existing chain. The immutable evidence Agent is
+stored separately from the new chain, with legacy ancestry as a read fallback.
+Older followups recover missing bindings only through persisted same-task/root
+parent edges. Evidence is re-read before publication and again at delegation.
+Another requester's evidence is never transferred: ordinary conversation can
+continue under the current requester, but automatic delegation remains unavailable
+until that requester starts a newly verified comment request. Follow-up snapshots
+come from the fresh authorized task read, and child Agents inherit that snapshot.
+Human follow-up status reactions target the new message, not the original
+Monolith comment; completion notifications retain their human-request behavior.
+
 The request-scoped reader keeps the caller's existing bearer and team scope.
 Only project, milestone and parent-task IDs already returned by the authorized
 task detail may be followed. Parent reads are deduplicated, at most three in
@@ -138,9 +152,12 @@ intake and meeting IDs retain their kinds; an ambiguous bare work ID is rejected
 The scope preserves inspector fields, stored GitHub/Figma/link/attachment data,
 versioned editor/description/alternate bodies, comments/replies and meeting board
 cards/groups/participants. Fixed continuation calls happen during initial capture.
-Click-time HTML replaces stored document mentions and is chunked locally after
-producer authorization; an agent never receives a retained user token or a live
-user-auth fallback. External GitHub/Figma page contents are not fetched.
+Click-time HTML replaces stored document mentions for reference selection. The
+producer may return its persisted document with its original source/version and
+server continuation; this remains valid even when a click snapshot was supplied.
+A legacy producer that explicitly returns `client_snapshot` still requires an
+exact snapshot version/prefix match and uses only validated local continuation.
+An agent never receives a retained user token or a live user-auth fallback. External GitHub/Figma page contents are not fetched.
 
 A 256KiB manifest plus at most ten 96KiB payload items remains the total storage
 contract. Multiple logical parts share a physical block; the current conservative

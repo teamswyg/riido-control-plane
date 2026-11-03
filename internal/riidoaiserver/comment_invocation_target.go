@@ -9,7 +9,7 @@ import (
 
 func (s Server) dispatchCommentTarget(ctx context.Context, principal AuthorizationResult, event TaskEvent, call *CommentInvocation, body, target string, budget int, notice func(string, string, string) error) (bool, error) {
 	key := "target:" + target
-	if slices.Contains(call.Ancestors, target) {
+	if slices.Contains(commentMentionLimitReasons(call, target, 1), "cycle") {
 		return false, notice(key, "cycle", "Riido: 자기 자신 또는 앞서 호출한 Agent로 이어지는 반복 호출을 중단했습니다.")
 	}
 	evidence, err := s.readCommentDeliveryEvidence(ctx, call.EvidenceEventID)
@@ -48,6 +48,7 @@ func (s Server) dispatchCommentTarget(ctx context.Context, principal Authorizati
 	}
 	evidence.AgentID = target
 	child := copyCommentInvocation(call)
+	child.HumanFollowup = false
 	child.Ancestors = append(child.Ancestors, target)
 	child.Depth++
 	child.Remaining = budget

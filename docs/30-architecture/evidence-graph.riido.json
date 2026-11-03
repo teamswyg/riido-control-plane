@@ -20,6 +20,73 @@
   ],
   "chains": [
     {
+      "id": "comment_agent_directory_policy_precheck_5892",
+      "observation": "Agent discovery returned policy_checked=false despite an existing execution-time comment handoff policy. Reusing the initiating assignment worktree for a precheck would also disagree with execution when current task repository or branch changed.",
+      "hypothesis": "Inject the existing comment limits and conversation preparation into directory reads, verify fresh root and task evidence once per directory request, and keep execution-time authorization and runtime checks authoritative.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "server_route_handlers_must_stay_semantically_split",
+        "agent_runtime_binding_must_preserve_identity_and_visibility_contract"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_directory_policy.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_constructor.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_invocation_precheck.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_invocation_precheck_snapshot.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_invocation_dispatch.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_invocation_target.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/comment_invocation_prompt.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_invocation_precheck_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_invocation_precheck_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_invocation_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/comment_invocation_limits_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Use the same depth-three, budget-eight, ancestor-cycle rules for discovery and dispatch. Current task composition and the existing native-conversation checks decide candidate session conflicts. Cache verified comment evidence only within one directory request; read failures fail the directory rather than claiming checked status. Reads do not publish assignments or consume budgets. Preserve expanded read-scope negotiation, child context inheritance, same-root response identity, and final dispatch revalidation. Runtime instructions require public-description role evidence, policy_checked and callable before selecting an Agent ID. Focused race tests cover limits, mismatched scope, active sessions, fresh repository and branch changes, and inherited child CLI context. Actual staging QA is recorded separately from fixture evidence.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "comment_native_conversation_continuity_5891_5892",
       "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication. A human reply in an existing Agent card ignored a typed mention and assigned the original Agent again. After TASK_THREADS exceeded the inline payload budget, startup runtime-snapshot writes returned 503 because the owned-state onboarding merge attempted to gunzip a missing inline field. That merge also reapplied a 50-thread tail to durable conversations.",
       "hypothesis": "Bind verified root comments to stable conversation identities while retaining per-Agent native sessions, import visible messages only on the next request, and publish immutable history chunks through the existing atomic manifest. Preserve SSE replay semantics and reject stale writers before they can replace newer conversation history. Hydrate verified immutable chunks at the atomic committed-read boundary for ordinary writers as well as loaders, and apply the same conversation retention policy during onboarding merges.",

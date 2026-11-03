@@ -21,6 +21,10 @@ func (s Server) deliverCommentInvocation(ctx context.Context, principal Authoriz
 	if err := s.appendCommentInvocationPrompt(ctx, principal, evidence.TaskID, &composed.Request); err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
+	if call := request.commentInvocation; call != nil && call.OriginAssignmentID != "" && !call.HumanFollowup {
+		composed.Request.Prompt += "\n\nYou are the recipient of this handoff. Carry out the request addressed to you in " + assignmentInstructionHeading +
+			". Earlier instructions to select a recipient were for the caller. Consult the directory only if your assigned work requires another Agent."
+	}
 	if composed.IntentGateRequired {
 		request.intentGateRequired = true
 		response, err = s.aiAgent.CreateAIAgentTaskAgentAssignment(ctx, principal, evidence.TaskID, request)

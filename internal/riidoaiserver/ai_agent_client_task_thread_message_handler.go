@@ -68,6 +68,7 @@ func (s Server) publishThreadReply(ctx context.Context, principal AuthorizationR
 		return AIAgentTaskActionResponse{}, err
 	}
 	req.AssignmentID = assignment.ID
+	req.commentInvocation = prepared.CommentInvocation
 	if owner, ok := s.assignment.(interface{ taskAgentGenerationSupported() bool }); ok && owner.taskAgentGenerationSupported() && assignmentSequence(assignment.ID) == 0 {
 		req.membershipPublicationGeneration = taskAgentAssignmentGeneration(assignment)
 	}

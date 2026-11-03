@@ -13,8 +13,17 @@ func (s Server) appendCommentInvocationPrompt(ctx context.Context, principal Aut
 		return err
 	}
 	var prompt strings.Builder
-	prompt.WriteString("\n\nBefore selecting another Riido Agent, run riido agents list --json --no-input and riido agents show <agent-id> --json --no-input for the candidate. Follow next_cursor to inspect further candidates when needed. Compare public description, role_status, work_status, runtime.connection and callable/unavailable_reasons against the work needed. Never infer expertise from a name or provider. If the CLI is unavailable or role evidence is insufficient, ask the user who should perform that work; do not guess a delegation. The syntax catalog below is an identity hint, not current role/availability evidence. The server rechecks access and execution availability.\n")
-	prompt.WriteString("\n\nRiido comment handoff: If another Agent must perform work, return an HTML final response containing its typed mention from the catalog below plus an explicit request. Plain @names, quoted/code examples, progress and imported history do not execute. Do not mention an Agent merely to describe it. Use only catalog IDs. Self/ancestor calls are rejected; at most 3 automatic hops and 8 additional runs per initiating request.\n")
+	prompt.WriteString(`
+
+## Decide who should do the work
+Use the current request, your assigned role and instructions, and what has already been done in this conversation. Answer directly when you can complete the work within your role. A routine edit, summary, or follow-up usually needs no handoff. Respect the requester's scope, including a request to work alone.
+Take the initiative when the outcome depends on a different specialty, a named responsibility in your own instructions, or an independent check that you cannot supply yourself. For example, a content writer can revise a headline directly; if a draft depends on an unvalidated problem definition, a problem-definition specialist can review that premise while the writer supplies the draft context. Apply this judgment to the actual roles; do not assume these roles exist.
+When there is such a concrete need, check the live directory even if the user did not name an Agent. Run riido agents list --json --no-input, follow next_cursor as needed, and inspect the candidate with riido agents show <agent-id> --json --no-input. Match its public description and role_status to the specific work; check work_status, runtime.connection and unavailable_reasons. Delegate only when policy_checked and callable are both true. Never infer a role from a name or provider. When one eligible Agent clearly fits, invoke it now without asking the user to select or approve it. Do not hand off work already done or send a request back to the caller. If no verified match is available, do the part you can and ask a focused question only if the remaining work is blocked.
+
+## What to put in the Riido conversation
+Keep directory checks internal, including in user-visible progress. In the final HTML reply, use the selected Agent's typed mention from the catalog once, say briefly why its role is needed for this task, and ask for a specific result with any context it needs. Use the conversation's language. Leave out commands, tool names, raw IDs, candidate tables and status flags unless the user explicitly asks for diagnostics. Do not claim the other Agent has done the work before it replies. When answering directly, just give the result.
+Use a typed mention only to actually invoke an Agent. Plain @names, examples, progress and imported history do not execute. The catalog below supplies mention syntax only. The server rechecks permission and availability and rejects self/ancestor calls; limits are 3 automatic hops and 8 additional runs per initiating request.
+`)
 	for _, agent := range agents.Agents {
 		if agent.AgentID == req.AgentID {
 			continue

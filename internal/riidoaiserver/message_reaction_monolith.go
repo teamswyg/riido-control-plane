@@ -58,7 +58,7 @@ func (s Server) deliverCommentStatusReactions(ctx context.Context, principal Aut
 	}
 	for _, thread := range response.Threads {
 		call := thread.CommentInvocation
-		if call == nil || call.EvidenceEventID == "" || call.OriginMessageID != "" {
+		if call == nil || call.EvidenceEventID == "" || call.OriginMessageID != "" || call.HumanFollowup {
 			continue
 		}
 		emoji, known := agentStatusReaction(thread)

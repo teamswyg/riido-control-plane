@@ -437,6 +437,7 @@ type SubmitAIAgentTaskCommentRequest struct {
 }
 
 type CreateAIAgentTaskThreadMessageRequest struct {
+	commentInvocation               *CommentInvocation
 	membershipPublicationGeneration string
 	targetAgentID                   string
 	RequestID                       string                       `json:"request_id,omitempty"`

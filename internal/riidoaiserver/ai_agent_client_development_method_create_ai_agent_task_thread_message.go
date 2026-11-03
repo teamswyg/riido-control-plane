@@ -76,6 +76,13 @@ func (s *DevelopmentAIAgentClientStore) CreateAIAgentTaskThreadMessage(ctx conte
 	response = actionResponseWithActiveStream(response, principal.WorkspaceID)
 	s.appendThreadUserMessageLocked(response, principal, req.Body, req.SourceMessageID)
 	s.upsertTaskThreadMessageFromActionLocked(response, req.SourceMessageID, conversationID, parentThreadID)
+	if parentThreadID != "" && req.commentInvocation != nil {
+		for i := range s.taskThreads[taskID] {
+			if s.taskThreads[taskID][i].ThreadID == response.ThreadID {
+				s.taskThreads[taskID][i].CommentInvocation = copyCommentInvocation(req.commentInvocation)
+			}
+		}
+	}
 	if !req.toolApproval && !req.toolApprovalWithoutPending {
 		s.assignTaskAgentMemberLocked(taskID, agent)
 	}
