@@ -16,6 +16,7 @@ type CommentDeliveryConfig struct {
 }
 
 type verifiedCommentDelivery struct {
+	directConversationID   string                          // Set only after validating direct assignment evidence.
 	CommentCreatedAt       time.Time                       `json:"comment_created_at"`
 	EventID                string                          `json:"event_id"`
 	CommentID              string                          `json:"comment_id"`

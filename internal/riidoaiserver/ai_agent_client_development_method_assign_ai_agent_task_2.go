@@ -90,6 +90,9 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 		}
 	}
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
+	if req.directRootTeamID != "" {
+		req.commentInvocation = newDirectInvocation(response, principal, req.directRootTeamID)
+	}
 	for i := range s.taskThreads[taskID] {
 		if s.taskThreads[taskID][i].ThreadID == response.ThreadID {
 			s.taskThreads[taskID][i].CommentInvocation = copyCommentInvocation(req.commentInvocation)

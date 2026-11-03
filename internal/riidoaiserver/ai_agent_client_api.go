@@ -394,6 +394,7 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
+	directRootTeamID  string // Set only by authenticated direct-assignment handlers.
 	commentInvocation *CommentInvocation
 	skipSourceMessage bool
 	RecoveryPolicy    *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`

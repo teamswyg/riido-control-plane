@@ -24,7 +24,19 @@ func (s Server) fetchCommentDeliveryEvidence(ctx context.Context, w http.Respons
 
 func (s Server) readCommentDeliveryEvidence(ctx context.Context, eventID string) (verifiedCommentDelivery, error) {
 	config := s.config.CommentDelivery
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, strings.TrimRight(config.EvidenceBaseURL, "/")+"/internal/agent-comment-deliveries/"+url.PathEscape(eventID), nil)
+	evidence, err := s.fetchInvocationEvidence(ctx, strings.TrimRight(config.EvidenceBaseURL, "/")+"/internal/agent-comment-deliveries/"+url.PathEscape(eventID))
+	if err != nil {
+		return verifiedCommentDelivery{}, err
+	}
+	if evidence.EventID != eventID || evidence.AgentID == "" || evidence.CommentID == "" {
+		return verifiedCommentDelivery{}, errors.New("invalid comment delivery evidence")
+	}
+	return evidence, nil
+}
+
+func (s Server) fetchInvocationEvidence(ctx context.Context, endpoint string) (verifiedCommentDelivery, error) {
+	config := s.config.CommentDelivery
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return verifiedCommentDelivery{}, err
 	}
@@ -49,7 +61,7 @@ func (s Server) readCommentDeliveryEvidence(ctx context.Context, eventID string)
 	}
 
 	evidence, decodeErr := decodeCommentDeliveryEvidence(result.Body)
-	if decodeErr != nil || evidence.EventID != eventID || evidence.PrincipalID == "" || evidence.WorkspaceID == "" || evidence.TaskID == "" || evidence.AgentID == "" || evidence.CommentID == "" || evidence.Context.Component.ID != evidence.TaskID || (evidence.Context.Component.ComponentType != "task" && evidence.Context.Component.ComponentType != "subtask") {
+	if decodeErr != nil || evidence.PrincipalID == "" || evidence.WorkspaceID == "" || evidence.TaskID == "" || evidence.Context.Component.ID != evidence.TaskID || (evidence.Context.Component.ComponentType != "task" && evidence.Context.Component.ComponentType != "subtask") {
 		return verifiedCommentDelivery{}, errors.New("invalid comment delivery evidence")
 	}
 	if err := s.prepareCommentReadScope(ctx, &evidence); err != nil {

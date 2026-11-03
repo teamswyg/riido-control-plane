@@ -10,7 +10,7 @@ import (
 // Legacy execution IDs remain unchanged, including their native session pins.
 func (s Server) commentConversationHistory(ctx context.Context, principal AuthorizationResult, evidence verifiedCommentDelivery, publication *AssignAIAgentTaskRequest) (AIAgentTaskThreadHistoryCollectionResponse, error) {
 	history, err := s.aiAgent.ListAIAgentTaskThreadHistory(ctx, principal, evidence.TaskID)
-	if err != nil {
+	if err != nil || evidence.directConversationID != "" {
 		return history, err
 	}
 	threads, err := s.aiAgent.ListAIAgentTaskThreads(ctx, principal, evidence.TaskID)
