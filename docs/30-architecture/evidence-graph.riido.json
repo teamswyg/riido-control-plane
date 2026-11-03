@@ -27051,6 +27051,36 @@
       ],
       "decision": "Thread history messages carry reactions; members add or delete only their own reaction (contract emoji format with monolith normalization, no progress messages). The agent keeps one status reaction on the message that started its run: 1f440 while queued, running or waiting, 2705 completed, 274c failed, none when stopping, stopped or cancelled; a follow-up without a source id uses its generated message. A run started by a monolith comment writes the same reaction to that comment. Member reactions on another member's user message create or clear a monolith notification, sent per message and member in revision order and retried on transient failures. The started push is sent once per assignment and recorded on the persisted thread. Reaction saves reload, apply, and are rejected and retried when any part changed since the reload.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "agent_to_agent_message_reaction_5909",
+      "observation": "A run started by another agent's reply stores the caller's reply as its source message and the caller thread as its origin, but no test checked that the status reaction lands on that reply in the caller's thread rather than in the invoked agent's own thread.",
+      "hypothesis": "Projecting the invoked run's status reaction onto the origin thread's source message keeps agent-to-agent reactions on the reply that asked for the work, with one reaction per status transition.",
+      "claims": [
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_agent_invocation_test.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/thread_message_reaction_agent_invocation_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep the existing projection: running shows 👀, completed ✅, failed ❌ on the caller's reply by the invoked agent, and the invoked agent's own thread gets no status reaction. Push and monolith comment reactions stay excluded for agent-invoked runs. No production code change.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
