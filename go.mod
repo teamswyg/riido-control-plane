@@ -3,7 +3,7 @@ module github.com/teamswyg/riido-control-plane
 go 1.26.5
 
 require (
-	github.com/teamswyg/riido-contracts v0.3.8-0.20261029070900-db93a8e67d8a
+	github.com/teamswyg/riido-contracts v0.3.8-0.20261102142722-3a7a01339949
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
