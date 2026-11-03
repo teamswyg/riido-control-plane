@@ -37,6 +37,32 @@ func TestCommentMentionsOnlyVisibleTypedHTML(t *testing.T) {
 	}
 }
 
+func TestCompletedAnswerMentionBoundary(t *testing.T) {
+	final := "<p>Tests passed.</p>\n<ul><li>Ready</li></ul>\n<p>" + mentionHTML("reviewer") + " Please review.</p>"
+	for _, tc := range []struct {
+		name, body string
+		want       []string
+	}{
+		{"plain progress", "Checking.\n\nVerified `index.html`.\r\n\r\n" + final, []string{"reviewer"}},
+		{"fenced example", "Example:\n```html\n\n" + final + "\n```", nil},
+		{"unclosed fence", "Example:\n~~~html\n\n" + final, nil},
+		{"quoted container", "Example:\n<blockquote>\n\n" + final + "</blockquote>", nil},
+		{"indented code", "Example:\n\n    " + final, nil},
+		{"more progress", "Checking.\n\n" + final + "\n\nStill working.", nil},
+		{"hidden example", "Checking.\n\n<p><code>" + mentionHTML("example") + "</code></p>", nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := completedAnswerMentionIDs(tc.body)
+			if err != nil || !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("got %v, %v; want %v", got, err, tc.want)
+			}
+		})
+	}
+	if _, err := completedAnswerMentionIDs(strings.Repeat("x", 128<<10) + "\n\n" + final); err == nil {
+		t.Fatal("oversized envelope accepted")
+	}
+}
+
 func TestCommentInvocationBudgetBoundsWholeTree(t *testing.T) {
 	var visit func(int, int) int
 	visit = func(budget, depth int) int {

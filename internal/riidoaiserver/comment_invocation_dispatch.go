@@ -28,7 +28,7 @@ func (s Server) dispatchCommentMentions(ctx context.Context, event TaskEvent) er
 	if strings.TrimSpace(body) == "" {
 		body = source.Message
 	}
-	ids, err := commentMentionIDs(body)
+	ids, err := completedAnswerMentionIDs(body)
 	if err != nil {
 		return notice("policy", "invalid_mentions", "Riido: Agent 호출을 시작하지 못했습니다. 멘션 형식 또는 댓글 크기·대상 수 제한을 확인한 뒤 다시 요청해 주세요.")
 	}

@@ -15,6 +15,9 @@ func TestDirectAssignmentFirstAnswerDelegatesOnceInOriginalConversation(t *testi
 			}
 			f.readHandoffCandidate(t, "agent-owned-codex")
 			body := "<p>The program prints Hello, World! " + mentionHTML("agent-owned-codex") + " Please review the greeting format.</p>"
+			if path == "agent-assignments" {
+				body = "계산기 요구사항을 확인했습니다.\n\n테스트를 마쳤습니다.\n\n\n" + body
+			}
 			for range 2 {
 				if w := f.complete(t, body); w.Code != 200 {
 					t.Fatal(w.Body.String())
