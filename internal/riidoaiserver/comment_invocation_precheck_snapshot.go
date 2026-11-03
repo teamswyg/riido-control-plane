@@ -49,7 +49,7 @@ func (s Server) readCommentMentionPrecheckSnapshot(ctx context.Context, current 
 			return out, ErrAuthorizationForbidden
 		}
 		out.call = thread.CommentInvocation
-		if out.call != nil && (out.call.PrincipalID != current.CreatedBy || out.call.WorkspaceID != current.WorkspaceID || thread.ConversationID != "comment:"+out.call.RootCommentID) {
+		if out.call != nil && (out.call.PrincipalID != current.CreatedBy || out.call.WorkspaceID != current.WorkspaceID || !out.call.matchesConversation(thread)) {
 			return out, ErrAuthorizationForbidden
 		}
 		break
@@ -57,7 +57,7 @@ func (s Server) readCommentMentionPrecheckSnapshot(ctx context.Context, current 
 	if out.call == nil {
 		return out, nil
 	}
-	out.evidence, err = s.readCommentDeliveryEvidence(ctx, out.call.EvidenceEventID)
+	out.evidence, err = s.readInvocationEvidence(ctx, current.TaskID, out.call)
 	if err != nil {
 		return out, err
 	}
