@@ -28919,6 +28919,59 @@
       ],
       "decision": "Add requested_by and confirmation_reason as omitempty response fields only; no existing field, ordering or follow-up behavior changes. New tests cover per-run requester recording, no overwrite by later actions, omission when unknown, and confirmation reason projection. The contract DSL regenerates IR, OpenAPI and the generated client; generated docs and golden hashes are refreshed by their own tools without relaxing gates.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_read_scope_failure_status_6008",
+      "observation": "Every requester-authorized read-scope failure was wrapped as a latest-document failure and answered 503 retry the same request_id, so a permission denial or stored data the monolith cannot serve safely (onboarding work authored by official members, a second live body) was retried indefinitely and could never succeed.",
+      "hypothesis": "Classifying only the read-scope failure by the monolith GraphQL code and integrity reason lets assignment return 403, 404 or 422 for failures retrying cannot fix while every transient read-scope failure and every other task-context read keeps the retryable 503, and none of them falls back to an assignment without task context.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_failure.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_graphql.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_task_context_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_error.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_failure_status_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_graphql_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_context_latest_document_failure_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Only failures of getComponentReadScope itself are classified: permission_denied/authentication or FORBIDDEN 403, not_found 404, conflict with reason read_scope_integrity 422. A conflict without that reason, other codes, timeouts and every non-read-scope task-context read keep 503. All classified errors remain latestTaskDocumentError so composition still refuses to assign without task context. Monolith and CLI changes are separate PRs; this change is local regression evidence only and does not establish deployment.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
