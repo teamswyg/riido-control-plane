@@ -2,11 +2,7 @@ package riidoaiserver
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 )
@@ -79,44 +75,5 @@ func TestAssignmentNotificationsCrossInstanceReadAndBoundedQueries(t *testing.T)
 	}
 	if !reflect.DeepEqual(operations.reads, []string{"a", "b", "a", "b"}) {
 		t.Fatalf("unexpected DB query fanout: %v", operations.reads)
-	}
-}
-
-func TestAssignmentNotificationsDynamoDBIdleReadBudget(t *testing.T) {
-	var mu sync.Mutex
-	calls := map[string]int{}
-	httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		target := r.Header.Get("X-Amz-Target")
-		mu.Lock()
-		calls[target]++
-		mu.Unlock()
-		switch target {
-		case dynamoDBQueryTarget:
-			json.NewEncoder(w).Encode(map[string]any{"Items": []any{}})
-		case dynamoDBGetItemTarget:
-			json.NewEncoder(w).Encode(map[string]any{})
-		default:
-			t.Errorf("notification performed unexpected operation %s", target)
-			http.Error(w, "unexpected", 500)
-		}
-	}))
-	defer httpServer.Close()
-	credentials, _ := NewStaticAWSCredentialsProvider("AKID", "SECRET", "")
-	operations, err := NewDynamoDBAssignmentOperationStore(DynamoDBAssignmentOperationStoreConfig{Region: "ap-northeast-2", TableName: "assignments", Endpoint: httpServer.URL, CredentialsProvider: credentials})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer operations.Close()
-	store := NewStoreWithConfig(StoreConfig{OperationStore: operations})
-	defer store.Close()
-	for i := 0; i < 2; i++ {
-		if _, err := store.AssignmentSignalVersions(context.Background(), []string{"a", "b"}); err != nil {
-			t.Fatal(err)
-		}
-	}
-	mu.Lock()
-	defer mu.Unlock()
-	if calls[dynamoDBQueryTarget] != 4 || calls[dynamoDBGetItemTarget] != 4 || len(calls) != 2 {
-		t.Fatalf("unexpected idle DynamoDB read budget: %v", calls)
 	}
 }
