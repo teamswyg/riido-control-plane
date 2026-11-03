@@ -19,8 +19,11 @@ func TestAssignmentPromptMapsGoalToMilestone(t *testing.T) {
 	if err != nil {
 		t.Fatalf("compose prompt: %v", err)
 	}
-	section := prompt.Prompt[strings.Index(prompt.Prompt, "## Hierarchy\n"):]
-	section = section[:strings.Index(section, "\n\n")]
+	_, section, found := strings.Cut(prompt.Prompt, "## Hierarchy\n")
+	if !found {
+		t.Fatalf("prompt has no hierarchy section:\n%s", prompt.Prompt)
+	}
+	section, _, _ = strings.Cut(section, "\n\n")
 	for _, want := range []string{"milestone = 목표 (상위 목표)", "project = 프로젝트", "- milestone: 기본 기능을 알려드릴게요"} {
 		if !strings.Contains(section, want) {
 			t.Fatalf("hierarchy section misses %q:\n%s", want, section)
