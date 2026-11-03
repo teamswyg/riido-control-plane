@@ -81,6 +81,7 @@ func ComposeAIAgentAssignmentPrompt(input AIAgentAssignmentPromptInput) (AIAgent
 	builder.WriteString("\n")
 
 	builder.WriteString("## Hierarchy\n")
+	builder.WriteString(promptHierarchyTerms)
 	writePromptReference(&builder, "project", hierarchy.Project)
 	writePromptReference(&builder, "milestone", hierarchy.Milestone)
 	writePromptReference(&builder, "parent_task", hierarchy.ParentTask)
