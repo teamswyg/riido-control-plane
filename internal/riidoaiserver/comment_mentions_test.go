@@ -43,6 +43,7 @@ func TestCompletedAnswerMentionBoundary(t *testing.T) {
 		name, body string
 		want       []string
 	}{
+		{"single newline before final", "Checking.\n" + final, []string{"reviewer"}},
 		{"plain progress", "Checking.\n\nVerified `index.html`.\r\n\r\n" + final, []string{"reviewer"}},
 		{"fenced example", "Example:\n```html\n\n" + final + "\n```", nil},
 		{"unclosed fence", "Example:\n~~~html\n\n" + final, nil},

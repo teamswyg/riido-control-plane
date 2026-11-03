@@ -53,7 +53,7 @@ func completedAnswerMentionIDs(body string) ([]string, error) {
 // or a multiline code span that could contain an apparent answer.
 var inlineProgressCode = regexp.MustCompile("`[^`\\r\\n]+`")
 
-var finalAnswerParagraph = regexp.MustCompile(`(?i)\r?\n[ \t]*\r?\n(<p\b)`)
+var finalAnswerParagraph = regexp.MustCompile(`(?i)\r?\n(<p\b)`)
 
 // Only HTML responses use the editor's typed mention contract. Quoted examples
 // and Markdown code must not turn documentation into an execution request.
