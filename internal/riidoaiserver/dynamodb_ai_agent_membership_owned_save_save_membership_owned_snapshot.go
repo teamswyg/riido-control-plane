@@ -26,11 +26,11 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, err
 			}
 			if createMutation && !maps.Equal(s.partHashes, committedHashes) {
-				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, errTaskAgentSnapshotChanged
+				return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, withFailureStage("owned_save_precheck", errTaskAgentSnapshotChanged)
 			}
 			for part, hash := range s.partHashes {
 				if committedHashes[part] != hash {
-					return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, errTaskAgentSnapshotChanged
+					return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, withFailureStage("owned_save_precheck_generation", errTaskAgentSnapshotChanged)
 				}
 			}
 		}
@@ -44,7 +44,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 				if scoped {
 					baseline := relation.TaskAgentMemberships[mutation.scope.taskID][mutation.scope.agentID]
 					if !sameTaskAgentMembershipBaseline(baseline, mutation.baseline) {
-						return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, ErrAIAgentMembershipChanged
+						return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, withFailureStage("owned_save_membership_fence", ErrAIAgentMembershipChanged)
 					}
 					delta := requested.TaskAgentMemberships[mutation.scope.taskID][mutation.scope.agentID]
 					snapshot.TaskAgentMemberships = copyTaskAgentMemberships(relation.TaskAgentMemberships)
@@ -78,7 +78,7 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 			if snapshotHasConversationHistory(snapshot) || strings.Contains(dynamoDBStringValue(current, "part_hashes_json"), conversationHistoryManifestGuard) {
 				for _, part := range []string{dynamoDBAIAgentClientSnapshotPartTaskThreads, dynamoDBAIAgentClientSnapshotPartTaskThreadMessages} {
 					if s.partHashes[part] != committedHashes[part] {
-						return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, errTaskAgentSnapshotChanged
+						return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, withFailureStage("owned_save_publication_conflict", errTaskAgentSnapshotChanged)
 					}
 				}
 			}
@@ -160,10 +160,10 @@ func (s *DynamoDBAIAgentClientSnapshot) saveMembershipOwnedSnapshot(ctx context.
 				return stats, encoded, err
 			}
 			if marker != mutation.scope.generation {
-				return stats, encoded, ErrAIAgentMembershipChanged
+				return stats, encoded, withFailureStage("owned_save_condition_membership", ErrAIAgentMembershipChanged)
 			}
-			return stats, encoded, errTaskAgentSnapshotChanged
+			return stats, encoded, withFailureStage("owned_save_condition_snapshot", errTaskAgentSnapshotChanged)
 		}
 	}
-	return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, errTaskAgentSnapshotChanged
+	return dynamoDBAIAgentClientSnapshotWriteStats{}, 0, withFailureStage("owned_save_retries_exhausted", errTaskAgentSnapshotChanged)
 }

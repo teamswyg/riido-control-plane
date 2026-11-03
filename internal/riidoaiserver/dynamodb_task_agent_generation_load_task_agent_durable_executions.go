@@ -61,7 +61,7 @@ func (s *DynamoDBAssignmentOperationStore) loadTaskAgentDurableExecutions(ctx co
 		return "", nil, err
 	}
 	if dynamoDBStringValue(latest, "generation") != dynamoDBStringValue(marker, "generation") {
-		return "", nil, ErrAIAgentMembershipChanged
+		return "", nil, withFailureStage("durable_execution_generation", ErrAIAgentMembershipChanged)
 	}
 	return dynamoDBStringValue(marker, "generation"), assignments, nil
 }
