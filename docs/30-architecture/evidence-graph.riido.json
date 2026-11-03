@@ -29000,6 +29000,39 @@
       ],
       "decision": "Only failures of getComponentReadScope itself are classified: permission_denied/authentication or FORBIDDEN 403, not_found 404, conflict with reason read_scope_integrity 422. A conflict without that reason, other codes, timeouts and every non-read-scope task-context read keep 503. All classified errors remain latestTaskDocumentError so composition still refuses to assign without task context. Monolith and CLI changes are separate PRs; this change is local regression evidence only and does not establish deployment.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_prompt_hierarchy_terms_6014",
+      "observation": "RIID-6014 QA: a user asked the Agent about the task's upper goal (상위 목표) and the Agent answered with the parent task, because the assignment prompt names the hierarchy only by API field names (project, milestone, parent_task) while the Riido screen calls a milestone 목표.",
+      "hypothesis": "One fixed line under the existing Hierarchy heading that maps the Riido screen names to the prompt fields lets the provider read 목표/상위 목표 as the milestone without changing which hierarchy data is captured, its order or its absence handling.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_prompt_hierarchy_terms.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_assignment_prompt.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_prompt_hierarchy_terms_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Add only the terminology line; hierarchy capture, read scope and message budgeting are unchanged. This is local regression evidence and does not establish deployment.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
