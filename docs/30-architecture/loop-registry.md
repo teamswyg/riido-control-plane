@@ -191,10 +191,10 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | Claim | Loop | Files | Verifiers | Semantic Hash |
 | --- | --- | ---: | ---: | --- |
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `07ab50ec626d` |
-| `thread_history_must_keep_user_followups` | `ai_thread_history` | `41` | `25` | `04c460122ad4` |
+| `thread_history_must_keep_user_followups` | `ai_thread_history` | `41` | `25` | `6d2209cc1915` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `26df19415a80` |
-| `sse_reconnect_must_resume_after_last_event_id` | `ai_thread_history` | `52` | `19` | `edc3fb89b7b1` |
-| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `34` | `17` | `a28bcbadc78b` |
+| `sse_reconnect_must_resume_after_last_event_id` | `ai_thread_history` | `52` | `19` | `0b53a37e5268` |
+| `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `34` | `17` | `8a712f46eec6` |
 | `thread_history_v3_must_preserve_run_identity_and_message_order` | `ai_thread_history` | `7` | `2` | `ab22b6a70ea5` |
 | `stop_reassign_must_not_revive_or_mutate_inactive_threads` | `ai_thread_history` | `22` | `13` | `01c6419ee2fa` |
 | `expired_harness_evidence_must_not_promote_candidates` | `provider_acceptance_harness` | `22` | `10` | `fe2fb8dc64e3` |
@@ -212,7 +212,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `16` | `10` | `61ce25286b04` |
 | `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `0fbf16b6e5f2` |
 | `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `6407aef4425b` |
-| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `158` | `51` | `285b518ed0aa` |
+| `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `158` | `51` | `b6ea150696de` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `39538f47b859` |
 | `loop_registry_evidence_must_expose_loop_surfaces` | `closed_loop_candidate` | `5` | `1` | `370623f78de5` |
 | `loop_registry_evidence_must_expose_architecture_index` | `closed_loop_candidate` | `16` | `7` | `ec39481aaa29` |
@@ -257,7 +257,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `114` | `46` | `febadf67c734` |
 | `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `27` | `7` | `28820a958c0c` |
 | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` | `closed_loop_candidate` | `32` | `12` | `dc6ca044a55f` |
-| `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `64` | `29` | `9727a8d5d94e` |
+| `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `64` | `29` | `f289ab3c5e0b` |
 | `public_aws_adapter_facade_must_preserve_contract` | `closed_loop_candidate` | `16` | `3` | `f95c0bac4a9a` |
 | `review_account_seed_must_preserve_redacted_seed_evidence` | `closed_loop_candidate` | `31` | `10` | `451283662e3d` |
 | `runtime_adapter_config_must_preserve_public_env_contract` | `closed_loop_candidate` | `85` | `20` | `9b193a756160` |
@@ -284,11 +284,11 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `context_map_must_guard_public_boundaries` | `loop_closure_audit` | `37` | `15` | `9952b770cb51` |
 | `api_client_delivery_must_preserve_generated_handoff_boundary` | `closed_loop_candidate` | `56` | `10` | `e41cd70a48d1` |
 | `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `9ad95e6e0d2f` |
-| `device_client_status_must_distinguish_install_update_and_ready` | `closed_loop_candidate` | `6` | `5` | `e646b70b34ed` |
-| `onboarding_completion_must_be_durable_and_idempotent` | `ai_thread_history` | `51` | `25` | `e96d2177665a` |
-| `desktop_presence_must_observe_committed_account_connections` | `closed_loop_candidate` | `47` | `22` | `9b1c019f8e79` |
+| `device_client_status_must_distinguish_install_update_and_ready` | `closed_loop_candidate` | `6` | `5` | `66ec9b28d209` |
+| `onboarding_completion_must_be_durable_and_idempotent` | `ai_thread_history` | `51` | `25` | `92e55cd2b00a` |
+| `desktop_presence_must_observe_committed_account_connections` | `closed_loop_candidate` | `47` | `22` | `ad9296eecbe0` |
 | `cli_installation_link_must_preserve_key_and_policy_fences` | `closed_loop_candidate` | `111` | `51` | `e911f6cc984d` |
-| `execution_coverage_must_fence_installation_permission` | `closed_loop_candidate` | `115` | `26` | `be22a58576f0` |
+| `execution_coverage_must_fence_installation_permission` | `closed_loop_candidate` | `115` | `26` | `9c8035db54a0` |
 | `assignment_read_scope_must_preserve_captured_leaf_authority` | `closed_loop_candidate` | `209` | `78` | `1c19c1c56df2` |
 
 ## Claim Surface Evidence
