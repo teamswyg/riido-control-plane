@@ -14,7 +14,8 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 	case errors.Is(err, errThreadMessageExecutionCancelled):
 		writeError(w, http.StatusServiceUnavailable, err.Error())
 	case errors.As(err, &latest):
-		writeError(w, http.StatusServiceUnavailable, latest.Error())
+		status, message := latest.response()
+		writeError(w, status, message)
 	case errors.As(err, &onboardingDependency):
 		status := http.StatusServiceUnavailable
 		if errors.Is(err, context.DeadlineExceeded) {
