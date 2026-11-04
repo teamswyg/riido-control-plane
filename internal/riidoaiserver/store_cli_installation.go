@@ -15,6 +15,9 @@ func (s *Store) commitCLIInstallation(state *storeState, msg cliInstallationComm
 	if msg.replay != nil {
 		return s.commitCLIInstallationIntentReplay(state, msg.ctx, *msg.replay)
 	}
+	if msg.retire != nil {
+		return s.commitCLIInstallationRetirement(state, msg.ctx, *msg.retire)
+	}
 	trial := *state
 	trial.cliInstallationIntents = maps.Clone(state.cliInstallationIntents)
 	trial.cliInstallationLinks = maps.Clone(state.cliInstallationLinks)

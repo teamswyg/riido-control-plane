@@ -47,6 +47,7 @@ var serverRoutes = []serverRoute{
 	{"POST /v1/internal/cli-installations/link-intents", Server.handleCLIInstallationIntent},
 	{"POST /v1/internal/cli-installations/policy", Server.handleCLIInstallationPolicy},
 	{"POST /v1/internal/cli-installations/link-receipts", Server.handleCLIInstallationReceipt},
+	{"POST /v1/internal/cli-installations/link-intent-retirements", Server.handleCLIInstallationRetirement},
 	{"POST /v1/daemon/cli-installation-links/{intent_id}/confirm", Server.handleCLIInstallationConfirm},
 	{"POST /v1/daemon/execution-claims/{assignment_id}/termination", Server.handleExecutionTermination},
 	{"/v1/daemon/runtime-snapshot", Server.handleDaemonRuntimeSnapshot},

@@ -8,6 +8,9 @@ func (s *Store) confirmLocalCLIInstallation(state *storeState, req cliInstallati
 	if err := verifyCLIInstallationProof(intent, req.device, req.signature); err != nil {
 		return cliInstallationLink{}, err
 	}
+	if intent.Retired {
+		return cliInstallationLink{}, errCLIInstallationExpired
+	}
 	link, exists := state.cliInstallationLinks[intent.Request.key()]
 	if exists && !matchingCLIInstallationLink(link, intent, req.device) {
 		return cliInstallationLink{}, errCLIInstallationConflict
