@@ -20,206 +20,78 @@
   ],
   "chains": [
     {
-      "id": "comment_agent_directory_policy_precheck_5892",
-      "observation": "Agent discovery returned policy_checked=false despite an existing execution-time comment handoff policy. Reusing the initiating assignment worktree for a precheck would also disagree with execution when current task repository or branch changed.",
-      "hypothesis": "Inject the existing comment limits and conversation preparation into directory reads, verify fresh root and task evidence once per directory request, and keep execution-time authorization and runtime checks authoritative.",
+      "id": "cli_monolith_grant_legacy_boundary_5972",
+      "observation": "A synthetic signed monolith CLI read grant passed both read and create through the legacy HTTP app PDP in legacy-only and dual-auth configurations. The app PDP does not own CLI grant revocation or installation policy. This is conditional source/fixture evidence, not a live production exploit. After dedicated thread and Agent readers landed, the legacy denial wrapper also needs evidence at the real environment-factory and HTTP-server composition boundary.",
+      "hypothesis": "Reject CLI markers before the entire legacy fallback chain while preserving normal app, opaque and Auth-v2 credentials. Unverified claim inspection can deny but never authenticate. CP thread reads require a separate resource/purpose-bound exchange and current grant/domain checks. Locally served TLS dependencies can test credential routing and fresh authority without live accounts or external side effects.",
       "claims": [
-        "thread_history_must_keep_user_followups",
-        "server_route_handlers_must_stay_semantically_split",
-        "agent_runtime_binding_must_preserve_identity_and_visibility_contract"
+        "request_authorization_must_preserve_security_boundary",
+        "runtime_adapter_config_must_preserve_public_env_contract",
+        "module_decomposition_must_preserve_surface_area_ratchet",
+        "loop_registry_tool_must_preserve_generated_doc_and_evidence_contract"
       ],
       "changes": [
         {
           "kind": "code",
-          "path": "internal/riidoaiserver/agent_directory_policy.go"
+          "path": "internal/authpep/authorization_legacy_cli.go"
         },
         {
           "kind": "code",
-          "path": "internal/riidoaiserver/server_constructor.go"
+          "path": "internal/authpep/authorization_legacy_cli_claims.go"
         },
         {
           "kind": "code",
-          "path": "internal/riidoaiserver/comment_invocation_precheck.go"
+          "path": "cmd/riido_ai_server/authorizer_scheme.go"
         },
         {
           "kind": "code",
-          "path": "internal/riidoaiserver/comment_invocation_precheck_snapshot.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/comment_invocation_dispatch.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/comment_invocation_target.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/comment_invocation_prompt.go"
+          "path": "tools/requestauth/constants_auth_scheme.go"
         }
       ],
       "verifiers": [
         {
           "kind": "test",
-          "path": "internal/riidoaiserver/comment_invocation_precheck_test.go"
+          "path": "internal/authpep/authorization_legacy_cli_test.go"
         },
         {
           "kind": "test",
-          "path": "internal/riidoaiserver/comment_invocation_precheck_context_test.go"
+          "path": "cmd/riido_ai_server/authorizer_cli_boundary_test.go"
         },
         {
           "kind": "test",
-          "path": "internal/riidoaiserver/comment_invocation_context_test.go"
+          "path": "tools/requestauth/main_test.go"
         },
         {
           "kind": "test",
-          "path": "internal/riidoaiserver/comment_invocation_limits_test.go"
+          "path": "tools/loopregistry/behavior_golden_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_cli_runtime_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/authorizer_cli_runtime_fixture_test.go"
         }
       ],
       "evidence": [
         {
           "kind": "artifact",
-          "path": "loop-registry-evidence",
+          "path": "request-authorization-evidence",
           "redacted": true
-        }
-      ],
-      "decision": "Use the same depth-three, budget-eight, ancestor-cycle rules for discovery and dispatch. Current task composition and the existing native-conversation checks decide candidate session conflicts. Cache verified comment evidence only within one directory request; read failures fail the directory rather than claiming checked status. Reads do not publish assignments or consume budgets. Preserve expanded read-scope negotiation, child context inheritance, same-root response identity, and final dispatch revalidation. Runtime instructions require public-description role evidence, policy_checked and callable before selecting an Agent ID. Focused race tests cover limits, mismatched scope, active sessions, fresh repository and branch changes, and inherited child CLI context. Actual staging QA is recorded separately from fixture evidence.",
-      "next_loop": "ai_thread_history"
-    },
-    {
-      "id": "comment_native_conversation_continuity_5891_5892",
-      "observation": "Execution-scoped comment grouping split one conversation across cards, and the ordinary snapshot tails could trim externally imported messages after a restart. Agent handoff also needed a stable parent message identity and context before child publication. A human reply in an existing Agent card ignored a typed mention and assigned the original Agent again. After TASK_THREADS exceeded the inline payload budget, startup runtime-snapshot writes returned 503 because the owned-state onboarding merge attempted to gunzip a missing inline field. That merge also reapplied a 50-thread tail to durable conversations.",
-      "hypothesis": "Bind verified root comments to stable conversation identities while retaining per-Agent native sessions, import visible messages only on the next request, and publish immutable history chunks through the existing atomic manifest. Preserve SSE replay semantics and reject stale writers before they can replace newer conversation history. Hydrate verified immutable chunks at the atomic committed-read boundary for ordinary writers as well as loaders, and apply the same conversation retention policy during onboarding merges.",
-      "claims": [
-        "thread_history_must_keep_user_followups",
-        "sse_reconnect_must_resume_after_last_event_id",
-        "control_plane_performance_hot_paths_must_emit_evidence"
-      ],
-      "changes": [
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/comment_conversation.go"
         },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/native_history.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/comment_invocation_dispatch.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/dynamodb_conversation_chunks.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/dynamodb_conversation_manifest.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/ai_agent_client_persistence.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/agent_event_handler.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/thread_message_mentions.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/thread_message_preparation.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/task_conversation_links.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/ai_agent_client_development_method_create_ai_agent_task_thread_message.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/server_thread_message_tool_approval.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_read.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/dynamodb_ai_agent_client_membership_commit.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/dynamodb_ai_agent_onboarding_merge.go"
-        }
-      ],
-      "verifiers": [
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/comment_conversation_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/native_history_persistence_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/native_history_retention_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/comment_invocation_context_retry_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/dynamodb_conversation_roundtrip_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/dynamodb_conversation_concurrency_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/dynamodb_conversation_failure_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/thread_message_mention_http_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/thread_message_mention_policy_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/thread_message_mention_native_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/dynamodb_conversation_runtime_snapshot_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/dynamodb_conversation_owned_integrity_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/dynamodb_conversation_owned_retention_test.go"
-        }
-      ],
-      "evidence": [
         {
           "kind": "artifact",
           "path": "loop-registry-evidence",
           "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
         }
       ],
-      "decision": "Retain distinct root-comment, thread, message, execution and provider-session IDs. Handoff inherits the authorized snapshot before creating a child, uses the persisted Agent message ID, and is bounded and idempotent. Large histories remain durable with hashed chunks and a format marker that fences old writers. Deploy a compatible storage baseline first and never roll back below it once new manifests exist. Unit/race/fixture checks do not replace authenticated provider round-trip QA. Explicit typed Agent mentions on the human thread-message endpoint select the named authorized participants before execution. Replies without Agent mentions keep the existing target. Each participant resumes only its own native session; server-recorded parent links preserve shared context and one conversation without admitting unrelated Agent history. Fanout deduplicates the human message and retries, and a request naming another Agent cannot approve the original Agent tool call. Runtime registration and heartbeat saves decode the committed chunk payload before any write; missing or corrupt chunks abort without mutation. Comment and native-history threads survive the onboarding merge beyond the ordinary 50-thread tail. This repairs the reader path without rewriting history or changing the storage format.",
-      "next_loop": "ai_thread_history"
+      "decision": "Read/create acceptance was observed before correction. CLI marker null/invalid/duplicate/escaped/case-variant cases now fail before static/external authorization, while ordinary application authorization and Auth-v2 remain intact. JWT-shaped legacy credentials above16KiB also fail closed. The line budget is preserved by separating the wrapper and classifier. No endpoint, credentials, environment activation, DB or deployment change is included. Generated surfaces/hashes and exact golden evidence reflect the new denial boundary without relaxing verifier conditions. The refreshed candidate integrates the date-renewal and dedicated read contracts. Runtime regression covers normal app controls, raw CLI app read/write denial, wrong-purpose/mixed tickets, dedicated projection, fresh revocation, disabled/unavailable readers and substituted tasks. Auth-v2 runtime evidence is rejection/no-downgrade only; real accounts, shared DB and activation remain outside this local fixture.",
+      "next_loop": "closed_loop_candidate"
     },
     {
       "id": "cli_claim_local_termination_observation_5900",
@@ -488,8 +360,8 @@
     },
     {
       "id": "single_pass_response_quality_and_delivery_5827",
-      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint. PR #1102 separates successful assignment commit and client projection timing, but independently truncating fractional milliseconds can make their logged sum differ from total processing time. RIID-5821 observed staging partial projection median676ms and reproduced25 no-op recovery snapshot saves. Adapter elapsed can include downstream event backpressure; it is not independent native inference time. Runtime snapshot reload reproduced loss of a newer in-process heartbeat, and malformed optional version output could reject the whole liveness update. Daemon failures lacked a request correlation ID.",
-      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages. Measure all intervals on one server clock; derive logged projection milliseconds as total minus logged commit milliseconds so the additive invariant survives truncation without changing field names or units. Recovery-only events are already durable and the development projection returns without mutation; bypassing only the persistent snapshot cycle removes redundant I/O. Separate lock/reload/apply/save clocks identify remaining overhead without changing ordinary projection or ACK behavior. Preserve only credential/session-matched newer observations while keeping durable deletion authoritative; isolate optional version metadata and give every server request a generated correlation ID.",
+      "observation": "Answer-only requests could hit an intent gate, empty status history could displace user requirements, and no local timing distinguished provider wait from accepted client projection. PR #1094 review reproduced prose keyword false positives (explains/compares) and missed nominal user requests (summary/translation/explanation/comparison). Independent review also reproduced rendered-empty editor HTML consuming all recent-message slots and hiding an older user API constraint. PR #1102 separates successful assignment commit and client projection timing, but independently truncating fractional milliseconds can make their logged sum differ from total processing time. RIID-5821 observed staging partial projection median676ms and reproduced25 no-op recovery snapshot saves. Adapter elapsed can include downstream event backpressure; it is not independent native inference time.",
+      "hypothesis": "Interpret scope in the existing provider turn, preserve non-empty scoped history, and measure accepted event projection without content logging or additional classification/review calls. Keep the explicit UserInstruction separate from source documents and require anchored directive syntax; allow nominal requests only in title/user instruction fields. The same readable-text function must determine eligibility before message budgeting and render the selected messages. Measure all intervals on one server clock; derive logged projection milliseconds as total minus logged commit milliseconds so the additive invariant survives truncation without changing field names or units. Recovery-only events are already durable and the development projection returns without mutation; bypassing only the persistent snapshot cycle removes redundant I/O. Separate lock/reload/apply/save clocks identify remaining overhead without changing ordinary projection or ACK behavior.",
       "claims": [
         "thread_history_must_keep_user_followups",
         "sse_reconnect_must_resume_after_last_event_id",
@@ -527,18 +399,6 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/ai_agent_client_persistent_method_record_ai_agent_assignment_event.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/runtime_snapshot_liveness.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/request_correlation.go"
-        },
-        {
-          "kind": "code",
-          "path": "internal/riidoaiserver/runtime_version_observed_at.go"
         }
       ],
       "verifiers": [
@@ -577,22 +437,6 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/recovery_projection_http_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/runtime_snapshot_reload_liveness_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/runtime_snapshot_liveness_authority_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/request_correlation_test.go"
-        },
-        {
-          "kind": "test",
-          "path": "internal/riidoaiserver/runtime_version_observed_at_test.go"
         }
       ],
       "evidence": [
@@ -602,7 +446,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25→0 save-count regression and actual local HTTP recovery replay→wrong-lease403→terminal snapshot503→same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work. Runtime stability regressions now cover stale reload, credential replacement, malformed version metadata and server-generated request IDs. Version confirmation time remains separate from heartbeat time; missing or invalid legacy timestamps stay unknown.",
+      "decision": "Keep default turn count unchanged. Ten local SSE observations and one native daemon probe are recorded in single-pass-response-delivery.riido.json. Median first SSE increased from 6751 to 7139 ms and terminal observation from 7255 to 8075 ms; small unrandomized samples do not establish a speedup or no regression. Existing continuation/recovery policy and SSE replay ownership remain unchanged. Review regressions must preserve ambiguous-prose clarification, accept nominal requests in request fields and retain direct document commands without another model call. The rendered-empty HTML regression is RED at reviewed head65ca863 and GREEN after sharing context normalization between eligibility and rendering; this deterministic repair adds no model turn. Successful partial/terminal logs retain total processing time and add assignment_commit_ms/client_projection_ms; authentication and decoding remain outside this interval, and UI paint/SSE delivery completion are not measured. Fractional-millisecond tests require the displayed split to sum exactly to the displayed total; a controlled local network-backpressure sample remains evidence only, not a production latency guarantee. The25→0 save-count regression and actual local HTTP recovery replay→wrong-lease403→terminal snapshot503→same-terminal retry200 verify no journal/lease/CAS/ACK bypass. New bounded projection fields use validated trace IDs and -1 for unattempted stages. This does not prove the cause of user92s or a production speedup; native versus daemon comparison remains matched-task/model/configuration work.",
       "next_loop": "ai_thread_history"
     },
     {
@@ -6355,6 +6199,14 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/thread_message_assignment.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_agent_read_request.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_cli_agent_read_auth.go"
         }
       ],
       "verifiers": [
@@ -6461,6 +6313,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/thread_snapshot_cancelled_publication_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_directory_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_detail_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/server_cli_agent_read_boundary_test.go"
         }
       ],
       "evidence": [
@@ -6470,7 +6334,7 @@
           "redacted": true
         }
       ],
-      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. The v3 user-message row now carries author_principal_id so another member's reply can be rendered as that member after refresh. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history. RIID-5820 keeps paths/commands local, sanitizes shared enums, retains legacy progress evidence and clears prior verification on a new run. Automatic provider recovery remains separate. RIID-5819 HTTP assign/poll/Ready/native-pin/terminal/follow-up regressions now preserve the selected native ID for completed, failed and cancelled runs, allow another authorized requester, reject scope/configuration mismatch and preserve 503/504/408 without private error bodies. Resume-only failed preparation sources use the shared native-ID fallback. Real two-turn Codex acceptance separately confirmed one native session and retained clone with two host-verified file changes; that compiled happy-path fixture predates the resume-only fallback, which is covered by deterministic tests. No new live Claude/Cursor/OpenClaw resume or historical device/account identity guarantee is inferred. RIID-5860 keeps public Agents callable by other authorized workspace members and private Agents owner-only. A connected-account HTTP regression enrolls the original device, creates a private Agent as another connected account, completes the first run and two native-session follow-ups, and rejects the physical device owner with privacy-preserving 404. Separate scope cases allow distinct Agent/runtime owners and reject missing current Agent ownership. The previous owner/runtime equality guard is RED on this supported flow; the corrected Agent/profile comparison is GREEN. This is deterministic server proof, not deployed end-to-end acceptance. RIID-5860 queue-copy regressions exercise assign/complete/reply/poll/Ready/Running over HTTP and both legacy/v3 cold reads plus live progress projection. Legacy queued comment kinds and scheduler/authorization/stop semantics remain compatible; no contention inference is made from queued state alone. Existing running snapshots normalize exact stale queue copy at read time without modifying durable provider lines. Contextual progress now projects only known 1101/1103 description and 1104 summary arguments as bounded plain-text display_message. Unknown or malformed payloads and client-supplied summaries do not gain this projection. Thread/event persistence restores the saved projection, and cache identity invalidates when contextual copy changes. Existing message body, user replies, author identity, sequence and stop/follow-up execution semantics remain unchanged; fixtures verify projection and persistence, not real provider-generated summary quality. RIID-5839 uses receipt-first replay and stable user-message identity to reuse execution and deduplicate publication. Invalid raw UTF-8 is rejected before JSON replacement and before execution/history creation; focused replay, publication-failure, and raw-byte HTTP regressions cover this boundary. Keyed followup assignment rejects unpublished cancelled/cancelling results with HTTP 503 before message publication, preserving cancellation and identity instead of automatically restarting work. A recovery-cancellation HTTP regression verifies no second publication or execution, alongside normal receipt replay coverage.",
+      "decision": "User follow-up retention is enforced as v3 history behavior, not frontend memory. The v3 user-message row now carries author_principal_id so another member's reply can be rendered as that member after refresh. Explicit command-execution replies close existing pending tool approvals, generic follow-up phrases remain normal work messages, and approval-shaped replies without a pending approval are recorded as terminal guidance instead of creating replacement assignment history. RIID-5820 keeps paths/commands local, sanitizes shared enums, retains legacy progress evidence and clears prior verification on a new run. Automatic provider recovery remains separate. RIID-5819 HTTP assign/poll/Ready/native-pin/terminal/follow-up regressions now preserve the selected native ID for completed, failed and cancelled runs, allow another authorized requester, reject scope/configuration mismatch and preserve 503/504/408 without private error bodies. Resume-only failed preparation sources use the shared native-ID fallback. Real two-turn Codex acceptance separately confirmed one native session and retained clone with two host-verified file changes; that compiled happy-path fixture predates the resume-only fallback, which is covered by deterministic tests. No new live Claude/Cursor/OpenClaw resume or historical device/account identity guarantee is inferred. RIID-5860 keeps public Agents callable by other authorized workspace members and private Agents owner-only. A connected-account HTTP regression enrolls the original device, creates a private Agent as another connected account, completes the first run and two native-session follow-ups, and rejects the physical device owner with privacy-preserving 404. Separate scope cases allow distinct Agent/runtime owners and reject missing current Agent ownership. The previous owner/runtime equality guard is RED on this supported flow; the corrected Agent/profile comparison is GREEN. This is deterministic server proof, not deployed end-to-end acceptance. RIID-5860 queue-copy regressions exercise assign/complete/reply/poll/Ready/Running over HTTP and both legacy/v3 cold reads plus live progress projection. Legacy queued comment kinds and scheduler/authorization/stop semantics remain compatible; no contention inference is made from queued state alone. Existing running snapshots normalize exact stale queue copy at read time without modifying durable provider lines. Contextual progress now projects only known 1101/1103 description and 1104 summary arguments as bounded plain-text display_message. Unknown or malformed payloads and client-supplied summaries do not gain this projection. Thread/event persistence restores the saved projection, and cache identity invalidates when contextual copy changes. Existing message body, user replies, author identity, sequence and stop/follow-up execution semantics remain unchanged; fixtures verify projection and persistence, not real provider-generated summary quality. RIID-5839 uses receipt-first replay and stable user-message identity to reuse execution and deduplicate publication. Invalid raw UTF-8 is rejected before JSON replacement and before execution/history creation; focused replay, publication-failure, and raw-byte HTTP regressions cover this boundary. Keyed followup assignment rejects unpublished cancelled/cancelling results with HTTP 503 before message publication, preserving cancellation and identity instead of automatically restarting work. A recovery-cancellation HTTP regression verifies no second publication or execution, alongside normal receipt replay coverage. User-mode CLI Agent directory is a separate read-only /v1/cli/workspaces/{workspace}/tasks/{task}/agents surface with an Agent-purpose ticket and a fresh monolith current-policy check on every request. Its addition to the shared generated API document does not create an execution, publish a message, replace history, or reuse thread credentials; existing user-followup retention and private/public thread visibility remain unchanged. Directory list/detail/boundary tests and the existing history regressions cover this separation.",
       "next_loop": "ai_thread_history"
     },
     {

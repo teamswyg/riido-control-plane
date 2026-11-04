@@ -8,6 +8,7 @@ import (
 )
 
 func composeAuthorizationSchemes(issuer string, legacy, v2 riidoaiserver.RequestAuthorizer) (riidoaiserver.RequestAuthorizer, error) {
+	legacy = authpep.RestrictLegacyApplicationTokens(legacy)
 	if v2 == nil {
 		return legacy, nil
 	}
