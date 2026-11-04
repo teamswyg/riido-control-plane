@@ -28,6 +28,7 @@ type CLIThreadReadAuthorizer struct {
 	origin, resource, token string
 	client                  *http.Client
 	now                     func() time.Time
+	contract                cliTaskReadContract
 }
 
 func (*CLIThreadReadAuthorizer) String() string   { return "CLIThreadReadAuthorizer[redacted]" }

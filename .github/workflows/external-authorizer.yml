@@ -15,10 +15,6 @@ on:
       - "cmd/riido_ai_server/env_names.go"
       - "cmd/riido_ai_server/authorizer_auth.go"
       - "cmd/riido_ai_server/authorizer_config.go"
-      - "cmd/riido_ai_server/authorizer_scheme.go"
-      - "cmd/riido_ai_server/authorizer_cli_boundary_test.go"
-      - "cmd/riido_ai_server/authorizer_cli_runtime_test.go"
-      - "cmd/riido_ai_server/authorizer_cli_runtime_fixture_test.go"
       - "cmd/riido_ai_server/web_origin_config.go"
       - "cmd/riido_ai_server/cli_thread_read*.go"
       - "cmd/riido_ai_server/cli_agent_read*.go"
@@ -62,10 +58,6 @@ on:
       - "cmd/riido_ai_server/env_names.go"
       - "cmd/riido_ai_server/authorizer_auth.go"
       - "cmd/riido_ai_server/authorizer_config.go"
-      - "cmd/riido_ai_server/authorizer_scheme.go"
-      - "cmd/riido_ai_server/authorizer_cli_boundary_test.go"
-      - "cmd/riido_ai_server/authorizer_cli_runtime_test.go"
-      - "cmd/riido_ai_server/authorizer_cli_runtime_fixture_test.go"
       - "cmd/riido_ai_server/web_origin_config.go"
       - "cmd/riido_ai_server/cli_thread_read*.go"
       - "cmd/riido_ai_server/cli_agent_read*.go"
@@ -123,7 +115,7 @@ jobs:
             -check-doc \
             -evidence-out out/request-authorization-evidence.json
       - name: Test request authorization adapters
-        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'CLIAgentRead|CLIThreadRead|Coverage|Covered|CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver|LegacyApplicationTokens|AuthorizerFromEnvRejectsMonolithCLI|AuthorizerFromEnvCLIActualRuntime' -count=1
+        run: go test ./internal/riidoaiserver ./internal/authpep ./cmd/riido_ai_server -run 'CLIAgentRead|CLIThreadRead|Coverage|Covered|CLIInstallation|ExternalHTTPAuthorizer|FallbackAuthorizer|CoalescingAuthorizer|JWTAccessToken|HTTPJWKSProvider|HTTPIntrospectionStatusResolver' -count=1
       - uses: actions/upload-artifact@v7
         if: always()
         with:

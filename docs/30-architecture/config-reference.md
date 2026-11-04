@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `69`; manifest entries: `69`; secret/credential entries: `11`; operator-only entries: `22`.
+Runtime env reads: `67`; manifest entries: `67`; secret/credential entries: `10`; operator-only entries: `21`.
 
 ## Runtime Env
 
@@ -28,8 +28,6 @@ Runtime env reads: `69`; manifest entries: `69`; secret/credential entries: `11`
 | `RIIDO_AI_SERVER_CLI_INSTALLATION_RESOURCE` | `empty` | `public` | Exact canonical OAuth resource for private CLI installation service; required with service:riido-monolith in AUTHZ_TOKENS_JSON. Missing config fails closed without user/device fallback. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL` | `empty` | `operator` | Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY` | `empty` | `secret` | Dedicated server-to-server comment delivery secret (minimum 32 bytes). |
-| `RIIDO_AI_SERVER_AGENT_SOURCE_STATE_URL` | `empty` | `operator` | Monolith base URL for the Agent source state lookup used by context changes; empty keeps omitted sources unknown. HTTPS outside loopback. |
-| `RIIDO_AI_SERVER_AGENT_SOURCE_STATE_KEY` | `empty` | `secret` | Dedicated server-to-server source state secret (minimum 32 bytes), separate from the comment delivery key. |
 | `RIIDO_AI_SERVER_ADDR` | `:8080` | `public` | HTTP listen address passed to the main API server. |
 | `RIIDO_AI_SERVER_SHUTDOWN_TIMEOUT_SECONDS` | `10` | `public` | Graceful shutdown timeout after SIGINT or SIGTERM. |
 | `RIIDO_AI_SERVER_AUTHZ_TOKENS_JSON` | `empty` | `secret` | Static bearer-token credential JSON for public-testable authorization. |

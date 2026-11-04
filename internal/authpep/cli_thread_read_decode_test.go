@@ -8,7 +8,7 @@ import (
 )
 
 func TestCLIThreadReadResponseStrictBoundary(t *testing.T) {
-	a := &CLIThreadReadAuthorizer{resource: threadReadFixtureResource, now: time.Now}
+	a := &CLIThreadReadAuthorizer{resource: threadReadFixtureResource, now: time.Now, contract: cliThreadReadContract()}
 	for _, tc := range []struct {
 		name   string
 		change func(*cliThreadReadResponse)
