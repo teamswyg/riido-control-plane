@@ -80,7 +80,7 @@ func (s Server) publishThreadReply(ctx context.Context, principal AuthorizationR
 	}
 	// A message folded into a running assignment did not get this prompt.
 	if prepared.StartsNewExecution || creationReceipt.ownCreation(assignment) {
-		s.captureAssignmentContext(ctx, assignment, prepared.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)})
+		s.captureAssignmentContext(ctx, assignment, prepared.TaskContext, (assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)}).withThread(assignment, response, &prepared.Selected))
 	}
 	return response, nil
 }

@@ -59,6 +59,7 @@ func (s Server) InheritAssignmentContext(ctx context.Context, parentAssignmentID
 		}
 	}
 	snapshot := parent
+	clearAssignmentContextLineage(&snapshot)
 	snapshot.AssignmentID, snapshot.AgentID = child.ID, child.AgentID
 	snapshot.TriggerKind, snapshot.TriggerID = AssignmentContextTriggerAgentMention, strings.TrimSpace(triggerID)
 	snapshot.CapturedAt, snapshot.CommentPages = time.Now().UTC(), len(pages)

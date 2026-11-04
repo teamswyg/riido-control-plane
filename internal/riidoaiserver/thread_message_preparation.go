@@ -4,6 +4,7 @@ import "context"
 
 type preparedThreadMessage struct {
 	CommentInvocation  *CommentInvocation
+	Selected           AIAgentTaskThreadRecord
 	Request            AssignRequest
 	TaskContext        *AIAgentTaskContext
 	StartsNewExecution bool
@@ -29,7 +30,7 @@ func (s Server) prepareThreadMessage(ctx context.Context, principal Authorizatio
 		return preparedThreadMessage{}, ErrAIAgentTaskThreadConflict
 	}
 	request, taskContext, err := s.assignRequestFromAIAgentTaskThreadMessage(ctx, principal, bearer, taskID, threadID, req, selected, history)
-	prepared := preparedThreadMessage{Request: request, TaskContext: taskContext, StartsNewExecution: target.AgentID != selected.AgentID || taskThreadMessageStartsNewExecution(selected)}
+	prepared := preparedThreadMessage{Selected: selected, Request: request, TaskContext: taskContext, StartsNewExecution: target.AgentID != selected.AgentID || taskThreadMessageStartsNewExecution(selected)}
 	if err == nil && prepared.StartsNewExecution {
 		prepared.CommentInvocation, err = s.prepareCommentFollowup(ctx, principal, selected, target.AgentID)
 		if err == nil && prepared.CommentInvocation != nil {

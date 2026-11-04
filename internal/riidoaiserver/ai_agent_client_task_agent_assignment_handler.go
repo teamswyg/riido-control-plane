@@ -78,6 +78,6 @@ func (s Server) handleAIAgentClientCreateTaskAgentAssignment(w http.ResponseWrit
 		writeAIAgentClientError(w, err)
 		return
 	}
-	s.captureAssignmentContext(r.Context(), assignment, composedReq.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerAssign, ID: req.RequestID, RequesterAdmin: aiAgentIsAdmin(principal)})
+	s.captureAssignmentContext(r.Context(), assignment, composedReq.TaskContext, (assignmentContextTrigger{Kind: AssignmentContextTriggerAssign, ID: req.RequestID, RequesterAdmin: aiAgentIsAdmin(principal)}).withThread(assignment, response, nil))
 	writeJSON(w, http.StatusAccepted, response)
 }
