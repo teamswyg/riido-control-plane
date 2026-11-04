@@ -24,7 +24,7 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 		if err != nil {
 			return err
 		}
-		return s.recordNativeHistoryLocked(input, message)
+		return s.recordNativeHistoryLocked(input, message, req)
 	}
 	agent, ok := s.agents[input.AgentID]
 	if !ok {

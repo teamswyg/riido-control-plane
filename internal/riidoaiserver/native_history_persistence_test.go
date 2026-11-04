@@ -65,3 +65,61 @@ func TestNativeHistoryPersistsDeduplicatesAndPrecedesTrigger(t *testing.T) {
 		t.Fatal("dedup crossed conversation boundary")
 	}
 }
+
+func TestNativeHistoryCodexAuthorIsRegisteredDeviceOwner(t *testing.T) {
+	ctx := t.Context()
+	store := NewDevelopmentAIAgentClientStore()
+	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}
+	agent := store.agents["agent-owned-codex"]
+	agent.Visibility = AgentVisibilityPublic
+	store.agents[agent.AgentID] = agent
+	action, err := store.CreateAIAgentTaskAgentAssignment(ctx, principal, "history-task", AssignAIAgentTaskRequest{AgentID: "agent-owned-codex", AssignmentID: "run", Instruction: "Riido reply", SourceCommentID: "reply"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	teammate := AuthorizationResult{PrincipalID: "user-2", WorkspaceID: principal.WorkspaceID}
+	if _, err := store.CreateAIAgentTaskThreadMessage(ctx, teammate, action.TaskID, action.ThreadID, CreateAIAgentTaskThreadMessageRequest{Body: "teammate reply"}); err != nil {
+		t.Fatal(err)
+	}
+	for i := range store.devices {
+		if store.devices[i].DeviceID == "device-dev-macbook" {
+			store.devices[i].OwnerPrincipalID = "mac-owner"
+		}
+	}
+	expected := map[string]string{"teammate reply": teammate.PrincipalID}
+	for i, tc := range []struct {
+		body, role, device, runtime, want string
+	}{
+		{"Codex reply", "user", "device-dev-macbook", "runtime-codex-dev", "mac-owner"},
+		{"Agent reply", "agent", "device-dev-macbook", "runtime-codex-dev", ""},
+		{"Other device", "user", "device-shared-studio", "runtime-codex-dev", ""},
+		{"Other runtime", "user", "device-dev-macbook", "runtime-claude-code-dev", ""},
+	} {
+		body := tc.body
+		if tc.role == "user" {
+			body = "<p>" + body + "</p>"
+		}
+		expected[body] = tc.want
+		message := nativeHistoryMessage{SessionID: "session", MessageID: tc.body, Body: tc.body, Role: tc.role, Ordinal: i + 1}
+		req := AgentEventRequest{RuntimeID: tc.runtime, DeviceID: tc.device}
+		event := TaskEvent{TaskID: action.TaskID, AssignmentID: action.AssignmentID, AgentID: action.AgentID, Type: EventRiidoLog, CreatedBy: principal.PrincipalID, Metadata: nativeHistoryTestMetadata(t, message)}
+		if err := store.RecordAIAgentAssignmentEvent(ctx, action.AgentID, req, event); err != nil {
+			t.Fatal(err)
+		}
+	}
+	history, err := store.ListAIAgentTaskThreadHistory(ctx, principal, action.TaskID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, row := range history.Threads {
+		for _, msg := range row.Messages {
+			got[msg.Body] = msg.AuthorPrincipalID
+		}
+	}
+	for body, want := range expected {
+		if author, ok := got[body]; !ok || author != want {
+			t.Errorf("%q: want author %q, got history %v", body, want, got)
+		}
+	}
+}

@@ -173,7 +173,7 @@
       },
       {
         "name": "native-history-wire-and-identity",
-        "detail": "Authenticated riido_log metadata.native_history_message carries session_id, stable message_id, role(user/agent), body, optional RFC3339 observed_at and positive ordinal, plus the current assignment lease token. Validate resumed assignment/session and require its exact published thread. Persist native:<SHA256(session ID + NUL + message ID)> identity, deduplicated within task/conversation/Agent across retries, restarts and later executions. Preserve identical text under different IDs. User text is HTML escaped and has no inferred Riido author principal; Agent identity comes from the source execution snapshot."
+        "detail": "Authenticated riido_log metadata.native_history_message carries session_id, stable message_id, role(user/agent), body, optional RFC3339 observed_at and positive ordinal, plus the current assignment lease token. Validate resumed assignment/session and require its exact published thread. Persist native:<SHA256(session ID + NUL + message ID)> identity, deduplicated within task/conversation/Agent across retries, restarts and later executions. Preserve identical text under different IDs. User text is HTML escaped. Newly imported Codex user messages display the registered device owner when the reporting device and runtime match the Agent binding. Other imports omit the author principal; Agent identity comes from the source execution snapshot."
       },
       {
         "name": "native-history-order-and-failure",

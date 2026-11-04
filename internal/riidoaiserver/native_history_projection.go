@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (s *DevelopmentAIAgentClientStore) recordNativeHistoryLocked(input assignmentEventInput, message nativeHistoryMessage) error {
+func (s *DevelopmentAIAgentClientStore) recordNativeHistoryLocked(input assignmentEventInput, message nativeHistoryMessage, req AgentEventRequest) error {
 	thread, found := s.taskThreadForAssignmentLocked(input.TaskID, input.AgentID, input.AssignmentID)
 	if !found {
 		return ErrAIAgentTaskThreadConflict
@@ -40,14 +40,30 @@ func (s *DevelopmentAIAgentClientStore) recordNativeHistoryLocked(input assignme
 	if observed.IsZero() || observed.UnixMilli() >= boundary.UnixMilli() {
 		observed = boundary.Add(-time.Millisecond)
 	}
+	var authorID string
 	body := message.Body
 	if message.Role == "user" {
+		authorID = s.nativeCodexDeviceOwnerLocked(input.AgentID, req)
 		body = "<p>" + strings.ReplaceAll(html.EscapeString(body), "\n", "<br>") + "</p>"
 	}
 	s.appendThreadHistoryMessageLocked(thread.ThreadID, AIAgentTaskThreadHistoryMessage{
 		MessageID: id, SourceMessageID: id, Role: AIAgentTaskThreadMessageRole(message.Role),
 		AssignmentID: thread.AssignmentID, RunID: thread.RunID, Body: body,
-		ObservedAt: observed, Seq: message.Ordinal - 1000001,
+		AuthorPrincipalID: authorID, ObservedAt: observed, Seq: message.Ordinal - 1000001,
 	})
 	return nil
+}
+
+// The event has passed assignment and daemon binding validation. Resolve the
+// owner from the registered device, independently of who requested the run.
+func (s *DevelopmentAIAgentClientStore) nativeCodexDeviceOwnerLocked(agentID string, req AgentEventRequest) string {
+	agent, ok := s.agents[agentID]
+	if !ok || req.RuntimeID == "" || agent.RuntimeID != req.RuntimeID || req.DeviceID == "" {
+		return ""
+	}
+	device, runtime, ok := s.deviceRuntimeByRuntimeIDLocked(req.RuntimeID)
+	if !ok || runtime.Kind != RuntimeKindCodex || device.DeviceID != req.DeviceID {
+		return ""
+	}
+	return device.OwnerPrincipalID
 }
