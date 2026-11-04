@@ -29033,6 +29033,60 @@
       ],
       "decision": "Add only the terminology line; hierarchy capture, read scope and message budgeting are unchanged. This is local regression evidence and does not establish deployment.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "riido_agent_comment_count_push_5842",
+      "observation": "RIID-5842 QA: a Riido task list showed 1 comment on a task with many Agent conversation messages, because list commentsCount counts only monolith comments while Agent conversations live only in control-plane.",
+      "hypothesis": "After a task's Agent conversation changes, pushing the absolute visible message count (comments-tab rule, excluding user messages copied from Riido comments) to the monolith in a per-task coalesced background job fixes the list count without changing any handler response, SSE replay, history projection or hot-path latency.",
+      "claims": [
+        "sse_reconnect_must_resume_after_last_event_id",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_comment_count_rule.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_comment_count_schedule.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_comment_count_push.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_ai_agent_client_task_v3.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_event_handler.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_comment_count_rule_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_comment_count_schedule_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_comment_count_backfill_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Off by default behind RIIDO_AI_SERVER_AGENT_COMMENT_COUNT. Handlers only schedule a background push after their unchanged success path; history reads push only tasks this process has not pushed. Each push adds one locked history read per coalesced task change. This is local regression evidence and does not establish deployment.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
