@@ -148,6 +148,7 @@ func (s Server) handleCommentDelivery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.captureAssignmentContext(ctx, assignment, composed.TaskContext, assignmentContextTrigger{Kind: AssignmentContextTriggerComment, ID: evidence.CommentID, RequesterAdmin: aiAgentIsAdmin(principal)})
+	s.scheduleAgentCommentCount(ctx, evidence.WorkspaceID, evidence.TaskID)
 	writeJSON(w, http.StatusAccepted, response)
 }
 

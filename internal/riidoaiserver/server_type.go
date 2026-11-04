@@ -56,5 +56,6 @@ type Server struct {
 	devices                  DeviceCredentialStore
 	aiAgentGlobalReconcile   *aiAgentGlobalReconcileGate
 	taskAgentExecutionGate   taskAgentExecutionGate
+	agentCommentCounts       *agentCommentCountDispatcher
 	config                   ServerConfig
 }

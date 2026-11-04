@@ -61,6 +61,7 @@ func NewServer(config ServerConfig) Server {
 		devices:                  devices,
 		aiAgentGlobalReconcile:   newAIAgentGlobalReconcileGate(config.AIAgentGlobalReconcileMinInterval),
 		taskAgentExecutionGate:   executionGate,
+		agentCommentCounts:       newAgentCommentCountDispatcher(),
 		config:                   config,
 	}
 }

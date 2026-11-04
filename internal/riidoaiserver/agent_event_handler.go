@@ -39,5 +39,6 @@ func (s Server) handleAgentEvent(w http.ResponseWriter, r *http.Request, agentID
 		}
 	}
 	logAgentResponseDelivery(req, response, receivedAt, committedAt, time.Now())
+	s.scheduleAgentCommentCount(r.Context(), response.Event.WorkspaceID, response.Event.TaskID)
 	writeJSON(w, http.StatusOK, response)
 }
