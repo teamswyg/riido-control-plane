@@ -17,13 +17,8 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 	if !ok {
 		return
 	}
-	var req AgentAssignmentContextRequest
-	if err := decodeJSON(r, &req); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	if !normalizeAssignmentContextRequest(&req) {
-		writeError(w, http.StatusBadRequest, "assignment_id, lease_token and a supported view are required")
+	req, cache, ok := parseAssignmentContextRequest(w, r)
+	if !ok {
 		return
 	}
 	assignment, ok := s.leasedAssignmentForContext(w, r, agentID, device, req)
@@ -69,8 +64,9 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	s.publishAssignmentContextReads(r.Context(), reads)
-	writeJSON(w, http.StatusOK, AgentAssignmentContextResponse{
+	response := AgentAssignmentContextResponse{
 		SchemaVersion: SchemaVersion, AssignmentID: snapshot.AssignmentID, TaskID: snapshot.TaskID, View: req.View,
 		CapturedAt: snapshot.CapturedAt, Truncated: snapshot.Truncated, Data: data, Sources: sources,
-	})
+	}
+	writeAssignmentContextRepresentation(w, cache, agentID, req, response)
 }

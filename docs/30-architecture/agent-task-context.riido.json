@@ -10,7 +10,11 @@
     "cmd/riido_ai_server/runtime_http.go",
     "cmd/riido_ai_server/task_context_config.go",
     "cmd/riido_ai_server/task_context_private.go",
+    "internal/riidoaiserver/agent_assignment_context_cache.go",
     "internal/riidoaiserver/agent_assignment_context_http.go",
+    "internal/riidoaiserver/agent_assignment_context_request.go",
+    "internal/riidoaiserver/agent_assignment_context_response.go",
+    "internal/riidoaiserver/agent_assignment_context_types.go",
     "internal/riidoaiserver/agent_assignment_context_meeting.go",
     "internal/riidoaiserver/agent_assignment_context_quota.go",
     "internal/riidoaiserver/agent_assignment_context_refusal.go",
@@ -175,6 +179,7 @@
     "internal/riidoaiserver/task_read_scope_wire.go"
   ],
   "policy": {
+    "conditional_content_reads": "RIID-5972 content-only conditional reads negotiate X-Riido-Context-Cache-Version: 1 and optional X-Riido-Context-Known-Digest: sha256:<64 lowercase hex> without changing request JSON. Hash versioned request identity (route agent, assignment/task/view/target/cursor/max_bytes) plus the full current representation (schema, captured_at, truncated/live, data and exact sources), excluding request_id and lease secrets. After normal device/active lease/run, quota, stored scope/page and durable read-audit success, return content_digest; an equal known digest returns POST 200 not_modified=true and data=null with current identity and sources. Hits still consume a call, load current captured pages and record exact page.Sources. No cache field is emitted for legacy/unknown-version/non-content/live requests. Malformed or duplicate known digests under v1 content requests return 400. No header grants scope, bypasses failure, performs live requester permission checks, changes fixed snapshot authority, or claims source-cache/provider-memory acceptance.",
     "identity": "same task/agent/conversation; preserve explicit initial and latest follow-up directives even when context reads fail",
     "parent_scope": "only authorized hierarchy references, same bearer/team, shared request deadline; no recursive project sweep",
     "source_budget": {
@@ -215,6 +220,11 @@
   "verification": {
     "synthetic_only": true,
     "tests": [
+      "TestAssignmentContentCacheNegotiationAndAudit",
+      "TestAssignmentContentCacheHeaderCompatibility",
+      "TestAssignmentContentCacheBindsIdenticalBatchToByteBudget",
+      "TestAssignmentContentCacheBoundaries",
+      "TestAssignmentContentCacheRepresentationChanges",
       "TestAIAgentRunReadsIncludesCurrentlyReadableReply",
       "TestAIAgentRunReadsRechecksReplyAccess",
       "TestAgentDashboardUsesSeparateGraphQLEndpoint",
