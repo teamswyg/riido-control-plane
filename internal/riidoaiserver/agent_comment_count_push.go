@@ -19,6 +19,7 @@ func (s Server) pushAgentCommentCount(ctx context.Context, key, workspaceID, tas
 	history, err := s.aiAgent.ListAIAgentTaskThreadHistory(ctx, principal, taskID)
 	if err != nil {
 		slog.WarnContext(ctx, "agent comment count pending", "task_id", taskID, "error", err)
+		s.agentCommentCounts.forgetSent(key)
 		return
 	}
 	count := countVisibleAgentCommentMessages(history.Threads)
@@ -28,6 +29,7 @@ func (s Server) pushAgentCommentCount(ctx context.Context, key, workspaceID, tas
 	body := map[string]any{"workspace_id": workspaceID, "task_id": taskID, "message_count": count, "observed_at": observedAt}
 	if err := s.writeAgentCommentCount(ctx, body); err != nil {
 		slog.WarnContext(ctx, "agent comment count pending", "task_id", taskID, "error", err)
+		s.agentCommentCounts.forgetSent(key)
 		return
 	}
 	s.agentCommentCounts.markSent(key, count)

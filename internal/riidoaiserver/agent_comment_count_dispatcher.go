@@ -36,6 +36,13 @@ func (d *agentCommentCountDispatcher) markSent(key string, count int) {
 	d.sent[key] = count
 }
 
+// forgetSent lets history reads retry a task whose latest push failed.
+func (d *agentCommentCountDispatcher) forgetSent(key string) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	delete(d.sent, key)
+}
+
 // repairAgentCommentCount pushes once for a task this process has not pushed yet,
 // so history reads fill tasks from before this change or after a failed push
 // without recomputing on every read. Changes still call scheduleAgentCommentCount.
