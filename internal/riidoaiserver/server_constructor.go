@@ -67,7 +67,7 @@ func NewServer(config ServerConfig) Server {
 		agentCommentCounts:       newAgentCommentCountDispatcher(),
 		config:                   config,
 	}
-	if config.AgentCommentBackfill {
+	if config.AgentCommentCount && config.AgentCommentBackfill {
 		go server.backfillAgentCommentCounts(context.Background())
 	}
 	return server

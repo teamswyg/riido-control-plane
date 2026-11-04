@@ -113,12 +113,12 @@ func (s Server) repairAgentCommentCount(ctx context.Context, workspaceID, taskID
 }
 
 // scheduleAgentCommentCount pushes the task's current count in the background.
-// It is a no-op unless the monolith comment-delivery URL and key are configured.
+// It is a no-op unless enabled and the monolith comment-delivery URL and key are configured.
 func (s Server) scheduleAgentCommentCount(ctx context.Context, workspaceID, taskID string) {
 	d := s.agentCommentCounts
 	config := s.config.CommentDelivery
 	workspaceID, taskID = strings.TrimSpace(workspaceID), strings.TrimSpace(taskID)
-	if d == nil || s.aiAgent == nil || config.EvidenceBaseURL == "" || config.Key == "" || workspaceID == "" || taskID == "" {
+	if d == nil || !s.config.AgentCommentCount || s.aiAgent == nil || config.EvidenceBaseURL == "" || config.Key == "" || workspaceID == "" || taskID == "" {
 		return
 	}
 	key := workspaceID + "\x00" + taskID
@@ -242,7 +242,7 @@ func (s *PersistentAIAgentClientStore) listAgentCommentCountTasks(ctx context.Co
 func (s Server) backfillAgentCommentCounts(ctx context.Context) {
 	lister, ok := s.aiAgent.(agentCommentCountTaskLister)
 	config := s.config.CommentDelivery
-	if !ok || s.agentCommentCounts == nil || config.EvidenceBaseURL == "" || config.Key == "" {
+	if !ok || s.agentCommentCounts == nil || !s.config.AgentCommentCount || config.EvidenceBaseURL == "" || config.Key == "" {
 		slog.WarnContext(ctx, "agent comment count backfill skipped: store or monolith delivery is not configured")
 		return
 	}

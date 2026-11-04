@@ -65,10 +65,14 @@ func TestAgentCommentCountPushesTaskCountOnceAndSkipsUnchangedRepair(t *testing.
 		return append([]map[string]any(nil), bodies...)
 	}
 
-	unconfigured := NewServer(ServerConfig{AIAgentClient: store})
-	unconfigured.scheduleAgentCommentCount(t.Context(), principal.WorkspaceID, action.TaskID)
+	for _, disabled := range []ServerConfig{
+		{AIAgentClient: store, AgentCommentCount: true},
+		{AIAgentClient: store, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: endpoint.URL, Key: "key"}},
+	} {
+		NewServer(disabled).scheduleAgentCommentCount(t.Context(), principal.WorkspaceID, action.TaskID)
+	}
 
-	server := NewServer(ServerConfig{AIAgentClient: store, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: endpoint.URL, Key: "key"}})
+	server := NewServer(ServerConfig{AIAgentClient: store, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: endpoint.URL, Key: "key"}, AgentCommentCount: true})
 	began := time.Now()
 	server.scheduleAgentCommentCount(t.Context(), principal.WorkspaceID, action.TaskID)
 	if time.Since(began) > 100*time.Millisecond {
@@ -108,7 +112,7 @@ func TestAgentCommentCountBackfillPushesEveryTaskWithThreads(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer endpoint.Close()
-	server := NewServer(ServerConfig{AIAgentClient: store, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: endpoint.URL, Key: "key"}})
+	server := NewServer(ServerConfig{AIAgentClient: store, CommentDelivery: CommentDeliveryConfig{EvidenceBaseURL: endpoint.URL, Key: "key"}, AgentCommentCount: true})
 	server.backfillAgentCommentCounts(t.Context())
 	mu.Lock()
 	defer mu.Unlock()
