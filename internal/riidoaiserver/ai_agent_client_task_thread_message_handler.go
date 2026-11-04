@@ -68,5 +68,6 @@ func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter
 	if prepared.StartsNewExecution || creationReceipt.ownCreation(assignment) {
 		s.captureAssignmentContext(r.Context(), assignment, prepared.TaskContext, (assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)}).withThread(assignment, response, &prepared.Selected))
 	}
+	s.scheduleAgentCommentCount(r.Context(), principal.WorkspaceID, taskID)
 	writeJSON(w, http.StatusAccepted, response)
 }

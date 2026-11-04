@@ -45,7 +45,7 @@ func configFromEnv() (runtimeConfig, error) {
 	if err != nil {
 		return runtimeConfig{}, err
 	}
-	return withAgentSourceState(configFromEnvParts(timing, runtimeConfigParts{
+	return withAgentCommentCount(withAgentSourceState(configFromEnvParts(timing, runtimeConfigParts{
 		localDir:             localDir,
 		reviewProvision:      reviewProvision,
 		authorizer:           authorizer,
@@ -54,7 +54,7 @@ func configFromEnv() (runtimeConfig, error) {
 		aiAgentClientDev:     aiAgentClientDev,
 		aiAgentClientStore:   aiAgentClientStore,
 		aiAgentClientMetrics: aiAgentClientMetrics,
-	}))
+	})))
 }
 
 type runtimeConfigParts struct {

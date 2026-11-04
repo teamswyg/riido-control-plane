@@ -10,7 +10,7 @@ This reader is generated from the runtime config manifest and `cmd/riido_ai_serv
 
 ## Coverage
 
-Runtime env reads: `69`; manifest entries: `69`; secret/credential entries: `11`; operator-only entries: `22`.
+Runtime env reads: `71`; manifest entries: `71`; secret/credential entries: `11`; operator-only entries: `24`.
 
 ## Runtime Env
 
@@ -28,6 +28,8 @@ Runtime env reads: `69`; manifest entries: `69`; secret/credential entries: `11`
 | `RIIDO_AI_SERVER_CLI_INSTALLATION_RESOURCE` | `empty` | `public` | Exact canonical OAuth resource for private CLI installation service; required with service:riido-monolith in AUTHZ_TOKENS_JSON. Missing config fails closed without user/device fallback. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL` | `empty` | `operator` | Monolith evidence endpoint for persisted Agent comment requests; empty disables delivery. |
 | `RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY` | `empty` | `secret` | Dedicated server-to-server comment delivery secret (minimum 32 bytes). |
+| `RIIDO_AI_SERVER_AGENT_COMMENT_COUNT` | `false` | `operator` | Push each task's visible Agent conversation message count to the monolith (RIID-5842); uses the comment delivery URL and key. Enable only after the monolith serves the endpoint. |
+| `RIIDO_AI_SERVER_AGENT_COMMENT_COUNT_BACKFILL` | `false` | `operator` | With RIIDO_AI_SERVER_AGENT_COMMENT_COUNT, push every task with Agent threads once in the background after startup; turn off after one run. |
 | `RIIDO_AI_SERVER_AGENT_SOURCE_STATE_URL` | `empty` | `operator` | Monolith base URL for the Agent source state lookup used by context changes; empty keeps omitted sources unknown. HTTPS outside loopback. |
 | `RIIDO_AI_SERVER_AGENT_SOURCE_STATE_KEY` | `empty` | `secret` | Dedicated server-to-server source state secret (minimum 32 bytes), separate from the comment delivery key. |
 | `RIIDO_AI_SERVER_ADDR` | `:8080` | `public` | HTTP listen address passed to the main API server. |
