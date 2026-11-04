@@ -42,5 +42,6 @@ func (s Server) handleAIAgentClientTaskThreadsV3(w http.ResponseWriter, r *http.
 		return
 	}
 	s.syncCommentStatusReactions(r.Context(), principal, taskID)
+	s.repairAgentCommentCount(r.Context(), principal.WorkspaceID, taskID)
 	writeJSON(w, http.StatusOK, response)
 }

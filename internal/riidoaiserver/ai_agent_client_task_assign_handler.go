@@ -70,5 +70,6 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		return
 	}
 	s.captureAssignmentContext(r.Context(), assignment, composedReq.TaskContext, (assignmentContextTrigger{Kind: AssignmentContextTriggerAssign, ID: req.RequestID, RequesterAdmin: aiAgentIsAdmin(principal)}).withThread(assignment, response, nil))
+	s.scheduleAgentCommentCount(r.Context(), principal.WorkspaceID, taskID)
 	writeJSON(w, http.StatusAccepted, response)
 }

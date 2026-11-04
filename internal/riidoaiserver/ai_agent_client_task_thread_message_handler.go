@@ -82,5 +82,6 @@ func (s Server) publishThreadReply(ctx context.Context, principal AuthorizationR
 	if prepared.StartsNewExecution || creationReceipt.ownCreation(assignment) {
 		s.captureAssignmentContext(ctx, assignment, prepared.TaskContext, (assignmentContextTrigger{Kind: AssignmentContextTriggerThreadMessage, ID: threadID, RequesterAdmin: aiAgentIsAdmin(principal)}).withThread(assignment, response, &prepared.Selected))
 	}
+	s.scheduleAgentCommentCount(ctx, principal.WorkspaceID, taskID)
 	return response, nil
 }

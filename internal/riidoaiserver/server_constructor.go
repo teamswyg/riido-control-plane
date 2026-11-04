@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 func NewServer(config ServerConfig) Server {
 	config = normalizeServerConfigNilInterfaces(config)
@@ -62,10 +65,14 @@ func NewServer(config ServerConfig) Server {
 		devices:                  devices,
 		aiAgentGlobalReconcile:   newAIAgentGlobalReconcileGate(config.AIAgentGlobalReconcileMinInterval),
 		taskAgentExecutionGate:   executionGate,
+		agentCommentCounts:       newAgentCommentCountDispatcher(),
 		config:                   config,
 	}
 	if server.config.AgentMentionPrecheck == nil && server.aiAgent != nil && server.assignment != nil && config.CommentDelivery.Key != "" {
 		server.config.AgentMentionPrecheck = server.precheckCommentMention
+	}
+	if config.AgentCommentCount && config.AgentCommentBackfill {
+		go server.backfillAgentCommentCounts(context.Background())
 	}
 	return server
 }

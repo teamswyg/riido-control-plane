@@ -39,6 +39,9 @@ type runtimeConfig struct {
 	TaskContextReader        riidoaiserver.AIAgentTaskContextReader
 	AssignmentContext        riidoaiserver.AssignmentContextStore
 	AssignmentReadScope      bool
+	// RIID-5842: push Agent comment counts to the monolith; backfill all tasks once.
+	AgentCommentCount    bool
+	AgentCommentBackfill bool
 }
 
 func closeRuntimeConfig(config runtimeConfig) {
