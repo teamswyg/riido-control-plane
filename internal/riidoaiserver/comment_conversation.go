@@ -66,6 +66,10 @@ func (s Server) prepareCommentConversation(ctx context.Context, principal Author
 	if publication.skipSourceMessage {
 		contextSourceID = ""
 	}
+	if req.ResumeSessionID != "" {
+		req.Prompt = resumedFollowupPrompt(publication.Instruction, selected, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: contextSourceID}, contextHistory)
+		return nil
+	}
 	appendTaskConversationContext(&contextText, selected, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: contextSourceID}, contextHistory)
 	req.Prompt += contextText.String()
 	return nil

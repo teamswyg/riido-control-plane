@@ -32,7 +32,7 @@ func TestHTTPThreadReplyHandoffKeepsEachAgentsNativeSession(t *testing.T) {
 		if err != nil || !found || projection.Assignment.AgentID != tc.target || projection.Assignment.ResumeSessionID != tc.session {
 			t.Fatal("returning participant resumed the wrong session")
 		}
-		if !strings.Contains(projection.Assignment.Prompt, "Second Agent reviewed the blog template") {
+		if strings.Contains(projection.Assignment.Prompt, "Second Agent reviewed the blog template") != (tc.target == first.AgentID) {
 			t.Fatal("continuation lost the other participant's linked conversation context")
 		}
 	}

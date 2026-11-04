@@ -32,7 +32,7 @@ func TestContextChangesMetadataDoesNotDiscardExistingReadableSnapshot(t *testing
 	c.readScopeCapture = &assignmentReadScopeCapture{Manifest: snapshot.Content, Pages: pages}
 	store := NewMemoryAssignmentContextStore()
 	server := NewServer(ServerConfig{AssignmentContext: store, AssignmentReadScope: true})
-	server.captureAssignmentReadScope(t.Context(), snapshot, &c)
+	server.captureAssignmentReadScope(t.Context(), snapshot, &c, true)
 	got, found, err := store.LoadAssignmentContextSnapshot(t.Context(), snapshot.AssignmentID)
 	if err != nil || !found {
 		t.Fatal("comparison metadata discarded entire readable capture", err)

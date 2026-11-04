@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -16,6 +17,9 @@ func TestHTTPThreadFollowupReusesAuthoritativeNativeSessionAcrossTerminalStates(
 			poll, err := f.store.PollAgent(context.Background(), "agent-owned-codex", PollRequest{DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev"})
 			if err != nil || poll.Assignment == nil || poll.Assignment.ID != next.AssignmentID || poll.Assignment.ResumeSessionID != "native-http-session" {
 				t.Fatal("real HTTP followup lost the exact selected thread native session")
+			}
+			if !strings.Contains(poll.Assignment.Prompt, "Continue this task in the same repository.") || strings.Contains(poll.Assignment.Prompt, "# Riido AI Agent Assignment") || strings.Contains(poll.Assignment.Prompt, "Previous Thread Message") {
+				t.Fatalf("resumed prompt repeated the assignment instead of the new instruction: %s", poll.Assignment.Prompt)
 			}
 		})
 	}
@@ -55,4 +59,24 @@ func (f *nativeResumeHTTPFixture) finishFirst(t *testing.T, terminal AssignmentS
 		f.post(t, "/v1/agents/agent-owned-codex/events", AgentEventRequest{AssignmentID: first.AssignmentID, TaskID: "task-new", DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev", State: phase.state, EventType: phase.kind, ProviderSessionID: phase.pin}, http.StatusOK, nil)
 	}
 	return first
+}
+
+func TestHTTPThreadFollowupWithoutNativeSessionFailsExplicitly(t *testing.T) {
+	f := newNativeResumeHTTPFixture(t)
+	var first AIAgentTaskActionResponse
+	f.post(t, f.base+"/tasks/task-new/agent-assignments", AssignAIAgentTaskRequest{AgentID: "agent-owned-codex", RequestID: "legacy-run"}, http.StatusAccepted, &first)
+	if _, err := f.store.PollAgent(t.Context(), first.AgentID, PollRequest{DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev"}); err != nil {
+		t.Fatal(err)
+	}
+	for _, phase := range []struct {
+		state AssignmentState
+		kind  string
+	}{{AssignmentReady, EventAssignmentReady}, {AssignmentRunning, EventAssignmentRunning}, {AssignmentCompleted, EventAssignmentCompleted}} {
+		f.post(t, "/v1/agents/"+first.AgentID+"/events", AgentEventRequest{AssignmentID: first.AssignmentID, TaskID: first.TaskID, DaemonID: "daemon-dev-macbook", DeviceID: "device-dev-macbook", RuntimeID: "runtime-codex-dev", State: phase.state, EventType: phase.kind}, http.StatusOK, nil)
+	}
+	f.post(t, f.base+"/tasks/task-new/threads/"+first.ThreadID+"/messages", CreateAIAgentTaskThreadMessageRequest{Body: "Continue legacy work"}, http.StatusConflict, nil)
+	projection, found, err := f.store.LoadAssignmentProjection(t.Context(), first.AssignmentID)
+	if err != nil || !found || !strings.Contains(projection.Assignment.Prompt, "# Riido AI Agent Assignment") {
+		t.Fatal("initial request lost full bootstrap context", err)
+	}
 }

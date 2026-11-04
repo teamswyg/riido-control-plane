@@ -3,6 +3,18 @@
 RIID-5818 owns readable, bounded task context and conversation continuity.
 The assignment remains one task; references do not authorize additional work.
 
+RIID-5891 compacts human follow-ups only after the authorized thread's native
+session has been selected for resume. The provider receives the new instruction
+and bounded conversation messages added since that Agent's previous request;
+its own retained messages and the full assignment snapshot are not repeated.
+The current authorized task snapshot remains available through `riido context get`
+and `riido work get`; the Agent reads it when the request needs updated task facts.
+Capturing that snapshot does not mark its omitted sources as read through the
+prompt. Initial requests, new Agent sessions and legacy requests without a native
+session retain the full context. Resume failures remain explicit failures and do
+not silently start an empty replacement session. Provider instruction placement,
+lease credentials and approval policies keep their existing paths.
+
 RIID-5972 records snapshot conversation provenance only from authenticated
 server-selected threads and successful publication responses. Initial task
 assignments seed their own conversation; follow-ups retain the selected parent

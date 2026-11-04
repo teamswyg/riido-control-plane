@@ -36,7 +36,11 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	if err := s.applyThreadNativeResume(ctx, principal, target, &assignmentReq, composed.AgentOwnerPrincipalID); err != nil {
 		return AssignRequest{}, nil, err
 	}
-	assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req, history.Threads...)
+	if assignmentReq.ResumeSessionID != "" {
+		assignmentReq.Prompt = resumedFollowupPrompt(req.Body, target, req, history.Threads)
+	} else {
+		assignmentReq.Prompt = appendAIAgentTaskThreadMessagePrompt(assignmentReq.Prompt, selectedThread, req, history.Threads...)
+	}
 	return assignmentReq, composed.TaskContext, nil
 }
 

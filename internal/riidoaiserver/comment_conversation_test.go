@@ -40,7 +40,7 @@ func TestCommentFollowupUsesRootAndOnlySameAgentNativeSession(t *testing.T) {
 				client.taskThreads[thread.TaskID][0].SourceCommentID = "older-reply-outside-context-window"
 				evidence.ConversationCommentIDs = []string{"older-reply-outside-context-window"}
 			}
-			var publication AssignAIAgentTaskRequest
+			publication := AssignAIAgentTaskRequest{Instruction: "New user request only"}
 			err := s.prepareCommentConversation(t.Context(), principal, evidence, &publication, &req, "user-1")
 			if name == "busy" || name == "waiting for input" {
 				if err == nil {
@@ -60,7 +60,10 @@ func TestCommentFollowupUsesRootAndOnlySameAgentNativeSession(t *testing.T) {
 			if (req.ResumeSessionID == "selected-native") != (name == "same agent" || name == "legacy root") {
 				t.Fatal("native scope lost")
 			}
-			if strings.Contains(req.Prompt, "previous finding") != (name != "other root") {
+			if req.ResumeSessionID != "" && !strings.Contains(req.Prompt, "New user request only") {
+				t.Fatal("compacted comment followup lost the user instruction")
+			}
+			if strings.Contains(req.Prompt, "previous finding") != (name != "other root" && req.ResumeSessionID == "") {
 				t.Fatal("conversation context missing or leaked")
 			}
 			if !strings.Contains(req.Prompt, "human context without a mention") {
