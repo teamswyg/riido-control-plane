@@ -11,6 +11,7 @@ type runtimeConfig struct {
 	ExecutionCoverageEnrollment bool
 	CLIInstallationService      riidoaiserver.CLIInstallationServiceConfig
 	CommentDelivery             riidoaiserver.CommentDeliveryConfig
+	AgentSourceState            riidoaiserver.AgentSourceStateConfig
 	AssignmentSnapshotStore     riidoaiserver.SnapshotStore
 
 	Addr                     string

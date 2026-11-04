@@ -16,6 +16,9 @@ func (s Server) assignmentContextChangesView(ctx context.Context, current Assign
 	if err := validateAssignmentReadScopeManifest(baseline); err != nil {
 		return nil, nil, false, err
 	}
+	if !req.sourceStates {
+		current.SourceStates = nil
+	}
 	out := compareAssignmentContextParts(baseline, current)
 	return out, assignmentContextChangeSources(current, out.Changes), true, nil
 }

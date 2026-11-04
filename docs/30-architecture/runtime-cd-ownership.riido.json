@@ -414,6 +414,14 @@
         "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."
       },
       {
+        "name": "RIIDO_AI_SERVER_AGENT_SOURCE_STATE_URL",
+        "reason": "Runtime configuration for the monolith Agent source state lookup; operator-owned and disabled until coordinated rollout."
+      },
+      {
+        "name": "RIIDO_AI_SERVER_AGENT_SOURCE_STATE_KEY",
+        "reason": "Runtime configuration for the monolith Agent source state lookup; operator-owned and disabled until coordinated rollout."
+      },
+      {
         "name": "RIIDO_AI_SERVER_AI_AGENT_CLIENT_DEVELOPMENT",
         "reason": "development runtime feature flag documented for testnet/development API startup; it is not a deploy/smoke GitHub configuration key"
       },

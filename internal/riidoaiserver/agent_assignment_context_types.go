@@ -16,6 +16,8 @@ type AgentAssignmentContextRequest struct {
 	// MaxBytes asks a content read for consecutive pages of the same part up to
 	// this encoded size. Zero keeps the single-page response.
 	MaxBytes int `json:"max_bytes,omitempty"`
+	// sourceStates comes from the changes version header, never from JSON.
+	sourceStates bool
 }
 
 type AgentAssignmentContextResponse struct {
