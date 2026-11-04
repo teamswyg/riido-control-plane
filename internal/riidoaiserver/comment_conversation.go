@@ -3,6 +3,7 @@ package riidoaiserver
 import (
 	"context"
 	"strings"
+	"time"
 )
 
 // The root is supplied only by the authenticated comment evidence service.
@@ -44,6 +45,7 @@ func (s Server) prepareCommentConversation(ctx context.Context, principal Author
 		}
 	}
 	selected := AIAgentTaskThreadRecord{TaskID: evidence.TaskID, AgentID: evidence.AgentID, ConversationID: publication.conversationID}
+	var since time.Time
 	if previous != nil {
 		selected, err = selectAIAgentHistoryThreadForFollowup(history, evidence.TaskID, previous.ThreadID)
 		if err != nil {
@@ -52,8 +54,10 @@ func (s Server) prepareCommentConversation(ctx context.Context, principal Author
 		if !taskThreadMessageStartsNewExecution(selected) {
 			return ErrAIAgentTaskThreadConflict
 		}
-		if err := s.applyThreadNativeResume(ctx, principal, selected, req, owner); err != nil {
-			return err
+		var resumeErr error
+		since, resumeErr = s.applyThreadNativeResume(ctx, principal, selected, req, owner)
+		if resumeErr != nil {
+			return resumeErr
 		}
 		if nativeFollowupProvider(req.RuntimeProvider) && !isNonDurableAssignmentID(selected.AssignmentID) && req.ResumeSessionID == "" {
 			return ErrAIAgentTaskThreadConflict
@@ -67,7 +71,7 @@ func (s Server) prepareCommentConversation(ctx context.Context, principal Author
 		contextSourceID = ""
 	}
 	if req.ResumeSessionID != "" {
-		req.Prompt = resumedFollowupPrompt(publication.Instruction, selected, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: contextSourceID}, contextHistory)
+		req.Prompt = resumedFollowupPrompt(publication.Instruction, selected, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: contextSourceID}, contextHistory, since)
 		return nil
 	}
 	appendTaskConversationContext(&contextText, selected, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: contextSourceID}, contextHistory)

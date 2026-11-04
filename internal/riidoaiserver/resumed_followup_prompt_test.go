@@ -20,8 +20,8 @@ func TestResumedFollowupSendsOnlyNewConversationContext(t *testing.T) {
 		{ThreadID: "other", TaskID: "task", AgentID: "other-agent", ConversationID: "comment:root", Messages: []AIAgentTaskThreadHistoryMessage{{Role: AIAgentTaskThreadMessageRoleAgent, Body: "new specialist finding", ObservedAt: now.Add(time.Minute)}}},
 		{ThreadID: "foreign", TaskID: "other-task", AgentID: "other-agent", ConversationID: "comment:root", Messages: []AIAgentTaskThreadHistoryMessage{{Role: AIAgentTaskThreadMessageRoleAgent, Body: "foreign secret", ObservedAt: now.Add(time.Minute)}}},
 	}
-	got := resumedFollowupPrompt("<p>Continue with the final revision.</p>", thread, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: "current"}, history)
-	for _, want := range []string{"Continue with the final revision.", "new ordinary reply", "new specialist finding", "riido context get"} {
+	got := resumedFollowupPrompt("<p>Continue with the final revision.</p>", thread, CreateAIAgentTaskThreadMessageRequest{SourceMessageID: "current"}, history, thread.StartedAt)
+	for _, want := range []string{"Continue with the final revision.", "new ordinary reply", "new specialist finding"} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("missing %q: %s", want, got)
 		}

@@ -1,20 +1,24 @@
 package riidoaiserver
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 // Native resume already restores this Agent's conversation. Only messages that
 // arrived outside that session after its previous request need to be supplied.
-func resumedFollowupPrompt(body string, thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history []AIAgentTaskThreadHistoryRecord) string {
+func resumedFollowupPrompt(body string, thread AIAgentTaskThreadRecord, req CreateAIAgentTaskThreadMessageRequest, history []AIAgentTaskThreadHistoryRecord, since time.Time) string {
+	instruction := taskMessageContextText(body, taskDocumentContextLimit)
 	var out strings.Builder
-	out.WriteString("Continue the existing conversation. The current authorized task snapshot is available through riido context get and riido work get; read it when updated task facts are needed.\n")
-	appendTaskConversationContext(&out, thread, req, resumedFollowupHistory(thread, history))
+	if !appendTaskConversationContext(&out, thread, req, resumedFollowupHistory(thread, history, since)) {
+		return instruction
+	}
 	out.WriteString("\n### New User Instruction\n" + assignmentInstructionHeading + "\n")
-	out.WriteString(taskMessageContextText(body, taskDocumentContextLimit))
-	appendFollowupExecutionPolicy(&out)
+	out.WriteString(instruction)
 	return strings.TrimSpace(out.String())
 }
 
-func resumedFollowupHistory(thread AIAgentTaskThreadRecord, history []AIAgentTaskThreadHistoryRecord) []AIAgentTaskThreadHistoryRecord {
+func resumedFollowupHistory(thread AIAgentTaskThreadRecord, history []AIAgentTaskThreadHistoryRecord, since time.Time) []AIAgentTaskThreadHistoryRecord {
 	known := map[string]bool{}
 	for _, row := range history {
 		if row.ThreadID == thread.ThreadID && row.AgentID == thread.AgentID {
@@ -36,7 +40,7 @@ func resumedFollowupHistory(thread AIAgentTaskThreadRecord, history []AIAgentTas
 		for _, message := range row.Messages {
 			// Unknown timestamps are retained; they cannot establish that a
 			// message predates this session's last request.
-			if known[message.SourceMessageID] || (!message.ObservedAt.IsZero() && message.ObservedAt.Before(thread.StartedAt)) {
+			if known[message.SourceMessageID] || (!message.ObservedAt.IsZero() && message.ObservedAt.Before(since)) {
 				continue
 			}
 			record.Messages = append(record.Messages, message)

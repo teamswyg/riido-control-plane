@@ -8,6 +8,9 @@ import (
 )
 
 func (s Server) appendCommentInvocationPrompt(ctx context.Context, principal AuthorizationResult, taskID string, req *AssignRequest) error {
+	if req.ResumeSessionID != "" {
+		return nil // The native session already has its delegation instructions.
+	}
 	agents, err := s.aiAgent.ListAIAgentTaskAssignableAgents(ctx, principal, taskID)
 	if err != nil {
 		return err

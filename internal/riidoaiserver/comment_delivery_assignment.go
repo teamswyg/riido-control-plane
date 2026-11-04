@@ -21,7 +21,7 @@ func (s Server) deliverCommentInvocationStages(ctx context.Context, principal Au
 	if err := s.appendCommentInvocationPrompt(ctx, principal, evidence.TaskID, &composed.Request); err != nil {
 		return AIAgentTaskActionResponse{}, withFailureStage("prompt", err)
 	}
-	if call := request.commentInvocation; call != nil && call.OriginAssignmentID != "" && !call.HumanFollowup {
+	if call := request.commentInvocation; call != nil && call.OriginAssignmentID != "" && !call.HumanFollowup && composed.Request.ResumeSessionID == "" {
 		composed.Request.Prompt += "\n\nYou are the recipient of this handoff. Carry out the request addressed to you in " + assignmentInstructionHeading +
 			". Earlier instructions to select a recipient were for the caller. Consult the directory only if your assigned work requires another Agent."
 	}

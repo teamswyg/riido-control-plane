@@ -5,8 +5,16 @@ The assignment remains one task; references do not authorize additional work.
 
 RIID-5891 compacts human follow-ups only after the authorized thread's native
 session has been selected for resume. The provider receives the new instruction
-and bounded conversation messages added since that Agent's previous request;
+and bounded conversation messages added since that Agent's previous execution;
 its own retained messages and the full assignment snapshot are not repeated.
+For a completed previous run, the cutoff comes from its validated assignment's
+`CreatedAt`, never
+from the conversation's original start time or a projection that omitted it.
+Failed or interrupted runs do not establish that their input was delivered;
+external messages remain eligible in that case.
+Native follow-ups omit the fixed execution policy, delegation guide and Agent
+catalog already supplied to the session. With no new external conversation
+messages, the prompt is exactly the readable new user input.
 The current authorized task snapshot remains available through `riido context get`
 and `riido work get`; the Agent reads it when the request needs updated task facts.
 Capturing that snapshot does not mark its omitted sources as read through the

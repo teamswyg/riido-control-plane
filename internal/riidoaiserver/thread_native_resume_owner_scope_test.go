@@ -8,7 +8,7 @@ func TestNativeFollowupUsesAgentOwnershipSeparatelyFromRuntimeOwnership(t *testi
 			s, _, thread, principal, req := nativeResumeScopeFixture(t)
 			thread.AgentSnapshot.OwnerPrincipalID = "user-2"
 			principal.PrincipalID, req.CreatedBy = "user-2", "user-2"
-			err := s.applyThreadNativeResume(t.Context(), principal, thread, &req, owner)
+			_, err := s.applyThreadNativeResume(t.Context(), principal, thread, &req, owner)
 			if owner == "" {
 				if err == nil || req.ResumeSessionID != "" {
 					t.Fatal("missing Agent ownership was accepted")
