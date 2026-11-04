@@ -10,6 +10,8 @@ func cliInstallationHTTPRoute(method, path string) string {
 		return ""
 	}
 	switch path {
+	case "/v1/internal/cli-installations/link-intent-evidence":
+		return path
 	case "/v1/internal/cli-installations/link-intents", "/v1/internal/cli-installations/policy", "/v1/internal/cli-installations/link-receipts", "/v1/internal/cli-installations/link-intent-retirements":
 		return path
 	}
