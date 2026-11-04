@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
-const daemonAssignmentEventsSchema = "riido-daemon-assignment-events.v1"
-const daemonAssignmentReconcileInterval = 5 * time.Second
+const (
+	daemonAssignmentEventsSchema      = "riido-daemon-assignment-events.v1"
+	daemonAssignmentReconcileInterval = 5 * time.Second
+)
 
 type daemonAssignmentEvent struct {
 	SchemaVersion           string                `json:"schema_version"`

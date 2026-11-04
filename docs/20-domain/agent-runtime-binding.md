@@ -48,6 +48,9 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 
 | Rule | Kind | Statement |
 | --- | --- | --- |
+| `device-assignment-events` | - | GET /v1/daemon/assignment-events uses a device ID and secret. Recheck the device and current bindings at each snapshot. The assignments SSE event carries binding metadata and affected agent IDs only. Existing poll owns claims and leases. |
+| `device-assignment-reconciliation` | - | On connection or reconnect, send every bound agent. Coalesce wakeups to one snapshot per second and reconcile every five seconds for missed signals or cross-instance changes. Use one queue query and one active-lease read per idle bound agent. Keepalives run every 15 seconds and streams rotate after five minutes. |
+| `device-assignment-rollout` | - | Roll out the server before the daemon. Legacy clients keep polling. The new daemon uses legacy polling only on 404/405/501 and retries other failures. Publish updates to the safe CDN paths and adopt at idle. Keep WAF relief until adoption and actual traffic are verified. |
 | `machine-device-id` | - | machine_id derives a stable physical-machine DeviceID |
 | `connected-workspaces` | - | workspace connections are unioned across enroll/snapshot/connect paths |
 | `account-connection-grants` | - | each authenticated account and workspace connection is preserved as a device grant without replacing device ownership or credentials |

@@ -8,12 +8,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"unicode"
-	"unicode/utf8"
-
-	"github.com/teamswyg/riido-contracts/hostintegration"
-
-	providercatalog "github.com/teamswyg/riido-contracts/provider/catalog"
 )
 
 type AIAgentDaemonRuntimeStore interface {
@@ -519,17 +513,7 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 			runtime.DetectionState != RuntimeDetectionStateError {
 			return nil, fmt.Errorf("runtimes[%d].detection_state is invalid", i)
 		}
-		providerVersion, err := normalizeRuntimeProviderVersion(runtime.ProviderVersion)
-		if err != nil {
-			// Version is optional display metadata. Legacy probes may send warnings
-			// or control characters; never reject the device heartbeat for that.
-			providerVersion = ""
-			if runtime.HealthStatus == "" || runtime.HealthStatus == hostintegration.ProviderHealthHealthy {
-				runtime.HealthStatus = hostintegration.ProviderHealthUnknown
-				runtime.DiagnosticCode = hostintegration.ProviderDiagnosticVersionProbeFailed
-				runtime.DiagnosticSummary = ""
-			}
-		}
+		providerVersion := normalizeRuntimeSnapshotVersion(&runtime)
 		healthStatus, diagnosticCode, diagnosticSummary, err := normalizeRuntimeProviderHealth(runtime)
 		if err != nil {
 			return nil, fmt.Errorf("runtimes[%d].provider_health: %w", i, err)
@@ -554,89 +538,4 @@ func normalizeRuntimeSnapshotRecords(deviceID, ownerPrincipalID, daemonID, daemo
 		})
 	}
 	return out, nil
-}
-
-func normalizeRuntimeProviderVersion(value string) (string, error) {
-	value = strings.TrimSpace(value)
-	if value == "" {
-		return "", nil
-	}
-	if utf8.RuneCountInString(value) > 128 {
-		return "", errors.New("must be 128 characters or fewer")
-	}
-	for _, r := range value {
-		if unicode.IsControl(r) {
-			return "", errors.New("must not contain control characters")
-		}
-	}
-	return value, nil
-}
-
-func normalizeRuntimeKind(kind RuntimeKind) RuntimeKind {
-	switch RuntimeKind(strings.TrimSpace(string(kind))) {
-	case RuntimeKindCodex:
-		return RuntimeKindCodex
-	case RuntimeKindClaudeCode, RuntimeKind("claude"):
-		return RuntimeKindClaudeCode
-	case RuntimeKindCursor:
-		return RuntimeKindCursor
-	case RuntimeKindOpenClaw:
-		return RuntimeKindOpenClaw
-	default:
-		return ""
-	}
-}
-
-func normalizeRuntimeModels(kind RuntimeKind, models []RuntimeModelRecord) []RuntimeModelRecord {
-	out := make([]RuntimeModelRecord, 0, len(models))
-	seen := map[string]struct{}{}
-	for _, model := range models {
-		model.ModelID = strings.TrimSpace(model.ModelID)
-		model.Label = strings.TrimSpace(model.Label)
-		if model.ModelID == "" {
-			continue
-		}
-		if _, ok := seen[model.ModelID]; ok {
-			continue
-		}
-		seen[model.ModelID] = struct{}{}
-		if model.Label == "" {
-			model.Label = model.ModelID
-		}
-		out = append(out, model)
-	}
-	if len(out) == 0 {
-		return []RuntimeModelRecord{defaultRuntimeModel(kind)}
-	}
-	return out
-}
-
-func defaultRuntimeModel(kind RuntimeKind) RuntimeModelRecord {
-	switch kind {
-	case RuntimeKindCodex:
-		return RuntimeModelRecord{ModelID: providercatalog.DefaultCodexModelID, Label: "Codex 기본 모델", IsDefault: true}
-	case RuntimeKindClaudeCode:
-		return RuntimeModelRecord{ModelID: providercatalog.DefaultClaudeModelID, Label: "Claude Code 기본 모델", IsDefault: true}
-	case RuntimeKindCursor:
-		return RuntimeModelRecord{ModelID: providercatalog.DefaultCursorModelID, Label: "Cursor Auto", IsDefault: true}
-	case RuntimeKindOpenClaw:
-		return RuntimeModelRecord{ModelID: providercatalog.DefaultOpenClawModelID, Label: "OpenClaw 기본 모델", IsDefault: true}
-	default:
-		return RuntimeModelRecord{ModelID: providercatalog.DefaultRuntimeModelID, Label: "기본 모델", IsDefault: true}
-	}
-}
-
-func runtimeProviderForAIAgentRuntime(kind RuntimeKind) string {
-	switch normalizeRuntimeKind(kind) {
-	case RuntimeKindCodex:
-		return "codex"
-	case RuntimeKindClaudeCode:
-		return "claude"
-	case RuntimeKindCursor:
-		return "cursor"
-	case RuntimeKindOpenClaw:
-		return "openclaw"
-	default:
-		return ""
-	}
 }

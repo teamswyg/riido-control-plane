@@ -3,10 +3,8 @@ package riidoaiserver
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 )
@@ -33,7 +31,7 @@ func TestDaemonAssignmentEventsScopeClaimAndReconnect(t *testing.T) {
 		return resp, cancel
 	}
 	rejected, cancel := connect("wrong-secret")
-	if rejected.StatusCode != 401 {
+	if rejected.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("invalid secret status=%d", rejected.StatusCode)
 	}
 	rejected.Body.Close()
@@ -41,7 +39,7 @@ func TestDaemonAssignmentEventsScopeClaimAndReconnect(t *testing.T) {
 	resp, cancel := connect(f.enrollment.DeviceSecret)
 	defer cancel()
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("status=%d", resp.StatusCode)
 	}
 	scanner := bufio.NewScanner(resp.Body)
@@ -70,36 +68,5 @@ func TestDaemonAssignmentEventsScopeClaimAndReconnect(t *testing.T) {
 	poll, err := assignments.PollAgent(context.Background(), a.AgentID, PollRequest{DaemonID: first.Bindings[0].DaemonID, DeviceID: f.enrollment.DeviceID, RuntimeID: f.codexRuntimeID})
 	if err != nil || poll.Action != PollStart {
 		t.Fatalf("notification changed ownership: %+v %v", poll, err)
-	}
-}
-
-func readDaemonNotice(t *testing.T, scanner *bufio.Scanner) daemonAssignmentEvent {
-	t.Helper()
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "data: ") {
-			var event daemonAssignmentEvent
-			if err := json.Unmarshal([]byte(strings.TrimPrefix(line, "data: ")), &event); err != nil {
-				t.Fatal(err)
-			}
-			return event
-		}
-	}
-	t.Fatalf("stream ended: %v", scanner.Err())
-	return daemonAssignmentEvent{}
-}
-
-func TestDaemonAssignmentNotificationsIgnoreOutputAndNoticeBindingChanges(t *testing.T) {
-	before := daemonAssignmentEvent{Bindings: []AgentRuntimeBinding{{AgentID: "a", RuntimeID: "old"}}}
-	after := daemonAssignmentEvent{Bindings: []AgentRuntimeBinding{{AgentID: "a", RuntimeID: "new"}, {AgentID: "b", RuntimeID: "new"}}}
-	changed := changedDaemonAssignmentAgents(before, after, map[string]string{"a": "same"}, map[string]string{"a": "same", "b": ""})
-	if len(changed) != 2 {
-		t.Fatalf("binding changes lost: %v", changed)
-	}
-	a := Assignment{ID: "a", State: AssignmentRunning, UpdatedAt: time.Now()}
-	b := a
-	b.UpdatedAt = b.UpdatedAt.Add(time.Second)
-	if assignmentSignalPart(a) != assignmentSignalPart(b) {
-		t.Fatal("heartbeat produced a wakeup")
 	}
 }

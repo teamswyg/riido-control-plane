@@ -30,7 +30,7 @@ func (s *DevelopmentAIAgentClientStore) EnrollDeviceCredential(ctx context.Conte
 	if err != nil {
 		return EnrollDeviceResponse{}, err
 	}
-	// A persisted device selection remains authoritative across local machine-ID drift.
+	// Persisted device selection remains authoritative across local machine-ID drift.
 	if existing, ok := s.deviceCredentials[deviceID]; ok && enrollment.deviceID != "" {
 		enrollment.machineID = existing.machineID
 	}
