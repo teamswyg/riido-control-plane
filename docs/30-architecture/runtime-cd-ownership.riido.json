@@ -414,14 +414,6 @@
         "reason": "Runtime configuration for authenticated monolith comment delivery; operator-owned and disabled until coordinated rollout."
       },
       {
-        "name": "RIIDO_AI_SERVER_AGENT_COMMENT_COUNT",
-        "reason": "Runtime configuration for monolith Agent comment counts (RIID-5842); operator-owned and disabled until coordinated rollout."
-      },
-      {
-        "name": "RIIDO_AI_SERVER_AGENT_COMMENT_COUNT_BACKFILL",
-        "reason": "Runtime configuration for monolith Agent comment counts (RIID-5842); operator-owned and disabled until coordinated rollout."
-      },
-      {
         "name": "RIIDO_AI_SERVER_AGENT_SOURCE_STATE_URL",
         "reason": "Runtime configuration for the monolith Agent source state lookup; operator-owned and disabled until coordinated rollout."
       },
