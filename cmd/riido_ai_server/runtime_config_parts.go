@@ -58,14 +58,6 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 	if err := commentDelivery.Validate(); err != nil {
 		return runtimeConfig{}, err
 	}
-	agentCommentCount, err := envOptionalBool(envAgentCommentCount)
-	if err != nil {
-		return runtimeConfig{}, err
-	}
-	agentCommentBackfill, err := envOptionalBool(envAgentCommentBackfill)
-	if err != nil {
-		return runtimeConfig{}, err
-	}
 	coverageEnrollment, err := executionCoverageEnrollmentFromEnv(parts.aiAgentClientStore, assignmentOperationStore)
 	if err != nil {
 		return runtimeConfig{}, err
@@ -104,12 +96,5 @@ func configFromEnvParts(timing runtimeTimingConfig, parts runtimeConfigParts) (r
 		AssignmentContext:        assignmentContext,
 		AssignmentReadScope:      assignmentReadScope,
 		TaskContextReader:        taskContextReader,
-		AgentCommentCount:        agentCommentCount,
-		AgentCommentBackfill:     agentCommentBackfill,
 	})
 }
-
-const (
-	envAgentCommentCount    = "RIIDO_AI_SERVER_AGENT_COMMENT_COUNT"
-	envAgentCommentBackfill = "RIIDO_AI_SERVER_AGENT_COMMENT_COUNT_BACKFILL"
-)
