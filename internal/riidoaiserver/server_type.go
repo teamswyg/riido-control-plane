@@ -42,6 +42,9 @@ type ServerConfig struct {
 	// AgentMentionPrecheck, when set (RIID-5892), adds mention-policy reasons
 	// to the live agent directory; the mention-time check stays authoritative.
 	AgentMentionPrecheck AgentMentionPrecheck
+	// AgentCommentBackfill (RIID-5842) pushes every task's visible Agent
+	// message count to the monolith once in the background after startup.
+	AgentCommentBackfill bool
 }
 
 type Server struct {

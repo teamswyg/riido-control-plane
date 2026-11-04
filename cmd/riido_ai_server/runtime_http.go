@@ -42,5 +42,6 @@ func newRuntimeHandler(config runtimeConfig, store *riidoaiserver.Store, aiAgent
 		LongPollTick:             config.LongPollTick,
 		AssignmentContext:        config.AssignmentContext,
 		AssignmentReadScope:      config.AssignmentReadScope,
+		AgentCommentBackfill:     config.AgentCommentBackfill,
 	}).Handler()
 }
