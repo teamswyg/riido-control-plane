@@ -30,8 +30,8 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 | Owned manifests with owner evidence | 9 |
 | Executable manifest inventory | 63 |
 | Tracked executable manifests | 63 |
-| Registered manual docs | 0 |
-| Scanned docs | 45 |
+| Registered manual docs | 1 |
+| Scanned docs | 46 |
 
 ## Manifest Inventory
 
@@ -69,19 +69,21 @@ Executable SSOT: [`executable-knowledge.riido.json`](executable-knowledge.riido.
 
 ## Registered Manual Surfaces
 
-None.
+| Group | Owner | Next artifact | Matched docs |
+| --- | --- | --- | ---: |
+| `device-assignment-notification-rollout` | control-plane runtime | docs/20-domain/agent-runtime-binding.riido.json | 1 |
 
 ## Manual Hotspots
 
 | Directory | Matched docs |
 | --- | ---: |
-| None | 0 |
+| `docs/30-architecture` | 1 |
 
 ## Manual Samples
 
 | Group | Path |
 | --- | --- |
-| None | - |
+| `device-assignment-notification-rollout` | `docs/30-architecture/device-assignment-notifications.md` |
 
 ## Assertions
 

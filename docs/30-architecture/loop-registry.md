@@ -254,7 +254,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `candidate_decision_next_artifact_must_be_required` | `closed_loop_candidate_decision` | `16` | `6` | `52ab2e7de2b5` |
 | `candidate_decision_evidence_must_expose_next_command` | `closed_loop_candidate_decision` | `31` | `17` | `fea349643f91` |
 | `open_decision_questions_must_bind_owner_next_artifact_and_reader` | `open_decision_queue` | `9` | `2` | `8f8769c1442e` |
-| `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `114` | `46` | `febadf67c734` |
+| `operational_readiness_checks_must_bind_release_items_to_evidence` | `operational_readiness_release_harness` | `114` | `46` | `c500d258cdb7` |
 | `container_image_contract_must_bind_runtime_shape` | `closed_loop_candidate` | `27` | `7` | `210f5f1ec0c4` |
 | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` | `closed_loop_candidate` | `32` | `12` | `b28b570be248` |
 | `server_route_handlers_must_stay_semantically_split` | `closed_loop_candidate` | `64` | `29` | `53eb06747ee9` |
@@ -267,7 +267,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `health_ready_command_must_preserve_public_runtime_probe` | `closed_loop_candidate` | `20` | `4` | `f0a423909a95` |
 | `runtime_deployment_boundary_must_preserve_public_private_ownership` | `closed_loop_candidate` | `36` | `4` | `7d3b9a50a5ee` |
 | `config_reference_must_preserve_env_manifest_parity` | `closed_loop_candidate` | `25` | `14` | `c5f39eec2a2b` |
-| `agent_runtime_binding_must_preserve_identity_and_visibility_contract` | `closed_loop_candidate` | `20` | `4` | `a08833874c0d` |
+| `agent_runtime_binding_must_preserve_identity_and_visibility_contract` | `closed_loop_candidate` | `20` | `4` | `6d7ce6c8a819` |
 | `assignment_operation_journal_must_preserve_replay_and_claim_ports` | `closed_loop_candidate` | `126` | `51` | `027dab10c713` |
 | `cloudwatch_emf_shape_must_preserve_metric_scope_evidence` | `closed_loop_candidate` | `24` | `9` | `6b3a808d43de` |
 | `saas_control_plane_boundaries_must_remain_executable` | `closed_loop_candidate` | `18` | `4` | `ebbabad4f3db` |
@@ -283,7 +283,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `integration_matrix_must_preserve_public_private_boundary` | `closed_loop_candidate` | `21` | `2` | `c57d95143e4e` |
 | `context_map_must_guard_public_boundaries` | `loop_closure_audit` | `37` | `15` | `f027ece5b99d` |
 | `api_client_delivery_must_preserve_generated_handoff_boundary` | `closed_loop_candidate` | `56` | `10` | `69c2e824c9f5` |
-| `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `40f0eea30ffa` |
+| `react_query_generator_must_preserve_generated_client_surface` | `closed_loop_candidate` | `104` | `3` | `bf2f4ce347ad` |
 | `device_client_status_must_distinguish_install_update_and_ready` | `closed_loop_candidate` | `6` | `5` | `5e14e113b577` |
 | `onboarding_completion_must_be_durable_and_idempotent` | `ai_thread_history` | `51` | `25` | `9abee9cf85ab` |
 | `desktop_presence_must_observe_committed_account_connections` | `closed_loop_candidate` | `47` | `22` | `b858e9764bdc` |

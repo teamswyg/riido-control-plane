@@ -4900,7 +4900,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "febadf67c7340c149f4e7c7333bbeda13db33af1ba8613b4e2bfcf7f909fbb44"
+      "semantic_hash": "c500d258cdb741786b0f0f7a6788357567d60942794b6a5abae1101e6e5ebdef"
     },
     {
       "id": "container_image_contract_must_bind_runtime_shape",
@@ -5958,7 +5958,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "a08833874c0d4d795c899f0ecd5063e60bce5818a0e9838849ec1ef710e6f392"
+      "semantic_hash": "6d7ce6c8a8198b13927580a57bd6bb2dd0093d58829bdd2aa40f3376e28a7390"
     },
     {
       "id": "assignment_operation_journal_must_preserve_replay_and_claim_ports",
@@ -7266,7 +7266,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "40f0eea30ffaa1cde38fc93216dc15fe7a96496eceaf1eb5629f43c5e23865c6"
+      "semantic_hash": "bf2f4ce347adf7ddf454a555462e1a45fc29bdbcd144d218b582baa8014731d1"
     },
     {
       "id": "device_client_status_must_distinguish_install_update_and_ready",
