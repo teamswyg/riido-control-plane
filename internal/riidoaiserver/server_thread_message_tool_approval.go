@@ -27,6 +27,13 @@ func (s Server) createThreadMessageToolApprovalDecision(
 	if err != nil {
 		return AIAgentTaskActionResponse{}, true, err
 	}
+	mentions, err := commentMentionIDs(req.Body)
+	if err != nil {
+		return AIAgentTaskActionResponse{}, true, err
+	}
+	if len(mentions) > 0 && (len(mentions) != 1 || mentions[0] != thread.AgentID) {
+		return AIAgentTaskActionResponse{}, false, nil
+	}
 	approval, ok, err := pendingThreadToolApproval(ctx, store, taskID, thread)
 	if err != nil {
 		return AIAgentTaskActionResponse{}, true, err

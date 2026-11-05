@@ -28,6 +28,40 @@ export interface AIAgentExecutionContext {
 }
 
 /**
+ * 한 message에 같은 emoji로 남은 reaction 묶음입니다. 사람과 AI Agent reaction을 함께 셉니다.
+ */
+export interface AIAgentMessageReaction {
+  /**
+   * reaction을 남긴 순서대로 정렬합니다.
+   */
+  actors: AIAgentMessageReactionActor[];
+  /**
+   * actors 수와 같습니다.
+   */
+  count: number;
+  /**
+   * monolith 댓글 reaction과 같은 정규화 값입니다. 소문자 unified codepoint를 '-'로 이은 문자열이며 (예: 👀 1f440, ✅ 2705, ❌ 274c), 서버는 monolith reaction emoji catalog와 같은 규칙으로 정규화합니다.
+   */
+  emoji: string;
+}
+
+/**
+ * reaction 하나를 남긴 사람 멤버 또는 AI Agent입니다.
+ */
+export interface AIAgentMessageReactionActor {
+  /**
+   * kind가 member이면 Riido user id, agent이면 agent_id입니다.
+   */
+  id: string;
+  kind: AIAgentMessageReactionActorKind;
+}
+
+/**
+ * task thread message reaction을 남긴 주체 종류입니다. 화면은 두 종류를 같은 reaction chip에 함께 셉니다.
+ */
+export type AIAgentMessageReactionActorKind = "member" | "agent";
+
+/**
  * 온보딩 완료 문구의 언어입니다. 생략하면 ko를 사용합니다.
  */
 export type AIAgentOnboardingLocale = "ko" | "en";
@@ -209,6 +243,10 @@ export interface AIAgentTaskThreadHistoryMessage {
   display_message?: string;
   message_id: string;
   observed_at?: string;
+  /**
+   * role이 user 또는 agent인 message에 남은 reaction 목록입니다. reaction이 없으면 생략하고, progress message에는 생기지 않습니다.
+   */
+  reactions?: AIAgentMessageReaction[];
   result_message?: string;
   role: AIAgentTaskThreadMessageRole;
   run_id?: string;
@@ -253,6 +291,15 @@ export interface AIAgentTaskThreadHistoryRecord {
   task_id: string;
   thread_id: string;
   work_status: AgentWorkStatus;
+}
+
+/**
+ * reaction 변경 뒤 대상 message의 전체 reaction 목록입니다. client는 이 응답으로 해당 message의 reaction chip을 바로 갱신합니다.
+ */
+export interface AIAgentTaskThreadMessageReactionsResponse {
+  message_id: string;
+  reactions: AIAgentMessageReaction[];
+  thread_id: string;
 }
 
 /**
@@ -320,6 +367,16 @@ export interface AIAgentTaskThreadStreamTarget {
 }
 
 /**
+ * 사람 멤버가 task thread message에 emoji reaction을 남기는 요청입니다. AI Agent reaction은 이 요청으로 만들 수 없습니다.
+ */
+export interface AddAIAgentTaskThreadMessageReactionRequest {
+  /**
+   * monolith 댓글 reaction과 같은 정규화 값입니다. 소문자 unified codepoint를 '-'로 이은 문자열이며 (예: 👀 1f440, ✅ 2705, ❌ 274c), 서버는 monolith reaction emoji catalog와 같은 규칙으로 정규화합니다.
+   */
+  emoji: string;
+}
+
+/**
  * agent 삭제와 runtime lifecycle에 의해 변경되는 task assignment 상태입니다.
  */
 export type AgentAssignmentState = "queued" | "running" | "stopping" | "stopped" | "completed" | "failed" | "unassigned";
@@ -369,6 +426,7 @@ export interface AgentClientRecord {
    */
   profile_color?: AgentProfileColor;
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
   /**
@@ -419,6 +477,7 @@ export interface AgentClientRecordV2 {
    */
   profile_color: AgentProfileColor;
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   runtime_id?: string;
   runtime_kind?: RuntimeKind;
   /**
@@ -638,6 +697,15 @@ export interface AgentProfileThumbnailUploadResponse {
 }
 
 /**
+ * Local reference paths bound to one device and runtime. Does not change cwd.
+ */
+export interface AgentReferenceFolders {
+  device_id: string;
+  paths: string[];
+  runtime_id: string;
+}
+
+/**
  * task thread에 기록되는 AI Agent 상태 update 종류입니다. 기존 comment 필드명은 호환명입니다.
  */
 export type AgentTaskCommentKind = "queued_by_busy_agent" | "assignment_started" | "stopped_by_agent_deleted" | "stopped_by_user_request" | "runtime_progress" | "task_completed" | "task_failed";
@@ -653,7 +721,7 @@ export interface AgentTaskNotificationEvent {
   created_by: string;
   event_id: string;
   event_type: "agent_task_notification";
-  notification_type: "result_ready" | "answer_required" | "approval_required" | "failed";
+  notification_type: "started" | "result_ready" | "answer_required" | "approval_required" | "failed";
   occurred_at: string;
   recipient_principal_id: string;
   run_id: string;
@@ -883,6 +951,7 @@ export interface CreateAgentConfigurationRequest {
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   /**
    * agent가 사용할 런타임 dropdown 선택값입니다.
    */
@@ -1268,6 +1337,7 @@ export interface UpdateAgentConfigurationRequest {
    * agent 프로필 사진 URL입니다. createAIAgentProfileThumbnailUpload 응답의 profile_thumbnail_url 값을 저장합니다.
    */
   profile_thumbnail_url?: string;
+  reference_folders?: AgentReferenceFolders;
   /**
    * agent가 사용할 런타임 dropdown 선택값입니다.
    */
@@ -4252,6 +4322,104 @@ export function createAIAgentTaskThreadMessageV2MutationOptions(config: RiidoCli
 }
 
 /**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface AddAIAgentTaskThreadMessageReactionV2PathParams {
+  workspace_id: string;
+  task_id: string;
+  thread_id: string;
+  message_id: string;
+}
+
+/**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ */
+export async function addAIAgentTaskThreadMessageReactionV2(config: RiidoClientConfig, params: AddAIAgentTaskThreadMessageReactionV2PathParams, body: AddAIAgentTaskThreadMessageReactionRequest, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadMessageReactionsResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages/${params.message_id}/reactions`;
+  return riidoRequest<AIAgentTaskThreadMessageReactionsResponse>(config, path, { method: 'POST', signal: options.signal, headers: riidoViewerHeaders(options), body: JSON.stringify(body) });
+}
+
+/**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface AddAIAgentTaskThreadMessageReactionV2MutationVariables {
+  params: AddAIAgentTaskThreadMessageReactionV2PathParams;
+  body: AddAIAgentTaskThreadMessageReactionRequest;
+  options?: RiidoRequestOptions;
+}
+
+/**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function addAIAgentTaskThreadMessageReactionV2MutationKey(): readonly unknown[] {
+  return ["addAIAgentTaskThreadMessageReactionV2"] as const;
+}
+
+/**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function addAIAgentTaskThreadMessageReactionV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, AddAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: addAIAgentTaskThreadMessageReactionV2MutationKey(),
+    mutationFn: (variables: AddAIAgentTaskThreadMessageReactionV2MutationVariables) => addAIAgentTaskThreadMessageReactionV2(config, variables.params, variables.body, variables.options ?? {}),
+  };
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ * 경로 파라미터입니다.
+ */
+export interface DeleteAIAgentTaskThreadMessageReactionV2PathParams {
+  workspace_id: string;
+  task_id: string;
+  thread_id: string;
+  message_id: string;
+  emoji: string;
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ */
+export async function deleteAIAgentTaskThreadMessageReactionV2(config: RiidoClientConfig, params: DeleteAIAgentTaskThreadMessageReactionV2PathParams, options: RiidoRequestOptions = {}): Promise<AIAgentTaskThreadMessageReactionsResponse> {
+  const path = `/v2/client/workspaces/${params.workspace_id}/ai-agent/tasks/${params.task_id}/threads/${params.thread_id}/messages/${params.message_id}/reactions/${params.emoji}`;
+  return riidoRequest<AIAgentTaskThreadMessageReactionsResponse>(config, path, { method: 'DELETE', signal: options.signal, headers: riidoViewerHeaders(options) });
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ * mutation 함수에 전달하는 변수입니다.
+ */
+export interface DeleteAIAgentTaskThreadMessageReactionV2MutationVariables {
+  params: DeleteAIAgentTaskThreadMessageReactionV2PathParams;
+  options?: RiidoRequestOptions;
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ * 이 mutation을 구분하는 React Query mutation key입니다.
+ */
+export function deleteAIAgentTaskThreadMessageReactionV2MutationKey(): readonly unknown[] {
+  return ["deleteAIAgentTaskThreadMessageReactionV2"] as const;
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ * useMutation에 전달할 수 있는 옵션입니다.
+ */
+export function deleteAIAgentTaskThreadMessageReactionV2MutationOptions(config: RiidoClientConfig, options: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, DeleteAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) {
+  return {
+    ...options,
+    mutationKey: deleteAIAgentTaskThreadMessageReactionV2MutationKey(),
+    mutationFn: (variables: DeleteAIAgentTaskThreadMessageReactionV2MutationVariables) => deleteAIAgentTaskThreadMessageReactionV2(config, variables.params, variables.options ?? {}),
+  };
+}
+
+/**
  * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
  * 경로 파라미터입니다.
  */
@@ -7121,6 +7289,84 @@ export interface CreateAIAgentTaskThreadMessageV2Endpoint {
 }
 
 /**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.add`
+ * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.add`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.add`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface AddAIAgentTaskThreadMessageReactionV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: AddAIAgentTaskThreadMessageReactionV2PathParams, body: AddAIAgentTaskThreadMessageReactionRequest, options?: RiidoRequestOptions) => Promise<AIAgentTaskThreadMessageReactionsResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, AddAIAgentTaskThreadMessageReactionV2MutationVariables>) => ReturnType<typeof addAIAgentTaskThreadMessageReactionV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, AddAIAgentTaskThreadMessageReactionV2MutationVariables>) => ReturnType<typeof addAIAgentTaskThreadMessageReactionV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v3.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly v3AiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.delete`
+ * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.delete`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.delete`
+ * 자동 무효화는 하지 않습니다. 화면 정책에 맞춰 invalidates helper를 명시적으로 호출합니다.
+ */
+export interface DeleteAIAgentTaskThreadMessageReactionV2Endpoint {
+  /**
+   * HTTP 요청을 직접 실행합니다.
+   */
+  readonly request: (params: DeleteAIAgentTaskThreadMessageReactionV2PathParams, options?: RiidoRequestOptions) => Promise<AIAgentTaskThreadMessageReactionsResponse>;
+  /**
+   * 이 mutation을 구분하는 key입니다.
+   */
+  readonly mutationKey: () => readonly unknown[];
+  /**
+   * useMutation에 전달할 수 있는 mutation option입니다.
+   */
+  readonly mutation: (options?: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, DeleteAIAgentTaskThreadMessageReactionV2MutationVariables>) => ReturnType<typeof deleteAIAgentTaskThreadMessageReactionV2MutationOptions>;
+  /**
+   * mutation과 동일합니다. React Query API에 명시적으로 넘길 때 사용합니다.
+   */
+  readonly mutationOptions: (options?: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, DeleteAIAgentTaskThreadMessageReactionV2MutationVariables>) => ReturnType<typeof deleteAIAgentTaskThreadMessageReactionV2MutationOptions>;
+  /**
+   * 이 command 이후 client가 선택적으로 무효화할 수 있는 cache helper입니다.
+   */
+  readonly invalidates: {
+    /**
+     * `v3.aiAgent.tasks.threads` cache tag를 무효화합니다.
+     */
+    readonly v3AiAgentTasksThreads: (queryClient: QueryClient) => Promise<void>;
+    /**
+     * 선언된 모든 cache tag를 한 번에 무효화합니다.
+     */
+    readonly all: (queryClient: QueryClient) => Promise<void[]>;
+  };
+}
+
+/**
  * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
  * 계약 generated path: `v3.aiAgent.tasks.threads`
  * 검색용 generated 경로: `aiAgent.tasks.threads`
@@ -7795,6 +8041,28 @@ export interface RiidoV2AIAgentTasksOnboardingCompletionNamespace {
 }
 
 /**
+ * v2.aiAgent.tasks.threadMessages.reactions namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksThreadMessagesReactionsNamespace {
+  /**
+   * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.add`
+   * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.add`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.add`
+   * invalidates: `v3.aiAgent.tasks.threads`
+   */
+  readonly add: AddAIAgentTaskThreadMessageReactionV2Endpoint;
+  /**
+   * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.delete`
+   * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.delete`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.delete`
+   * invalidates: `v3.aiAgent.tasks.threads`
+   */
+  readonly delete: DeleteAIAgentTaskThreadMessageReactionV2Endpoint;
+}
+
+/**
  * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
  */
 export interface RiidoV2AIAgentTasksThreadMessagesNamespace {
@@ -7806,6 +8074,10 @@ export interface RiidoV2AIAgentTasksThreadMessagesNamespace {
    * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly create: CreateAIAgentTaskThreadMessageV2Endpoint;
+  /**
+   * v2.aiAgent.tasks.threadMessages.reactions namespace입니다.
+   */
+  readonly reactions: RiidoV2AIAgentTasksThreadMessagesReactionsNamespace;
 }
 
 /**
@@ -8728,6 +9000,28 @@ export function createRiidoControlPlaneClient(config: RiidoClientConfig): RiidoC
                 aiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }),
                 aiAgentTasksAssignedAgentProfiles: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() }),
                 all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: getAIAgentClientBootstrapV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskAssignableAgentsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadsV2QueryKeyRoot() }), queryClient.invalidateQueries({ queryKey: listWorkspaceAssignedAgentProfilesV2QueryKeyRoot() })]),
+              },
+            },
+            reactions: {
+              add: {
+                request: (params: AddAIAgentTaskThreadMessageReactionV2PathParams, body: AddAIAgentTaskThreadMessageReactionRequest, options?: RiidoRequestOptions) => addAIAgentTaskThreadMessageReactionV2(config, params, body, options),
+                mutationKey: addAIAgentTaskThreadMessageReactionV2MutationKey,
+                mutation: (options: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, AddAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) => addAIAgentTaskThreadMessageReactionV2MutationOptions(config, options),
+                mutationOptions: (options: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, AddAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) => addAIAgentTaskThreadMessageReactionV2MutationOptions(config, options),
+                invalidates: {
+                  v3AiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() }),
+                  all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() })]),
+                },
+              },
+              delete: {
+                request: (params: DeleteAIAgentTaskThreadMessageReactionV2PathParams, options?: RiidoRequestOptions) => deleteAIAgentTaskThreadMessageReactionV2(config, params, options),
+                mutationKey: deleteAIAgentTaskThreadMessageReactionV2MutationKey,
+                mutation: (options: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, DeleteAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) => deleteAIAgentTaskThreadMessageReactionV2MutationOptions(config, options),
+                mutationOptions: (options: RiidoMutationOptions<AIAgentTaskThreadMessageReactionsResponse, DeleteAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) => deleteAIAgentTaskThreadMessageReactionV2MutationOptions(config, options),
+                invalidates: {
+                  v3AiAgentTasksThreads: (queryClient: QueryClient) => queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() }),
+                  all: (queryClient: QueryClient) => Promise.all([queryClient.invalidateQueries({ queryKey: listAIAgentTaskThreadHistoryV3QueryKeyRoot() })]),
+                },
               },
             },
           },

@@ -25,6 +25,15 @@ func (s *DevelopmentAIAgentClientStore) UpdateAIAgentConfiguration(ctx context.C
 	if err := s.applyAgentRuntimePatchLocked(&agent, principal, previousRuntimeID, req); err != nil {
 		return AgentClientRecordResponse{}, err
 	}
+	if req.ReferenceFolders != nil {
+		folders, err := s.normalizeReferenceFoldersLocked(req.ReferenceFolders, agent.RuntimeID)
+		if err != nil {
+			return AgentClientRecordResponse{}, err
+		}
+		agent.ReferenceFolders = folders
+	} else if agent.ReferenceFolders != nil && agent.ReferenceFolders.RuntimeID != agent.RuntimeID {
+		agent.ReferenceFolders = nil
+	}
 	agent.Editability = editabilityForAssignedTasks(agent.AssignedTaskCount)
 	agent.UpdatedAt = time.Now().UTC()
 	s.agents[agent.AgentID] = agent

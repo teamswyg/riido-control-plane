@@ -42,7 +42,7 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 		req.ComponentID, req.BearerToken = componentID, bearerToken
 		out, err := c.getTaskReadScope(requestCtx, req, location.Team.ID)
 		if err != nil {
-			return AIAgentTaskContext{}, latestTaskDocumentError{taskReadScopeError{err}}
+			return AIAgentTaskContext{}, latestTaskDocumentError{taskReadScopeError{withFailureStage("read_scope", err)}}
 		}
 		return out, nil
 	}

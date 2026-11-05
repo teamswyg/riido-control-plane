@@ -19,7 +19,7 @@ func TestThreadSnapshotRequestRetryKeepsFirstExecutionAndHistory(t *testing.T) {
 		t.Fatal("retry created another execution/thread")
 	}
 	projection, found, err := f.store.LoadAssignmentProjection(t.Context(), next.AssignmentID)
-	if err != nil || !found || !strings.Contains(projection.Assignment.Prompt, "first snapshot") || strings.Contains(projection.Assignment.Prompt, "changed snapshot") || projection.Assignment.ResumeSessionID != "native-http-session" {
+	if err != nil || !found || !strings.Contains(projection.Assignment.Prompt, "First followup") || strings.Contains(projection.Assignment.Prompt, "first snapshot") || strings.Contains(projection.Assignment.Prompt, "changed snapshot") || projection.Assignment.ResumeSessionID != "native-http-session" {
 		t.Fatalf("first snapshot/native resume lost: %+v err=%v", projection, err)
 	}
 	history, err := f.client.ListAIAgentTaskThreadHistory(t.Context(), AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}, "task-new")

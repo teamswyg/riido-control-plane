@@ -42,6 +42,9 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 	if err != nil {
 		return composedAssignRequest{}, err
 	}
+	if selected.ReferenceFolders != nil && !selected.ReferenceFolders.Matches(binding.DeviceID, binding.RuntimeID) {
+		return composedAssignRequest{}, errors.New("reference_folders no longer matches the agent runtime; select the folders again")
+	}
 	assignmentReq := AssignRequest{
 		RecoveryPolicy: policy,
 
@@ -52,6 +55,7 @@ func (s Server) assignRequestFromAIAgentClientTaskResult(
 		RuntimeProvider:          binding.RuntimeProvider,
 		ModelID:                  selected.ModelID,
 		AgentInstruction:         augmentAgentInstruction(selected.Instruction),
+		ReferenceFolders:         selected.ReferenceFolders.Clone(),
 		AllowExperimentalRuntime: runtime.RequiresExperimentalOptIn,
 		CreatedBy:                strings.TrimSpace(principal.PrincipalID),
 	}

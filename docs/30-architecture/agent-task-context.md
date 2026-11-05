@@ -3,6 +3,26 @@
 RIID-5818 owns readable, bounded task context and conversation continuity.
 The assignment remains one task; references do not authorize additional work.
 
+RIID-5891 compacts human follow-ups only after the authorized thread's native
+session has been selected for resume. The provider receives the new instruction
+and bounded conversation messages added since that Agent's previous execution;
+its own retained messages and the full assignment snapshot are not repeated.
+For a completed previous run, the cutoff comes from its validated assignment's
+`CreatedAt`, never
+from the conversation's original start time or a projection that omitted it.
+Failed or interrupted runs do not establish that their input was delivered;
+external messages remain eligible in that case.
+Native follow-ups omit the fixed execution policy, delegation guide and Agent
+catalog already supplied to the session. With no new external conversation
+messages, the prompt is exactly the readable new user input.
+The current authorized task snapshot remains available through `riido context get`
+and `riido work get`; the Agent reads it when the request needs updated task facts.
+Capturing that snapshot does not mark its omitted sources as read through the
+prompt. Initial requests, new Agent sessions and legacy requests without a native
+session retain the full context. Resume failures remain explicit failures and do
+not silently start an empty replacement session. Provider instruction placement,
+lease credentials and approval policies keep their existing paths.
+
 RIID-5972 records snapshot conversation provenance only from authenticated
 server-selected threads and successful publication responses. Initial task
 assignments seed their own conversation; follow-ups retain the selected parent
@@ -48,6 +68,20 @@ permissions. CP preserves that evidence without requesting a user credential
 or making anonymous reads. Only older evidence with no `extended` field receives
 the trigger-only fallback. The original comment remains the execution trigger;
 normal snapshot capture, read audit and current viewer filtering still apply.
+
+A human follow-up in a verified comment conversation keeps its server-owned
+comment evidence binding. Only a new execution resets the automatic call chain
+(depth 0, budget 8, ancestors containing the selected Agent); active-run messages
+and tool approvals keep their existing chain. The immutable evidence Agent is
+stored separately from the new chain, with legacy ancestry as a read fallback.
+Older followups recover missing bindings only through persisted same-task/root
+parent edges. Evidence is re-read before publication and again at delegation.
+Another requester's evidence is never transferred: ordinary conversation can
+continue under the current requester, but automatic delegation remains unavailable
+until that requester starts a newly verified comment request. Follow-up snapshots
+come from the fresh authorized task read, and child Agents inherit that snapshot.
+Human follow-up status reactions target the new message, not the original
+Monolith comment; completion notifications retain their human-request behavior.
 
 The request-scoped reader keeps the caller's existing bearer and team scope.
 Only project, milestone and parent-task IDs already returned by the authorized

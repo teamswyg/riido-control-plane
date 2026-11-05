@@ -1,7 +1,6 @@
 package riidoaiserver
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -17,13 +16,13 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 	// A consistent Query is not a multi-item snapshot. Reject mixed parts
 	// observed across a concurrent atomic write before publishing any state.
 	hashes := map[string]string{}
-	if err := json.Unmarshal([]byte(dynamoDBStringValue(current, "part_hashes_json")), &hashes); err != nil {
+	if err := decodeConversationManifestHashes([]byte(dynamoDBStringValue(current, "part_hashes_json")), &hashes); err != nil {
 		return AIAgentClientSnapshot{}, 0, err
 	}
 	parts := dynamoDBAIAgentClientSnapshotItemsByPart(items)
 	for name, hash := range hashes {
 		item := parts[name]
-		raw, err := gunzipBase64(dynamoDBStringValue(item, "part_gzip"))
+		raw, err := snapshotPartRaw(item, items)
 		if err != nil || hash != sha256Hex(raw) {
 			return AIAgentClientSnapshot{}, 0, errAIAgentSnapshotConflict
 		}
@@ -37,7 +36,7 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 			return AIAgentClientSnapshot{}, 0, fmt.Errorf("decode DynamoDB AI Agent client split snapshot: part %s is required", name)
 		}
 		encodedBytes += int64(len(dynamoDBStringValue(item, "part_gzip")))
-		if err := decodeDynamoDBAIAgentClientSnapshotPart(name, item, &snapshot); err != nil {
+		if err := decodeDynamoDBAIAgentClientSnapshotPart(name, item, &snapshot, items); err != nil {
 			return AIAgentClientSnapshot{}, 0, err
 		}
 	}
@@ -56,7 +55,7 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 			continue
 		}
 		encodedBytes += int64(len(dynamoDBStringValue(item, "part_gzip")))
-		if err := decodeDynamoDBAIAgentClientSnapshotPart(name, item, &snapshot); err != nil {
+		if err := decodeDynamoDBAIAgentClientSnapshotPart(name, item, &snapshot, items); err != nil {
 			return AIAgentClientSnapshot{}, 0, err
 		}
 	}
@@ -66,8 +65,12 @@ func decodeSplitDynamoDBAIAgentClientSnapshot(items []map[string]map[string]stri
 	return snapshot, encodedBytes, nil
 }
 
-func decodeDynamoDBAIAgentClientSnapshotPart(name string, item map[string]map[string]string, snapshot *AIAgentClientSnapshot) error {
-	raw, err := gunzipBase64(dynamoDBStringValue(item, "part_gzip"))
+func decodeDynamoDBAIAgentClientSnapshotPart(name string, item map[string]map[string]string, snapshot *AIAgentClientSnapshot, related ...[]map[string]map[string]string) error {
+	var items []map[string]map[string]string
+	if len(related) > 0 {
+		items = related[0]
+	}
+	raw, err := snapshotPartRaw(item, items)
 	if err != nil {
 		return fmt.Errorf("decode DynamoDB AI Agent client snapshot part %s gzip: %w", name, err)
 	}

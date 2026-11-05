@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-func (s Server) captureAssignmentReadScope(ctx context.Context, snapshot AssignmentContextSnapshot, taskContext *AIAgentTaskContext) {
+func (s Server) captureAssignmentReadScope(ctx context.Context, snapshot AssignmentContextSnapshot, taskContext *AIAgentTaskContext, promptDelivered bool) {
 	if !s.config.AssignmentReadScope || taskContext.readScopeCapture == nil {
 		return
 	}
@@ -27,6 +27,9 @@ func (s Server) captureAssignmentReadScope(ctx context.Context, snapshot Assignm
 	snapshot = boundAssignmentComparisonMetadata(snapshot, taskContext.readScopeCapture.Pages)
 	if err := store.SaveAssignmentContentBundle(ctx, snapshot, taskContext.readScopeCapture.Pages); err != nil {
 		log.Printf("event=assignment_context_capture_failed assignment_id=%q stage=scoped_bundle error_type=%T", snapshot.AssignmentID, err)
+		return
+	}
+	if !promptDelivered {
 		return
 	}
 	status := AssignmentContextReadServed

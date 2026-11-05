@@ -69,5 +69,7 @@ func (s *DynamoDBAIAgentClientSnapshot) readMembershipCommit(ctx context.Context
 			result = append(result, read.Item)
 		}
 	}
-	return result, nil
+	// Owned saves also merge TASK_THREADS; hydrate and verify immutable chunks
+	// for every reader of the committed snapshot, including ordinary heartbeats.
+	return s.loadConversationChunks(ctx, result, credentials)
 }

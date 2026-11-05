@@ -892,6 +892,34 @@ export interface CreateAIAgentTaskThreadMessageV2ReactEndpoint extends core.Crea
 }
 
 /**
+ * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.add`
+ * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.add`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.add`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface AddAIAgentTaskThreadMessageReactionV2ReactEndpoint extends core.AddAIAgentTaskThreadMessageReactionV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskThreadMessageReactionsResponse, core.AddAIAgentTaskThreadMessageReactionV2MutationVariables>) => UseMutationResult<core.AIAgentTaskThreadMessageReactionsResponse, Error, core.AddAIAgentTaskThreadMessageReactionV2MutationVariables>;
+}
+
+/**
+ * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+ * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.delete`
+ * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.delete`
+ * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.delete`
+ * client의 `@/lib/react-query` 정책을 통과하는 mutation hook endpoint입니다.
+ */
+export interface DeleteAIAgentTaskThreadMessageReactionV2ReactEndpoint extends core.DeleteAIAgentTaskThreadMessageReactionV2Endpoint {
+  /**
+   * React Query useMutation hook입니다.
+   */
+  readonly useMutation: (options?: core.RiidoMutationOptions<core.AIAgentTaskThreadMessageReactionsResponse, core.DeleteAIAgentTaskThreadMessageReactionV2MutationVariables>) => UseMutationResult<core.AIAgentTaskThreadMessageReactionsResponse, Error, core.DeleteAIAgentTaskThreadMessageReactionV2MutationVariables>;
+}
+
+/**
  * AI Agent task thread를 user/agent/progress message history로 조회합니다 (v3 workspace-scoped)
  * 계약 generated path: `v3.aiAgent.tasks.threads`
  * 검색용 generated 경로: `aiAgent.tasks.threads`
@@ -1538,6 +1566,28 @@ export interface RiidoV2AIAgentTasksOnboardingCompletionReactNamespace {
 }
 
 /**
+ * v2.aiAgent.tasks.threadMessages.reactions namespace입니다.
+ */
+export interface RiidoV2AIAgentTasksThreadMessagesReactionsReactNamespace {
+  /**
+   * task thread message에 사람 멤버의 emoji reaction을 남깁니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.add`
+   * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.add`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.add`
+   * invalidates: `v3.aiAgent.tasks.threads`
+   */
+  readonly add: AddAIAgentTaskThreadMessageReactionV2ReactEndpoint;
+  /**
+   * task thread message에서 사람 멤버 자신의 emoji reaction을 지웁니다 (v2 workspace-scoped)
+   * 계약 generated path: `v2.aiAgent.tasks.threadMessages.reactions.delete`
+   * 검색용 generated 경로: `aiAgent.tasks.threadMessages.reactions.delete`
+   * 접근 예시: `riido.v2.aiAgent.tasks.threadMessages.reactions.delete`
+   * invalidates: `v3.aiAgent.tasks.threads`
+   */
+  readonly delete: DeleteAIAgentTaskThreadMessageReactionV2ReactEndpoint;
+}
+
+/**
  * 선택된 workspace의 task thread에 사용자가 다음 작업 지시를 남기는 정식 message command namespace입니다.
  */
 export interface RiidoV2AIAgentTasksThreadMessagesReactNamespace {
@@ -1549,6 +1599,10 @@ export interface RiidoV2AIAgentTasksThreadMessagesReactNamespace {
    * invalidates: `v2.aiAgent.bootstrap`, `v2.aiAgent.tasks.assignableAgents`, `v2.aiAgent.tasks.threads`, `v2.aiAgent.tasks.assignedAgentProfiles`
    */
   readonly create: CreateAIAgentTaskThreadMessageV2ReactEndpoint;
+  /**
+   * v2.aiAgent.tasks.threadMessages.reactions namespace입니다.
+   */
+  readonly reactions: RiidoV2AIAgentTasksThreadMessagesReactionsReactNamespace;
 }
 
 /**
@@ -2047,6 +2101,16 @@ export function useRiidoControlPlaneClient(config: core.RiidoClientConfig): Riid
               create: {
                 ...coreClient.v2.aiAgent.tasks.threadMessages.create,
                 useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskActionResponse, core.CreateAIAgentTaskThreadMessageV2MutationVariables> = {}) => useMutation<core.AIAgentTaskActionResponse, Error, core.CreateAIAgentTaskThreadMessageV2MutationVariables>(coreClient.v2.aiAgent.tasks.threadMessages.create.mutation(options)),
+              },
+              reactions: {
+                add: {
+                  ...coreClient.v2.aiAgent.tasks.threadMessages.reactions.add,
+                  useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskThreadMessageReactionsResponse, core.AddAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) => useMutation<core.AIAgentTaskThreadMessageReactionsResponse, Error, core.AddAIAgentTaskThreadMessageReactionV2MutationVariables>(coreClient.v2.aiAgent.tasks.threadMessages.reactions.add.mutation(options)),
+                },
+                delete: {
+                  ...coreClient.v2.aiAgent.tasks.threadMessages.reactions.delete,
+                  useMutation: (options: core.RiidoMutationOptions<core.AIAgentTaskThreadMessageReactionsResponse, core.DeleteAIAgentTaskThreadMessageReactionV2MutationVariables> = {}) => useMutation<core.AIAgentTaskThreadMessageReactionsResponse, Error, core.DeleteAIAgentTaskThreadMessageReactionV2MutationVariables>(coreClient.v2.aiAgent.tasks.threadMessages.reactions.delete.mutation(options)),
+                },
               },
             },
             threadStreamSubscription: {

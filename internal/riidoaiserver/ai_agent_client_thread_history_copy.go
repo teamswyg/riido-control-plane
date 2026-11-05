@@ -7,6 +7,7 @@ func copyTaskThreadHistoryMessages(in []AIAgentTaskThreadHistoryMessage) []AIAge
 	out := make([]AIAgentTaskThreadHistoryMessage, len(in))
 	for i, message := range in {
 		out[i] = clientVisibleTaskThreadHistoryMessage(message)
+		out[i].Reactions = copyMessageReactions(message.Reactions)
 	}
 	return out
 }

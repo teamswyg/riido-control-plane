@@ -39,9 +39,11 @@ func (s Server) assignRequestWithTaskContextPromptForClientResult(
 	if err != nil {
 		var latest latestTaskDocumentError
 		if contextReq.DocumentSnapshot != nil {
+			logTaskContextUnavailable(ctx, withFailureStage("editor_snapshot", err))
 			return composedAssignRequest{}, latestTaskDocumentError{err}
 		}
 		if errors.As(err, &latest) {
+			logTaskContextUnavailable(ctx, err)
 			return composedAssignRequest{}, err
 		}
 		request, composeErr := composeAssignRequestWithoutTaskContext(taskID, componentID, req)

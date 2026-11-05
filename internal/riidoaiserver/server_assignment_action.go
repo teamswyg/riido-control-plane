@@ -75,7 +75,7 @@ func (s Server) cancelAIAgentAssignmentTargets(ctx context.Context, targets []ai
 				return primary, true, err
 			}
 			if !found || (!isTerminal(current.Assignment.State) && current.Assignment.State != AssignmentCancelling) {
-				return primary, true, ErrAIAgentMembershipChanged
+				return primary, true, withFailureStage("assignment_action_membership", ErrAIAgentMembershipChanged)
 			}
 		}
 		if target.AssignmentID == primary.AssignmentID {

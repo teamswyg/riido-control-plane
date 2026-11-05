@@ -12,6 +12,10 @@ import (
 var errAIAgentSnapshotConflict = errors.New("agent state changed concurrently; retry request")
 
 func (s *DynamoDBAIAgentClientSnapshot) putSnapshotTransaction(ctx context.Context, items []map[string]map[string]string, expected int64, credentials AWSCredentials) error {
+	items, err := s.stageConversationChunks(ctx, items, credentials)
+	if err != nil {
+		return err
+	}
 	writes := make([]dynamoDBTransactWritePut, 0, len(items))
 	for _, item := range items {
 		var write dynamoDBTransactWritePut

@@ -18,7 +18,7 @@ func (s *Store) CancelAssignment(ctx context.Context, taskID string, req CancelA
 	}
 	select {
 	case res := <-reply:
-		return res.assignment, res.err
+		return *copyAssignment(res.assignment), res.err
 	case <-ctx.Done():
 		return Assignment{}, ctx.Err()
 	}

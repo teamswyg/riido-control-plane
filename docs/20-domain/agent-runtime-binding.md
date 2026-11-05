@@ -41,6 +41,8 @@ Executable SSOT: [`agent-runtime-binding.riido.json`](agent-runtime-binding.riid
 | `device-id-if-bound` | daemon | poll device_id must match only when the binding has a non-empty device_id |
 | `daemon-poll-durable-identity` | daemon | a daemon poll validates the current durable agent/runtime/device/daemon identity without applying time-based liveness projection; deleted, rebound, explicitly unavailable, or mismatched bindings remain rejected |
 | `nil-registry-no-gate` | fallback | nil registry imposes no binding gate |
+| `reference-folder-configuration` | configuration | RIID-5893: optional reference_folders binds local absolute paths to device_id and runtime_id. Only the existing agent owner mutation boundary can update it; omission preserves it, empty paths clears it, and a changed runtime clears the previous binding. |
+| `reference-folder-execution` | configuration | RIID-5893: assignment creation snapshots matching reference folders, appends a separate reference instruction, and deep-copies paths across persistence and response boundaries. Desktop owns native selection; daemon owns actual binding/access checks and per-run provider options. Selection does not change cwd or override OS/managed restrictions. |
 
 ## Device And Visibility Rules
 

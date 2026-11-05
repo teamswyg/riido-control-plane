@@ -49,7 +49,7 @@ func stateFromAssignmentOperations(records []AssignmentOperationRecord) (storeSt
 				}
 			}
 		}
-		state.assignments[record.Assignment.ID] = record.Assignment
+		state.assignments[record.Assignment.ID] = *copyAssignment(record.Assignment)
 		if seq := assignmentSequence(record.Assignment.ID); seq > state.nextAssignmentSeq {
 			state.nextAssignmentSeq = seq
 		}

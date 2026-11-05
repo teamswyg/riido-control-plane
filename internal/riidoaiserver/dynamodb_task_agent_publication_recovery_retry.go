@@ -18,5 +18,5 @@ func (s *DynamoDBAssignmentOperationStore) recoverFailedTaskAgentPublication(ctx
 			return result, err
 		}
 	}
-	return nil, ErrAIAgentMembershipChanged
+	return nil, withFailureStage("publication_recovery_retry_exhausted", ErrAIAgentMembershipChanged)
 }

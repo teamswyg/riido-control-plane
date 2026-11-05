@@ -16,14 +16,18 @@ func appendTaskConversationContext(out *strings.Builder, thread AIAgentTaskThrea
 		if text == "" {
 			continue
 		}
-		part := "\n### Previous " + string(message.Role) + " message\n" + text + "\n"
+		author := string(message.Role)
+		if thread.ConversationID != "" {
+			author = conversationMessageAuthor(message, history)
+		}
+		part := "\n### Previous " + author + " message\n" + text + "\n"
 		parts = append(parts, part)
 		remaining -= len([]rune(part))
 	}
 	if len(parts) == 0 {
 		return false
 	}
-	out.WriteString("\n\n## Recent conversation context\nReference history; the New User Instruction below is authoritative.\n")
+	out.WriteString("\n\n## Recent conversation context\nThese are earlier messages. Use them as background for the current assignment.\n")
 	if len(parts) < len(messages) {
 		out.WriteString("[Earlier conversation messages omitted by context budget.]\n")
 	}
