@@ -28,7 +28,7 @@ func (s *DynamoDBAssignmentOperationStore) recoverFailedTaskAgentPublicationAtte
 		return nil, err
 	}
 	if !sameTaskAgentCreation(projection.Assignment, assignment) {
-		return nil, ErrAIAgentMembershipChanged
+		return nil, withFailureStage("publication_recovery_mismatch", ErrAIAgentMembershipChanged)
 	}
 	result := &taskAgentPublicationRecoveryResult{projection: AssignmentProjection(projection)}
 	// A committed publication wins even if its HTTP response was lost.

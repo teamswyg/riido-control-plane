@@ -13,10 +13,10 @@
   "generated_core": "web/generated/aiAgentClient.ts",
   "generated_react": "web/generated/aiAgentClient.react.ts",
   "operation_counts": {
-    "total": 64,
+    "total": 66,
     "v1": 28,
-    "v2": 35,
-    "smoke_matrix": 64
+    "v2": 37,
+    "smoke_matrix": 66
   },
   "required_generated_paths": [
     "aiAgent.bootstrap",
@@ -70,7 +70,8 @@
   ],
   "deployment_evidence": [
     "not from a manual",
-    "The workflow masks both values"
+    "The workflow masks both values",
+    "RIID-5891 rollout requires a storage-compatible baseline before comment/native-history producers. Once format-1 conversation manifests are committed, rollback must retain format-aware readers/writers and durable chunks; old binaries cannot read the fenced manifest. No SQL migration or snapshot-table replacement is required."
   ],
   "device_client_guidance": {
     "read_endpoint": "GET /v2/client/workspaces/{workspace_id}/ai-agent/devices",
@@ -88,11 +89,12 @@
       "RIID-5829 desktop task notifications: Assignment의 created_by·workspace_id·team_id는 배정 시 인증 주체와 검증된 작업 맥락에서 저장한다. 과거 created_by가 비어 있으면 소유자로 추정하지 않는다.",
       "RIID-5829 desktop task notifications: Assignment.state는 기존 실행 FSM을 유지한다. running과 confirmation_reason(answer_required/approval_required)이 함께 있으면 WorkStatus는 waiting_for_user다. 로그는 대기를 해제하지 않고 명시적 running 재개와 terminal 결과만 해제한다.",
       "RIID-5829 desktop task notifications: TaskEvent의 event_id는 assignment ID와 영속 event sequence로 구성하고 at이 발생 시각이다. 별도 agent_task_notification에 workspace/task/agent/assignment/run ID, created_by, recipient_principal_id, notification_type, confirmation_reason, work_status, assignment_state, team_id를 제공한다.",
-      "RIID-5829 desktop task notifications: 알림 종류는 result_ready, answer_required, approval_required, failed다. completed는 실행 결과 준비이며 업무 완료 상태를 변경하지 않는다. 일반 로그·경고·복구 중 provider_error·사용자 취소는 알림을 만들지 않는다.",
+      "RIID-5829 desktop task notifications: 알림 종류는 started, result_ready, answer_required, approval_required, failed다. completed는 실행 결과 준비이며 업무 완료 상태를 변경하지 않는다. 일반 로그·경고·복구 중 provider_error·사용자 취소·Agent 간 호출은 알림을 만들지 않는다. started는 반응 대상이 있는 실행만 배정당 한 번 전송한다.",
       "RIID-5829 desktop task notifications: 수신자는 배정자 한 명이다. 공유 에이전트 소유권·관리자 역할로 수신 권한을 확대하지 않는다. SSE 발송 직전 현재 bearer로 해당 workspace/task의 읽기 권한을 재확인하고 실패하면 전달하지 않는다.",
       "RIID-5829 desktop task notifications: 최초 연결 및 재연결은 live-only다. SSE 연결이 끊긴 구간은 과거 알림으로 재생하지 않으며 현재 실행 상태는 작업 상세 재조회로 확인한다. 프로세스 완전 종료 원격 푸시는 범위 밖이다.",
       "RIID-5829 desktop task notifications: 같은 상태/사유의 재전송과 종료 뒤 늦은 이벤트는 추가 알림을 만들지 않는다. Assignment 저장 이후 알림 투영이 실패해 재시도하더라도 이미 저장한 event ID를 재사용한다. 클라이언트는 사용자·워크스페이스별 event ID를 최대 512개 보존하고 Electron은 창 사이 중복을 막는다.",
       "RIID-5829 desktop task notifications: 클릭은 발신 webview의 같은 origin에서 /workspace/teams/team/tasks/task로 이동하고 소유 창을 복원한다. 이전 생산자가 team_id를 제공하지 않으면 현재 작업 메타데이터에서 같은 workspace/task임을 확인한 후 경로를 구성한다. 이동 시 기존 인증·권한 가드가 다시 적용된다.",
+      "RIID-5907 reactions: stable message ID별 member 반응은 기존 snapshot에 저장하며 Agent 상태 반응은 durable 실행 상태에서 투영한다. 실행의 최초 source message ID를 고정하고 진행 메시지는 반응 대상에서 제외한다. 원댓글 반응은 비동기 직렬 전달하며 실패 시 다음 history 조회에서 재시도한다. 반응 오류는 실행 응답에 영향을 주지 않는다.",
       "RIID-5829 notification multiplex: GET /v1/client/ai-agent/events?notifications=1&workspace_id=<id>&workspace_id=<id> accepts 1–100 workspace entries, deduplicates IDs, authorizes every workspace to the same principal before subscribing, and emits only live agent_task_notification events over one HTTP connection. Current task access is rechecked per delivery; replay and unrelated client events are excluded. Cancelling the request or closing an underlying subscription releases all subscriptions. Existing workspace event routes remain compatible. This avoids HTTP/1 per-origin connection starvation for accounts with many workspaces.",
       "RIID-5823 recovery_policy is optional and finite; explicit fallback candidates require same requester/Agent/device owner, same daemon, exact model inventory, healthy confirmed diagnostics and existing experimental permission",
       "Recovery policy is immutable for a RequestID and copied independently through assignment, durable projection, snapshot and poll responses; generic component-task assignment cannot authorize fallback providers",
@@ -147,7 +149,7 @@
       },
       {
         "name": "group-by-conversation-id",
-        "detail": "Render one Agent comment card per conversation_id. thread_id is the concrete run/thread record inside that card, not the card grouping key."
+        "detail": "Render one conversation per conversation_id. A comment:<root ID> conversation is embedded as replies under the actual Monolith root comment, not a separate top-level card. thread_id identifies an execution. Deduplicate source comment/message IDs, preserve per-message Agent snapshots, and retain normal replies without Agent mentions in shared context."
       },
       {
         "name": "optimistic-v2-mutation",
@@ -160,6 +162,38 @@
       {
         "name": "select-runtime-bound-agent",
         "detail": "Populate the participant picker from task-scoped assignable-agents. Bootstrap remains the management catalog, while assignable-agents includes only visible agents whose runtime and daemon are currently online and resolvable by the assignment POST path."
+      },
+      {
+        "name": "comment-native-continuity",
+        "detail": "RIID-5891: Monolith authenticates current task membership and supplies root_comment_id plus bounded root/recent ordinary replies. Select only the latest same-task, same-conversation, same-Agent execution; existing workspace, owner, model, worktree and runtime native-resume checks apply. Active executions conflict and retry later. Missing durable native sessions conflict instead of silently starting fresh; non-executing intent/onboarding records remain exempt. Monolith supplies conversation_comment_ids independently of the 33-message context window (maximum 10000 IDs, explicit failure beyond it). The next successful request lazily adopts matching legacy comment executions into the verified root, retaining execution IDs and native pins and persisting the grouping. No unrelated legacy task conversation is merged."
+      },
+      {
+        "name": "external-history-import-boundary",
+        "detail": "Import external Codex/Claude visible user and Agent messages only when Riido sends the next request to the exact retained native session. The canonical Riido task prompt anchors history; exclude older unrelated history, already projected Riido prompt/answer pairs, tools, reasoning and sidechains. Attachment bytes are not copied; non-text user input has an omission marker. Page opens and timers never trigger import. Imported mentions never trigger Agent execution."
+      },
+      {
+        "name": "native-history-wire-and-identity",
+        "detail": "Authenticated riido_log metadata.native_history_message carries session_id, stable message_id, role(user/agent), body, optional RFC3339 observed_at and positive ordinal, plus the current assignment lease token. Validate resumed assignment/session and require its exact published thread. Persist native:<SHA256(session ID + NUL + message ID)> identity, deduplicated within task/conversation/Agent across retries, restarts and later executions. Preserve identical text under different IDs. User text is HTML escaped. Newly imported Codex user messages display the registered device owner when the reporting device and runtime match the Agent binding. Other imports omit the author principal; Agent identity comes from the source execution snapshot."
+      },
+      {
+        "name": "native-history-order-and-failure",
+        "detail": "Append-only imports precede the verified stored timestamp of the triggering comment (or request time), with at least a millisecond gap for browser sorting. Use provider timestamps when before that boundary, otherwise retain source ordinal order at the boundary; no original send time is inferred. Missing sessions/anchors, corrupt chains, incomplete pages or oversized imports stop continuation. Limits:64 KiB/message,2000 external messages,4 MiB text,Claude64 MiB transcript,Codex10000 turns. Imports retry without silent loss; terminal success waits for delivery. Projection may temporarily show a prefix during an outage; inference starts with native context loaded and does not wait for projection ACKs. External changes after the read boundary need a subsequent request. Comment/native conversation messages and their thread anchors bypass legacy 100-message/50-thread tail retention. DynamoDB thread/message parts exceeding 192 KiB encoded are split into immutable hash-addressed chunks staged before the existing atomic CURRENT commit; readers validate every chunk and the whole-part hash. The manifest history-format guard makes legacy writers fail closed. Legacy snapshots remain readable; roll back only to a history-format-aware reader/writer. Unreferenced staged chunks never become visible; no automatic chunk deletion runs in this change."
+      },
+      {
+        "name": "native-history-rollout",
+        "detail": "Deploy Control Plane consumer and client, then Monolith root evidence, then Daemon producer. Old evidence falls back to its triggering comment ID; complete root/reply merging requires the Monolith update. Old Daemons resume without importing external messages. Roll back producer first; persisted messages remain readable and no SQL migration is required. Fixture tests cover scope, persistence/replay, author/order and UI root merging. Actual authenticated provider roundtrips and production rollout require release verification."
+      },
+      {
+        "name": "comment-agent-mention-dispatch",
+        "detail": "RIID-5892: only verified comment executions dispatch visible typed HTML Agent mentions from the committed successful final response. Plain @names, imported history, progress, recovery events and quoted/code examples never dispatch. Revalidate current Monolith evidence, original workspace/principal/root, assignable target and runtime/native-session scope. Persist a server-owned invocation binding with each execution. Preserve the source Agent response and human context without duplicating the handoff as a human reply. Preserve origin_thread_id, origin_message_id and origin_assignment_id on the server-owned child binding, separately from the original human comment evidence. Expose the exact origin message as the child thread source_message_id for RIID-5909, without cloning it as a user message."
+      },
+      {
+        "name": "comment-agent-mention-bounds",
+        "detail": "Each initiating human-to-Agent request has a maximum eight automatic descendants and three automatic hops. Deduplicate up to eight targets per response in mention order; reject self/ancestor cycles. Divide remaining descendant budget deterministically among all targets, including unavailable targets, so branching cannot exceed the bound. Calls enqueue in mention order and complete in runtime order. Over-budget responses are rejected with a same-root system notice. New human requests receive a fresh budget. Guide models to riido agents list/show --json for current role/availability evidence before choosing a target; unavailable or insufficient evidence requires clarification, not guessed delegation. Child CLI context inherits the parent snapshot via RIID-5900 under identical task/workspace/requester; Use the deterministic child assignment ID to persist inherited context before publishing a pollable execution. Failures are retryable and do not acknowledge a completed handoff or start a contextless child."
+      },
+      {
+        "name": "comment-agent-mention-delivery",
+        "detail": "Stable source-assignment/target request receipts and persisted source outcomes survive concurrent replay, ACK loss and restart. Terminal HTTP ACK follows child publication or persisted system failure. Infrastructure failure returns 503 and retries the same committed terminal event. Access revocation, unavailable target/runtime and session conflicts produce system-role notices in the same conversation. Render system messages without an Agent author. Long Agent responses collapse at 240px and expand without deleting rich text, mentions or links. Client first, then CP; existing Monolith evidence and Daemon ACK retry are reused. No SQL migration; legacy executions without a binding never dispatch retrospectively. Actual authenticated provider roundtrips and rollout remain release verification."
       }
     ],
     "response_shapes": [
@@ -408,7 +442,7 @@
       },
       {
         "name": "send-thread-message",
-        "detail": "POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run."
+        "detail": "POST the task-scoped v2 thread message endpoint with thread_id. The follow-up should remain in the same conversation_id and set parent_thread_id when it creates a follow-up run. Visible typed Agent mentions select the named authorized Agent(s); with no Agent mention the selected thread Agent continues. Preserve the human message identity across fanout and retries, publish each target Agent snapshot, and resume only that Agent's native session within this conversation. Linked participant history stays in shared context; quoted/member mentions do not retarget execution. Never silently fall back to the original Agent when a target is unavailable or unauthorized."
       },
       {
         "name": "stop-agent",

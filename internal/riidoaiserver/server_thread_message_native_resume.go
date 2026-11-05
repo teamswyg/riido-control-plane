@@ -4,43 +4,54 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"time"
 
 	"github.com/teamswyg/riido-contracts/assignment"
 )
 
+var errNativeSessionUnavailable = errors.New("native session unavailable; start a new conversation explicitly")
+
 // Select only the assignment behind the authorized thread. The daemon remains
 // the authority for its retained device/runtime/workdir/session binding.
-func (s Server) applyThreadNativeResume(ctx context.Context, principal AuthorizationResult, thread AIAgentTaskThreadRecord, req *AssignRequest, agentOwnerPrincipalID string) error {
-	if thread.AssignmentID == "" || !nativeFollowupProvider(req.RuntimeProvider) {
-		return nil
+// Return the prior execution timestamp so shared-thread projection timestamps
+// cannot cause already supplied peer context to be replayed.
+func (s Server) applyThreadNativeResume(ctx context.Context, principal AuthorizationResult, thread AIAgentTaskThreadRecord, req *AssignRequest, agentOwnerPrincipalID string) (time.Time, error) {
+	if thread.AssignmentID == "" || isNonDurableAssignmentID(thread.AssignmentID) || !nativeFollowupProvider(req.RuntimeProvider) {
+		return time.Time{}, nil
 	}
 	reader, ok := s.assignment.(AssignmentProjectionReader)
 	if !ok {
-		return assignmentDependencyFailure(errors.New("follow-up assignment source unavailable"))
+		return time.Time{}, assignmentDependencyFailure(errors.New("follow-up assignment source unavailable"))
 	}
 	projection, found, err := reader.LoadAssignmentProjection(ctx, thread.AssignmentID)
 	if err != nil {
-		return assignmentDependencyFailure(err)
+		return time.Time{}, assignmentDependencyFailure(err)
 	}
 	if !found {
-		return nil // Legacy histories can have no retained assignment/native pin.
+		return time.Time{}, errNativeSessionUnavailable
 	}
 	previous := projection.Assignment
 	resumeID := assignment.ResumeSessionIDForAssignment(previous)
-	if !isTerminal(previous.State) || resumeID == "" {
-		return nil
+	if !isTerminal(previous.State) {
+		return time.Time{}, nil
+	}
+	if resumeID == "" {
+		return time.Time{}, errNativeSessionUnavailable
 	}
 	if previous.ID != thread.AssignmentID || previous.TaskID != thread.TaskID || previous.AgentID != thread.AgentID || previous.WorkspaceID != principal.WorkspaceID || previous.WorkspaceID != req.WorkspaceID {
-		return ErrAuthorizationForbidden
+		return time.Time{}, ErrAuthorizationForbidden
 	}
 	if previous.AgentID != req.AgentID || previous.RuntimeProvider != req.RuntimeProvider || previous.ModelID != req.ModelID || !reflect.DeepEqual(previous.Worktree, req.Worktree) {
-		return ErrAIAgentTaskThreadConflict
+		return time.Time{}, ErrAIAgentTaskThreadConflict
 	}
 	if err := s.validateFollowupRuntimeBinding(thread, *req, agentOwnerPrincipalID); err != nil {
-		return err
+		return time.Time{}, err
 	}
 	req.ResumeSessionID = resumeID
-	return nil
+	if previous.State != AssignmentCompleted {
+		return time.Time{}, nil // Delivery of the failed/interrupted input is unconfirmed.
+	}
+	return previous.CreatedAt, nil
 }
 
 func nativeFollowupProvider(provider string) bool {

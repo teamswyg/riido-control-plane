@@ -78,13 +78,33 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 	agent.Editability = AgentEditabilityBlockedAssignedTasks
 	agent.AssignedTaskCount++
 	s.agents[agent.AgentID] = agent
+	if req.conversationID != "" {
+		s.adoptLegacyCommentConversationsLocked(taskID, req)
+		sourceMessageID := req.SourceMessageID
+		if sourceMessageID == "" {
+			sourceMessageID = req.SourceCommentID
+		}
+		s.upsertTaskThreadMessageFromActionLocked(response, sourceMessageID, req.conversationID, req.parentThreadID)
+		if !req.skipSourceMessage {
+			s.appendThreadUserMessageLocked(response, principal, req.Instruction, req.SourceCommentID, req.sourceMessageObservedAt)
+		}
+	}
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
+	if req.directRootTeamID != "" {
+		req.commentInvocation = newDirectInvocation(response, principal, req.directRootTeamID)
+	}
+	for i := range s.taskThreads[taskID] {
+		if s.taskThreads[taskID][i].ThreadID == response.ThreadID {
+			s.taskThreads[taskID][i].CommentInvocation = copyCommentInvocation(req.commentInvocation)
+		}
+	}
 	s.recordTaskThreadRequesterLocked(response.TaskID, response.ThreadID, principal.PrincipalID)
 	agent = s.projectAgentWorkStatusFromThreadsLocked(agent)
 	s.agents[agent.AgentID] = agent
 	s.assignTaskAgentMemberLocked(taskID, agent)
 
 	s.appendAgentTaskActionEvent(response)
+	s.appendTaskNotificationLocked(TaskEvent{EventID: "started:" + response.AssignmentID, AssignmentID: response.AssignmentID, TaskID: taskID, AgentID: response.AgentID, WorkspaceID: principal.WorkspaceID, CreatedBy: principal.PrincipalID, At: time.Now().UTC()}, response)
 	s.rememberTaskRequestReceiptLocked(receiptKey, response)
 	return clientVisibleQueuedActionResponse(response), nil
 }

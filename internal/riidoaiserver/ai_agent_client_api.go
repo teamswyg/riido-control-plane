@@ -260,26 +260,27 @@ type DeviceDaemonCommandResponse struct {
 }
 
 type AgentClientRecord struct {
-	AgentID             string            `json:"agent_id"`
-	OwnerPrincipalID    string            `json:"owner_principal_id"`
-	WorkspaceID         string            `json:"workspace_id,omitempty"`
-	IsOwnedByViewer     bool              `json:"is_owned_by_viewer"`
-	Name                string            `json:"name"`
-	ProfileThumbnailURL string            `json:"profile_thumbnail_url,omitempty"`
-	TmpColor            string            `json:"tmp_color,omitempty"`
-	ProfileColor        AgentProfileColor `json:"profile_color"`
-	Description         string            `json:"description,omitempty"`
-	Instruction         string            `json:"instruction,omitempty"`
-	Visibility          AgentVisibility   `json:"visibility"`
-	RuntimeID           string            `json:"runtime_id,omitempty"`
-	RuntimeKind         RuntimeKind       `json:"runtime_kind,omitempty"`
-	ModelID             string            `json:"model_id,omitempty"`
-	ModelLabel          string            `json:"model_label,omitempty"`
-	WorkStatus          AgentWorkStatus   `json:"work_status"`
-	Editability         AgentEditability  `json:"editability"`
-	AssignedTaskCount   int               `json:"assigned_task_count"`
-	CreatedAt           time.Time         `json:"created_at"`
-	UpdatedAt           time.Time         `json:"updated_at"`
+	ReferenceFolders    *assignment.ReferenceFolders `json:"reference_folders,omitempty"`
+	AgentID             string                       `json:"agent_id"`
+	OwnerPrincipalID    string                       `json:"owner_principal_id"`
+	WorkspaceID         string                       `json:"workspace_id,omitempty"`
+	IsOwnedByViewer     bool                         `json:"is_owned_by_viewer"`
+	Name                string                       `json:"name"`
+	ProfileThumbnailURL string                       `json:"profile_thumbnail_url,omitempty"`
+	TmpColor            string                       `json:"tmp_color,omitempty"`
+	ProfileColor        AgentProfileColor            `json:"profile_color"`
+	Description         string                       `json:"description,omitempty"`
+	Instruction         string                       `json:"instruction,omitempty"`
+	Visibility          AgentVisibility              `json:"visibility"`
+	RuntimeID           string                       `json:"runtime_id,omitempty"`
+	RuntimeKind         RuntimeKind                  `json:"runtime_kind,omitempty"`
+	ModelID             string                       `json:"model_id,omitempty"`
+	ModelLabel          string                       `json:"model_label,omitempty"`
+	WorkStatus          AgentWorkStatus              `json:"work_status"`
+	Editability         AgentEditability             `json:"editability"`
+	AssignedTaskCount   int                          `json:"assigned_task_count"`
+	CreatedAt           time.Time                    `json:"created_at"`
+	UpdatedAt           time.Time                    `json:"updated_at"`
 }
 
 type AgentClientRecordResponse struct {
@@ -361,17 +362,19 @@ type AgentProfileThumbnailUploadResponse struct {
 }
 
 type CreateAgentConfigurationRequest struct {
-	ProfileColor        AgentProfileColor `json:"profile_color,omitempty"`
-	Name                string            `json:"name"`
-	ProfileThumbnailURL *string           `json:"profile_thumbnail_url,omitempty"`
-	Description         *string           `json:"description,omitempty"`
-	Instruction         *string           `json:"instruction,omitempty"`
-	Visibility          AgentVisibility   `json:"visibility"`
-	RuntimeID           string            `json:"runtime_id"`
-	ModelID             *string           `json:"model_id,omitempty"`
+	ReferenceFolders    *assignment.ReferenceFolders `json:"reference_folders,omitempty"`
+	ProfileColor        AgentProfileColor            `json:"profile_color,omitempty"`
+	Name                string                       `json:"name"`
+	ProfileThumbnailURL *string                      `json:"profile_thumbnail_url,omitempty"`
+	Description         *string                      `json:"description,omitempty"`
+	Instruction         *string                      `json:"instruction,omitempty"`
+	Visibility          AgentVisibility              `json:"visibility"`
+	RuntimeID           string                       `json:"runtime_id"`
+	ModelID             *string                      `json:"model_id,omitempty"`
 }
 
 type UpdateAgentConfigurationRequest struct {
+	ReferenceFolders *assignment.ReferenceFolders `json:"reference_folders,omitempty"`
 	// ProfileColor is accepted for compatibility and ignored: the color is fixed at creation.
 	ProfileColor        AgentProfileColor `json:"profile_color,omitempty"`
 	Name                string            `json:"name,omitempty"`
@@ -391,13 +394,21 @@ type DeleteAgentResponse struct {
 }
 
 type AssignAIAgentTaskRequest struct {
-	RecoveryPolicy *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
+	directRootTeamID  string // Set only by authenticated direct-assignment handlers.
+	commentInvocation *CommentInvocation
+	skipSourceMessage bool
+	RecoveryPolicy    *assignment.ProviderRecoveryPolicy `json:"recovery_policy,omitempty"`
 
 	RequestID                       string                       `json:"request_id,omitempty"`
 	DocumentSnapshot                *AIAgentTaskDocumentSnapshot `json:"document_snapshot,omitempty"`
 	Instruction                     string                       `json:"instruction,omitempty"`
 	SourceCommentID                 string                       `json:"-"`
-	VerifiedTaskContext             *AIAgentTaskContext          `json:"-"`
+	SourceMessageID                 string                       `json:"-"`
+	conversationID                  string
+	parentThreadID                  string
+	sourceMessageObservedAt         time.Time
+	legacyCommentConversations      []string
+	VerifiedTaskContext             *AIAgentTaskContext `json:"-"`
 	membershipPublicationGeneration string
 	AgentID                         string `json:"agent_id"`
 	AssignmentID                    string `json:"-"`
@@ -427,7 +438,9 @@ type SubmitAIAgentTaskCommentRequest struct {
 }
 
 type CreateAIAgentTaskThreadMessageRequest struct {
+	commentInvocation               *CommentInvocation
 	membershipPublicationGeneration string
+	targetAgentID                   string
 	RequestID                       string                       `json:"request_id,omitempty"`
 	DocumentSnapshot                *AIAgentTaskDocumentSnapshot `json:"document_snapshot,omitempty"`
 	Body                            string                       `json:"body"`
@@ -501,30 +514,32 @@ type AIAgentTaskThreadFailureDiagnostics struct {
 }
 
 type AIAgentTaskThreadRecord struct {
-	ConfirmationReason string                               `json:"confirmation_reason,omitempty"`
-	ThreadID           string                               `json:"thread_id"`
-	ConversationID     string                               `json:"conversation_id,omitempty"`
-	ParentThreadID     string                               `json:"parent_thread_id,omitempty"`
-	TaskID             string                               `json:"task_id"`
-	AssignmentID       string                               `json:"assignment_id,omitempty"`
-	AgentID            string                               `json:"agent_id"`
-	AgentSnapshot      *AIAgentTaskThreadAgentSnapshot      `json:"agent_snapshot,omitempty"`
-	AgentSnapshotID    string                               `json:"-"`
-	RunID              string                               `json:"run_id"`
-	SourceCommentID    string                               `json:"source_comment_id,omitempty"`
-	SourceMessageID    string                               `json:"source_message_id,omitempty"`
-	RequestedBy        string                               `json:"requested_by,omitempty"`
-	WorkStatus         AgentWorkStatus                      `json:"work_status"`
-	AssignmentState    AgentAssignmentState                 `json:"assignment_state"`
-	QueueDiagnostics   *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`
-	FailureDiagnostics *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
-	ExecutionContext   *assignment.ExecutionContext         `json:"execution_context,omitempty"`
-	CommentKind        AgentTaskCommentKind                 `json:"comment_kind"`
-	Message            string                               `json:"message"`
-	ResultMessage      string                               `json:"result_message,omitempty"`
-	StartedAt          time.Time                            `json:"started_at,omitempty"`
-	CompletedAt        time.Time                            `json:"completed_at,omitempty"`
-	Lines              []AgentThreadProgressLine            `json:"lines"`
+	ReactionSourceMessageID *string                              `json:"reaction_source_message_id,omitempty"`
+	CommentInvocation       *CommentInvocation                   `json:"comment_invocation,omitempty"`
+	ConfirmationReason      string                               `json:"confirmation_reason,omitempty"`
+	ThreadID                string                               `json:"thread_id"`
+	ConversationID          string                               `json:"conversation_id,omitempty"`
+	ParentThreadID          string                               `json:"parent_thread_id,omitempty"`
+	TaskID                  string                               `json:"task_id"`
+	AssignmentID            string                               `json:"assignment_id,omitempty"`
+	AgentID                 string                               `json:"agent_id"`
+	AgentSnapshot           *AIAgentTaskThreadAgentSnapshot      `json:"agent_snapshot,omitempty"`
+	AgentSnapshotID         string                               `json:"-"`
+	RunID                   string                               `json:"run_id"`
+	SourceCommentID         string                               `json:"source_comment_id,omitempty"`
+	SourceMessageID         string                               `json:"source_message_id,omitempty"`
+	RequestedBy             string                               `json:"requested_by,omitempty"`
+	WorkStatus              AgentWorkStatus                      `json:"work_status"`
+	AssignmentState         AgentAssignmentState                 `json:"assignment_state"`
+	QueueDiagnostics        *AIAgentTaskThreadQueueDiagnostics   `json:"queue_diagnostics,omitempty"`
+	FailureDiagnostics      *AIAgentTaskThreadFailureDiagnostics `json:"failure_diagnostics,omitempty"`
+	ExecutionContext        *assignment.ExecutionContext         `json:"execution_context,omitempty"`
+	CommentKind             AgentTaskCommentKind                 `json:"comment_kind"`
+	Message                 string                               `json:"message"`
+	ResultMessage           string                               `json:"result_message,omitempty"`
+	StartedAt               time.Time                            `json:"started_at,omitempty"`
+	CompletedAt             time.Time                            `json:"completed_at,omitempty"`
+	Lines                   []AgentThreadProgressLine            `json:"lines"`
 }
 
 type AIAgentTaskThreadCollectionResponse struct {

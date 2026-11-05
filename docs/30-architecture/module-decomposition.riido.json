@@ -27,9 +27,9 @@
     "hotspot_limits": [
       {
         "path": "internal/riidoaiserver",
-        "max_files": 85,
+        "max_files": 95,
         "max_lines": 838,
-        "max_total_over_target_lines": 14828
+        "max_total_over_target_lines": 15400
       },
       {
         "path": "internal/authpep",

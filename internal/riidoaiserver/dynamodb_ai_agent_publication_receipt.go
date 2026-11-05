@@ -20,7 +20,7 @@ func (s *DynamoDBAIAgentClientSnapshot) publicationReceiptAction(ctx context.Con
 			return nil, err
 		}
 		if !exists || projection.Assignment.TaskID != scope.taskID || projection.Assignment.AgentID != scope.agentID || taskAgentAssignmentGeneration(projection.Assignment) != scope.generation || !isTerminal(projection.Assignment.State) {
-			return nil, ErrAIAgentMembershipChanged
+			return nil, withFailureStage("publication_receipt_mismatch", ErrAIAgentMembershipChanged)
 		}
 		// Terminal states cannot become runnable again under the same identity.
 		return nil, nil

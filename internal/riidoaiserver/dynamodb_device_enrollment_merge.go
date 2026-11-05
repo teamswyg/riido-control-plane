@@ -21,7 +21,7 @@ func mergeCommittedEnrollmentState(ctx context.Context, items []map[string]map[s
 		}
 	} else {
 		for _, part := range []string{dynamoDBAIAgentClientSnapshotPartDeviceCredentials, dynamoDBAIAgentClientSnapshotPartDevices} {
-			if err := decodeCommittedAIAgentClientPart(part, current, parts[part], &committed); err != nil {
+			if err := decodeCommittedAIAgentClientPart(part, current, parts[part], items, &committed); err != nil {
 				return err
 			}
 		}

@@ -21,14 +21,14 @@ func (c *AIAgentPrivateTaskContextClient) getLatestProviderDocument(ctx context.
 	projections, err := c.fetchProviderProjections(ctx, team, id, bearer)
 	if err != nil {
 		outcome = taskContextReadOutcome(ctx, err)
-		return nil, latestTaskDocumentError{err}
+		return nil, latestTaskDocumentError{withFailureStage("document_projection", err)}
 	}
 	if projections.JSON != nil {
 		jsonState = "invalid"
 	}
 	if projections.JSON != nil && strings.TrimSpace(*projections.JSON) != "" {
 		if _, _, err := readableTaskContextJSON(*projections.JSON); err != nil {
-			return nil, latestTaskDocumentError{err}
+			return nil, latestTaskDocumentError{withFailureStage("document_json", err)}
 		}
 	}
 	document := projections.document()

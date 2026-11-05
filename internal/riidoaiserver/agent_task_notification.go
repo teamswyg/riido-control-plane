@@ -8,6 +8,14 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 	if event.EventID == "" || event.CreatedBy == "" || event.WorkspaceID == "" {
 		return
 	}
+	for _, thread := range s.taskThreads[event.TaskID] {
+		if thread.AssignmentID == event.AssignmentID && thread.CommentInvocation != nil && thread.CommentInvocation.OriginMessageID != "" {
+			return
+		}
+	}
+	if event.State == AssignmentCancelled || event.State == AssignmentCancelling {
+		return
+	}
 	kind := ""
 	switch response.WorkStatus {
 	case AgentWorkStatusWaitingForUser:
@@ -19,7 +27,18 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 		kind = "result_ready"
 	case AgentWorkStatusFailed:
 		kind = "failed"
-	case AgentWorkStatusIdle, AgentWorkStatusQueued, AgentWorkStatusRunning, AgentWorkStatusOffline:
+	case AgentWorkStatusQueued, AgentWorkStatusRunning:
+		for _, thread := range s.taskThreads[event.TaskID] {
+			sourceID := thread.SourceMessageID
+			if thread.ReactionSourceMessageID != nil {
+				sourceID = *thread.ReactionSourceMessageID
+			}
+			if thread.AssignmentID == event.AssignmentID && (sourceID != "" || thread.SourceCommentID != "") {
+				kind = "started"
+				break
+			}
+		}
+	case AgentWorkStatusIdle, AgentWorkStatusOffline:
 		return
 	}
 	if kind == "" {
@@ -31,7 +50,7 @@ func (s *DevelopmentAIAgentClientStore) appendTaskNotificationLocked(event TaskE
 		if !ok {
 			continue
 		}
-		if notification.EventID == event.EventID || (isTerminal(event.State) && notification.AssignmentID == event.AssignmentID && notification.NotificationType == kind) {
+		if notification.EventID == event.EventID || ((isTerminal(event.State) || kind == "started") && notification.AssignmentID == event.AssignmentID && notification.NotificationType == kind) {
 			return
 		}
 	}

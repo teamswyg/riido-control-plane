@@ -13,6 +13,10 @@ func (s *DevelopmentAIAgentClientStore) updateTaskThreadMessageFromActionLocked(
 	parentThreadID string,
 	now time.Time,
 ) {
+	if thread.ReactionSourceMessageID == nil {
+		source := thread.SourceMessageID
+		thread.ReactionSourceMessageID = &source
+	}
 	thread.RunID = response.RunID
 	if thread.ConversationID == "" {
 		thread.ConversationID = defaultTaskThreadConversationID(conversationID, response.ThreadID)

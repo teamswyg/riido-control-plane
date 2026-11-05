@@ -35,9 +35,14 @@ func (s *DevelopmentAIAgentClientStore) createAIAgentWithProfileColor(ctx contex
 	if !ok {
 		return AgentClientRecordResponse{}, errors.New("runtime_id or model_id is not available")
 	}
+	referenceFolders, err := s.normalizeReferenceFoldersLocked(req.ReferenceFolders, input.RuntimeID)
+	if err != nil {
+		return AgentClientRecordResponse{}, err
+	}
 	now := time.Now().UTC()
 	agentID := uniqueAIAgentIDLocked(s.agents, "agent-"+principal.PrincipalID+"-"+input.RuntimeID)
 	agent := AgentClientRecord{
+		ReferenceFolders:    referenceFolders,
 		AgentID:             agentID,
 		OwnerPrincipalID:    principal.PrincipalID,
 		WorkspaceID:         workspaceID,

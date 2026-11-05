@@ -45,7 +45,7 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 		CapturedAt:           now,
 	}
 	if taskContext.ReadScope != nil {
-		s.captureAssignmentReadScope(ctx, snapshot, taskContext)
+		s.captureAssignmentReadScope(ctx, snapshot, taskContext, assignment.ResumeSessionID == "")
 		return
 	}
 	// Legacy captures cannot be compared; preserve their existing storage budget.
@@ -57,6 +57,9 @@ func (s Server) captureAssignmentContext(ctx context.Context, assignment Assignm
 	if err := store.SaveAssignmentContextSnapshot(ctx, snapshot); err != nil {
 		log.Printf("event=assignment_context_capture_failed assignment_id=%q stage=snapshot error_type=%T", assignment.ID, err)
 		return
+	}
+	if assignment.ResumeSessionID != "" {
+		return // The snapshot is available to CLI reads, but was not in this prompt.
 	}
 	status := AssignmentContextReadServed
 	if snapshot.Truncated {

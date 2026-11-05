@@ -178,6 +178,11 @@ func (s *PersistentAIAgentClientStore) saveSnapshot(ctx context.Context) error {
 	snapshot.Version = s.version + 1
 	ctx = context.WithValue(ctx, taskAgentPreserveMembershipContextKey{}, true)
 	if err := s.snapshotStore.SaveAIAgentClientSnapshot(ctx, snapshot); err != nil {
+		if errors.Is(err, errTaskAgentSnapshotChanged) || errors.Is(err, errAIAgentSnapshotConflict) {
+			s.snapshotReloadMu.Lock()
+			s.snapshotReloadRequired = true
+			s.snapshotReloadMu.Unlock()
+		}
 		return err
 	}
 	s.version = snapshot.Version
@@ -264,24 +269,21 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 
 	agents := make([]AgentClientRecord, 0, len(s.agents))
 	for _, agent := range s.agents {
+		agent.ReferenceFolders = agent.ReferenceFolders.Clone()
 		agents = append(agents, agent)
 	}
 	sort.Slice(agents, func(i, j int) bool { return agents[i].AgentID < agents[j].AgentID })
 
 	taskThreads := make(map[string][]AIAgentTaskThreadRecord, len(s.taskThreads))
 	for taskID, threads := range s.taskThreads {
-		// Keep only the most recent threads per task (the tail is chronological),
-		// then cap each thread's progress lines. Both bounds keep the single
-		// AI Agent client snapshot DynamoDB item under its 400 KB hard limit;
-		// uncapped, accumulated runs/lines eventually make EVERY client write
-		// (device heartbeat, thread progress, assignment events) fail with a
-		// DynamoDB ValidationException, freezing the projection. The live SSE
-		// stream is unaffected — it delivers every line in real time.
+		// Retain conversation anchors and active runs. Other task projections keep
+		// their recent tail; progress lines remain bounded. Conversation payloads
+		// use chunked storage so retention does not exceed DynamoDB item limits.
 		retainedThreads := threads
 		if len(retainedThreads) > aiAgentClientThreadsPerTaskLimit {
 			retainedThreads = make([]AIAgentTaskThreadRecord, 0, len(threads))
 			for index, thread := range threads {
-				if index >= len(threads)-aiAgentClientThreadsPerTaskLimit || taskThreadNeedsRetention(thread) {
+				if index >= len(threads)-aiAgentClientThreadsPerTaskLimit || taskThreadNeedsRetention(thread) || durableConversationHistory(thread, s.taskThreadMessages[thread.ThreadID]) {
 					retainedThreads = append(retainedThreads, thread)
 				}
 			}
@@ -294,10 +296,7 @@ func (s *DevelopmentAIAgentClientStore) snapshot(savedAt time.Time) (AIAgentClie
 		}
 		taskThreads[taskID] = copied
 	}
-	taskThreadMessages := make(map[string][]AIAgentTaskThreadHistoryMessage, len(s.taskThreadMessages))
-	for threadID, messages := range s.taskThreadMessages {
-		taskThreadMessages[threadID] = retainLatestThreadHistoryMessages(messages)
-	}
+	taskThreadMessages := retainedConversationMessages(taskThreads, s.taskThreadMessages)
 	events, err := snapshotEvents(retainLatestClientReplayEvents(s.events))
 	if err != nil {
 		return AIAgentClientSnapshot{}, err
@@ -426,6 +425,7 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		if agentID == "" {
 			return errors.New("ai agent client snapshot agent_id is required")
 		}
+		agent.ReferenceFolders = agent.ReferenceFolders.Clone()
 		agents[agentID] = agent
 	}
 	taskThreads := make(map[string][]AIAgentTaskThreadRecord, len(snapshot.TaskThreads))
@@ -446,8 +446,9 @@ func (s *DevelopmentAIAgentClientStore) restoreSnapshotWithSubscriberMode(snapsh
 		if threadID == "" {
 			return errors.New("ai agent client snapshot task thread message thread_id is required")
 		}
-		taskThreadMessages[threadID] = retainLatestThreadHistoryMessages(messages)
+		taskThreadMessages[threadID] = copyTaskThreadHistoryMessages(messages)
 	}
+	taskThreadMessages = retainedConversationMessages(taskThreads, taskThreadMessages)
 	events, err := restoreSnapshotEvents(snapshot.Events)
 	if err != nil {
 		return err

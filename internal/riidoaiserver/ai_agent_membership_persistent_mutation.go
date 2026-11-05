@@ -19,6 +19,7 @@ func (s *PersistentAIAgentClientStore) forceReloadMembershipSnapshot(ctx context
 }
 
 func (s *PersistentAIAgentClientStore) mutateTaskAgentMembership(ctx context.Context, taskID, agentID, publicationGeneration string, fence *taskAgentMembershipRemovalFence, publication bool, mutate func() (AIAgentTaskActionResponse, error)) (AIAgentTaskActionResponse, error) {
+	var lastConflict error
 	for attempt := 0; attempt < 3; attempt++ {
 		if err := s.forceReloadMembershipSnapshot(ctx); err != nil {
 			return AIAgentTaskActionResponse{}, err
@@ -28,7 +29,7 @@ func (s *PersistentAIAgentClientStore) mutateTaskAgentMembership(ctx context.Con
 			return AIAgentTaskActionResponse{}, err
 		}
 		if fence != nil && (before.TaskAgentMemberships[taskID][agentID].DurableGeneration != fence.durableGeneration || before.TaskAgentMemberships[taskID][agentID].IntentGateAssignmentID != fence.intentGateAssignmentID) {
-			return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
+			return AIAgentTaskActionResponse{}, withFailureStage("membership_removal_fence", ErrAIAgentMembershipChanged)
 		}
 		response, err := mutate()
 		if err != nil {
@@ -69,8 +70,10 @@ func (s *PersistentAIAgentClientStore) mutateTaskAgentMembership(ctx context.Con
 		if !errors.Is(err, errTaskAgentSnapshotChanged) {
 			return response, err
 		}
+		lastConflict = err
 	}
-	return AIAgentTaskActionResponse{}, ErrAIAgentMembershipChanged
+	_, lastStage := failureStages(lastConflict)
+	return AIAgentTaskActionResponse{}, withFailureStage("membership_retries_exhausted:"+lastStage, ErrAIAgentMembershipChanged)
 }
 
 type taskAgentMembershipObservationReader interface {

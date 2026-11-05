@@ -10,12 +10,16 @@ func (s *DevelopmentAIAgentClientStore) appendThreadUserMessageLocked(
 	principal AuthorizationResult,
 	body string,
 	sourceMessageID string,
+	observedAt ...time.Time,
 ) {
 	body = strings.TrimSpace(body)
 	if body == "" || strings.TrimSpace(response.ThreadID) == "" {
 		return
 	}
 	now := time.Now().UTC()
+	if len(observedAt) > 0 && !observedAt[0].IsZero() {
+		now = observedAt[0]
+	}
 	message := AIAgentTaskThreadHistoryMessage{
 		MessageID:         taskThreadUserMessageID(response.ThreadID, response.AssignmentID, sourceMessageID, body, now),
 		Role:              AIAgentTaskThreadMessageRoleUser,

@@ -48,6 +48,10 @@ func (s Server) handleAIAgentClientAssignTask(w http.ResponseWriter, r *http.Req
 		writeJSON(w, http.StatusAccepted, response)
 		return
 	}
+	if err := s.prepareDirectAssignment(r.Context(), principal, taskID, &req, &composedReq); err != nil {
+		writeAIAgentClientError(w, err)
+		return
+	}
 	assignmentReq := composedReq.Request
 	creationContext, creationReceipt := withTaskAgentCreationReceipt(r.Context())
 	assignment, err := s.assignment.AssignTaskReplacement(creationContext, taskID, assignmentReq)

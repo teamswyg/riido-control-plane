@@ -7,25 +7,27 @@ import (
 
 func (s *DevelopmentAIAgentClientStore) upsertTaskThreadFromActionLocked(response AIAgentTaskActionResponse, sourceCommentID string) {
 	now := time.Now().UTC()
+	reactionSource := ""
 	thread := AIAgentTaskThreadRecord{
-		ThreadID:           response.ThreadID,
-		ConversationID:     response.ThreadID,
-		TaskID:             response.TaskID,
-		AssignmentID:       response.AssignmentID,
-		AgentID:            response.AgentID,
-		AgentSnapshot:      copyTaskThreadAgentSnapshot(response.AgentSnapshot),
-		RunID:              response.RunID,
-		SourceCommentID:    strings.TrimSpace(sourceCommentID),
-		WorkStatus:         response.WorkStatus,
-		ConfirmationReason: response.ConfirmationReason,
-		AssignmentState:    response.AssignmentState,
-		CommentKind:        response.CommentKind,
-		Message:            response.Message,
-		ResultMessage:      response.ResultMessage,
-		FailureDiagnostics: copyFailureDiagnostics(response.FailureDiagnostics),
-		ExecutionContext:   copyExecutionContext(response.ExecutionContext),
-		StartedAt:          now,
-		Lines:              []AgentThreadProgressLine{},
+		ReactionSourceMessageID: &reactionSource,
+		ThreadID:                response.ThreadID,
+		ConversationID:          response.ThreadID,
+		TaskID:                  response.TaskID,
+		AssignmentID:            response.AssignmentID,
+		AgentID:                 response.AgentID,
+		AgentSnapshot:           copyTaskThreadAgentSnapshot(response.AgentSnapshot),
+		RunID:                   response.RunID,
+		SourceCommentID:         strings.TrimSpace(sourceCommentID),
+		WorkStatus:              response.WorkStatus,
+		ConfirmationReason:      response.ConfirmationReason,
+		AssignmentState:         response.AssignmentState,
+		CommentKind:             response.CommentKind,
+		Message:                 response.Message,
+		ResultMessage:           response.ResultMessage,
+		FailureDiagnostics:      copyFailureDiagnostics(response.FailureDiagnostics),
+		ExecutionContext:        copyExecutionContext(response.ExecutionContext),
+		StartedAt:               now,
+		Lines:                   []AgentThreadProgressLine{},
 	}
 	if !taskThreadHasActiveStream(thread) {
 		thread.CompletedAt = now
