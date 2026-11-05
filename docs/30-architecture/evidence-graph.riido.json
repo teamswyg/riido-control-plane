@@ -28190,6 +28190,10 @@
         },
         {
           "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_saved_editor_test.go"
+        },
+        {
+          "kind": "test",
           "path": "internal/riidoaiserver/task_read_scope_evidence_boundaries_test.go"
         },
         {
