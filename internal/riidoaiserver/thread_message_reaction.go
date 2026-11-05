@@ -3,10 +3,11 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"github.com/teamswyg/riido-contracts/reactionemoji"
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/teamswyg/riido-contracts/reactionemoji"
 )
 
 type AIAgentMessageReactionActor struct {

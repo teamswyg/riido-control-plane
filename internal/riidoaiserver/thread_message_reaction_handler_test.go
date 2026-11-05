@@ -14,6 +14,7 @@ type reactionTestAuthorizer struct{ principal AuthorizationResult }
 func (a reactionTestAuthorizer) Authorize(context.Context, string, AuthorizationRequest) (AuthorizationResult, error) {
 	return a.principal, nil
 }
+
 func TestMessageReactionHTTPAuthorizesAndPersistsActor(t *testing.T) {
 	store := NewDevelopmentAIAgentClientStore()
 	principal := AuthorizationResult{PrincipalID: "user-1", WorkspaceID: defaultAIAgentClientWorkspaceID}

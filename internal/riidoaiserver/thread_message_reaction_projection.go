@@ -8,6 +8,8 @@ func agentStatusReaction(thread AIAgentTaskThreadRecord) (string, bool) {
 		return "", true
 	}
 	switch thread.WorkStatus {
+	case AgentWorkStatusIdle, AgentWorkStatusOffline:
+		return "", false
 	case AgentWorkStatusCompleted:
 		return "2705", true
 	case AgentWorkStatusFailed:
