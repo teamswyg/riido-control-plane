@@ -2,6 +2,7 @@ package riidoaiserver
 
 import (
 	"errors"
+
 	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
 )
 

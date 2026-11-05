@@ -17,7 +17,7 @@ func newDirectCallFixture(t *testing.T, path string, legacy bool) *commentCallFi
 	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet || r.Header.Get(CommentDeliveryKeyHeader) != key || r.URL.Path != "/internal/agent-assignment-context/"+defaultAIAgentClientWorkspaceID+"/team-direct/handoff-task/user-1" {
 			t.Error("unexpected evidence lookup", r.Method, r.URL.Path)
-			w.WriteHeader(403)
+			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 		if f.status != 200 {
