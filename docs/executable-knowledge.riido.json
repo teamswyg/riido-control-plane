@@ -141,7 +141,17 @@
       "owner_key": "pipelines"
     }
   ],
-  "manual_groups": [],
+  "manual_groups": [
+    {
+      "id": "device-assignment-notification-rollout",
+      "owner": "control-plane runtime",
+      "reason": "Preserve the staging device notification rollout and safe updater contract; this historical delivery note is not a generated verification claim.",
+      "next_artifact": "docs/20-domain/agent-runtime-binding.riido.json",
+      "paths": [
+        "docs/30-architecture/device-assignment-notifications.md"
+      ]
+    }
+  ],
   "manifest_loop_budget": {
     "max_missing": 0,
     "max_missing_by_group": {}
