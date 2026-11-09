@@ -25,8 +25,10 @@ func newCLIInstallationIntentReplay(req cliInstallationIntentRequest, requestID 
 	if _, err := rand.Read(challenge[:]); err != nil {
 		return cliInstallationIntentReplay{}, errCLIInstallationUnavailable
 	}
-	req.SchemaVersion = cliInstallationIntentV2Schema
-	response := cliInstallationIntentResponse{SchemaVersion: cliInstallationIntentV2Schema, Challenge: base64.RawURLEncoding.EncodeToString(challenge[:]), ExpiresAt: time.Now().UTC().Add(10 * time.Minute)}
+	if !req.isTransfer() {
+		req.SchemaVersion = cliInstallationIntentV2Schema
+	}
+	response := cliInstallationIntentResponse{SchemaVersion: req.SchemaVersion, Challenge: base64.RawURLEncoding.EncodeToString(challenge[:]), ExpiresAt: time.Now().UTC().Add(10 * time.Minute)}
 	record := cliInstallationIntentReplay{req, cliInstallationIntentReplayResponse{response, requestID}}
 	record.Response.IntentID = record.intentID()
 	return record, nil

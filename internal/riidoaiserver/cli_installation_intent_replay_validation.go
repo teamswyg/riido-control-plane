@@ -10,6 +10,10 @@ func normalizeCLIInstallationIntentCreate(wire cliInstallationIntentCreateReques
 		if len(wire.RequestID) != 0 {
 			return req, "", errCLIInstallationInvalid
 		}
+	case cliInstallationIntentV3Schema:
+		if json.Unmarshal(wire.RequestID, &requestID) != nil || !installationRandom32(requestID) {
+			return req, "", errCLIInstallationInvalid
+		}
 	case cliInstallationIntentV2Schema:
 		if json.Unmarshal(wire.RequestID, &requestID) != nil || !installationRandom32(requestID) {
 			return req, "", errCLIInstallationInvalid
@@ -24,10 +28,12 @@ func normalizeCLIInstallationIntentCreate(wire cliInstallationIntentCreateReques
 
 func (record cliInstallationIntentReplay) valid() error {
 	req := record.Request
-	if req.SchemaVersion != cliInstallationIntentV2Schema || record.Response.SchemaVersion != cliInstallationIntentV2Schema {
+	if (req.SchemaVersion != cliInstallationIntentV2Schema && !req.isTransfer()) || record.Response.SchemaVersion != req.SchemaVersion {
 		return errCLIInstallationInvalid
 	}
-	req.SchemaVersion = cliInstallationIntentSchema
+	if !req.isTransfer() {
+		req.SchemaVersion = cliInstallationIntentSchema
+	}
 	if _, err := installationPublicKey(req); err != nil {
 		return err
 	}

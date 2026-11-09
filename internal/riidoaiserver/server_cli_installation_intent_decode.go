@@ -29,6 +29,8 @@ func decodeCLIInstallationIntentCreate(w http.ResponseWriter, r *http.Request) (
 	keys := "schema_version installation_id resource client_id key_fingerprint public_key_algorithm public_key expected_device_id approved_principal_id"
 	switch discriminator.SchemaVersion {
 	case cliInstallationIntentSchema:
+	case cliInstallationIntentV3Schema:
+		keys += " request_id previous_device_id previous_link_revision"
 	case cliInstallationIntentV2Schema:
 		keys += " request_id"
 	default:

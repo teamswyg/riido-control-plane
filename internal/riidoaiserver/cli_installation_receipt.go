@@ -48,7 +48,7 @@ func originalCLIInstallationReceipt(intent cliInstallationIntent, link cliInstal
 	// permission are independently checked by the policy endpoint.
 	if link.valid() != nil || link.cliInstallationIdentity != intent.Request.cliInstallationIdentity ||
 		link.DeviceID != intent.Request.ExpectedDeviceID || link.LinkApprovedBy != intent.Request.ApprovedPrincipalID ||
-		link.DeviceOwnerAtLink != intent.Request.ApprovedPrincipalID || !link.LinkedAt.Before(intent.ExpiresAt) {
+		link.DeviceOwnerAtLink != intent.Request.ApprovedPrincipalID || link.LinkRevision != expectedCLIInstallationLinkRevision(intent.Request) || !link.LinkedAt.Before(intent.ExpiresAt) {
 		return cliInstallationReceipt{}, errCLIInstallationUnavailable
 	}
 	return cliInstallationReceipt{cliInstallationReceiptSchema, intent.ID, link}, nil

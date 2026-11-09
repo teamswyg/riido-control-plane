@@ -15,7 +15,7 @@ func NewCLIInstallationServiceConfig(resource string, credentials []StaticTokenC
 			continue
 		}
 		for _, scope := range credential.Scopes {
-			if scope != "cli-installation:link" && scope != "cli-installation:policy-read" {
+			if scope != "cli-installation:link" && scope != "cli-installation:policy-read" && scope != "cli-installation:transfer" {
 				return CLIInstallationServiceConfig{}, errors.New("CLI installation service requires exact operation scopes")
 			}
 		}

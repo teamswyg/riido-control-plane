@@ -25,6 +25,11 @@ func (s Server) handleCLIInstallationIntent(w http.ResponseWriter, r *http.Reque
 		if err != nil {
 			return nil, err
 		}
+		if req.isTransfer() {
+			if err := s.authorizeCLIInstallationService(r, "transfer"); err != nil {
+				return nil, err
+			}
+		}
 		if req.Resource != s.config.CLIInstallationService.Resource {
 			return nil, ErrAuthorizationForbidden
 		}

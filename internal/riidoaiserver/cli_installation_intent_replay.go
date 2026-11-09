@@ -43,7 +43,9 @@ func (record cliInstallationIntentReplay) intent() cliInstallationIntent {
 	raw, _ := base64.RawURLEncoding.DecodeString(record.Response.Challenge)
 	digest := sha256.Sum256(raw)
 	request := record.Request
-	request.SchemaVersion = cliInstallationIntentSchema
+	if !request.isTransfer() {
+		request.SchemaVersion = cliInstallationIntentSchema
+	}
 	return cliInstallationIntent{Request: request, ID: record.Response.IntentID, ChallengeDigest: hex.EncodeToString(digest[:]), ExpiresAt: record.Response.ExpiresAt, ReplayKey: record.key()}
 }
 

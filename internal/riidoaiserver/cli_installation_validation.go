@@ -24,7 +24,7 @@ func (id cliInstallationIdentity) key() string {
 }
 
 func installationPublicKey(req cliInstallationIntentRequest) (*ecdsa.PublicKey, error) {
-	if req.SchemaVersion != cliInstallationIntentSchema || !req.valid() || req.PublicKeyAlgorithm != cliInstallationAlgorithm || !cliInstallationID(req.ExpectedDeviceID) || !cliInstallationID(req.ApprovedPrincipalID) {
+	if !validCLIInstallationTransfer(req) || !req.valid() || req.PublicKeyAlgorithm != cliInstallationAlgorithm || !cliInstallationID(req.ExpectedDeviceID) || !cliInstallationID(req.ApprovedPrincipalID) {
 		return nil, errCLIInstallationInvalid
 	}
 	key, err := base64.RawURLEncoding.DecodeString(req.PublicKey)
