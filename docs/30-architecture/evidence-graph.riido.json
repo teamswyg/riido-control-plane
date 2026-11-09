@@ -27124,7 +27124,7 @@
     {
       "id": "cli_installation_complete_coverage_5900",
       "observation": "Unknown-only link policy prevents unsafe permission but cannot restore ordinary linked use after verified local execution completion. Empty history, lease expiry, legacy registration and mutable device binding cannot prove complete execution coverage.",
-      "hypothesis": "Atomic server-issued birth, device/owner/generation/credential admission fencing and an epoch-bound unresolved ledger allow a final policy authorization snapshot to grant permission safely for covered local executions while keeping legacy and unobserved work unknown.",
+      "hypothesis": "Atomic server-issued birth, device/owner/generation/credential admission fencing and an epoch-bound unresolved ledger allow a final policy authorization snapshot to grant permission safely for covered local executions while keeping legacy and unobserved work unknown. Explicit legacy bootstrap must first fence admission, then atomically replace the native credential and complete coverage only after a protected proof from a different OS boot. Durable transition records and exact native-snapshot comparison must make retries safe without deleting existing links or changing the device ID.",
       "claims": [
         "execution_coverage_must_fence_installation_permission",
         "cli_installation_link_must_preserve_key_and_policy_fences",
@@ -27390,6 +27390,26 @@
         {
           "kind": "code",
           "path": "internal/riidoaiserver/store_handle_poll.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_bootstrap_store.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_bootstrap_advance.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/device_bootstrap_commit.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/dynamodb_device_bootstrap_security.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_device_bootstrap_operation.go"
         }
       ],
       "verifiers": [
@@ -27568,6 +27588,18 @@
         {
           "kind": "test",
           "path": "internal/riidoaiserver/execution_coverage_termination_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_bootstrap_atomic_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_bootstrap_recovery_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/device_bootstrap_http_lifecycle_test.go"
         }
       ],
       "evidence": [
@@ -27582,7 +27614,7 @@
           "redacted": true
         }
       ],
-      "decision": "Source and synthetic HTTP/Dynamo regression evidence cover birth, admission, credential rotation, receipt idempotency, policy/claim interleaving and conservative unknown states. This chain does not assert live AWS/provider termination, fleet activation, Desktop integration or authenticated release acceptance. Per-request monolith consumption and runtime/installation rollout remain separate gates.",
+      "decision": "Source and synthetic HTTP/Dynamo regression evidence cover birth, admission, credential rotation, receipt idempotency, policy/claim interleaving and conservative unknown states. This chain does not assert live AWS/provider termination, fleet activation, Desktop integration or authenticated release acceptance. Per-request monolith consumption and runtime/installation rollout remain separate gates. RIID-5971 bootstrap source and synthetic Dynamo/HTTP tests now cover prepare fencing, cross-boot proof validation, atomic activation, response-loss recovery, expired intent renewal and stale credential rejection. Public approval orchestration, Desktop restart journaling and real reboot/link/repair acceptance remain unverified.",
       "next_loop": "closed_loop_candidate"
     },
     {

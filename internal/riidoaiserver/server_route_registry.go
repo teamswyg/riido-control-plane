@@ -51,6 +51,8 @@ var serverRoutes = []serverRoute{
 	{"POST /v1/internal/cli-installations/link-receipts", Server.handleCLIInstallationReceipt},
 	{"POST /v1/internal/cli-installations/link-intent-retirements", Server.handleCLIInstallationRetirement},
 	{"POST /v1/daemon/cli-installation-links/{intent_id}/confirm", Server.handleCLIInstallationConfirm},
+	{"POST /v1/internal/cli-installations/device-bootstraps", Server.handleDeviceBootstrapCreate},
+	{"POST /v1/daemon/device-bootstraps/{transition_id}/{operation}", Server.handleDeviceBootstrapOperation},
 	{"POST /v1/daemon/execution-claims/{assignment_id}/termination", Server.handleExecutionTermination},
 	{"/v1/daemon/runtime-snapshot", Server.handleDaemonRuntimeSnapshot},
 	{"/v1/daemon/agent-bindings", Server.handleDaemonAgentBindings},

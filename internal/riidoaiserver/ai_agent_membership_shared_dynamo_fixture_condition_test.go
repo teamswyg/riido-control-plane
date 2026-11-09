@@ -14,6 +14,8 @@ func (f *membershipSharedDynamoFixture) condition(t *testing.T, p *membershipDyn
 	}
 	previous := f.items[membershipDynamoKey(key)]
 	switch strings.TrimSpace(p.ConditionExpression) {
+	case "payload_sha256 = :bootstrap_hash", "policy_schema = :schema AND coverage_state = :state AND revision = :revision", "policy_schema = :schema AND coverage_state = :state AND transition_id = :transition AND revision = :revision":
+		return bootstrapFixtureCondition(p, previous)
 	case "(attribute_not_exists(pk) AND attribute_not_exists(sk)) OR (policy_schema = :schema AND coverage_state = :unknown)":
 		if p.ExpressionAttributeValues[":schema"]["S"] != "device_policy_revision/v1" || p.ExpressionAttributeValues[":unknown"]["S"] != "unknown" {
 			t.Error("invalid legacy admission fence values")

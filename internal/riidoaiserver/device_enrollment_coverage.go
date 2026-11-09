@@ -28,7 +28,7 @@ func newCoverageIdentity(prefix string) (string, error) {
 }
 
 func validateCredentialCoverage(c AIAgentClientDeviceCredentialSnapshot) error {
-	covered := strings.HasPrefix(c.DeviceID, executionCoveragePrefix)
+	covered := coverageDeviceIdentity(c.DeviceID, c.ExecutionCoverageGeneration)
 	if covered && cliInstallationID(c.ExecutionCoverageGeneration) && cliInstallationID(c.CredentialGeneration) {
 		return nil
 	}
@@ -41,7 +41,7 @@ func validateCredentialCoverage(c AIAgentClientDeviceCredentialSnapshot) error {
 func (s *DevelopmentAIAgentClientStore) enrollmentCoverageLocked(deviceID string, enrollment normalizedDeviceEnrollment) (string, string, error) {
 	existing, existed := s.deviceCredentials[deviceID]
 	if existed && existing.coverageGeneration != "" {
-		if !s.executionCoverageAtomic || !strings.HasPrefix(deviceID, executionCoveragePrefix) || existing.credentialGeneration == "" {
+		if !s.executionCoverageAtomic || !coverageDeviceIdentity(deviceID, existing.coverageGeneration) || existing.credentialGeneration == "" {
 			return "", "", errCLIInstallationUnavailable
 		}
 		credential, err := newCoverageIdentity("cred_")
