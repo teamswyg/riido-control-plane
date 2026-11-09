@@ -2,7 +2,6 @@ package riidoaiserver
 
 import (
 	"errors"
-	"strings"
 )
 
 const coverageLocalTermination = "local_invocations_quiescent"
@@ -34,7 +33,7 @@ func validateClaimCoverage(claim executionClaim) error {
 		}
 		return nil
 	}
-	if !strings.HasPrefix(claim.DeviceID, executionCoveragePrefix) || !cliInstallationID(claim.CoverageGeneration) || !cliInstallationID(claim.CredentialGeneration) || !cliInstallationID(claim.RuntimeProvider) ||
+	if !coverageDeviceIdentity(claim.DeviceID, claim.CoverageGeneration) || !cliInstallationID(claim.CoverageGeneration) || !cliInstallationID(claim.CredentialGeneration) || !cliInstallationID(claim.RuntimeProvider) ||
 		(claim.TerminationScope != coverageLocalTermination && claim.TerminationScope != "unobserved") {
 		return errors.New("invalid execution coverage provenance")
 	}

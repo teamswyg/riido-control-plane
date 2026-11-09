@@ -2,7 +2,6 @@ package riidoaiserver
 
 import (
 	"strconv"
-	"strings"
 )
 
 const (
@@ -20,7 +19,7 @@ type executionCoverage struct {
 
 func executionCoverageFromItem(item map[string]map[string]string, device string) (executionCoverage, error) {
 	c := executionCoverage{DeviceID: device, Generation: dynamoDBStringValue(item, "generation"), CredentialGeneration: dynamoDBStringValue(item, "credential_generation"), OwnerPrincipalID: dynamoDBStringValue(item, "owner_principal_id"), State: dynamoDBStringValue(item, "coverage_state")}
-	if !strings.HasPrefix(device, executionCoveragePrefix) || !cliInstallationID(device) ||
+	if !coverageDeviceIdentity(device, c.Generation) || !cliInstallationID(device) ||
 		dynamoDBStringValue(item, "pk") != "DEVICE_POLICY#"+device || dynamoDBStringValue(item, "sk") != "REVISION" ||
 		dynamoDBStringValue(item, "policy_schema") != executionCoverageSchema ||
 		!cliInstallationID(c.Generation) || !cliInstallationID(c.CredentialGeneration) || !cliInstallationID(c.OwnerPrincipalID) ||

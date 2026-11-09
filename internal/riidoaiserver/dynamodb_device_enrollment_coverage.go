@@ -58,7 +58,8 @@ func (s *DynamoDBAIAgentClientSnapshot) enrollmentCoverageAction(ctx context.Con
 		if mutation.before.ExecutionCoverageGeneration != "" {
 			return nil, errCLIInstallationUnavailable
 		}
-		return nil, nil
+		action := legacyExecutionAdmissionFence(s.tableName, after.DeviceID)
+		return &action, nil
 	}
 	if !mutation.existed {
 		item, err := executionCoverageItem(executionCoverage{DeviceID: after.DeviceID, Generation: after.ExecutionCoverageGeneration, CredentialGeneration: after.CredentialGeneration, OwnerPrincipalID: after.OwnerPrincipalID, State: "complete", Revision: 1})
