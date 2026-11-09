@@ -37,7 +37,7 @@ func (intent cliInstallationIntent) valid() error {
 }
 
 func (link cliInstallationLink) valid() error {
-	if link.SchemaVersion != cliInstallationLinkSchema || !link.cliInstallationIdentity.valid() || !cliInstallationID(link.DeviceID) || !cliInstallationID(link.DeviceOwnerAtLink) || link.DeviceOwnerAtLink != link.LinkApprovedBy || link.LinkRevision != "1" || link.LinkedAt.IsZero() {
+	if link.SchemaVersion != cliInstallationLinkSchema || !link.cliInstallationIdentity.valid() || !cliInstallationID(link.DeviceID) || !cliInstallationID(link.DeviceOwnerAtLink) || link.DeviceOwnerAtLink != link.LinkApprovedBy || !validCLIInstallationLinkRevision(link.LinkRevision) || link.LinkedAt.IsZero() {
 		return errCLIInstallationInvalid
 	}
 	if payload, err := json.Marshal(link); err != nil || len(payload) > 3<<10 {

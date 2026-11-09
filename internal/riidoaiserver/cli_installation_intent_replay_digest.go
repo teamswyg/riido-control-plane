@@ -6,6 +6,9 @@ import (
 )
 
 func installationIntentRequestDigest(domain string, request cliInstallationIntentRequest, requestID string) [32]byte {
+	if request.isTransfer() {
+		domain += "/device-transfer.v1"
+	}
 	return installationIntentTupleDigest(domain, cliInstallationServicePrincipal, request.Resource, request.ClientID, requestID)
 }
 

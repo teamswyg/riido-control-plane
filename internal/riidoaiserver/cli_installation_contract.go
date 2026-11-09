@@ -31,10 +31,12 @@ type cliInstallationIdentity struct {
 type cliInstallationIntentRequest struct {
 	SchemaVersion string `json:"schema_version"`
 	cliInstallationIdentity
-	PublicKeyAlgorithm  string `json:"public_key_algorithm"`
-	PublicKey           string `json:"public_key"`
-	ExpectedDeviceID    string `json:"expected_device_id"`
-	ApprovedPrincipalID string `json:"approved_principal_id"`
+	PublicKeyAlgorithm   string `json:"public_key_algorithm"`
+	PublicKey            string `json:"public_key"`
+	ExpectedDeviceID     string `json:"expected_device_id"`
+	ApprovedPrincipalID  string `json:"approved_principal_id"`
+	PreviousDeviceID     string `json:"previous_device_id,omitempty"`
+	PreviousLinkRevision string `json:"previous_link_revision,omitempty"`
 }
 
 type cliInstallationIntent struct {

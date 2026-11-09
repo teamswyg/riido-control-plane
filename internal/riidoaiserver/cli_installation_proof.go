@@ -12,6 +12,10 @@ import (
 func cliInstallationLinkMessage(intent cliInstallationIntent) []byte {
 	r := intent.Request
 	fields := []string{"riido-cli-device-link.v1", "link", r.Resource, r.ClientID, r.InstallationID, intent.ID, intent.ChallengeDigest, r.KeyFingerprint, r.ExpectedDeviceID, r.ApprovedPrincipalID, intent.ExpiresAt.UTC().Format(time.RFC3339Nano)}
+	if r.isTransfer() {
+		fields[0], fields[1] = "riido-cli-device-transfer.v1", "transfer"
+		fields = append(fields, r.PreviousDeviceID, r.PreviousLinkRevision)
+	}
 	var message bytes.Buffer
 	for _, field := range fields {
 		_ = binary.Write(&message, binary.BigEndian, uint32(len(field)))
@@ -37,9 +41,9 @@ func verifyCLIInstallationProof(intent cliInstallationIntent, device authenticat
 }
 
 func linkForCLIInstallation(intent cliInstallationIntent, device authenticatedClaimDevice, now time.Time) cliInstallationLink {
-	return cliInstallationLink{SchemaVersion: cliInstallationLinkSchema, cliInstallationIdentity: intent.Request.cliInstallationIdentity, DeviceID: device.deviceID, LinkApprovedBy: intent.Request.ApprovedPrincipalID, DeviceOwnerAtLink: device.ownerPrincipalID, LinkRevision: "1", LinkedAt: now.UTC()}
+	return cliInstallationLink{SchemaVersion: cliInstallationLinkSchema, cliInstallationIdentity: intent.Request.cliInstallationIdentity, DeviceID: device.deviceID, LinkApprovedBy: intent.Request.ApprovedPrincipalID, DeviceOwnerAtLink: device.ownerPrincipalID, LinkRevision: expectedCLIInstallationLinkRevision(intent.Request), LinkedAt: now.UTC()}
 }
 
 func matchingCLIInstallationLink(link cliInstallationLink, intent cliInstallationIntent, device authenticatedClaimDevice) bool {
-	return link.SchemaVersion == cliInstallationLinkSchema && link.cliInstallationIdentity == intent.Request.cliInstallationIdentity && link.DeviceID == device.deviceID && link.DeviceOwnerAtLink == device.ownerPrincipalID && link.LinkApprovedBy == intent.Request.ApprovedPrincipalID && link.LinkRevision == "1" && !link.LinkedAt.IsZero()
+	return link.SchemaVersion == cliInstallationLinkSchema && link.cliInstallationIdentity == intent.Request.cliInstallationIdentity && link.DeviceID == device.deviceID && link.DeviceOwnerAtLink == device.ownerPrincipalID && link.LinkApprovedBy == intent.Request.ApprovedPrincipalID && link.LinkRevision == expectedCLIInstallationLinkRevision(intent.Request) && !link.LinkedAt.IsZero()
 }

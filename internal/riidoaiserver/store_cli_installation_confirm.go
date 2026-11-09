@@ -5,6 +5,10 @@ func (s *Store) confirmLocalCLIInstallation(state *storeState, req cliInstallati
 	if !ok || intent.Request.Resource != req.resource {
 		return cliInstallationLink{}, ErrAuthorizationForbidden
 	}
+	if intent.Request.isTransfer() {
+		// Only the shared native authority can fence execution and replace a link.
+		return cliInstallationLink{}, errCLIInstallationUnavailable
+	}
 	if err := verifyCLIInstallationProof(intent, req.device, req.signature); err != nil {
 		return cliInstallationLink{}, err
 	}

@@ -14,6 +14,9 @@ func (s *DynamoDBAssignmentOperationStore) confirmCLIInstallationLink(ctx contex
 		if err != nil {
 			return cliInstallationLink{}, err
 		}
+		if intent.Request.isTransfer() {
+			return s.confirmCLIInstallationTransfer(ctx, id, device, signature, resource)
+		}
 		if intent.Request.Resource != resource {
 			return cliInstallationLink{}, ErrAuthorizationForbidden
 		}
