@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `290`
 - claim refs: `462`
-- change refs: `3155`
-- verifier refs: `1899`
+- change refs: `3156`
+- verifier refs: `1903`
 - evidence refs: `863`
 
 ## Compiled Chain Summary
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `192` | `295` | `2074` | `1174` | `544` |
+| `closed_loop_candidate` | `192` | `295` | `2075` | `1178` | `544` |
 | `control_plane_performance_harness` | `32` | `36` | `245` | `262` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `20` | `35` | `379` | `199` | `73` |
@@ -317,7 +317,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `riido_cli_context_read_quota_5900` | `2` | `5` | `7` | `1` | `ai_thread_history` |
 | `riido_cli_run_read_current_metadata_5900` | `2` | `8` | `5` | `1` | `ai_thread_history` |
 | `riido_cli_comment_verified_context_5900` | `2` | `2` | `1` | `1` | `ai_thread_history` |
-| `cli_installation_service_link_and_revision_5900` | `4` | `50` | `49` | `3` | `closed_loop_candidate` |
+| `cli_installation_service_link_and_revision_5900` | `4` | `51` | `53` | `3` | `closed_loop_candidate` |
 | `cli_installation_complete_coverage_5900` | `3` | `71` | `48` | `2` | `closed_loop_candidate` |
 | `typed_assignment_read_scope_5900` | `3` | `113` | `66` | `2` | `closed_loop_candidate` |
 | `riido_cli_run_read_grouping_5917` | `2` | `9` | `4` | `1` | `ai_thread_history` |

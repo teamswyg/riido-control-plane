@@ -322,7 +322,11 @@
         "durable-snapshot-schema-and-pair-must-match-actor-evidence",
         "dynamo-evidence-uses-only-exact-consistent-gets",
         "expired-retired-consumed-evidence-never-renews-permission",
-        "evidence-preflight-and-browser-origin-rejected"
+        "evidence-preflight-and-browser-origin-rejected",
+        "evidence-v2-only-reads-existing-v3-transfer-domain",
+        "transfer-evidence-requires-link-and-transfer-service-scopes",
+        "transfer-evidence-binds-previous-device-revision-and-target",
+        "evidence-v1-cannot-read-transfer-domain"
       ]
     },
     {
