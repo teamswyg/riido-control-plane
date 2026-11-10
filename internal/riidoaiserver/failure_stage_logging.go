@@ -62,6 +62,10 @@ func failureKind(ctx context.Context, err error) string {
 		return "thread_conflict"
 	case errors.Is(err, errNativeSessionUnavailable):
 		return "session_unavailable"
+	case errors.Is(err, errNativeSessionConfigurationMismatch):
+		return "session_configuration_mismatch"
+	case errors.Is(err, errNativeSessionRuntimeMismatch):
+		return "session_runtime_mismatch"
 	case isDynamoDBTransactionContention(err):
 		return "store_conflict"
 	case errors.Is(err, ErrAuthorizationForbidden):

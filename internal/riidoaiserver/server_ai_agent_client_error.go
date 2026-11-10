@@ -33,7 +33,7 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusNotFound, "not found")
 	case errors.Is(err, ErrAIAgentAssigned):
 		writeError(w, http.StatusConflict, err.Error())
-	case errors.Is(err, ErrAIAgentTaskThreadConflict), errors.Is(err, errNativeSessionUnavailable):
+	case errors.Is(err, ErrAIAgentTaskThreadConflict), isNativeSessionConflict(err):
 		writeError(w, http.StatusConflict, err.Error())
 	case errors.Is(err, ErrAIAgentMembershipChanged):
 		writeError(w, http.StatusConflict, err.Error())

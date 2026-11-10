@@ -61,7 +61,7 @@ func (s Server) precheckCommentMention(ctx context.Context, current Assignment, 
 	// Use the same freshly verified task and root membership as execution.
 	err = s.prepareCommentConversation(ctx, principal, evidence, &publication, &request, selected.OwnerPrincipalID)
 	switch {
-	case errors.Is(err, ErrAIAgentTaskThreadConflict), errors.Is(err, errNativeSessionUnavailable):
+	case errors.Is(err, ErrAIAgentTaskThreadConflict), isNativeSessionConflict(err):
 		return []string{"session_conflict"}, nil
 	case errors.Is(err, ErrAuthorizationForbidden), errors.Is(err, ErrAIAgentNotFound):
 		return []string{"target_unavailable"}, nil
