@@ -22,5 +22,5 @@ func (s *DynamoDBAssignmentOperationStore) readCLIInstallationIntentEvidence(ctx
 			return cliInstallationIntentEvidence{}, errCLIInstallationUnavailable
 		}
 	}
-	return installationEvidenceResponse(lookup.Response.RequestID, original, found), nil
+	return installationEvidenceResponse(lookup, original, found), nil
 }

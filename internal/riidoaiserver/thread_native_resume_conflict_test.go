@@ -21,7 +21,7 @@ func (s mismatchedNativeRuntimeStore) LookupAgentRuntimeFact(string) (AgentRunti
 func TestNativeFollowupMismatchIsNotAnActiveThreadConflict(t *testing.T) {
 	for _, name := range []string{"model", "provider", "worktree", "runtime"} {
 		t.Run(name, func(t *testing.T) {
-			s, _, thread, principal, req := nativeResumeScopeFixture(t)
+			s, source, thread, principal, req := nativeResumeScopeFixture(t)
 			kind := "session_configuration_mismatch"
 			message := "native session configuration does not match the requested agent, provider, model or worktree"
 			switch name {
@@ -30,6 +30,7 @@ func TestNativeFollowupMismatchIsNotAnActiveThreadConflict(t *testing.T) {
 			case "provider":
 				req.RuntimeProvider = "claude"
 			case "worktree":
+				source.projection.Assignment.Worktree = &AssignmentWorktree{BranchName: "original-branch"}
 				req.Worktree = &AssignmentWorktree{BranchName: "different-branch"}
 			case "runtime":
 				binding, runtime, err := s.resolveAgentRuntimeFact(req.AgentID)
