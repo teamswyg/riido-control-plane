@@ -11,6 +11,14 @@ import (
 
 var errNativeSessionUnavailable = errors.New("native session unavailable; start a new conversation explicitly")
 
+// A terminal session can be incompatible even when no other thread is active.
+var errNativeSessionConfigurationMismatch = errors.New("native session configuration does not match the requested agent, provider, model or worktree")
+var errNativeSessionRuntimeMismatch = errors.New("native session runtime binding is inconsistent")
+
+func isNativeSessionConflict(err error) bool {
+	return errors.Is(err, errNativeSessionUnavailable) || errors.Is(err, errNativeSessionConfigurationMismatch) || errors.Is(err, errNativeSessionRuntimeMismatch)
+}
+
 // Select only the assignment behind the authorized thread. The daemon remains
 // the authority for its retained device/runtime/workdir/session binding.
 // Return the prior execution timestamp so shared-thread projection timestamps
@@ -42,7 +50,7 @@ func (s Server) applyThreadNativeResume(ctx context.Context, principal Authoriza
 		return time.Time{}, ErrAuthorizationForbidden
 	}
 	if previous.AgentID != req.AgentID || previous.RuntimeProvider != req.RuntimeProvider || previous.ModelID != req.ModelID || !reflect.DeepEqual(previous.Worktree, req.Worktree) {
-		return time.Time{}, ErrAIAgentTaskThreadConflict
+		return time.Time{}, errNativeSessionConfigurationMismatch
 	}
 	if err := s.validateFollowupRuntimeBinding(thread, *req, agentOwnerPrincipalID); err != nil {
 		return time.Time{}, err
@@ -64,7 +72,7 @@ func (s Server) validateFollowupRuntimeBinding(thread AIAgentTaskThreadRecord, r
 		return assignmentDependencyFailure(err)
 	}
 	if binding.AgentID != req.AgentID || binding.RuntimeProvider != req.RuntimeProvider || runtimeProviderForAIAgentRuntime(runtime.Kind) != req.RuntimeProvider || binding.DeviceID == "" || binding.DaemonID == "" || binding.RuntimeID == "" || runtime.RuntimeID != binding.RuntimeID || runtime.DeviceID != binding.DeviceID || (runtime.DaemonID != "" && runtime.DaemonID != binding.DaemonID) || runtime.OwnerPrincipalID == "" {
-		return ErrAIAgentTaskThreadConflict
+		return errNativeSessionRuntimeMismatch
 	}
 	// A connected account can own an Agent on another account's physical runtime.
 	// Revalidate immutable Agent ownership against the authorized current profile.

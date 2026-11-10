@@ -55,7 +55,7 @@ func (s Server) dispatchCommentTarget(ctx context.Context, principal Authorizati
 	child.Outcomes = nil
 	request := AssignAIAgentTaskRequest{AgentID: target, RequestID: requestID, Instruction: fmt.Sprintf("Agent %s requested work in this comment conversation:\n%s", event.AgentID, body), SourceCommentID: evidence.CommentID, SourceMessageID: call.OriginMessageID, VerifiedTaskContext: &evidence.Context, commentInvocation: child, skipSourceMessage: true}
 	_, err = s.deliverCommentInvocation(ctx, principal, evidence, request)
-	if errors.Is(err, ErrAIAgentTaskThreadConflict) || errors.Is(err, errNativeSessionUnavailable) || errors.Is(err, ErrAuthorizationForbidden) || errors.Is(err, ErrAIAgentNotFound) {
+	if errors.Is(err, ErrAIAgentTaskThreadConflict) || isNativeSessionConflict(err) || errors.Is(err, ErrAuthorizationForbidden) || errors.Is(err, ErrAIAgentNotFound) {
 		return false, notice(key, "continuation_unavailable", fmt.Sprintf("Riido: %s의 기존 세션을 이어서 호출할 수 없습니다. 진행 중인 요청과 연결 상태를 확인한 뒤 다시 요청해 주세요.", selected.Name))
 	}
 	if err != nil {
