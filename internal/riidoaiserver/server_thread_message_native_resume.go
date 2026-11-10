@@ -41,12 +41,16 @@ func (s Server) applyThreadNativeResume(ctx context.Context, principal Authoriza
 	if previous.ID != thread.AssignmentID || previous.TaskID != thread.TaskID || previous.AgentID != thread.AgentID || previous.WorkspaceID != principal.WorkspaceID || previous.WorkspaceID != req.WorkspaceID {
 		return time.Time{}, ErrAuthorizationForbidden
 	}
-	if previous.AgentID != req.AgentID || previous.RuntimeProvider != req.RuntimeProvider || previous.ModelID != req.ModelID || !reflect.DeepEqual(previous.Worktree, req.Worktree) {
+	worktreeChanged := previous.Worktree != nil && !reflect.DeepEqual(previous.Worktree, req.Worktree)
+	if previous.AgentID != req.AgentID || previous.RuntimeProvider != req.RuntimeProvider || previous.ModelID != req.ModelID || worktreeChanged {
 		return time.Time{}, ErrAIAgentTaskThreadConflict
 	}
 	if err := s.validateFollowupRuntimeBinding(thread, *req, agentOwnerPrincipalID); err != nil {
 		return time.Time{}, err
 	}
+	// Task context can discover a repository after a run starts, for example
+	// when the Agent opens a PR. Keep the worktree bound to the native session.
+	req.Worktree = cloneAssignmentWorktree(previous.Worktree)
 	req.ResumeSessionID = resumeID
 	if previous.State != AssignmentCompleted {
 		return time.Time{}, nil // Delivery of the failed/interrupted input is unconfirmed.

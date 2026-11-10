@@ -37,6 +37,24 @@ func TestHTTPSharedAgentFollowupKeepsNativeSessionWhenRequesterChanges(t *testin
 	}
 }
 
+func TestHTTPThreadFollowupKeepsWorkdirWhenPullRequestIsLinked(t *testing.T) {
+	f := newNativeResumeHTTPFixture(t)
+	repositories := f.taskContext.contextSnapshot.Repositories
+	f.taskContext.contextSnapshot.Repositories = nil
+	first := f.finishFirst(t, AssignmentCompleted)
+
+	f.taskContext.contextSnapshot.Repositories = repositories
+	var next AIAgentTaskActionResponse
+	f.post(t, f.base+"/tasks/task-new/threads/"+first.ThreadID+"/messages", CreateAIAgentTaskThreadMessageRequest{
+		Body:      "Continue in the same conversation after linking the pull request.",
+		RequestID: "followup-after-pr-link",
+	}, http.StatusAccepted, &next)
+	projection, found, err := f.store.LoadAssignmentProjection(t.Context(), next.AssignmentID)
+	if err != nil || !found || projection.Assignment.ResumeSessionID != "native-http-session" || projection.Assignment.Worktree != nil {
+		t.Fatal("follow-up changed the original session's execution binding", err)
+	}
+}
+
 func (f *nativeResumeHTTPFixture) finishFirst(t *testing.T, terminal AssignmentState) AIAgentTaskActionResponse {
 	t.Helper()
 	var first AIAgentTaskActionResponse

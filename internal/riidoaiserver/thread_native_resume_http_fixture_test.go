@@ -9,11 +9,12 @@ import (
 )
 
 type nativeResumeHTTPFixture struct {
-	handler http.Handler
-	store   *Store
-	client  *DevelopmentAIAgentClientStore
-	base    string
-	token   string
+	handler     http.Handler
+	store       *Store
+	client      *DevelopmentAIAgentClientStore
+	taskContext *assignmentHTTPTaskContextReader
+	base        string
+	token       string
 }
 
 func newNativeResumeHTTPFixture(t *testing.T) *nativeResumeHTTPFixture {
@@ -32,8 +33,9 @@ func newNativeResumeHTTPFixture(t *testing.T) *nativeResumeHTTPFixture {
 	}
 	taskContext := aiAgentTaskContextHTTPFixture()
 	taskContext.Component.ID = "task-new"
-	handler := NewServer(ServerConfig{Assignment: store, AIAgentClient: client, TaskContext: &assignmentHTTPTaskContextReader{contextSnapshot: taskContext}, Authorizer: auth}).Handler()
-	return &nativeResumeHTTPFixture{handler: handler, store: store, client: client, base: "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent", token: "native-owner-token"}
+	reader := &assignmentHTTPTaskContextReader{contextSnapshot: taskContext}
+	handler := NewServer(ServerConfig{Assignment: store, AIAgentClient: client, TaskContext: reader, Authorizer: auth}).Handler()
+	return &nativeResumeHTTPFixture{handler: handler, store: store, client: client, taskContext: reader, base: "/v2/client/workspaces/" + defaultAIAgentClientWorkspaceID + "/ai-agent", token: "native-owner-token"}
 }
 
 func (f *nativeResumeHTTPFixture) post(t *testing.T, path string, body any, status int, destination any) {
@@ -47,7 +49,7 @@ func (f *nativeResumeHTTPFixture) post(t *testing.T, path string, body any, stat
 	response := httptest.NewRecorder()
 	f.handler.ServeHTTP(response, req)
 	if response.Code != status {
-		t.Fatalf("native followup HTTP status=%d want=%d", response.Code, status)
+		t.Fatalf("native followup HTTP status=%d want=%d body=%s", response.Code, status, response.Body)
 	}
 	if destination != nil {
 		if err := json.Unmarshal(response.Body.Bytes(), destination); err != nil {
