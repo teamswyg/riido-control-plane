@@ -12,8 +12,10 @@ import (
 var errNativeSessionUnavailable = errors.New("native session unavailable; start a new conversation explicitly")
 
 // A terminal session can be incompatible even when no other thread is active.
-var errNativeSessionConfigurationMismatch = errors.New("native session configuration does not match the requested agent, provider, model or worktree")
-var errNativeSessionRuntimeMismatch = errors.New("native session runtime binding is inconsistent")
+var (
+	errNativeSessionConfigurationMismatch = errors.New("native session configuration does not match the requested agent, provider, model or worktree")
+	errNativeSessionRuntimeMismatch       = errors.New("native session runtime binding is inconsistent")
+)
 
 func isNativeSessionConflict(err error) bool {
 	return errors.Is(err, errNativeSessionUnavailable) || errors.Is(err, errNativeSessionConfigurationMismatch) || errors.Is(err, errNativeSessionRuntimeMismatch)
