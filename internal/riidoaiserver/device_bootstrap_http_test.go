@@ -30,7 +30,7 @@ func TestDeviceBootstrapHTTPScopesAndCredentialIsolation(t *testing.T) {
 	if wire.TransitionID != request.TransitionID || wire.State != "issued" {
 		t.Fatal("wrong created transition")
 	}
-	for _, forbidden := range []string{"secret_hash", "next_secret", "public_key", "before", "after"} {
+	for _, forbidden := range []string{"secret_hash", "next_secret", "public_key", "before", "after", "credential_issued_at"} {
 		if strings.Contains(response.Body.String(), forbidden) {
 			t.Fatal("HTTP exposed persistence authority", forbidden)
 		}

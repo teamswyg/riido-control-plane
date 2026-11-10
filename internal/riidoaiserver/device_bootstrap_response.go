@@ -17,6 +17,7 @@ type deviceBootstrapResponse struct {
 	PreviousBootDigest          string     `json:"previous_boot_digest,omitempty"`
 	ExecutionCoverageGeneration string     `json:"execution_coverage_generation,omitempty"`
 	CredentialGeneration        string     `json:"credential_generation,omitempty"`
+	CredentialIssuedAt          *time.Time `json:"credential_issued_at,omitempty"`
 	CompletedAt                 *time.Time `json:"completed_at,omitempty"`
 }
 
@@ -25,6 +26,7 @@ func bootstrapResponse(r deviceBootstrapRecord) deviceBootstrapResponse {
 	if r.State == "complete" {
 		response.ExecutionCoverageGeneration = r.After.ExecutionCoverageGeneration
 		response.CredentialGeneration = r.After.CredentialGeneration
+		response.CredentialIssuedAt = &r.After.IssuedAt
 		response.CompletedAt = &r.CompletedAt
 	}
 	return response
