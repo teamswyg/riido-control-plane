@@ -7,6 +7,31 @@ import (
 )
 
 func (s *DynamoDBAssignmentOperationStore) loadAssignmentProjection(ctx context.Context, assignmentID string, credentials AWSCredentials) (assignmentProjectionRecord, bool, error) {
+	return s.readAssignmentProjection(ctx, assignmentID, credentials, false)
+}
+
+func (s *DynamoDBAssignmentOperationStore) readAssignmentProjection(ctx context.Context, assignmentID string, credentials AWSCredentials, readFailure bool) (assignmentProjectionRecord, bool, error) {
+	item, err := s.getAssignmentJournalItem(ctx, credentials, dynamoDBAssignmentProjectionPK(assignmentID), dynamoDBAssignmentProjectionSK)
+	if err != nil {
+		return assignmentProjectionRecord{}, false, fmt.Errorf("dynamodb get assignment projection: %w", err)
+	}
+	if len(item) == 0 {
+		return assignmentProjectionRecord{}, false, nil
+	}
+	projection, err := assignmentProjectionFromDynamoDBItem(item)
+	if err != nil {
+		return assignmentProjectionRecord{}, false, err
+	}
+	if readFailure && projection.Assignment.State == AssignmentFailed && AssignmentOperationType(dynamoDBStringValue(item, "operation_type")) == AssignmentOperationAgentEvent {
+		projection.WorkspacePreparationFailed, err = s.readWorkspacePreparationFailure(ctx, credentials, projection, item)
+		if err != nil {
+			return assignmentProjectionRecord{}, false, err
+		}
+	}
+	return projection, true, nil
+}
+
+func (s *DynamoDBAssignmentOperationStore) getAssignmentJournalItem(ctx context.Context, credentials AWSCredentials, pk, sk string) (map[string]map[string]string, error) {
 	payload, err := json.Marshal(struct {
 		TableName      string                       `json:"TableName"`
 		ConsistentRead bool                         `json:"ConsistentRead"`
@@ -15,12 +40,12 @@ func (s *DynamoDBAssignmentOperationStore) loadAssignmentProjection(ctx context.
 		TableName:      s.tableName,
 		ConsistentRead: true,
 		Key: map[string]map[string]string{
-			"pk": {"S": dynamoDBAssignmentProjectionPK(assignmentID)},
-			"sk": {"S": dynamoDBAssignmentProjectionSK},
+			"pk": {"S": pk},
+			"sk": {"S": sk},
 		},
 	})
 	if err != nil {
-		return assignmentProjectionRecord{}, false, err
+		return nil, err
 	}
 	body, err := doDynamoDBJSON(ctx, dynamoDBRequest{
 		endpoint:     s.endpoint,
@@ -33,20 +58,13 @@ func (s *DynamoDBAssignmentOperationStore) loadAssignmentProjection(ctx context.
 		now:          s.now,
 	})
 	if err != nil {
-		return assignmentProjectionRecord{}, false, fmt.Errorf("dynamodb get assignment projection: %w", err)
+		return nil, err
 	}
 	var response struct {
 		Item map[string]map[string]string `json:"Item"`
 	}
 	if err := json.Unmarshal(body, &response); err != nil {
-		return assignmentProjectionRecord{}, false, fmt.Errorf("decode DynamoDB assignment projection response: %w", err)
+		return nil, fmt.Errorf("decode DynamoDB assignment journal response: %w", err)
 	}
-	if len(response.Item) == 0 {
-		return assignmentProjectionRecord{}, false, nil
-	}
-	record, err := assignmentProjectionFromDynamoDBItem(response.Item)
-	if err != nil {
-		return assignmentProjectionRecord{}, false, err
-	}
-	return record, true, nil
+	return response.Item, nil
 }

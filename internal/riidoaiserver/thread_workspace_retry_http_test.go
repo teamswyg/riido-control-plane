@@ -8,19 +8,22 @@ import (
 
 func TestHTTPWorkspaceRetryPreservesConversationAndInstruction(t *testing.T) {
 	t.Run("linked PR selection", func(t *testing.T) {
-		testHTTPWorkspaceRetryReply(t, "<p>PR #1396</p>", "Verify the shortcut implementation.", "refs/pull/1396/head")
+		testHTTPWorkspaceRetryReply(t, "<p>PR #1396</p>", "Verify the shortcut implementation.", "refs/pull/1396/head", false)
 	})
 	t.Run("ordinary conversation reply", func(t *testing.T) {
-		testHTTPWorkspaceRetryReply(t, "<p>Check the Chrome shortcut as well.</p>", "Check the Chrome shortcut as well.", "refs/pull/1396/head")
+		testHTTPWorkspaceRetryReply(t, "<p>Check the Chrome shortcut as well.</p>", "Check the Chrome shortcut as well.", "refs/pull/1396/head", false)
 	})
 	t.Run("ordinary reply after branch settings changed", func(t *testing.T) {
-		testHTTPWorkspaceRetryReply(t, "<p>Use the updated settings and continue.</p>", "Use the updated settings and continue.", "staging")
+		testHTTPWorkspaceRetryReply(t, "<p>Use the updated settings and continue.</p>", "Use the updated settings and continue.", "staging", false)
+	})
+	t.Run("terminal reconciliation before failure delivery", func(t *testing.T) {
+		testHTTPWorkspaceRetryReply(t, "<p>Continue on the linked PR.</p>", "Continue on the linked PR.", "refs/pull/1396/head", true)
 	})
 }
 
-func testHTTPWorkspaceRetryReply(t *testing.T, body, instruction, expectedRef string) {
+func testHTTPWorkspaceRetryReply(t *testing.T, body, instruction, expectedRef string, reconcileFirst bool) {
 	t.Helper()
-	f, first, pollRequest := workspaceRetryHTTPFixture(t)
+	f, first, pollRequest := workspaceRetryHTTPFixture(t, reconcileFirst)
 
 	if expectedRef == "staging" {
 		f.taskContext.contextSnapshot.Component.BranchName = expectedRef

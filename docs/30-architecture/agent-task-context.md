@@ -265,7 +265,10 @@ A retained native session keeps its original checkout and workdir.
 
 A failed workspace preparation can accept a reply from the original requester
 in the same conversation. The workspace diagnostic and durable failed assignment
-must agree that provider execution did not start. The reply can select a linked
+must agree that provider execution did not start. When reconciliation advances
+the thread before event delivery, the assignment journal can supply the matching
+terminal workspace diagnostic from the operation that committed the failure.
+The reply can select a linked
 PR, name a branch in the same repository or retry after restoring Git access.
 A conversational reply becomes the new instruction. It uses the refreshed
 checkout, selecting the exact PR ref when a single authorized PR is the fallback
