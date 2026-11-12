@@ -72,5 +72,13 @@ func assignmentWorktreeFromTaskContext(contextSnapshot AIAgentTaskContext, repos
 	if worktree.RepositoryFullName == "" && worktree.RepositoryURL == "" {
 		return nil
 	}
+	keyNumber := strings.TrimSpace(contextSnapshot.Component.KeyNumber)
+	taskGeneratedBranch := worktree.BranchName == "" || (keyNumber != "" && strings.HasPrefix(worktree.BranchName, keyNumber+"-"))
+	if worktree.Source == "pull_request" && taskGeneratedBranch {
+		pulls := checkoutPullsForRepository(contextSnapshot.linkedPullRequests, worktree)
+		if len(pulls) == 1 {
+			worktree.Source = checkoutPullFallbackPrefix + pulls[0].number
+		}
+	}
 	return worktree
 }

@@ -1,18 +1,19 @@
 package riidoaiserver
 
 type AIAgentTaskContext struct {
-	ReadScope         *AssignmentReadScope   `json:"read_scope,omitempty"`
-	ReadScopeEvidence *taskReadScopeEvidence `json:"readScopeCapture,omitempty"`
-	readScopeCapture  *assignmentReadScopeCapture
-	TeamID            string                         `json:"team_id,omitempty"`
-	SchemaVersion     string                         `json:"schema_version,omitempty"`
-	Component         AIAgentTaskContextComponent    `json:"component"`
-	Document          AIAgentTaskContextDocument     `json:"document"`
-	Hierarchy         AIAgentTaskContextHierarchy    `json:"hierarchy"`
-	Repositories      []AIAgentTaskContextRepository `json:"repositories"`
-	Resources         []AIAgentTaskContextResource   `json:"resources,omitempty"`
-	ResourceStatus    string                         `json:"resource_status,omitempty"`
-	Extended          *AIAgentTaskContextExtended    `json:"extended,omitempty"`
+	linkedPullRequests []taskCheckoutPullRequest
+	ReadScope          *AssignmentReadScope   `json:"read_scope,omitempty"`
+	ReadScopeEvidence  *taskReadScopeEvidence `json:"readScopeCapture,omitempty"`
+	readScopeCapture   *assignmentReadScopeCapture
+	TeamID             string                         `json:"team_id,omitempty"`
+	SchemaVersion      string                         `json:"schema_version,omitempty"`
+	Component          AIAgentTaskContextComponent    `json:"component"`
+	Document           AIAgentTaskContextDocument     `json:"document"`
+	Hierarchy          AIAgentTaskContextHierarchy    `json:"hierarchy"`
+	Repositories       []AIAgentTaskContextRepository `json:"repositories"`
+	Resources          []AIAgentTaskContextResource   `json:"resources,omitempty"`
+	ResourceStatus     string                         `json:"resource_status,omitempty"`
+	Extended           *AIAgentTaskContextExtended    `json:"extended,omitempty"`
 }
 
 type AIAgentTaskContextComponent struct {
