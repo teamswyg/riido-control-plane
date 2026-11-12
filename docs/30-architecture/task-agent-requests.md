@@ -59,3 +59,30 @@ outbox as part of rollback. The old request-less routes remain compatible; only
 identified requests opt into durable new execution per submission.
 
 현재 참여자 generation 및 제거 tombstone을 유지한다. 식별 요청 생성도 journal/projection/generation/receipt의 같은 transaction을 사용하며, 일반 writer는 최신 참여자 relation을 보존하고 변경 part와 CURRENT를 한 번에 저장한다.
+
+## Automatic PR checkout selection
+
+For a new execution, a generated task branch is a suggestion, not evidence
+that the branch exists. When the authenticated task read supplies complete
+GitHub and repository metadata, use the most recently updated linked PR in
+the selected repository. PR state does not affect selection. Compare parsed
+`updatedAt` instants; equal or unavailable dates use the greater PR number as
+a deterministic tie-breaker. Duplicate records retain their newest date.
+
+Checkout uses `refs/pull/<number>/head`, the selected PR's actual head content,
+without requiring its display branch name or substituting the default branch.
+This also works after a head branch is deleted. The existing daemon fetches
+that exact ref using its normal Git credentials. No new credentials or GitHub
+API permission are introduced.
+
+An explicit configured branch is preserved. A user can override automatic
+selection on the first instruction line with `PR #123`, `branch: name`, or
+`브랜치: name`; a PR must be linked to this task in the selected repository.
+Invalid or unauthorized choices fail before queueing and never fall back to a
+contextless assignment. Ordinary prose does not count as a checkout command.
+
+The same rules apply when retrying a workspace preparation failure through a
+conversation reply. Existing request deduplication and native-session binding
+remain in force; this selection does not restart existing executions or move a
+resumed session into another worktree. Incomplete metadata and PRs from other
+repositories cannot supply an automatic checkout.

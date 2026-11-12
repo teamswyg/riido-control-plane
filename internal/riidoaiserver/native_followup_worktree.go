@@ -16,6 +16,9 @@ func sameNativeFollowupWorktree(previous, current *AssignmentWorktree) bool {
 	if strings.HasPrefix(b.Source, checkoutPullFallbackPrefix) {
 		b.Source = "pull_request"
 	}
+	if b.Source == checkoutRecoverySelectionSource && sameCheckoutRepository(&a, &b) {
+		return a.BranchName == b.BranchName
+	}
 	if a.Source == checkoutRecoverySelectionSource && sameCheckoutRepository(&a, &b) {
 		return true
 	}
