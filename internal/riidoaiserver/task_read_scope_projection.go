@@ -23,6 +23,9 @@ func projectReadScopeWork(out *AIAgentTaskContext, resource AssignmentScopedReso
 		out.Component = AIAgentTaskContextComponent{ID: resource.ID, Title: resource.Title, KeyNumber: resource.KeyNumber, UpdatedAt: resource.UpdatedAt, ComponentType: detail.ComponentType, BranchName: detail.BranchName}
 		out.Document = AIAgentTaskContextDocument{Content: work.Body.Content, ContentFormat: work.Body.Format, Source: work.Body.Source, Status: work.Body.Status}
 		out.Repositories = readScopeLegacyRepositories(work.Repositories)
+		if checkoutMetadataComplete(work.PartsStatus) {
+			out.linkedPullRequests = taskCheckoutPullRequests(work.GitHub)
+		}
 	}
 	for _, reason := range resource.Reasons {
 		ref := AIAgentTaskContextReference{ID: resource.ID, Title: resource.Title, KeyNumber: resource.KeyNumber, UpdatedAt: resource.UpdatedAt}

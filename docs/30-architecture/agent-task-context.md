@@ -256,3 +256,17 @@ A producer may replace work/meeting metadata, one comment page, or one board pag
 ## Conditional captured-content reads
 
 RIID-5972 content-only conditional reads negotiate X-Riido-Context-Cache-Version: 1 and optional X-Riido-Context-Known-Digest: sha256:<64 lowercase hex> without changing request JSON. Hash versioned request identity (route agent, assignment/task/view/target/cursor/max_bytes) plus the full current representation (schema, captured_at, truncated/live, data and exact sources), excluding request_id and lease secrets. After normal device/active lease/run, quota, stored scope/page and durable read-audit success, return content_digest; an equal known digest returns POST 200 not_modified=true and data=null with current identity and sources. Hits still consume a call, load current captured pages and record exact page.Sources. No cache field is emitted for legacy/unknown-version/non-content/live requests. Malformed or duplicate known digests under v1 content requests return 400. No header grants scope, bypasses failure, performs live requester permission checks, changes fixed snapshot authority, or claims source-cache/provider-memory acceptance.
+
+A fresh assignment may carry a checkout fallback for one linked GitHub PR in
+the selected repository. The fallback comes from complete, authorized root
+GitHub metadata, and applies only when the generated task branch is missing.
+The daemon uses the exact GitHub PR head ref with its existing Git credentials.
+A retained native session keeps its original checkout and workdir.
+
+A failed workspace preparation can accept a reply from the original requester
+in the same conversation. The workspace diagnostic and durable failed assignment
+must agree that provider execution did not start. The reply can select a linked
+PR, name a branch in the same repository or retry after restoring Git access.
+The retry uses refreshed task context and the original instruction. A reply can
+supply the instruction on the next line if necessary. The failed assignment
+identifies the retry so repeat submissions do not start duplicate executions.

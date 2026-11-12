@@ -3,7 +3,6 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"reflect"
 	"time"
 
 	"github.com/teamswyg/riido-contracts/assignment"
@@ -41,17 +40,17 @@ func (s Server) applyThreadNativeResume(ctx context.Context, principal Authoriza
 		return time.Time{}, errNativeSessionUnavailable
 	}
 	previous := projection.Assignment
-	resumeID := assignment.ResumeSessionIDForAssignment(previous)
 	if !isTerminal(previous.State) {
 		return time.Time{}, nil
-	}
-	if resumeID == "" {
-		return time.Time{}, errNativeSessionUnavailable
 	}
 	if previous.ID != thread.AssignmentID || previous.TaskID != thread.TaskID || previous.AgentID != thread.AgentID || previous.WorkspaceID != principal.WorkspaceID || previous.WorkspaceID != req.WorkspaceID {
 		return time.Time{}, ErrAuthorizationForbidden
 	}
-	worktreeChanged := previous.Worktree != nil && !reflect.DeepEqual(previous.Worktree, req.Worktree)
+	resumeID := assignment.ResumeSessionIDForAssignment(previous)
+	if resumeID == "" {
+		return time.Time{}, errNativeSessionUnavailable
+	}
+	worktreeChanged := previous.Worktree != nil && !sameNativeFollowupWorktree(previous.Worktree, req.Worktree)
 	if previous.AgentID != req.AgentID || previous.RuntimeProvider != req.RuntimeProvider || previous.ModelID != req.ModelID || worktreeChanged {
 		return time.Time{}, errNativeSessionConfigurationMismatch
 	}

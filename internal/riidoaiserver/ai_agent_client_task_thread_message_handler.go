@@ -3,6 +3,8 @@ package riidoaiserver
 import (
 	"context"
 	"net/http"
+	"reflect"
+	"strings"
 )
 
 func (s Server) handleAIAgentClientCreateTaskThreadMessage(w http.ResponseWriter, r *http.Request, taskID, threadID string) {
@@ -66,6 +68,10 @@ func (s Server) publishThreadReply(ctx context.Context, principal AuthorizationR
 	assignment, err := s.assignThreadMessage(creationContext, taskID, prepared.Request, prepared.StartsNewExecution)
 	if err != nil {
 		return AIAgentTaskActionResponse{}, err
+	}
+	if strings.HasPrefix(prepared.Request.RequestID, workspaceRetryRequestPrefix) &&
+		(!reflect.DeepEqual(assignment.Worktree, prepared.Request.Worktree) || assignment.Prompt != prepared.Request.Prompt) {
+		return AIAgentTaskActionResponse{}, errWorkspaceRetryAlreadyStarted
 	}
 	req.AssignmentID = assignment.ID
 	req.commentInvocation = prepared.CommentInvocation

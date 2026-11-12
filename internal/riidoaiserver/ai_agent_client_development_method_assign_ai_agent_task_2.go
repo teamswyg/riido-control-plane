@@ -85,9 +85,9 @@ func (s *DevelopmentAIAgentClientStore) assignAIAgentTask(ctx context.Context, p
 			sourceMessageID = req.SourceCommentID
 		}
 		s.upsertTaskThreadMessageFromActionLocked(response, sourceMessageID, req.conversationID, req.parentThreadID)
-		if !req.skipSourceMessage {
-			s.appendThreadUserMessageLocked(response, principal, req.Instruction, req.SourceCommentID, req.sourceMessageObservedAt)
-		}
+	}
+	if !req.skipSourceMessage {
+		s.appendThreadUserMessageLocked(response, principal, req.Instruction, req.SourceCommentID, req.sourceMessageObservedAt)
 	}
 	s.upsertTaskThreadFromActionLocked(response, req.SourceCommentID)
 	if req.directRootTeamID != "" {

@@ -34,6 +34,15 @@ func (s Server) assignRequestFromAIAgentTaskThreadMessage(ctx context.Context, p
 	}
 	assignmentReq := composed.Request
 	since, err := s.applyThreadNativeResume(ctx, principal, target, &assignmentReq, composed.AgentOwnerPrincipalID)
+	if errors.Is(err, errNativeSessionUnavailable) {
+		recovered, recoveryErr := s.prepareWorkspaceRetry(ctx, principal, target, history, &assignmentReq, composed.TaskContext, req.Body)
+		if recoveryErr != nil {
+			return AssignRequest{}, nil, recoveryErr
+		}
+		if recovered {
+			return assignmentReq, composed.TaskContext, nil
+		}
+	}
 	if err != nil {
 		return AssignRequest{}, nil, err
 	}
