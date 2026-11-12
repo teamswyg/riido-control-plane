@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `290`
 - claim refs: `462`
-- change refs: `3157`
-- verifier refs: `1903`
+- change refs: `3160`
+- verifier refs: `1907`
 - evidence refs: `863`
 
 ## Compiled Chain Summary
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `192` | `295` | `2075` | `1178` | `544` |
+| `closed_loop_candidate` | `192` | `295` | `2078` | `1182` | `544` |
 | `control_plane_performance_harness` | `32` | `36` | `245` | `262` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `20` | `35` | `380` | `199` | `73` |
@@ -243,7 +243,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `stream_relay_checkpoint_boundary_coverage_loop` | `1` | `4` | `4` | `3` | `closed_loop_candidate` |
 | `eventbridge_stream_relay_boundary_coverage_loop` | `1` | `6` | `4` | `3` | `closed_loop_candidate` |
 | `device_enrollment_normalization_coverage_loop` | `1` | `2` | `2` | `2` | `closed_loop_candidate` |
-| `assignment_active_lease_expiry_coverage_loop` | `1` | `3` | `3` | `2` | `closed_loop_candidate` |
+| `assignment_active_lease_expiry_coverage_loop` | `1` | `6` | `7` | `2` | `closed_loop_candidate` |
 | `assignment_progress_line_structured_metadata_coverage_loop` | `1` | `2` | `2` | `2` | `closed_loop_candidate` |
 | `tool_approval_late_decision_timeout_coverage_loop` | `1` | `2` | `2` | `2` | `closed_loop_candidate` |
 | `desktop_device_enroll_http_error_coverage_loop` | `1` | `2` | `2` | `2` | `closed_loop_candidate` |
