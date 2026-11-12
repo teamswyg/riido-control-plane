@@ -45,11 +45,20 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 			return false, errWorkspaceRetryAlreadyStarted
 		}
 	}
-	input, newInstruction, _ := strings.Cut(taskMessageContextText(body, taskDocumentContextLimit), "\n")
-	if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, strings.TrimSpace(input)); err != nil {
-		return false, err
+	instruction := taskMessageContextText(body, taskDocumentContextLimit)
+	firstLine, rest, _ := strings.Cut(instruction, "\n")
+	if input := strings.TrimSpace(firstLine); isWorkspaceRetryInstruction(input) {
+		if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, input); err != nil {
+			return false, err
+		}
+		instruction = strings.TrimSpace(rest)
+	} else if number, fallback := strings.CutPrefix(req.Worktree.Source, checkoutPullFallbackPrefix); fallback {
+		// The generated task branch just failed. Use the authorized linked
+		// PR selected by the refreshed context for this attempt.
+		if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, "PR #"+number); err != nil {
+			return false, err
+		}
 	}
-	instruction := strings.TrimSpace(newInstruction)
 	if instruction == "" {
 		instruction = workspaceRetryOriginalInstruction(thread, history.Threads, principal.PrincipalID)
 	}
