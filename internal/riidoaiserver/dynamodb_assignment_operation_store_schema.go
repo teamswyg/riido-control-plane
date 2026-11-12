@@ -13,13 +13,7 @@ const (
 	dynamoDBAssignmentQueryLimit   = 50
 )
 
-type assignmentProjectionRecord struct {
-	Assignment        Assignment
-	LastEventSeq      int64
-	Recovery          *recoveryWatermark          `json:"-"`
-	EventACKs         []assignmentEventACKReceipt `json:"-"`
-	ContextTerminalAt time.Time                   `json:"-"`
-}
+type assignmentProjectionRecord AssignmentProjection
 
 func dynamoDBAssignmentProjectionPK(assignmentID string) string {
 	return "ASSIGNMENT#" + assignmentID
@@ -30,7 +24,10 @@ func dynamoDBAgentActivePK(agentID string) string {
 }
 
 func assignmentOperationSortKey(record AssignmentOperationRecord) string {
-	return record.RecordedAt.UTC().Format("20060102T150405.000000000Z") +
-		"#" + fmt.Sprintf("%020d", assignmentOperationLastEventSeq(record)) +
-		"#" + record.OperationID
+	return assignmentOperationKey(record.RecordedAt, assignmentOperationLastEventSeq(record), record.OperationID)
+}
+
+func assignmentOperationKey(recordedAt time.Time, lastEventSeq int64, operationID string) string {
+	return recordedAt.UTC().Format("20060102T150405.000000000Z") +
+		"#" + fmt.Sprintf("%020d", lastEventSeq) + "#" + operationID
 }

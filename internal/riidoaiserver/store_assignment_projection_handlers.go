@@ -45,13 +45,15 @@ func handleLoadAssignmentProjection(state *storeState, assignmentID string) (Ass
 	lastEventSeq := int64(0)
 	terminalSeq := int64(0)
 	var terminalAt time.Time
+	var workspacePreparationFailed bool
 	for _, event := range state.events[assignment.TaskID] {
 		if event.AssignmentID == assignmentID && isTerminal(event.State) && (terminalSeq == 0 || event.Seq < terminalSeq) {
 			terminalSeq, terminalAt = event.Seq, event.At
 		}
 		if event.AssignmentID == assignmentID && event.Seq > lastEventSeq {
 			lastEventSeq = event.Seq
+			workspacePreparationFailed = isWorkspacePreparationFailure(assignment, event)
 		}
 	}
-	return AssignmentProjection{Assignment: *copyAssignment(assignment), LastEventSeq: lastEventSeq, ContextTerminalAt: terminalAt}, true, nil
+	return AssignmentProjection{Assignment: *copyAssignment(assignment), LastEventSeq: lastEventSeq, ContextTerminalAt: terminalAt, WorkspacePreparationFailed: workspacePreparationFailed}, true, nil
 }
