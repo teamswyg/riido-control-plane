@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-var workspaceRetryBranch = regexp.MustCompile(`^[a-zA-Z0-9_][a-zA-Z0-9._/-]{0,199}$`)
 var workspaceRetryPull = regexp.MustCompile(`(?i)^PR #[1-9][0-9]{0,9}$`)
 
 func isWorkspaceRetryInstruction(input string) bool {
@@ -31,13 +30,33 @@ func selectWorkspaceRetryCheckout(worktree *AssignmentWorktree, pulls []taskChec
 	case strings.HasPrefix(strings.ToLower(input), "branch:"), strings.HasPrefix(input, "브랜치:"):
 		_, branch, _ := strings.Cut(input, ":")
 		branch = strings.TrimSpace(branch)
-		if workspaceRetryBranch.MatchString(branch) && !strings.Contains(branch, "..") &&
-			!strings.Contains(branch, "//") && !strings.HasPrefix(branch, "refs/") &&
-			!strings.HasSuffix(branch, "/") && !strings.HasSuffix(branch, ".") {
+		if validWorkspaceRetryBranch(branch) {
 			worktree.BranchName = branch
 			worktree.Source = checkoutRecoverySelectionSource
 			return nil
 		}
 	}
 	return errors.New(workspaceRetryInputHelp)
+}
+
+// Match a branch name, including UTF-8 task branches. Full refs, Git revision
+// syntax, and values that could be interpreted as flags are outside this input.
+func validWorkspaceRetryBranch(branch string) bool {
+	if branch == "" || len(branch) > 1024 || branch == "@" ||
+		strings.HasPrefix(branch, "-") || strings.HasPrefix(branch, "refs/") ||
+		strings.Contains(branch, "..") || strings.Contains(branch, "@{") ||
+		strings.ContainsAny(branch, " ~^:?*[\\") || strings.HasSuffix(branch, ".") {
+		return false
+	}
+	for _, r := range branch {
+		if r < 32 || r == 127 {
+			return false
+		}
+	}
+	for part := range strings.SplitSeq(branch, "/") {
+		if part == "" || strings.HasPrefix(part, ".") || strings.HasSuffix(part, ".lock") {
+			return false
+		}
+	}
+	return true
 }

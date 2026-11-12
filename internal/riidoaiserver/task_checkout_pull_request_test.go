@@ -27,3 +27,15 @@ func TestCheckoutPullRequestsRequireSameRepositoryAndUnambiguousEvidence(t *test
 		t.Fatalf("explicit branch must have no automatic fallback: %+v", worktree)
 	}
 }
+
+func TestWorkspaceRetryAllowsKoreanBranchWithoutAcceptingGitRevisionSyntax(t *testing.T) {
+	worktree := &AssignmentWorktree{}
+	if err := selectWorkspaceRetryCheckout(worktree, nil, "브랜치: 작업/수정"); err != nil || worktree.BranchName != "작업/수정" {
+		t.Fatalf("valid UTF-8 branch was rejected: %v", err)
+	}
+	for _, invalid := range []string{"-h", "refs/pull/3/head", "branch@{1}", "staging~1", "a//b", "foo/.bar", "foo/bar.lock"} {
+		if err := selectWorkspaceRetryCheckout(worktree, nil, "branch: "+invalid); err == nil {
+			t.Fatalf("invalid branch %q was accepted", invalid)
+		}
+	}
+}
