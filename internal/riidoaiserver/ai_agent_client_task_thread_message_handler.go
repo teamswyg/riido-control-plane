@@ -69,7 +69,8 @@ func (s Server) publishThreadReply(ctx context.Context, principal AuthorizationR
 	if err != nil {
 		return AIAgentTaskActionResponse{}, err
 	}
-	if strings.HasPrefix(prepared.Request.RequestID, workspaceRetryRequestPrefix) && !reflect.DeepEqual(assignment.Worktree, prepared.Request.Worktree) {
+	if strings.HasPrefix(prepared.Request.RequestID, workspaceRetryRequestPrefix) &&
+		(!reflect.DeepEqual(assignment.Worktree, prepared.Request.Worktree) || assignment.Prompt != prepared.Request.Prompt) {
 		return AIAgentTaskActionResponse{}, errWorkspaceRetryAlreadyStarted
 	}
 	req.AssignmentID = assignment.ID
