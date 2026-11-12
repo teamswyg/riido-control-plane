@@ -12,7 +12,7 @@ const workspaceRetryRequestPrefix = "workspace-retry-"
 
 var errWorkspaceRetryAlreadyStarted = errors.New("a retry is already linked to this execution; use the latest execution in this conversation")
 
-const workspaceRetryInputHelp = "Reply with a linked PR number (PR #123), a branch in the same repository (branch: staging), or retry after restoring repository access."
+const workspaceRetryInputHelp = "reply with a linked PR number (PR #123), a branch in the same repository (branch: staging), or retry after restoring repository access"
 
 // A workspace preparation diagnostic is emitted before provider submission.
 // A missing session ID by itself does not establish that it is safe to replay.
@@ -54,7 +54,7 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 		instruction = workspaceRetryOriginalInstruction(thread, history.Threads, principal.PrincipalID)
 	}
 	if instruction == "" {
-		return false, errors.New("Add the original instruction on the next line of your reply.")
+		return false, errors.New("add the original instruction on the next line of your reply")
 	}
 	req.RequestID = workspaceRetryRequestPrefix + sha256Hex([]byte(previous.ID))
 	req.Prompt = appendAIAgentTaskThreadMessagePrompt(req.Prompt, thread, CreateAIAgentTaskThreadMessageRequest{Body: instruction}, history.Threads...)
