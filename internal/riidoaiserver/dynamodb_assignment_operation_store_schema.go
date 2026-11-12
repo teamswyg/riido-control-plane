@@ -13,7 +13,7 @@ const (
 	dynamoDBAssignmentQueryLimit   = 50
 )
 
-type assignmentProjectionRecord = AssignmentProjection
+type assignmentProjectionRecord AssignmentProjection
 
 func dynamoDBAssignmentProjectionPK(assignmentID string) string {
 	return "ASSIGNMENT#" + assignmentID
