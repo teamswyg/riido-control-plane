@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -15,6 +16,7 @@ const (
 type taskCheckoutPullRequest struct {
 	repository string
 	number     string
+	updatedAt  time.Time
 }
 
 // Only saved PRs scoped to this task by the authenticated context reader may
@@ -23,8 +25,9 @@ func taskCheckoutPullRequests(records []json.RawMessage) []taskCheckoutPullReque
 	var pulls []taskCheckoutPullRequest
 	for _, raw := range records {
 		var pr struct {
-			URL    string `json:"htmlUrl"`
-			Number int64  `json:"number"`
+			URL       string `json:"htmlUrl"`
+			Number    int64  `json:"number"`
+			UpdatedAt string `json:"updatedAt"`
 		}
 		if json.Unmarshal(raw, &pr) != nil || pr.Number < 1 || pr.Number > 9999999999 {
 			continue
@@ -40,32 +43,9 @@ func taskCheckoutPullRequests(records []json.RawMessage) []taskCheckoutPullReque
 		}
 		name := safeAIAgentRepositoryFullName(strings.TrimPrefix(strings.TrimSuffix(parsed.EscapedPath(), suffix), "/"))
 		if name != "" {
-			pulls = append(pulls, taskCheckoutPullRequest{repository: name, number: number})
+			updatedAt, _ := time.Parse(time.RFC3339Nano, pr.UpdatedAt)
+			pulls = append(pulls, taskCheckoutPullRequest{repository: name, number: number, updatedAt: updatedAt})
 		}
 	}
 	return pulls
-}
-
-func checkoutPullsForRepository(pulls []taskCheckoutPullRequest, worktree *AssignmentWorktree) []taskCheckoutPullRequest {
-	if worktree == nil {
-		return nil
-	}
-	repo := worktree.RepositoryFullName
-	if repo == "" {
-		repo = strings.TrimSuffix(strings.TrimPrefix(worktree.RepositoryURL, "https://github.com/"), ".git")
-	}
-	var matches []taskCheckoutPullRequest
-	seen := make(map[string]bool)
-	for _, pull := range pulls {
-		if strings.EqualFold(pull.repository, repo) && !seen[pull.number] {
-			matches = append(matches, pull)
-			seen[pull.number] = true
-		}
-	}
-	return matches
-}
-
-func sameCheckoutRepository(a, b *AssignmentWorktree) bool {
-	return a != nil && b != nil && strings.EqualFold(a.RepositoryFullName, b.RepositoryFullName) &&
-		strings.EqualFold(a.RepositoryURL, b.RepositoryURL) && a.IsPrivate == b.IsPrivate
 }
