@@ -20346,8 +20346,8 @@
     },
     {
       "id": "assignment_active_lease_expiry_coverage_loop",
-      "observation": "Assignment active lease expiry still had partial coverage around recent in-memory updates, missing durable leases, mismatched active assignment rows, expired durable leases, heartbeat repair, and lease-store errors.",
-      "hypothesis": "Focused store tests can prove stale active assignment leases fail closed and fresh durable heartbeats refresh in-memory state without changing daemon polling or assignment APIs.",
+      "observation": "Assignment active lease expiry still had partial coverage around recent in-memory updates, missing durable leases, mismatched active assignment rows, expired durable leases, heartbeat repair, and lease-store errors. Startup replay separately used assignment state UpdatedAt as a liveness signal, so a long-running assignment with a valid independently renewed lease was incorrectly failed during a server restart.",
+      "hypothesis": "Focused store tests can prove stale active assignment leases fail closed and fresh durable heartbeats refresh in-memory state without changing daemon polling or assignment APIs. Reading the durable active lease before startup stale repair can preserve the live assignment without changing its state timestamp or extending its lease; incomplete reads must abort before any repair write.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence"
       ],
@@ -20363,6 +20363,18 @@
         {
           "kind": "manifest",
           "path": "docs/30-architecture/evidence-graph.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_open.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_replay_stale_active_repair.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/assignment_replay_active_lease.go"
         }
       ],
       "verifiers": [
@@ -20377,6 +20389,22 @@
         {
           "kind": "tool",
           "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_open_active_lease_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_open_active_lease_expiry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_open_active_lease_error_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_open_dynamodb_active_lease_test.go"
         }
       ],
       "evidence": [
@@ -20390,7 +20418,7 @@
           "redacted": true
         }
       ],
-      "decision": "Assignment active lease tests now prove non-active assignments and recently updated active assignments skip durable lease reads, missing/mismatched/expired durable leases are treated as expired, fresh durable heartbeat timestamps refresh in-memory assignment UpdatedAt, lease store errors are surfaced, assignmentActiveLeaseExpired reaches 100%, failStaleAssignment remains 100%, failStaleAssignmentWithMessage remains 100%, and no API or runtime contract changes are introduced.",
+      "decision": "Assignment active lease tests now prove non-active assignments and recently updated active assignments skip durable lease reads, missing/mismatched/expired durable leases are treated as expired, fresh durable heartbeat timestamps refresh in-memory assignment UpdatedAt, lease store errors are surfaced, assignmentActiveLeaseExpired reaches 100%, failStaleAssignment remains 100%, failStaleAssignmentWithMessage remains 100%, and no API or runtime contract changes are introduced. Startup RED reproduced failed state in leased, ready, running and cancelling despite a live lease. The fix preserves these executions, permits post-restart poll/completion, uses authoritative persisted expiry rather than local heartbeat age, and keeps expired/missing/other-assignment and legacy cleanup. Snapshot restart with the real DynamoDB adapter performs a consistent active-lease read and no mutation. Dependency errors or caller cancellation stop opening before repairs. Existing public API, persistence schema and running tasks are outside the change.",
       "next_loop": "closed_loop_candidate"
     },
     {
