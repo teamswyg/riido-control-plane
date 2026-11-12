@@ -267,6 +267,9 @@ A failed workspace preparation can accept a reply from the original requester
 in the same conversation. The workspace diagnostic and durable failed assignment
 must agree that provider execution did not start. The reply can select a linked
 PR, name a branch in the same repository or retry after restoring Git access.
-The retry uses refreshed task context and the original instruction. A reply can
-supply the instruction on the next line if necessary. The failed assignment
-identifies the retry so repeat submissions do not start duplicate executions.
+A conversational reply becomes the new instruction. It uses the refreshed
+checkout, selecting the exact PR ref when a single authorized PR is the fallback
+for the generated task branch. A checkout-only reply keeps the original
+instruction, or can supply an instruction on the next line. The failed
+assignment identifies the retry so repeat submissions do not start duplicate
+executions.
