@@ -12,12 +12,16 @@ func (s *DevelopmentAIAgentClientStore) applyAssignmentProjectionToTaskThread(th
 	for i := range threads {
 		if threads[i].ThreadID != thread.ThreadID ||
 			strings.TrimSpace(threads[i].AssignmentID) != strings.TrimSpace(thread.AssignmentID) ||
-			!taskThreadHasActiveStream(threads[i]) {
+			(!taskThreadHasActiveStream(threads[i]) && !taskThreadNeedsCompletedResult(threads[i])) {
 			continue
 		}
 		previous := threads[i]
+		if !taskThreadHasActiveStream(previous) {
+			return s.repairCompletedTaskThreadProjectionLocked(previous, projection)
+		}
 		s.ensureTaskThreadAgentSnapshotLocked(&threads[i], threads[i].StartedAt)
-		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, "", nil)
+		message, metadata := assignmentProjectionTerminalResult(projection)
+		response := assignmentEventActionResponse(threads[i], projection.Assignment.State, message, metadata)
 
 		if projection.Assignment.State == AssignmentRunning && projection.Assignment.ConfirmationReason.Valid() {
 			response.WorkStatus = AgentWorkStatusWaitingForUser

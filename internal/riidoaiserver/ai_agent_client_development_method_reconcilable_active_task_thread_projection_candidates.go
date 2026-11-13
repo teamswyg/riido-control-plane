@@ -20,7 +20,7 @@ func (s *DevelopmentAIAgentClientStore) reconcilableActiveTaskThreadProjectionCa
 	out := []AIAgentTaskThreadRecord{}
 	for _, id := range taskIDs {
 		for _, thread := range s.taskThreads[id] {
-			if !taskThreadHasActiveStream(thread) || strings.TrimSpace(thread.AssignmentID) == "" {
+			if (!taskThreadHasActiveStream(thread) && (taskID == "" || !taskThreadNeedsCompletedResult(thread))) || strings.TrimSpace(thread.AssignmentID) == "" {
 				continue
 			}
 			agent, ok := s.agents[thread.AgentID]
