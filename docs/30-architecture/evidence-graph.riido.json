@@ -29372,6 +29372,39 @@
       ],
       "decision": "Off by default behind RIIDO_AI_SERVER_AGENT_COMMENT_COUNT. Handlers only schedule a background push after their unchanged success path; history reads push only tasks this process has not pushed. Each push adds one locked history read per coalesced task change. This is local regression evidence and does not establish deployment.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "tool_approval_question_visibility_6159",
+      "observation": "A running assignment emits a valid confirmation reason and current question, but task-thread lifecycle message filtering retains an earlier response while exposing waiting_for_user. The existing scoped status event already triggers client history refresh.",
+      "hypothesis": "Use the non-empty question for running confirmation events before constructing the task-thread response. Preserve the earlier message when no question is supplied, keep terminal results separate, and reuse the existing waiting status and client refresh contract.",
+      "claims": [
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_record_assignment_status.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tool_approval_visibility_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Apply only current confirmation question preservation. Approval/answer/empty-question regression cases check refreshed history and scoped waiting status; terminal results and permission policy remain unchanged. Local tests do not establish deployment or live approval acceptance.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
