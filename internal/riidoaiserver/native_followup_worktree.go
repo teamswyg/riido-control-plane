@@ -10,6 +10,11 @@ func sameNativeFollowupWorktree(previous, current *AssignmentWorktree) bool {
 		return previous == current
 	}
 	a, b := *previous, *current
+	// A new linked PR changes the default for new assignments, not the worktree
+	// owned by an existing native conversation. The caller retains previous.
+	if strings.HasPrefix(b.Source, checkoutPullFallbackPrefix) && sameCheckoutRepository(&a, &b) {
+		return true
+	}
 	if strings.HasPrefix(a.Source, checkoutPullFallbackPrefix) {
 		a.Source = "pull_request"
 	}
