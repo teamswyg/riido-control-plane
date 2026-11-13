@@ -23,4 +23,5 @@ type AssignmentProjection struct {
 	EventACKs                  []assignmentEventACKReceipt `json:"-"`
 	WorkspacePreparationFailed bool                        `json:"-"`
 	ContextTerminalAt          time.Time                   `json:"-"`
+	TerminalEvent              *TaskEvent                  `json:"-"`
 }

@@ -10,7 +10,7 @@ func (s *DynamoDBAssignmentOperationStore) loadAssignmentProjection(ctx context.
 	return s.readAssignmentProjection(ctx, assignmentID, credentials, false)
 }
 
-func (s *DynamoDBAssignmentOperationStore) readAssignmentProjection(ctx context.Context, assignmentID string, credentials AWSCredentials, readFailure bool) (assignmentProjectionRecord, bool, error) {
+func (s *DynamoDBAssignmentOperationStore) readAssignmentProjection(ctx context.Context, assignmentID string, credentials AWSCredentials, readTerminal bool) (assignmentProjectionRecord, bool, error) {
 	item, err := s.getAssignmentJournalItem(ctx, credentials, dynamoDBAssignmentProjectionPK(assignmentID), dynamoDBAssignmentProjectionSK)
 	if err != nil {
 		return assignmentProjectionRecord{}, false, fmt.Errorf("dynamodb get assignment projection: %w", err)
@@ -22,10 +22,13 @@ func (s *DynamoDBAssignmentOperationStore) readAssignmentProjection(ctx context.
 	if err != nil {
 		return assignmentProjectionRecord{}, false, err
 	}
-	if readFailure && projection.Assignment.State == AssignmentFailed && AssignmentOperationType(dynamoDBStringValue(item, "operation_type")) == AssignmentOperationAgentEvent {
-		projection.WorkspacePreparationFailed, err = s.readWorkspacePreparationFailure(ctx, credentials, projection, item)
+	if readTerminal && isTerminal(projection.Assignment.State) && AssignmentOperationType(dynamoDBStringValue(item, "operation_type")) == AssignmentOperationAgentEvent {
+		projection.TerminalEvent, err = s.readTerminalAssignmentEvent(ctx, credentials, projection, item)
 		if err != nil {
 			return assignmentProjectionRecord{}, false, err
+		}
+		if projection.TerminalEvent != nil {
+			projection.WorkspacePreparationFailed = isWorkspacePreparationFailure(projection.Assignment, *projection.TerminalEvent)
 		}
 	}
 	return projection, true, nil

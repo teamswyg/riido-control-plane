@@ -34,7 +34,13 @@ func (s *DevelopmentAIAgentClientStore) RecordAIAgentAssignmentEvent(ctx context
 	previousThread := thread
 	if hadThread && !agentAssignmentStateAcceptsRuntimeProgress(previousThread.AssignmentState) {
 		// Snapshot repair can observe the durable terminal event before its fanout.
-		// Deliver that event without reviving or mutating the terminal projection.
+		// Fill a missing result without reopening the execution or changing agent counts.
+		if input.State == AssignmentCompleted && input.Type == EventAssignmentCompleted &&
+			thread.AssignmentID == input.AssignmentID && thread.TaskID == input.TaskID && thread.AgentID == input.AgentID {
+			if s.repairCompletedTaskThreadResultLocked(thread, input.Message, input.Metadata) {
+				thread, _ = s.assignmentEventThreadLocked(input)
+			}
+		}
 		if thread.AssignmentID == input.AssignmentID && isTerminal(input.State) && input.Type != EventRiidoLog && input.Type != EventProviderLog && input.Type != EventProviderError {
 			response := assignmentEventActionResponse(thread, input.State, input.Message, input.Metadata)
 			if response.WorkStatus == thread.WorkStatus {
