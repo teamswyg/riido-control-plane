@@ -41,6 +41,10 @@ func (s *Store) handleDecideToolApproval(
 		result := toolApprovalResultFor(approval, nil, s.now())
 		return result, nil, nil
 	}
+	assignment := state.assignments[approval.AssignmentID]
+	if assignment.ID == "" || isTerminal(assignment.State) || assignment.State == AssignmentCancelling {
+		return ToolApprovalResult{}, nil, errors.New("assignment no longer accepts tool approval")
+	}
 	if decision.Decision == ApprovalDecisionApprove {
 		approval.Status = ApprovalApproved
 	} else {
