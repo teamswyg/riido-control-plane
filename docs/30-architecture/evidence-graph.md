@@ -12,8 +12,8 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 - loop registry: `docs/30-architecture/loop-registry.riido.json`
 - chains: `291`
 - claim refs: `463`
-- change refs: `3186`
-- verifier refs: `1924`
+- change refs: `3190`
+- verifier refs: `1926`
 - evidence refs: `865`
 
 ## Compiled Chain Summary
@@ -25,7 +25,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 
 | Next Loop | Chains | Claims | Changes | Verifiers | Evidence |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `closed_loop_candidate` | `193` | `296` | `2080` | `1183` | `545` |
+| `closed_loop_candidate` | `193` | `296` | `2084` | `1185` | `545` |
 | `control_plane_performance_harness` | `32` | `36` | `245` | `262` | `81` |
 | `operational_readiness_release_harness` | `22` | `40` | `179` | `107` | `69` |
 | `ai_thread_history` | `20` | `35` | `404` | `215` | `73` |
@@ -330,7 +330,7 @@ Executable SSOT: [`evidence-graph.riido.json`](evidence-graph.riido.json).
 | `riido_read_scope_failure_status_6008` | `1` | `5` | `3` | `1` | `closed_loop_candidate` |
 | `riido_prompt_hierarchy_terms_6014` | `1` | `2` | `1` | `1` | `closed_loop_candidate` |
 | `riido_agent_comment_count_push_5842` | `2` | `5` | `3` | `1` | `closed_loop_candidate` |
-| `tool_approval_question_visibility_6159` | `1` | `2` | `1` | `1` | `closed_loop_candidate` |
+| `tool_approval_question_visibility_6159` | `1` | `6` | `3` | `1` | `closed_loop_candidate` |
 
 ## Loop
 
