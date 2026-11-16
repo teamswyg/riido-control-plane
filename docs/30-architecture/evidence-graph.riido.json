@@ -29380,8 +29380,8 @@
     },
     {
       "id": "tool_approval_question_visibility_6159",
-      "observation": "A running assignment emits a valid confirmation reason and current question, but task-thread lifecycle message filtering retains an earlier response while exposing waiting_for_user. The existing scoped status event already triggers client history refresh.",
-      "hypothesis": "Use the non-empty question for running confirmation events before constructing the task-thread response. Preserve the earlier message when no question is supplied, keep terminal results separate, and reuse the existing waiting status and client refresh contract.",
+      "observation": "A running assignment emits a valid confirmation reason and current question, but task-thread lifecycle message filtering retains an earlier response while exposing waiting_for_user. The existing scoped status event already triggers client history refresh. RIID-6191 reproduced a second, different approval question with the same assignment and confirmation reason being deduplicated to the first committed event before this projection. The accepted first fix therefore did not update the visible question for consecutive tools, and the unchanged waiting status also suppressed a client refresh.",
+      "hypothesis": "Use the non-empty question for running confirmation events before constructing the task-thread response. Preserve the earlier message when no question is supplied, keep terminal results separate, and reuse the existing waiting status and client refresh contract. Compare a non-empty incoming question with the latest matching committed waiting event before reusing its identity. A changed question needs a new event and a scoped waiting-status notification; identical-question retries and empty lifecycle updates must keep the latest identity.",
       "claims": [
         "thread_history_must_keep_user_followups"
       ],
@@ -29393,12 +29393,36 @@
         {
           "kind": "manifest",
           "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_notification_identity.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_client_development_func_should_fanout_agent_task_action_event.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/consecutive_tool_approval_cases_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/consecutive_tool_approval_test.go"
         }
       ],
       "verifiers": [
         {
           "kind": "test",
           "path": "internal/riidoaiserver/tool_approval_visibility_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/consecutive_tool_approval_cases_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/consecutive_tool_approval_test.go"
         }
       ],
       "evidence": [
@@ -29408,7 +29432,7 @@
           "redacted": true
         }
       ],
-      "decision": "Apply only current confirmation question preservation. Approval/answer/empty-question regression cases check refreshed history and scoped waiting status; terminal results and permission policy remain unchanged. Local tests do not establish deployment or live approval acceptance.",
+      "decision": "Apply only current confirmation question preservation. Approval/answer/empty-question regression cases check refreshed history and scoped waiting status; terminal results and permission policy remain unchanged. Local tests do not establish deployment or live approval acceptance. RIID-6191 adds exact A-to-B-to-A approval and answer regressions across committed event, task-thread projection, v3 history and task/assignment/run-scoped status fanout. The focused pre-fix regressions failed on event reuse and missing status refresh; the integrated local suite passes with current source. Preserve current-question retry identity and empty-update retention, and keep authentication, lease, assignment, terminal, approval and timeout policies unchanged. This records local correction evidence; server deployment and real consecutive approvals with same-run body persistence remain separate acceptance gates.",
       "next_loop": "closed_loop_candidate"
     }
   ],
