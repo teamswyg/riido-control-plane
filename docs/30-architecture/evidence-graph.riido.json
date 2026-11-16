@@ -29451,6 +29451,56 @@
       ],
       "decision": "Apply only current confirmation question preservation. Approval/answer/empty-question regression cases check refreshed history and scoped waiting status; terminal results and permission policy remain unchanged. Local tests do not establish deployment or live approval acceptance. RIID-6191 adds exact A-to-B-to-A approval and answer regressions across committed event, task-thread projection, v3 history and task/assignment/run-scoped status fanout. The focused pre-fix regressions failed on event reuse and missing status refresh; the integrated local suite passes with current source. Preserve current-question retry identity and empty-update retention, and keep authentication, lease, assignment, terminal, approval and timeout policies unchanged. This records local correction evidence; server deployment and real consecutive approvals with same-run body persistence remain separate acceptance gates.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "tool_approval_human_wait_6192",
+      "observation": "RIID-6192: a current approval question can be visible in waiting_for_user with approval_required, but the server assigns an implicit five-minute expiration. A deterministic 24-hour clock advance returned timed_out without a user decision. The daemon separately consumed human response time in its run deadline.",
+      "hypothesis": "Keep the existing approval-needed state and current request details until an explicit decision. Treat an omitted deadline as unbounded, retain explicitly supplied deadlines, and reject pending decisions once their assignment has ended. The daemon must separately exclude resolver wait time from execution budgets.",
+      "claims": [
+        "thread_history_must_keep_user_followups",
+        "store_snapshot_file_outbox_must_preserve_durable_replay_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_tool_approval_request_normalize.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_tool_approval_validation.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_tool_approval_decision_handler.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_tool_approval_human_wait_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/store_tool_approval_decide_timeout_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/tool_approval_visibility_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Remove only the implicit response deadline. Current request identity, explicit permission and explicit deadlines remain enforced. Regression coverage preserves pending tool details across snapshot reload and a 24-hour clock advance, accepts a later decision, and refuses approval after cancellation. Deploy the server before the daemon budget change. Rollback readers must continue accepting zero expires_at while those records remain stored. Local regressions do not establish live deployment or user acceptance.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
