@@ -18,7 +18,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
       "review_by": "2026-11-23",
-      "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-smoke:source_coverage_seed."
+      "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-smoke:source_coverage_seed."
     },
     {
       "candidate_id": "ai-agent-client-testnet-load:load_harness_client_read_pressure",
@@ -28,7 +28,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_client_read_pressure."
+      "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_client_read_pressure."
     },
     {
       "candidate_id": "ai-agent-client-testnet-load:load_harness_closed_loop_promotion",
@@ -38,7 +38,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_closed_loop_promotion."
+      "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_closed_loop_promotion."
     },
     {
       "candidate_id": "control-plane-performance:control_plane_performance_hot_path_benchmarks",
@@ -48,7 +48,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_hot_path_benchmarks."
+      "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_hot_path_benchmarks."
     },
     {
       "candidate_id": "control-plane-performance:control_plane_performance_closed_loop_promotion",
@@ -58,7 +58,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_closed_loop_promotion."
+      "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_closed_loop_promotion."
     },
     {
       "candidate_id": "control-plane-pressure:http_endpoint_threads_v3",
@@ -68,7 +68,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_endpoint_threads_v3."
+      "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_endpoint_threads_v3."
     },
     {
       "candidate_id": "control-plane-pressure:http_metrics_observe",
@@ -78,7 +78,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
       "review_by": "2026-11-23",
-      "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_metrics_observe."
+      "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_metrics_observe."
     },
     {
       "candidate_id": "control-plane-pressure:store_metrics_observe",
@@ -88,7 +88,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
       "review_by": "2026-11-23",
-      "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:store_metrics_observe."
+      "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:store_metrics_observe."
     },
     {
       "candidate_id": "control-plane-pressure:progress_ingest_fragment",
@@ -98,7 +98,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:progress_ingest_fragment."
+      "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:progress_ingest_fragment."
     },
     {
       "candidate_id": "control-plane-pressure:thread_stream_subscription",
@@ -108,7 +108,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
       "review_by": "2026-11-23",
-      "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_stream_subscription."
+      "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_stream_subscription."
     },
     {
       "candidate_id": "control-plane-pressure:client_event_subscriber_fanout",
@@ -118,7 +118,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:client_event_subscriber_fanout."
+      "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:client_event_subscriber_fanout."
     },
     {
       "candidate_id": "control-plane-pressure:thread_history_v3",
@@ -128,7 +128,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_history_v3."
+      "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_history_v3."
     },
     {
       "candidate_id": "control-plane-pressure:assignment_long_poll_wait",
@@ -138,7 +138,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
       "review_by": "2026-11-23",
-      "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:assignment_long_poll_wait."
+      "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:assignment_long_poll_wait."
     },
     {
       "candidate_id": "control-plane-pressure:tool_approval_waiters",
@@ -148,7 +148,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
       "review_by": "2026-11-23",
-      "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:tool_approval_waiters."
+      "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:tool_approval_waiters."
     },
     {
       "candidate_id": "loop-closure-audit:source_coverage_seed",
@@ -158,7 +158,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
       "review_by": "2026-11-23",
-      "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-closure-audit:source_coverage_seed."
+      "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-closure-audit:source_coverage_seed."
     },
     {
       "candidate_id": "loop-closure-audit:syntax_hash_graph_spike",
@@ -178,7 +178,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
       "review_by": "2026-11-23",
-      "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-refresh-dispatch:source_coverage_seed."
+      "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-refresh-dispatch:source_coverage_seed."
     },
     {
       "candidate_id": "operational-readiness:otel_xray_client_surface",
@@ -188,7 +188,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "client_surface_alarm_plan_apply_evidence",
       "review_by": "2026-11-23",
-      "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:otel_xray_client_surface."
+      "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:otel_xray_client_surface."
     },
     {
       "candidate_id": "operational-readiness:staging_client_p0_visual_retest",
@@ -198,7 +198,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "staging_client_p0_visual_screenshot_evidence",
       "review_by": "2026-11-23",
-      "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:staging_client_p0_visual_retest."
+      "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:staging_client_p0_visual_retest."
     },
     {
       "candidate_id": "operational-readiness:daemon_network_disconnect_waiting",
@@ -208,7 +208,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "daemon_network_disconnect_release_evidence",
       "review_by": "2026-11-23",
-      "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:daemon_network_disconnect_waiting."
+      "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:daemon_network_disconnect_waiting."
     },
     {
       "candidate_id": "operational-readiness:single_pc_agent_limit",
@@ -218,7 +218,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "single_pc_agent_capacity_evidence",
       "review_by": "2026-11-23",
-      "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:single_pc_agent_limit."
+      "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:single_pc_agent_limit."
     },
     {
       "candidate_id": "operational-readiness:boot_burst_capacity",
@@ -228,7 +228,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "cold_start_packet_burst_evidence",
       "review_by": "2026-11-23",
-      "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:boot_burst_capacity."
+      "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:boot_burst_capacity."
     },
     {
       "candidate_id": "operational-readiness:server_crash_recovery",
@@ -238,7 +238,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "ecs_service_recovery_chaos_evidence",
       "review_by": "2026-11-23",
-      "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:server_crash_recovery."
+      "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:server_crash_recovery."
     },
     {
       "candidate_id": "operational-readiness:scale_out_recovery",
@@ -248,7 +248,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "scale_out_timing_evidence",
       "review_by": "2026-11-23",
-      "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:scale_out_recovery."
+      "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:scale_out_recovery."
     },
     {
       "candidate_id": "operational-readiness:all_servers_down_daemon_behavior",
@@ -258,7 +258,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "daemon_reconnect_storm_evidence",
       "review_by": "2026-11-23",
-      "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:all_servers_down_daemon_behavior."
+      "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:all_servers_down_daemon_behavior."
     },
     {
       "candidate_id": "operational-readiness:desktop_body_only_change",
@@ -268,7 +268,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "desktop_body_only_golden_evidence",
       "review_by": "2026-11-23",
-      "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:desktop_body_only_change."
+      "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:desktop_body_only_change."
     }
   ],
   "decision_templates": [
@@ -280,7 +280,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
       "review_by": "2026-11-23",
-      "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:harness_failure."
+      "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:harness_failure."
     },
     {
       "subject_kind": "loop_refresh_ignored_command",
@@ -290,7 +290,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "verifier",
       "review_by": "2026-11-23",
-      "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_ignored_command."
+      "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_ignored_command."
     },
     {
       "subject_kind": "loop_refresh_stale_source",
@@ -300,7 +300,7 @@
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
       "review_by": "2026-11-23",
-      "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record. Reviewed 2026-11-07: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_stale_source."
+      "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_stale_source."
     }
   ],
   "assertions": [
