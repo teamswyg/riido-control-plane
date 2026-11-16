@@ -776,12 +776,13 @@
     },
     {
       "id": "production_provider_failure_observability_loop",
-      "observation": "Production logs showed repeated external-authorizer timeouts, short HTTP 503 bursts, and initial non-operational provider observations without a useful diagnostic code or device correlation. One-percent head sampling also produced no retained error traces for the same incident window.",
-      "hypothesis": "Bounded failure-stage fields, hashed device correlation, normalized provider diagnostics, and error-marked spans can make provider and request failures diagnosable without changing endpoints, logging raw provider output, or adding high-cardinality metric dimensions.",
+      "observation": "Production logs showed repeated external-authorizer timeouts, short HTTP 503 bursts, and initial non-operational provider observations without a useful diagnostic code or device correlation. One-percent head sampling also produced no retained error traces for the same incident window. RIID-6191 replacement tasks failed runtime health checks without retained evidence distinguishing a TCP connection from a ready-probe request entering the process.",
+      "hypothesis": "Bounded failure-stage fields, hashed device correlation, normalized provider diagnostics, and error-marked spans can make provider and request failures diagnosable without changing endpoints, logging raw provider output, or adding high-cardinality metric dimensions. One constant marker per process for the first primary HTTP connection and first GET ready probe can distinguish those boundaries without recording addresses, headers, query values, or request bodies.",
       "claims": [
         "control_plane_performance_hot_paths_must_emit_evidence",
         "operational_readiness_checks_must_bind_release_items_to_evidence",
-        "request_authorization_must_preserve_security_boundary"
+        "request_authorization_must_preserve_security_boundary",
+        "health_ready_command_must_preserve_public_runtime_probe"
       ],
       "changes": [
         {
@@ -799,6 +800,18 @@
         {
           "kind": "manifest",
           "path": "docs/20-domain/request-authorization.riido.json"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_http.go"
+        },
+        {
+          "kind": "code",
+          "path": "cmd/riido_ai_server/runtime_health_diagnostics.go"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/runtime_health_diagnostics_test.go"
         }
       ],
       "verifiers": [
@@ -817,6 +830,10 @@
         {
           "kind": "tool",
           "path": "tools/evidencegraph"
+        },
+        {
+          "kind": "test",
+          "path": "cmd/riido_ai_server/runtime_health_diagnostics_test.go"
         }
       ],
       "evidence": [
@@ -826,7 +843,7 @@
           "redacted": true
         }
       ],
-      "decision": "Keep the existing v1/v2 endpoint and payload contracts unchanged. Record only normalized routes, bounded diagnostic codes and stages, and a short device hash; retain error spans while leaving successful traffic on a low-rate baseline.",
+      "decision": "Keep the existing v1/v2 endpoint and payload contracts unchanged. Record only normalized routes, bounded diagnostic codes and stages, and a short device hash; retain error spans while leaving successful traffic on a low-rate baseline. Keep the public health responses and timing unchanged. Real TCP regression requests close each connection so repeated connections cannot bypass the one-marker bound; a mutation removing that bound must fail. These process-entry markers do not identify ALB requests, prove response delivery, establish deployment success, or fix the underlying health failure. Missing markers alone are not proof of missing connections because the log sink may fail.",
       "next_loop": "control_plane_performance_harness"
     },
     {
