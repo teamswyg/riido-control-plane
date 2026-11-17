@@ -38,7 +38,8 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err := req.DocumentSnapshot.validate(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	if c.assignmentReadScope || req.capturedReadScope {
+	if c.assignmentReadScope || c.locatorVersion == 2 || req.capturedReadScope {
+		req.WorkspaceID = location.Team.Workspace.ID
 		req.ComponentID, req.BearerToken = componentID, bearerToken
 		out, err := c.getTaskReadScope(requestCtx, req, location.Team.ID)
 		if err != nil {

@@ -24,6 +24,10 @@ func (c *AIAgentPrivateTaskContextClient) fetchReadScopeBody(ctx context.Context
 	if first.Selector != nil {
 		variables["selector"] = first.Selector
 	}
+	if resource.WorkspaceID != "" && resource.Kind != AssignmentContentMeeting {
+		query = nativeReadScopeQuery(query)
+		variables["workspaceId"], variables["locatorVersion"] = resource.WorkspaceID, 2
+	}
 	var page taskReadBodyPage
 	if err := c.readScopeGraphQL(ctx, bearer, query, root, variables, &page); err != nil {
 		return nil, err

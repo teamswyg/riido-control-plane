@@ -17,7 +17,7 @@ func (index *taskReadEvidenceIndex) read(ctx context.Context, root string, varia
 	var key, kind, id string
 	switch root {
 	case "getComponentReadScope":
-		if v["componentId"] != index.scope.RootID || v["teamId"] != index.scope.TeamID || v["editorSnapshot"] != nil {
+		if v["componentId"] != index.scope.RootID || v["teamId"] != index.scope.TeamID || v["editorSnapshot"] != nil || (index.scope.SchemaVersion == taskReadScopeNativeSchema && (v["workspaceId"] != index.scope.WorkspaceID || v["locatorVersion"] != 2)) {
 			return taskContextReadError{"invalid"}
 		}
 		data, err := json.Marshal(index.scope)
@@ -57,7 +57,7 @@ func (index *taskReadEvidenceIndex) read(ctx context.Context, root string, varia
 			return err
 		}
 	}
-	if team := index.selected[kind+"\x00"+id]; team == "" || team != stringValue("teamId") {
+	if team, selected := index.selected[kind+"\x00"+id]; !selected || team != stringValue("teamId") || (kind != "meeting" && index.scope != nil && index.scope.SchemaVersion == taskReadScopeNativeSchema && (v["workspaceId"] != index.scope.WorkspaceID || v["locatorVersion"] != 2)) {
 		return taskContextReadError{"invalid"}
 	}
 	data, found := index.values[key]

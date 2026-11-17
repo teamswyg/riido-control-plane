@@ -11,7 +11,7 @@ func readScopeWorkSummary(work *taskReadScopeWork) (AssignmentScopedResource, er
 		if work.Summary.KeyNumber != nil {
 			key = *work.Summary.KeyNumber
 		}
-		return AssignmentScopedResource{Kind: work.Kind, ID: work.ID, TeamID: work.TeamID, Title: work.Summary.Title, KeyNumber: key, UpdatedAt: work.Summary.UpdatedAt, Reasons: work.Reasons}, nil
+		return AssignmentScopedResource{WorkspaceID: work.WorkspaceID, Kind: work.Kind, ID: work.ID, TeamID: work.TeamID, Title: work.Summary.Title, KeyNumber: key, UpdatedAt: work.Summary.UpdatedAt, Reasons: work.Reasons}, nil
 	}
 	details := work.Details
 	if work.Kind == AssignmentContentBacklog {
@@ -29,7 +29,7 @@ func readScopeWorkSummary(work *taskReadScopeWork) (AssignmentScopedResource, er
 	if json.Unmarshal(details, &value) != nil || value.ID != work.ID {
 		return AssignmentScopedResource{}, taskContextReadError{"invalid"}
 	}
-	return AssignmentScopedResource{Kind: work.Kind, ID: work.ID, TeamID: work.TeamID, Title: value.Title, KeyNumber: value.KeyNumber, UpdatedAt: value.UpdatedAt, Reasons: work.Reasons}, nil
+	return AssignmentScopedResource{WorkspaceID: work.WorkspaceID, Kind: work.Kind, ID: work.ID, TeamID: work.TeamID, Title: value.Title, KeyNumber: value.KeyNumber, UpdatedAt: value.UpdatedAt, Reasons: work.Reasons}, nil
 }
 
 func readScopeStatus(status string) bool {

@@ -10,8 +10,13 @@ func (c *AIAgentPrivateTaskContextClient) fetchReadScopeComments(ctx context.Con
 	if version != "" {
 		variables["version"] = version
 	}
+	query := readScopeCommentsQuery
+	if resource.WorkspaceID != "" {
+		query = nativeReadScopeQuery(query)
+		variables["workspaceId"], variables["locatorVersion"] = resource.WorkspaceID, 2
+	}
 	var out taskReadCommentPage
-	if err := c.readScopeGraphQL(ctx, bearer, readScopeCommentsQuery, "getReadScopeComments", variables, &out); err != nil {
+	if err := c.readScopeGraphQL(ctx, bearer, query, "getReadScopeComments", variables, &out); err != nil {
 		return nil, err
 	}
 	restored, err := c.restoreReadScopeComments(ctx, bearer, resource, &out)

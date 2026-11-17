@@ -18,7 +18,7 @@ func (s Server) currentRunReadRequiresScope(ctx context.Context, assignmentID, w
 	if !found || snapshot.Context.ReadScope == nil {
 		return false, nil
 	}
-	if snapshot.AssignmentID != assignmentID || snapshot.WorkspaceID != workspaceID || snapshot.TaskID != taskID || snapshot.Context.ReadScope.RootID != taskID || snapshot.Context.ReadScope.SchemaVersion != taskReadScopeSchema {
+	if snapshot.AssignmentID != assignmentID || snapshot.WorkspaceID != workspaceID || snapshot.TaskID != taskID || snapshot.Context.ReadScope.RootID != taskID || !validAssignmentScopeSchema(snapshot.Context.ReadScope, workspaceID) {
 		return false, errors.New("captured read scope identity unavailable")
 	}
 	return true, nil

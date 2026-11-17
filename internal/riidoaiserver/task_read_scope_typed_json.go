@@ -19,7 +19,7 @@ func (c *AIAgentPrivateTaskContextClient) readScopeTypedJSON(ctx context.Context
 		content.WriteString(page.Content)
 		if *page.Complete {
 			raw := content.String()
-			if !json.Valid([]byte(raw)) || readScopePartVersion(resource.Kind, resource.ID, resource.TeamID, part, first.Source, raw, expected) != first.Version {
+			if !json.Valid([]byte(raw)) || resourcePartVersion(resource, part, first.Source, raw, expected) != first.Version {
 				return nil, false, invalid
 			}
 			return json.RawMessage(raw), true, nil

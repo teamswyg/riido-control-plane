@@ -54,7 +54,7 @@ func absentAssignmentSources(parent, current AssignmentContextSnapshot) []agentS
 	refs := []agentSourceStateRef{}
 	for _, resource := range parent.Context.ReadScope.Resources {
 		key := string(resource.Kind) + "\x00" + resource.ID
-		if present[key] || resource.ID == "" || resource.TeamID == "" || !validAssignmentContentKind(resource.Kind) {
+		if present[key] || resource.ID == "" || (resource.TeamID == "" && parent.Context.ReadScope.SourceSchemaVersion != taskReadScopeNativeSchema) || !validAssignmentContentKind(resource.Kind) {
 			continue
 		}
 		present[key] = true
