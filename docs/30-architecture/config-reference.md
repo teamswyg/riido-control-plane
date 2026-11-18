@@ -78,7 +78,7 @@ Runtime env reads: `71`; manifest entries: `71`; secret/credential entries: `11`
 | `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID` | `empty` | `operator` | Legacy Open API task-context adapter workspace id. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID` | `empty` | `operator` | Legacy Open API task-context adapter team id. |
 | `RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY` | `empty` | `secret` | Legacy task-context workspace API key sent server-to-server. |
-| `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS` | `task-context default` | `public` | Positive timeout override for task context lookup. |
+| `RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS` | `task-context default` | `public` | Positive overall timeout override for task context lookup, including read-scope retry and backoff; retries never reset this budget. |
 | `RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS` | `25` | `public` | Maximum daemon poll hold time; must stay below ALB idle timeout. |
 | `RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS` | `2` | `public` | Fallback re-evaluation interval during a held daemon poll. |
 | `AWS_CONTAINER_CREDENTIALS_FULL_URI` | `empty` | `credential` | ECS credential endpoint used to sign AWS requests. |

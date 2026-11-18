@@ -9,10 +9,7 @@ import (
 )
 
 // Queries are package-owned constants; callers supply variables, never queries.
-func (c *AIAgentPrivateTaskContextClient) readScopeGraphQL(ctx context.Context, bearer, query, root string, variables, out any) error {
-	if c.readScopeEvidence != nil {
-		return c.readScopeEvidence.read(ctx, root, variables, out)
-	}
+func (c *AIAgentPrivateTaskContextClient) readScopeGraphQLOnce(ctx context.Context, bearer, query, root string, variables, out any) error {
 	body, err := json.Marshal(map[string]any{"query": query, "variables": variables})
 	if err != nil {
 		return taskContextReadError{"invalid"}

@@ -114,6 +114,7 @@
     "internal/riidoaiserver/task_context_projection_read.go",
     "internal/riidoaiserver/task_context_read_failure.go",
     "internal/riidoaiserver/task_context_read_observation.go",
+    "internal/riidoaiserver/task_context_read_retry.go",
     "internal/riidoaiserver/task_context_related_read.go",
     "internal/riidoaiserver/task_context_reply_metadata.go",
     "internal/riidoaiserver/task_context_reply_projection.go",
@@ -148,6 +149,7 @@
     "internal/riidoaiserver/task_read_scope_evidence_read.go",
     "internal/riidoaiserver/task_read_scope_evidence_types.go",
     "internal/riidoaiserver/task_read_scope_graphql.go",
+    "internal/riidoaiserver/task_read_scope_retry.go",
     "internal/riidoaiserver/task_read_scope_incomplete.go",
     "internal/riidoaiserver/task_read_scope_json_pages.go",
     "internal/riidoaiserver/task_read_scope_json_source_leaf.go",
@@ -342,7 +344,19 @@
       "TestCommentFollowupRestoresInvocationAndDispatches",
       "TestCommentFollowupResetsOnlyHumanChainAndKeepsEvidenceIdentity",
       "TestCommentFollowupCannotTransferEvidenceOrIgnoreRevocation",
-      "TestCommentFollowupDoesNotWriteStatusToOriginalComment"
+      "TestCommentFollowupDoesNotWriteStatusToOriginalComment",
+      "TestTaskReadScopeRecoversTransientInitialRead",
+      "TestTaskReadScopeKeepsPrefixAfterTransientContinuationExhaustion",
+      "TestTaskReadScopeRetriesStayBoundedAndFailClosed",
+      "TestTaskReadScopeContinuationDenialDoesNotBecomePartial",
+      "TestTaskReadScopeRetryHonorsOverallDeadline",
+      "TestHTTPTaskAssignmentRecoversScopeReadAndReplaysSameRequest",
+      "TestTaskReadScopeRetriesGatewayFailures",
+      "TestTaskReadScopeDoesNotRetryGraphQLOrMalformedResponses",
+      "TestTaskReadScopeRetriesTimeoutAndInterruptedTransport",
+      "TestTaskReadScopeSlowInitialReadCannotResetDeadline",
+      "TestTaskReadScopeCancellationNeverMasksPermanentFailure",
+      "TestTaskReadScopeRetryRebuildsIdenticalRead"
     ]
   },
   "limits": [

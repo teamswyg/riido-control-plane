@@ -70,7 +70,7 @@
     {"name":"RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_ID","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"operator","meaning":"Legacy Open API task-context adapter workspace id."},
     {"name":"RIIDO_AI_SERVER_TASK_CONTEXT_TEAM_ID","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"operator","meaning":"Legacy Open API task-context adapter team id."},
     {"name":"RIIDO_AI_SERVER_TASK_CONTEXT_WORKSPACE_API_KEY","default":"empty","owner":"cmd/riido_ai_server","sensitivity":"secret","meaning":"Legacy task-context workspace API key sent server-to-server."},
-    {"name":"RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS","default":"task-context default","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Positive timeout override for task context lookup."},
+    {"name":"RIIDO_AI_SERVER_TASK_CONTEXT_TIMEOUT_SECONDS","default":"task-context default","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Positive overall timeout override for task context lookup, including read-scope retry and backoff; retries never reset this budget."},
     {"name":"RIIDO_AI_SERVER_LONGPOLL_MAX_HOLD_SECONDS","default":"25","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Maximum daemon poll hold time; must stay below ALB idle timeout."},
     {"name":"RIIDO_AI_SERVER_LONGPOLL_TICK_SECONDS","default":"2","owner":"cmd/riido_ai_server","sensitivity":"public","meaning":"Fallback re-evaluation interval during a held daemon poll."},
     {"name":"AWS_CONTAINER_CREDENTIALS_FULL_URI","default":"empty","owner":"AWS/ECS runtime","sensitivity":"credential","meaning":"ECS credential endpoint used to sign AWS requests."},
