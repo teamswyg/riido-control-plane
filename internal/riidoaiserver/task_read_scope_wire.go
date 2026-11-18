@@ -2,8 +2,10 @@ package riidoaiserver
 
 import "encoding/json"
 
-const taskReadScopeSchema = "riido-read-scope.v1"
-const taskReadScopeNativeSchema = "riido-read-scope.v2"
+const (
+	taskReadScopeSchema       = "riido-read-scope.v1"
+	taskReadScopeNativeSchema = "riido-read-scope.v2"
+)
 
 type taskReadScope struct {
 	WorkspaceID   string                     `json:"workspaceId,omitempty"`

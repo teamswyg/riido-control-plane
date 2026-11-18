@@ -83,6 +83,11 @@
       "rule": "sort task event histories by sequence"
     },
     {
+      "id": "preserve-live-replay-assignment",
+      "kind": "replay",
+      "rule": "Before failing a replayed active assignment because its state UpdatedAt is old, consult the existing durable active-lease store. Preserve the assignment and emit no failure while the same assignment has an unexpired lease, even when its heartbeat is older than the local configured lease duration or its lease epoch differs from the replayed projection. Resolve all candidate lease reads before applying repairs; a failed or cancelled bounded read aborts opening without persisting any repair. Expired, missing or other-assignment leases retain stale cleanup, and stores without the lease port retain their legacy age-based repair behavior."
+    },
+    {
       "id": "rebuild-current-assignment",
       "kind": "index",
       "rule": "rebuild task current_assignment_id from newest assignment ordering"

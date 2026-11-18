@@ -8,7 +8,8 @@ func (s *DevelopmentAIAgentClientStore) recordAssignmentStatusEventLocked(
 	thread AIAgentTaskThreadRecord,
 ) {
 	message := assignmentEventVisibleThreadMessage(input.State, input.Type, input.Message, previousThread.Message)
-	if assignmentMetadataNeedsInput(input.Metadata) && input.Message != "" {
+	if (assignmentMetadataNeedsInput(input.Metadata) ||
+		(input.State == AssignmentRunning && input.Event.ConfirmationReason.Valid())) && input.Message != "" {
 		message = input.Message
 	}
 	response := assignmentEventActionResponse(thread, input.State, message, input.Metadata)

@@ -22,9 +22,7 @@ func validateStoredToolApproval(req ToolApprovalRequest) error {
 		return errors.New("status is required")
 	case req.RequestedAt.IsZero():
 		return errors.New("requested_at is required")
-	case req.ExpiresAt.IsZero():
-		return errors.New("expires_at is required")
-	case req.ExpiresAt.Before(req.RequestedAt):
+	case !req.ExpiresAt.IsZero() && req.ExpiresAt.Before(req.RequestedAt):
 		return errors.New("expires_at must be after requested_at")
 	default:
 		return nil

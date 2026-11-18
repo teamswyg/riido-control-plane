@@ -4,10 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 )
-
-const defaultToolApprovalTTL = 5 * time.Minute
 
 func (s *Store) normalizeToolApprovalRequest(
 	state *storeState,
@@ -37,9 +34,6 @@ func (s *Store) normalizeToolApprovalRequest(
 	}
 	if req.RequestedAt.IsZero() {
 		req.RequestedAt = now
-	}
-	if req.ExpiresAt.IsZero() {
-		req.ExpiresAt = req.RequestedAt.Add(defaultToolApprovalTTL)
 	}
 	if err := validateStoredToolApproval(req); err != nil {
 		return ToolApprovalRequest{}, err

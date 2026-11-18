@@ -59,7 +59,7 @@ func (s Server) assignRequestWithTaskContextPromptForClientResult(
 	}
 	composedReq, err := composeAssignRequestWithTaskContextResult(taskID, componentID, req, contextSnapshot)
 	if err != nil {
-		if contextReq.DocumentSnapshot != nil || (contextSnapshot.ReadScope != nil && contextSnapshot.ReadScope.SourceSchemaVersion == taskReadScopeNativeSchema) {
+		if contextReq.DocumentSnapshot != nil || errors.Is(err, errTaskCheckoutSelection) || (contextSnapshot.ReadScope != nil && contextSnapshot.ReadScope.SourceSchemaVersion == taskReadScopeNativeSchema) {
 			return composedAssignRequest{}, err
 		}
 		request, composeErr := composeAssignRequestWithoutTaskContext(taskID, componentID, req)

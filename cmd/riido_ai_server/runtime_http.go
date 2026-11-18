@@ -12,7 +12,8 @@ func newRuntimeHTTPServers(config runtimeConfig, store *riidoaiserver.Store, aiA
 	servers := []*http.Server{
 		{
 			Addr:              config.Addr,
-			Handler:           newRuntimeHandler(config, store, aiAgentClient, httpTransactions, traceRecorder),
+			Handler:           observeRuntimeReadyProbe(newRuntimeHandler(config, store, aiAgentClient, httpTransactions, traceRecorder)),
+			ConnState:         observeRuntimeConnections(),
 			ReadHeaderTimeout: 5 * time.Second,
 		},
 	}

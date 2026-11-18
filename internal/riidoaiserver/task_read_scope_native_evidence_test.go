@@ -40,13 +40,12 @@ func TestTaskReadScopeNativeEvidenceStagesAndCentralParent(t *testing.T) {
 }
 
 func TestTaskReadScopeNativeRejectsScopeWorkspaceAndRootMismatch(t *testing.T) {
-	bundle := nativeTestCapture(t, "component")
 	for _, mutate := range []func(*taskReadScope){
 		func(s *taskReadScope) { s.WorkspaceID = "" },
 		func(s *taskReadScope) { s.Works[0].WorkspaceID = "other" },
 		func(s *taskReadScope) { s.Works[0].TeamID = "old-team" },
 	} {
-		bundle = nativeTestCapture(t, "component")
+		bundle := nativeTestCapture(t, "component")
 		mutate(bundle.Scope)
 		if err := validateTaskReadScope(*bundle.Scope, "task-private", "team"); err == nil {
 			t.Fatal("invalid native scope accepted")

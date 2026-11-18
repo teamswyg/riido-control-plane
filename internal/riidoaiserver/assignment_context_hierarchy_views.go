@@ -21,7 +21,7 @@ const (
 func validAssignmentContextView(view string) bool {
 	switch view {
 	case AssignmentContextViewMeeting, AssignmentContextViewMeetings, AssignmentContextViewBase, AssignmentContextViewChanges, AssignmentContextViewTask, AssignmentContextViewTree, AssignmentContextViewResources, AssignmentContextViewComments,
-		AssignmentContextViewAgents, AssignmentContextViewAgent, AssignmentContextViewContent:
+		AssignmentContextViewAgents, AssignmentContextViewAgent, AssignmentContextViewContent, "activity", "threads", "thread", "body":
 		return true
 	}
 	return false

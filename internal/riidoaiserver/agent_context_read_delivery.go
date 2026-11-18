@@ -33,8 +33,31 @@ func (s Server) clientContextReadForDelivery(r *http.Request, principal Authoriz
 		return ClientStreamEvent{}, false
 	}
 	read = event.Payload.(AgentContextReadEvent)
+	explicit := map[runReadSourceKey]bool{}
+	if s.config.AssignmentContext != nil {
+		stored, err := s.config.AssignmentContext.ListAssignmentContextReads(ctx, read.AssignmentID)
+		if err != nil {
+			return ClientStreamEvent{}, false
+		}
+		for _, item := range stored {
+			if item.Explicit && item.TaskID == read.TaskID && item.AgentID == read.AgentID {
+				explicit[runReadSourceKey{item.SourceKind, item.SourceID, item.SourcePart}] = true
+			}
+		}
+	}
 	sources := make([]AgentContextReadSource, 0, len(read.Sources))
 	for _, source := range read.Sources {
+		key := runReadSourceKey{source.Kind, source.ID, source.Part}
+		if explicit[key] && explicitReadSource(key) {
+			_, ok, err := s.currentExplicitReadMetadata(ctx, token, current.WorkspaceID, key)
+			if err != nil {
+				return ClientStreamEvent{}, false
+			}
+			if ok {
+				sources = append(sources, source)
+			}
+			continue
+		}
 		if visible[runReadSourceKey{source.Kind, source.ID, source.Part}] || (source.Kind == "agent" && source.Part == "profile") {
 			sources = append(sources, source)
 		}

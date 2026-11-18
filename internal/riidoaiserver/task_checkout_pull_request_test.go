@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCheckoutPullRequestsRequireSameRepositoryAndUnambiguousEvidence(t *testing.T) {
+func TestCheckoutPullRequestsRequireSameRepositoryAndSelectDeterministically(t *testing.T) {
 	pulls := taskCheckoutPullRequests([]json.RawMessage{
 		json.RawMessage(`{"number":3,"htmlUrl":"https://github.com/example/other/pull/3"}`),
 		json.RawMessage(`{"number":4,"htmlUrl":"https://github.com/example/repo/pull/5"}`),
@@ -15,8 +15,8 @@ func TestCheckoutPullRequestsRequireSameRepositoryAndUnambiguousEvidence(t *test
 	})
 	repository := AIAgentTaskContextRepository{FullName: "example/repo", Source: "pull_request"}
 	snapshot := AIAgentTaskContext{linkedPullRequests: pulls}
-	if worktree := assignmentWorktreeFromTaskContext(snapshot, repository); worktree.Source != "pull_request" {
-		t.Fatalf("ambiguous linked PRs were silently selected: %+v", worktree)
+	if worktree := assignmentWorktreeFromTaskContext(snapshot, repository); worktree.BranchName != "refs/pull/8/head" {
+		t.Fatalf("equal-date linked PRs must use a deterministic PR-number tie break: %+v", worktree)
 	}
 	snapshot.linkedPullRequests = pulls[:len(pulls)-1]
 	if worktree := assignmentWorktreeFromTaskContext(snapshot, repository); worktree.Source != "pull_request_fallback:7" {
