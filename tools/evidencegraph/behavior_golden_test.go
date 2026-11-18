@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-const evidenceGraphBehaviorGoldenSHA256 = "35e7681d1e7091b315780937396238cb0c701527fc4894691a1d8b81bc0be9ca"
+const evidenceGraphBehaviorGoldenSHA256 = "dbb59a31f756c5ebe388414ce91aa80e5831e5a99b7ef06a16fe2580e574c2ff"
 
 func TestEvidenceGraphBehaviorGolden(t *testing.T) {
 	t.Setenv("RIIDO_EVIDENCE_NOW", "2026-06-25T00:00:00Z")

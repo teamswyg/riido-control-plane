@@ -24,9 +24,12 @@ func postApprovalChatThreadMessage(
 	chatBody string,
 ) AIAgentTaskActionResponse {
 	t.Helper()
-	body := `{"body":"` + chatBody + `","source_message_id":"approval-chat-1"}`
+	body, err := json.Marshal(map[string]string{"body": chatBody, "source_message_id": "approval-chat-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	path := "/v2/client/workspaces/workspace-dev-riid/ai-agent/tasks/task-approval/threads/" + assigned.ThreadID + "/messages"
-	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(string(body)))
 	req.Header.Set("Authorization", "Bearer round-trip-token")
 	resp := httptest.NewRecorder()
 	server.ServeHTTP(resp, req)

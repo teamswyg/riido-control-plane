@@ -18,6 +18,14 @@ func TestHTTPThreadMessageApprovesPendingToolApprovalExecutionReply(t *testing.T
 	assertHTTPThreadMessageApprovesPendingToolApproval(t, approvalExecutionChatBody)
 }
 
+func TestHTTPThreadMessageApprovesOnlyCurrentToolRequest(t *testing.T) {
+	assertHTTPThreadMessageApprovesPendingToolApproval(t, "<p>APPROVE THIS TOOL REQUEST ONLY.</p>")
+}
+
+func TestHTTPThreadMessageApprovesPendingToolForMentionedCurrentAgent(t *testing.T) {
+	assertHTTPThreadMessageApprovesPendingToolApproval(t, "<p>"+mentionHTML("agent-public-openclaw")+" 승인</p>")
+}
+
 func assertHTTPThreadMessageApprovesPendingToolApproval(t *testing.T, body string) {
 	t.Helper()
 	server := newApprovalChatTestServer(t)

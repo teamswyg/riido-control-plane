@@ -51,7 +51,7 @@ func (s *DynamoDBAssignmentOperationStore) loop() {
 			continue
 		}
 		if cmd.projection {
-			record, found, err := s.loadAssignmentProjection(cmd.ctx, cmd.assignmentID, credentials)
+			record, found, err := s.readAssignmentProjection(cmd.ctx, cmd.assignmentID, credentials, true)
 			cmd.projectionReply <- dynamoDBAssignmentProjectionResult{projection: AssignmentProjection(record), found: found, err: err}
 			continue
 		}

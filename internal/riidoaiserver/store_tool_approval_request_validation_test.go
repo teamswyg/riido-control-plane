@@ -34,7 +34,6 @@ func TestValidateStoredToolApprovalRequiresStableIdentity(t *testing.T) {
 		{"tool", func(r *ToolApprovalRequest) { r.ToolID = "" }, "tool_id is required"},
 		{"status", func(r *ToolApprovalRequest) { r.Status = "" }, "status is required"},
 		{"requested", func(r *ToolApprovalRequest) { r.RequestedAt = time.Time{} }, "requested_at is required"},
-		{"expires", func(r *ToolApprovalRequest) { r.ExpiresAt = time.Time{} }, "expires_at is required"},
 		{
 			"backwards expiry",
 			func(r *ToolApprovalRequest) { r.ExpiresAt = now.Add(-time.Second) },

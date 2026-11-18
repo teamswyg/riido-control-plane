@@ -1,6 +1,10 @@
 package riidoaiserver
 
-import assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
+import (
+	"strings"
+
+	assignmentcontract "github.com/teamswyg/riido-contracts/assignment"
+)
 
 // Assignment events commit before client projections. If projecting/saving the
 // notification fails, a daemon retry must reuse the committed event identity.
@@ -17,6 +21,9 @@ func repeatedNotificationEvent(state *storeState, assignment Assignment, req Age
 			continue
 		}
 		if waiting && event.Type == assignmentcontract.EventAssignmentWaitingForUser && event.ConfirmationReason == req.ConfirmationReason {
+			if question := strings.TrimSpace(req.Message); question != "" && question != strings.TrimSpace(event.Message) {
+				return TaskEvent{}, false
+			}
 			return event, true
 		}
 		if terminal && event.State == assignment.State && (event.Type == EventAssignmentCompleted || event.Type == EventAssignmentFailed || event.Type == EventAssignmentCancelled) {

@@ -264,6 +264,9 @@ prompt composition failures stop assignment creation; they never produce a
 context-free fallback execution. Version 1 retains its existing REST locator
 and fallback behavior. This boundary applies to fresh current-viewer reads as
 well as initial assignments; retained captures do not confer current access.
+Metadata-only viewer checks resolve that same canonical identity, then request only
+ID, current title and kind. They do not capture body, comments or related work.
+A missing or forbidden target is hidden from the source list.
 
 ### Large typed read-scope slots
 
@@ -282,8 +285,14 @@ A retained native session keeps its original checkout and workdir.
 
 A failed workspace preparation can accept a reply from the original requester
 in the same conversation. The workspace diagnostic and durable failed assignment
-must agree that provider execution did not start. The reply can select a linked
+must agree that provider execution did not start. When reconciliation advances
+the thread before event delivery, the assignment journal can supply the matching
+terminal workspace diagnostic from the operation that committed the failure.
+The reply can select a linked
 PR, name a branch in the same repository or retry after restoring Git access.
-The retry uses refreshed task context and the original instruction. A reply can
-supply the instruction on the next line if necessary. The failed assignment
-identifies the retry so repeat submissions do not start duplicate executions.
+A conversational reply becomes the new instruction. It uses the refreshed
+checkout, selecting the exact PR ref when a single authorized PR is the fallback
+for the generated task branch. A checkout-only reply keeps the original
+instruction, or can supply an instruction on the next line. The failed
+assignment identifies the retry so repeat submissions do not start duplicate
+executions.

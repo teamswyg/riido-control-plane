@@ -49,6 +49,16 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err := req.DocumentSnapshot.validate(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
+	if req.metadataOnly {
+		detail, err := c.getExplicitViewerMetadata(requestCtx, location.Team.ID, componentID, bearerToken)
+		if err != nil {
+			return AIAgentTaskContext{}, err
+		}
+		if detail.ID != componentID {
+			return AIAgentTaskContext{}, ErrAuthorizationForbidden
+		}
+		return AIAgentTaskContext{Component: AIAgentTaskContextComponent{ID: detail.ID, Title: detail.Title, ComponentType: detail.ComponentType}, TeamID: location.Team.ID}, nil
+	}
 	if c.assignmentReadScope || req.capturedReadScope {
 		req.WorkspaceID = location.Team.Workspace.ID
 		req.ComponentID, req.BearerToken = componentID, bearerToken
@@ -59,17 +69,5 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 		return out, nil
 	}
 
-	detail, err := c.getComponentDetail(requestCtx, location.Team.ID, componentID, bearerToken)
-	if err != nil {
-		return AIAgentTaskContext{}, err
-	}
-	if detail.ID != componentID {
-		return AIAgentTaskContext{}, errors.New("riidoaiserver: task context component identity mismatch")
-	}
-	contextSnapshot := detail.toAIAgentTaskContext()
-	contextSnapshot.TeamID = location.Team.ID
-	if err := c.enrichTaskContextFor(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req); err != nil {
-		return AIAgentTaskContext{}, err
-	}
-	return contextSnapshot, nil
+	return c.getLegacyTaskDetailContext(requestCtx, req, location.Team.ID, componentID, bearerToken)
 }

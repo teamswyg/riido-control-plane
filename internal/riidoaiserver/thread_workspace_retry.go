@@ -17,8 +17,7 @@ const workspaceRetryInputHelp = "reply with a linked PR number (PR #123), a bran
 // A workspace preparation diagnostic is emitted before provider submission.
 // A missing session ID by itself does not establish that it is safe to replay.
 func (s Server) prepareWorkspaceRetry(ctx context.Context, principal AuthorizationResult, thread AIAgentTaskThreadRecord, history AIAgentTaskThreadHistoryCollectionResponse, req *AssignRequest, taskContext *AIAgentTaskContext, body string) (bool, error) {
-	if thread.AssignmentState != AgentAssignmentStateFailed || thread.ExecutionContext == nil ||
-		thread.ExecutionContext.DiagnosticCode != "workspace_preparation_failed" || taskContext == nil {
+	if thread.AssignmentState != AgentAssignmentStateFailed || taskContext == nil {
 		return false, nil
 	}
 	reader, ok := s.assignment.(AssignmentProjectionReader)
@@ -28,6 +27,11 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 	projection, found, err := reader.LoadAssignmentProjection(ctx, thread.AssignmentID)
 	if err != nil {
 		return false, assignmentDependencyFailure(err)
+	}
+	// Reconciliation can advance the thread before its diagnostic arrives.
+	reportedWorkspaceFailure := thread.ExecutionContext != nil && thread.ExecutionContext.DiagnosticCode == workspacePreparationFailedDiagnostic
+	if !reportedWorkspaceFailure && !projection.WorkspacePreparationFailed {
+		return false, nil
 	}
 	previous := projection.Assignment
 	if !found || previous.ID != thread.AssignmentID || previous.TaskID != thread.TaskID ||
@@ -45,11 +49,20 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 			return false, errWorkspaceRetryAlreadyStarted
 		}
 	}
-	input, newInstruction, _ := strings.Cut(taskMessageContextText(body, taskDocumentContextLimit), "\n")
-	if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, strings.TrimSpace(input)); err != nil {
-		return false, err
+	instruction := taskMessageContextText(body, taskDocumentContextLimit)
+	firstLine, rest, _ := strings.Cut(instruction, "\n")
+	if input := strings.TrimSpace(firstLine); isWorkspaceRetryInstruction(input) {
+		if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, input); err != nil {
+			return false, err
+		}
+		instruction = strings.TrimSpace(rest)
+	} else if number, fallback := strings.CutPrefix(req.Worktree.Source, checkoutPullFallbackPrefix); fallback {
+		// The generated task branch just failed. Use the authorized linked
+		// PR selected by the refreshed context for this attempt.
+		if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, "PR #"+number); err != nil {
+			return false, err
+		}
 	}
-	instruction := strings.TrimSpace(newInstruction)
 	if instruction == "" {
 		instruction = workspaceRetryOriginalInstruction(thread, history.Threads, principal.PrincipalID)
 	}

@@ -9,6 +9,7 @@ type AIAgentTaskContextRequest struct {
 	DocumentSnapshot  *AIAgentTaskDocumentSnapshot
 	Extended          bool // also read related work, meetings and comments (extra upstream reads)
 	ReplyMetadata     bool // current-viewer audit only; never adds reply bodies to assignment context
+	metadataOnly      bool // internal viewer check: component identity/title, no read-scope capture or enrichment
 	capturedReadScope bool // server-selected current-viewer read for an existing scoped snapshot
 }
 
