@@ -43,6 +43,10 @@ func agentEventErrorCategory(err error) string {
 	}
 	message := err.Error()
 	switch {
+	case errors.Is(err, ErrAuthorizationForbidden):
+		return "authorization_forbidden"
+	case errors.Is(err, ErrAuthorizationUnauthenticated), errors.Is(err, ErrAuthorizationInvalidCredential):
+		return "authentication_failed"
 	case strings.HasPrefix(message, "assignment ") && strings.HasSuffix(message, " not found"):
 		return agentEventErrorCategoryAssignmentNotFound
 	case strings.Contains(message, " belongs to agent "):

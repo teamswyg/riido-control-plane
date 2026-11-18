@@ -29583,6 +29583,56 @@
       ],
       "decision": "Use only immutable assignment provenance and a server-key producer with current root and target ACL. Preserve lease/quota/audit and public metadata source enum; do not grant snapshot authority from a receipt. Metadata-only viewer checks must hide revoked/deleted targets and avoid downloading large bodies. Local tests and independent review do not establish deployed source or actual-account acceptance. Deploy monolith producer before CP and CLI.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "running_assignment_reporting_continuity_6237",
+      "observation": "RIID-6213 completed its native turn but reported hard timeout after progress-report backpressure; 264 progress reports received HTTP 403 immediately after a transient auth-probe-failed runtime health observation. Ordinary device-authenticated reports lost their verified device context, while running assignment reports reused new-claim runtime readiness checks.",
+      "hypothesis": "Preserving authenticated device provenance and separating existing leased report identity from new-claim readiness allows progress and completion to reach their existing durable ACK without permitting a new run on an unavailable runtime.",
+      "claims": [
+        "sse_reconnect_must_resume_after_last_event_id",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/execution_coverage_event_auth.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_reporting_binding.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_daemon_binding_lookup.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/store_handle_event.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/server_agent_event_diagnostics.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_event_device_context_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/execution_event_unavailable_runtime_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Keep new-claim readiness strict. For an existing lease, report authorization retains current agent/device/runtime/daemon identity, authenticated device provenance, coverage generation, lease/state and durable projection checks while allowing transient runtime unavailability. Tests reject device substitution and changed binding identities and accept completion after offline/missing observations. Failure diagnostics separate authorization rejection from bad input. Existing terminal projection and SSE replay ownership remain unchanged. A paired native Codex plus local HTTP daemon/server run completed with five partial snapshots, no report failures and 52 ms adapter-completion-to-terminal-ACK; this single local observation is not a production latency guarantee.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {
