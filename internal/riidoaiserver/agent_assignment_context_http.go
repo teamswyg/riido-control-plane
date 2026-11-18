@@ -25,6 +25,10 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 	if !ok || !s.consumeAssignmentContextRead(w, r, assignment.ID) {
 		return
 	}
+	if explicitAssignmentView(req.View) || len(req.Options) > 0 {
+		s.serveExplicitAssignmentRead(w, r, assignment, device, req)
+		return
+	}
 	if assignmentContextLiveView(req.View) {
 		s.serveLiveAssignmentContext(w, r, assignment, req)
 		return
@@ -36,8 +40,7 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	if !found {
-		snapshot = AssignmentContextSnapshot{AssignmentID: assignment.ID, TaskID: assignment.TaskID, AgentID: assignment.AgentID, RequesterPrincipalID: assignment.CreatedBy}
-		s.writeAssignmentContextRefusal(w, r, snapshot, req, now, AssignmentContextReadUnavailable, http.StatusNotFound, "assignment context snapshot unavailable")
+		s.handleMissingAssignmentSnapshot(w, r, assignment, device, req, now)
 		return
 	}
 	if s.refuseUnavailableMeeting(w, r, snapshot, req, now) {
@@ -50,7 +53,7 @@ func (s Server) handleAgentAssignmentContext(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	if !inScope {
-		s.writeAssignmentContextRefusal(w, r, snapshot, req, now, AssignmentContextReadDenied, http.StatusForbidden, "target is outside this assignment's context")
+		s.handleOutsideAssignmentSnapshot(w, r, assignment, device, req, snapshot, now)
 		return
 	}
 	status := AssignmentContextReadServed

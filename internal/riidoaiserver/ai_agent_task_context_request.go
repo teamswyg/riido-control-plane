@@ -38,6 +38,16 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err := req.DocumentSnapshot.validate(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
+	if req.metadataOnly {
+		detail, err := c.getExplicitViewerMetadata(requestCtx, location.Team.ID, componentID, bearerToken)
+		if err != nil {
+			return AIAgentTaskContext{}, err
+		}
+		if detail.ID != componentID {
+			return AIAgentTaskContext{}, ErrAuthorizationForbidden
+		}
+		return AIAgentTaskContext{Component: AIAgentTaskContextComponent{ID: detail.ID, Title: detail.Title, ComponentType: detail.ComponentType}, TeamID: location.Team.ID}, nil
+	}
 	if c.assignmentReadScope || req.capturedReadScope {
 		req.ComponentID, req.BearerToken = componentID, bearerToken
 		out, err := c.getTaskReadScope(requestCtx, req, location.Team.ID)
@@ -56,9 +66,6 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	}
 	contextSnapshot := detail.toAIAgentTaskContext()
 	contextSnapshot.TeamID = location.Team.ID
-	if err := req.DocumentSnapshot.validate(); err != nil {
-		return AIAgentTaskContext{}, err
-	}
 	if err := c.enrichTaskContextFor(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req); err != nil {
 		return AIAgentTaskContext{}, err
 	}

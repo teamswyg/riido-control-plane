@@ -6,13 +6,15 @@ import (
 )
 
 type AgentAssignmentContextRequest struct {
-	AssignmentID string `json:"assignment_id"`
-	LeaseToken   string `json:"lease_token"`
-	View         string `json:"view"`
-	Target       string `json:"target,omitempty"`
-	Cursor       string `json:"cursor,omitempty"`
-	Since        string `json:"since,omitempty"`
-	RequestID    string `json:"request_id,omitempty"`
+	AssignmentID string            `json:"assignment_id"`
+	LeaseToken   string            `json:"lease_token"`
+	View         string            `json:"view"`
+	Target       string            `json:"target,omitempty"`
+	Cursor       string            `json:"cursor,omitempty"`
+	Since        string            `json:"since,omitempty"`
+	RequestID    string            `json:"request_id,omitempty"`
+	Options      map[string]string `json:"options,omitempty"`
+	ThreadID     string            `json:"thread_id,omitempty"`
 	// MaxBytes asks a content read for consecutive pages of the same part up to
 	// this encoded size. Zero keeps the single-page response.
 	MaxBytes int `json:"max_bytes,omitempty"`

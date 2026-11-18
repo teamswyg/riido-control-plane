@@ -4,6 +4,9 @@ import "time"
 
 // AssignmentContextRead records the requester, source, run and read time.
 type AssignmentContextRead struct {
+	// Explicit marks a live, individually authorized resource read internally.
+	// Public read parts retain the existing metadata vocabulary.
+	Explicit             bool      `json:"explicit,omitempty"`
 	AssignmentID         string    `json:"assignment_id"`
 	TaskID               string    `json:"task_id"`
 	AgentID              string    `json:"agent_id"`
