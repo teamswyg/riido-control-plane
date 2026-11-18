@@ -191,7 +191,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | Claim | Loop | Files | Verifiers | Semantic Hash |
 | --- | --- | ---: | ---: | --- |
 | `deleted_agent_threads_must_remain_visible` | `ai_thread_history` | `4` | `3` | `07ab50ec626d` |
-| `thread_history_must_keep_user_followups` | `ai_thread_history` | `83` | `57` | `c95904b63535` |
+| `thread_history_must_keep_user_followups` | `ai_thread_history` | `83` | `57` | `9a3842b4cbdf` |
 | `same_provider_agents_must_keep_distinct_threads` | `ai_thread_history` | `4` | `2` | `26df19415a80` |
 | `sse_reconnect_must_resume_after_last_event_id` | `ai_thread_history` | `52` | `19` | `269b5a5ccf17` |
 | `thread_history_v3_must_expose_stable_conversation_grouping` | `ai_thread_history` | `34` | `17` | `044324b4772e` |

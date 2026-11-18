@@ -888,7 +888,7 @@
       "generated_docs": [
         "docs/30-architecture/loop-registry.md"
       ],
-      "semantic_hash": "c95904b63535201b7f4302e5841b50cd038f802f94ffe3e0d3209b7f00387d87"
+      "semantic_hash": "9a3842b4cbdfac6160e627cd7c3713a726c51c7915adc71fc1ebce70cdd3578f"
     },
     {
       "id": "same_provider_agents_must_keep_distinct_threads",

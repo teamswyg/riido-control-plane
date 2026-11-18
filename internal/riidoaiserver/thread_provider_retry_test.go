@@ -23,8 +23,10 @@ func TestCodexPreStartReplyRequiresConclusiveRecovery(t *testing.T) {
 		{"late receipt", "unavailable", "not_started", "codex", AssignmentReady, 11, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			p := AssignmentProjection{Assignment: Assignment{RuntimeProvider: "codex"}, LastEventSeq: 10,
-				Recovery: &recoveryWatermark{Context: assignment.RecoveryContext{State: tc.phase, Provider: tc.provider, OutcomeCertainty: tc.outcome}, Receipts: []recoveryReceipt{{State: tc.state, Seq: tc.seq}}}}
+			p := AssignmentProjection{
+				Assignment: Assignment{RuntimeProvider: "codex"}, LastEventSeq: 10,
+				Recovery: &recoveryWatermark{Context: assignment.RecoveryContext{State: tc.phase, Provider: tc.provider, OutcomeCertainty: tc.outcome}, Receipts: []recoveryReceipt{{State: tc.state, Seq: tc.seq}}},
+			}
 			if got := confirmedCodexPreStartFailure(p, &AssignRequest{RuntimeProvider: "codex"}); got != tc.want {
 				t.Fatalf("eligible = %v, want %v", got, tc.want)
 			}
