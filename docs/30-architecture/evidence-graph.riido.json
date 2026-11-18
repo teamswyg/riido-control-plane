@@ -29541,6 +29541,48 @@
       ],
       "decision": "Remove only the implicit response deadline. Current request identity, explicit permission and explicit deadlines remain enforced. Regression coverage preserves pending tool details across snapshot reload and a 24-hour clock advance, accepts a later decision, and refuses approval after cancellation. Deploy the server before the daemon budget change. Rollback readers must continue accepting zero expires_at while those records remain stored. Local regressions do not establish live deployment or user acceptance.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "explicit_current_permission_reads_6233",
+      "observation": "RIID-6233: ordinary work links were missing from capture and the agent could not read explicitly requested activity or retained conversations outside the initial snapshot. Viewer metadata checks also fetched whole bodies and retained a previously visible key after a current denial.",
+      "hypothesis": "Keep automatic captured scope fixed while adding bounded single-target live reads authorized as the original assignment requester; persist audit before serving and separately reauthorize the current viewer using selected metadata.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_read.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_explicit.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_boundary_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/ai_agent_run_reads_explicit_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_thread_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "Use only immutable assignment provenance and a server-key producer with current root and target ACL. Preserve lease/quota/audit and public metadata source enum; do not grant snapshot authority from a receipt. Metadata-only viewer checks must hide revoked/deleted targets and avoid downloading large bodies. Local tests and independent review do not establish deployed source or actual-account acceptance. Deploy monolith producer before CP and CLI.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
