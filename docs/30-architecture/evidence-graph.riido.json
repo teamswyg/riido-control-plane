@@ -29583,6 +29583,48 @@
       ],
       "decision": "Use only immutable assignment provenance and a server-key producer with current root and target ACL. Preserve lease/quota/audit and public metadata source enum; do not grant snapshot authority from a receipt. Metadata-only viewer checks must hide revoked/deleted targets and avoid downloading large bodies. Local tests and independent review do not establish deployed source or actual-account acceptance. Deploy monolith producer before CP and CLI.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "explicit_workspace_locator_6239",
+      "observation": "RIID-6239: workspace-owned projects and milestones have no owner team. The explicit native producer now returns a versioned null-team locator, while the current consumer only accepts a real team. The shared API guide changes no thread lifecycle behavior.",
+      "hypothesis": "Accept explicit-read.v2 only for project/milestone with an explicitly present null team_id. Keep v1 real-team validation and all immutable requester, workspace, root, ACL, quota and audit checks.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_locator.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_client.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_locator_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_read_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The HTTP regressions accept current-authority workspace projects/milestones and persist their read receipt. Missing fields, null-team TASKs, fabricated PM teams and mismatched provenance remain denied. This additive transport contract neither expands automatic snapshot scope nor changes thread messages. Deploy the compatible consumer before enabling the producer v2 envelope; local tests and CI do not establish live-account or UI acceptance.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {
