@@ -11,7 +11,7 @@ type explicitAssignmentResult struct {
 	RootID        string          `json:"root_id"`
 	PrincipalID   string          `json:"principal_id"`
 	ID            string          `json:"id"`
-	TeamID        string          `json:"team_id"`
+	TeamID        *string         `json:"team_id"`
 	Title         string          `json:"title"`
 	Kind          string          `json:"kind"`
 	Admin         bool            `json:"admin"`

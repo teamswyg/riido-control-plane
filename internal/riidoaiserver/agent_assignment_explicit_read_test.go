@@ -15,7 +15,8 @@ func explicitReadFixture(t *testing.T, change func(*assignmentContextFixture, *e
 		if r.Method != http.MethodPost || r.Header.Get(CommentDeliveryKeyHeader) != strings.Repeat("k", 32) || r.URL.Path != "/internal/agent-assignment-read/"+f.leased.WorkspaceID+"/"+f.leased.TaskID+"/"+f.leased.CreatedBy {
 			t.Error("untrusted source request")
 		}
-		v := explicitAssignmentResult{SchemaVersion: "riido-agent-explicit-read.v1", WorkspaceID: f.leased.WorkspaceID, RootID: f.leased.TaskID, PrincipalID: f.leased.CreatedBy, ID: "target-one", TeamID: "team-one", Title: "Current title", Kind: "task", Data: json.RawMessage(`{"id":"target-one","body":{"content":"readable evidence"}}`)}
+		team := "team-one"
+		v := explicitAssignmentResult{SchemaVersion: "riido-agent-explicit-read.v1", WorkspaceID: f.leased.WorkspaceID, RootID: f.leased.TaskID, PrincipalID: f.leased.CreatedBy, ID: "target-one", TeamID: &team, Title: "Current title", Kind: "task", Data: json.RawMessage(`{"id":"target-one","body":{"content":"readable evidence"}}`)}
 		if change != nil && !change(f, &v, w, r) {
 			return
 		}

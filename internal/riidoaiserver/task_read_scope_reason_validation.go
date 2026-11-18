@@ -25,7 +25,11 @@ func readScopeReasons(reasons []taskReadScopeReason, kind AssignmentContentKind,
 			return taskContextReadError{"invalid"}
 		}
 		switch reason.Kind {
-		case "root", "parentTask", "milestone", "project", "child":
+		case "root":
+			if kind == AssignmentContentMeeting || reason.Relation != nil {
+				return taskContextReadError{"invalid"}
+			}
+		case "parentTask", "milestone", "project", "child":
 			if kind != AssignmentContentComponent || reason.Relation != nil {
 				return taskContextReadError{"invalid"}
 			}

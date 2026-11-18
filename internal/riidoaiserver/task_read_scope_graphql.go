@@ -43,7 +43,7 @@ func (c *AIAgentPrivateTaskContextClient) readScopeGraphQL(ctx context.Context, 
 		switch envelope.Errors[0].Extensions.Code {
 		case "UNAUTHENTICATED", "FORBIDDEN", "authentication_required", "permission_denied":
 			return taskContextReadError{"denied"}
-		case "not_found":
+		case "NOT_FOUND", "not_found":
 			return taskContextReadError{"missing"}
 		case "conflict":
 			// RIID-6008: stored data the monolith cannot serve safely. Retrying

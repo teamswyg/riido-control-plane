@@ -9,6 +9,10 @@ import (
 )
 
 func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) {
+	locatorVersion, err := taskContextLocatorVersionFromEnv()
+	if err != nil {
+		return nil, err
+	}
 	raw := taskContextRawEnv{
 		baseURL:     strings.TrimSpace(os.Getenv(envTaskContextBaseURL)),
 		graphqlURL:  strings.TrimSpace(os.Getenv(envTaskContextGraphQLURL)),
@@ -18,6 +22,9 @@ func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) 
 		timeoutRaw:  strings.TrimSpace(os.Getenv(envTaskContextTimeout)),
 	}
 	if raw.empty() {
+		if locatorVersion == 2 {
+			return nil, fmt.Errorf("%s requires private task context configuration", envTaskContextLocatorVersion)
+		}
 		return nil, nil
 	}
 	if raw.baseURL == "" {
@@ -29,6 +36,9 @@ func taskContextReaderFromEnv() (riidoaiserver.AIAgentTaskContextReader, error) 
 	}
 	if raw.openAPIUnset() {
 		return privateTaskContextReader(raw.baseURL, raw.graphqlURL, timeout)
+	}
+	if locatorVersion == 2 {
+		return nil, fmt.Errorf("%s requires requester-private task context", envTaskContextLocatorVersion)
 	}
 	if !raw.openAPIComplete() {
 		return nil, fmt.Errorf("%s, %s, and %s must be set together for OpenAPI task context; omit all three to use private JWT task context", envTaskContextWorkspaceID, envTaskContextTeamID, envTaskContextAPIKey)

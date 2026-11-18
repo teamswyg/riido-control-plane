@@ -176,7 +176,8 @@
     "internal/riidoaiserver/task_read_scope_typed_metadata.go",
     "internal/riidoaiserver/task_read_scope_typed_restore.go",
     "internal/riidoaiserver/task_read_scope_validation.go",
-    "internal/riidoaiserver/task_read_scope_wire.go"
+    "internal/riidoaiserver/task_read_scope_wire.go",
+    "internal/riidoaiserver/task_read_scope_native_locator.go"
   ],
   "policy": {
     "conditional_content_reads": "RIID-5972 content-only conditional reads negotiate X-Riido-Context-Cache-Version: 1 and optional X-Riido-Context-Known-Digest: sha256:<64 lowercase hex> without changing request JSON. Hash versioned request identity (route agent, assignment/task/view/target/cursor/max_bytes) plus the full current representation (schema, captured_at, truncated/live, data and exact sources), excluding request_id and lease secrets. After normal device/active lease/run, quota, stored scope/page and durable read-audit success, return content_digest; an equal known digest returns POST 200 not_modified=true and data=null with current identity and sources. Hits still consume a call, load current captured pages and record exact page.Sources. No cache field is emitted for legacy/unknown-version/non-content/live requests. Malformed or duplicate known digests under v1 content requests return 400. No header grants scope, bypasses failure, performs live requester permission checks, changes fixed snapshot authority, or claims source-cache/provider-memory acceptance.",
@@ -217,6 +218,7 @@
     "click_snapshot_body": "RIID-5892/5900: click-time HTML selects mentions; an authorized producer may return its persisted root document with unchanged source/version and authenticated server continuation. Supplying an editor snapshot does not require a client_snapshot response. Legacy client_snapshot responses remain bound to the exact input version and prefix and continue locally. Identity, permission, page and version validation remain required.",
     "native_followup_prompt": "RIID-5891: after authorized native resume selection, send the new instruction and bounded new conversation messages since the validated prior assignment CreatedAt only; omit repeated execution policy, delegation guide and catalog; with no new context the prompt is exactly the readable user input; retain fresh task snapshots for on-demand CLI reads without false prompt-read audit. Requests without a native session retain full initial context; resume failure remains explicit.",
     "human_comment_followup": "RIID-5892: a new human execution preserves revalidated server-owned original comment evidence while resetting automatic depth/budget/ancestors. Immutable evidence Agent identity is independent of the new chain. Older missing bindings follow persisted same-task/root parent edges only; another requester cannot inherit the original capability. Active execution/tool approval does not reset limits. Fresh authorized follow-up snapshots are inherited by children. Human follow-up status targets its new message, with ordinary user notifications; automatic children target the calling Agent message.",
+    "workspace_native_initial_locator": "Locator version 2 first resolves requester-authorized canonical task identity, workspace and nonempty current team with native GraphQL getComponentWorkspace, then calls typed getComponentReadScope with that strict team and workspace. No legacy REST lookup. Validate v2 workspace/root/team, including moves between reads; allow teamless central parent leaves without weakening the producer root team guard. Any initial validation, lookup, permission, transport or prompt composition error fails closed rather than dispatching a context-free fallback. Metadata-only viewer checks use the same authorized canonical locator followed by minimal getComponent metadata, never the full read-scope capture. Version 1 is unchanged.",
     "explicit_cli_reads": "RIID-6233: automatic capture recognizes same-workspace canonical Riido work links in HTML and Tiptap JSON in addition to typed mentions; existing one-hop/count limits remain. Authenticated active-lease CLI calls may explicitly read one task, comment page, body part, activity page or retained conversation outside the initial snapshot. The service-key monolith endpoint resolves the immutable assignment requester/workspace/root and rechecks active root and target memberships on every call. No actor/role/token from model input, recursive capture, OAuth fallback or arbitrary URL fetch. Existing 100-call quota, bounded response, durable audit and post-read lease checks apply. Live responses carry original continuation versions/selectors; partial sources are marked. Read receipts retain public metadata parts and an internal explicit marker; HTTP/SSE source lists recheck the current viewer against each target and hide inaccessible/deleted targets without a hidden count."
   },
   "verification": {
@@ -342,7 +344,12 @@
       "TestCommentFollowupRestoresInvocationAndDispatches",
       "TestCommentFollowupResetsOnlyHumanChainAndKeepsEvidenceIdentity",
       "TestCommentFollowupCannotTransferEvidenceOrIgnoreRevocation",
-      "TestCommentFollowupDoesNotWriteStatusToOriginalComment"
+      "TestCommentFollowupDoesNotWriteStatusToOriginalComment",
+      "TestTaskReadScopeNativeCompositionFailureCannotDispatchFallback",
+      "TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations",
+      "TestTaskReadScopeNativeInitialLocatorFailsClosed",
+      "TestTaskReadScopeNativeTransportFailureCannotDispatchFallback",
+      "TestHTTPAIAgentClientNativeLocatorFailureDoesNotPublishAssignment"
     ]
   },
   "limits": [

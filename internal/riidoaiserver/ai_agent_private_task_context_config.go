@@ -10,6 +10,7 @@ import (
 
 type AIAgentPrivateTaskContextClientConfig struct {
 	AssignmentReadScope bool
+	LocatorVersion      int
 	GraphQLURL          string
 	BaseURL             string
 	Timeout             time.Duration
@@ -18,6 +19,7 @@ type AIAgentPrivateTaskContextClientConfig struct {
 
 type AIAgentPrivateTaskContextClient struct {
 	assignmentReadScope bool
+	locatorVersion      int
 	readScopeEvidence   *taskReadEvidenceIndex
 	graphqlURL          string
 	projectionBundles   bool
@@ -27,6 +29,12 @@ type AIAgentPrivateTaskContextClient struct {
 }
 
 func NewAIAgentPrivateTaskContextClient(config AIAgentPrivateTaskContextClientConfig) (*AIAgentPrivateTaskContextClient, error) {
+	if config.LocatorVersion == 0 {
+		config.LocatorVersion = 1
+	}
+	if config.LocatorVersion != 1 && config.LocatorVersion != 2 {
+		return nil, errors.New("riidoaiserver: unsupported task context locator version")
+	}
 	baseURL, err := normalizeAIAgentTaskContextBaseURL(strings.TrimSpace(config.BaseURL))
 	if err != nil {
 		return nil, err
@@ -48,6 +56,7 @@ func NewAIAgentPrivateTaskContextClient(config AIAgentPrivateTaskContextClientCo
 	}
 	return &AIAgentPrivateTaskContextClient{
 		assignmentReadScope: config.AssignmentReadScope,
+		locatorVersion:      config.LocatorVersion,
 		graphqlURL:          graphqlURL,
 		projectionBundles:   strings.TrimSpace(config.GraphQLURL) != "",
 		baseURL:             baseURL,

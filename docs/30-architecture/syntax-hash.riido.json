@@ -456,6 +456,13 @@
       "mode": "golden_locked_dependency_allowlist_tool"
     },
     {
+      "id": "ai_native_deployment_preflight_guard",
+      "package_path": "tools/ainativepreflight",
+      "golden_command": "go test ./tools/ainativepreflight -count=1",
+      "semantic_claim_id": "operational_readiness_checks_must_bind_release_items_to_evidence",
+      "mode": "golden_locked_ai_native_deployment_preflight_tool"
+    },
+    {
       "id": "dependency_allowlist_layers_adapter",
       "package_path": "tools/dependencyallowlist/layers",
       "golden_command": "go test ./tools/dependencyallowlist -run TestDependencyAllowlistBehaviorGolden -count=1",

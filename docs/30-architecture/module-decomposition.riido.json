@@ -371,6 +371,12 @@
       "must_not_own": "deployment values or secrets"
     },
     {
+      "path": "tools/ainativepreflight",
+      "kind": "evidence-tool",
+      "role": "Read-only production native task configuration preflight verifier.",
+      "must_not_own": "AWS writes, task deployment, or secret values"
+    },
+    {
       "path": "tools/containercontract",
       "kind": "evidence-tool",
       "role": "Container image contract verifier.",

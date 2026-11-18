@@ -12,7 +12,7 @@ func validateAssignmentReadScopeManifest(snapshot AssignmentContextSnapshot) err
 		return nil
 	}
 	invalid := errors.New("assignment scoped manifest inconsistent")
-	if scope.SchemaVersion != taskReadScopeSchema || scope.RootID != snapshot.Context.Component.ID || scope.TeamID == "" || scope.TeamID != snapshot.Context.TeamID {
+	if !validAssignmentScopeSchema(scope, snapshot.WorkspaceID) || scope.RootID != snapshot.Context.Component.ID || scope.TeamID == "" || scope.TeamID != snapshot.Context.TeamID {
 		return invalid
 	}
 	index := map[string]AssignmentContentManifest{}
@@ -26,10 +26,10 @@ func validateAssignmentReadScopeManifest(snapshot AssignmentContextSnapshot) err
 	resources := map[string]bool{}
 	for _, resource := range scope.Resources {
 		key := string(resource.Kind) + "\x00" + resource.ID
-		if resource.ID == "" || resource.TeamID == "" || resources[key] {
+		if resource.ID == "" || (resource.TeamID == "" && scope.SourceSchemaVersion != taskReadScopeNativeSchema) || invalidAssignmentResourceWorkspace(scope, resource) || resources[key] {
 			return invalid
 		}
-		if resource.Kind == AssignmentContentComponent && resource.ID == scope.RootID && resource.TeamID != scope.TeamID {
+		if resource.ID == scope.RootID && resource.TeamID != scope.TeamID {
 			return invalid
 		}
 		resources[key] = true

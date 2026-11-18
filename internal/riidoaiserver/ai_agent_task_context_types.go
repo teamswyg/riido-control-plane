@@ -17,6 +17,7 @@ type AIAgentTaskContext struct {
 }
 
 type AIAgentTaskContextComponent struct {
+	Kind          string `json:"kind,omitempty"`
 	ID            string `json:"id"`
 	ComponentType string `json:"componentType,omitempty"`
 	Title         string `json:"title"`

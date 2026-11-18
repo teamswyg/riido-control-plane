@@ -248,6 +248,26 @@ fragment. The owning resource remains recorded for envelope-only fragments.
 This means a partial read of an object is a read; it does not claim full-object
 completion or record unseen objects from later fragments.
 
+### Workspace-native initial locator
+
+With `RIIDO_AI_SERVER_TASK_CONTEXT_LOCATOR_VERSION=2`, a requester-private
+assignment resolves `getComponentWorkspace` through the configured native
+GraphQL endpoint using the caller's token and canonical task ID. It validates
+the returned task ID, workspace, task/subtask classification and nonempty
+current team, then supplies that team to `getComponentReadScope` with the
+workspace ID and locator version 2. It never calls the legacy REST locator.
+The scope and root must retain the resolved team; a move between reads fails
+closed and never retries against another identity. Central project/milestone
+leaves may have no team, but the producer's root task team guard is unchanged.
+Missing workspace, lookup/permission/transport errors, invalid identities and
+prompt composition failures stop assignment creation; they never produce a
+context-free fallback execution. Version 1 retains its existing REST locator
+and fallback behavior. This boundary applies to fresh current-viewer reads as
+well as initial assignments; retained captures do not confer current access.
+Metadata-only viewer checks resolve that same canonical identity, then request only
+ID, current title and kind. They do not capture body, comments or related work.
+A missing or forbidden target is hidden from the source list.
+
 ### Large typed read-scope slots
 
 A producer may replace work/meeting metadata, one comment page, or one board page with `contentPage`. These are fixed `metadata`, `comments_page`, and `board_page` body parts, bound to resource kind/ID/team and the normalized closed selector. The consumer reassembles UTF-8 chunks, verifies the complete canonical hash, and validates the fixed slot before using placeholders. Unknown fields, recursive references, mismatched identities/selectors and changed hashes are rejected. No stored OAuth or live evidence fallback is added. Captures retain the existing byte and time budgets; an unfinished typed slot stays explicitly incomplete.

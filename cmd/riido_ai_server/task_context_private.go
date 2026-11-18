@@ -11,8 +11,13 @@ func privateTaskContextReader(baseURL, graphqlURL string, timeout time.Duration)
 	if err != nil {
 		return nil, err
 	}
+	locatorVersion, err := taskContextLocatorVersionFromEnv()
+	if err != nil {
+		return nil, err
+	}
 	client, err := riidoaiserver.NewAIAgentPrivateTaskContextClient(riidoaiserver.AIAgentPrivateTaskContextClientConfig{
 		AssignmentReadScope: readScope,
+		LocatorVersion:      locatorVersion,
 		BaseURL:             baseURL,
 		GraphQLURL:          graphqlURL,
 		Timeout:             timeout,
