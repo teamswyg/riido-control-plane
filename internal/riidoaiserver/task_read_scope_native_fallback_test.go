@@ -30,3 +30,16 @@ func TestTaskReadScopeNativeCompositionFailureCannotDispatchFallback(t *testing.
 		t.Fatalf("native composition failure dispatched fallback: %+v, %v", result, err)
 	}
 }
+
+func TestTaskReadScopeNativeNoLegacyFallback(t *testing.T) {
+	for _, response := range []string{`{"errors":[{"extensions":{"code":"permission_denied"}}]}`, `{"data":{"getComponentReadScope":{"schemaVersion":"riido-read-scope.v1"}}}`} {
+		calls := 0
+		upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { calls++; _, _ = w.Write([]byte(response)) }))
+		client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: upstream.URL, LocatorVersion: 2})
+		_, err := client.getTaskReadScope(t.Context(), AIAgentTaskContextRequest{ComponentID: "task", WorkspaceID: "workspace"}, "team")
+		upstream.Close()
+		if err == nil || calls != 1 {
+			t.Fatalf("legacy fallback: calls=%d err=%v", calls, err)
+		}
+	}
+}

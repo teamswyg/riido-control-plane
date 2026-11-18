@@ -7,7 +7,6 @@ func (c *AIAgentPrivateTaskContextClient) getTaskReadScope(ctx context.Context, 
 	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	team = scope.TeamID
 	b, err := newTaskReadScopeBuilder()
 	if err != nil {
 		return AIAgentTaskContext{}, err

@@ -5,11 +5,12 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 func TestTaskReadScopeNativeInitialLocatorFailsClosed(t *testing.T) {
-	for _, name := range []string{"denied", "not found", "missing workspace", "missing bearer", "missing task", "scope workspace", "scope root", "missing team", "missing root team", "old root team", "downgrade"} {
+	for _, name := range []string{"denied", "not found", "missing workspace", "missing bearer", "missing task", "scope workspace", "scope root", "missing team", "missing root team", "old root team", "moved team", "downgrade", "location root", "location workspace", "location team", "location classification", "scope denied"} {
 		t.Run(name, func(t *testing.T) {
 			capture := nativeTestCapture(t, "component")
 			req := AIAgentTaskContextRequest{ComponentID: "task-private", WorkspaceID: "workspace", BearerToken: "human"}
@@ -20,8 +21,16 @@ func TestTaskReadScopeNativeInitialLocatorFailsClosed(t *testing.T) {
 				if r.Method != http.MethodPost || r.URL.Path != "/graphql" {
 					t.Error("native locator attempted legacy REST")
 				}
+				var wire struct{ Query string }
+				_ = json.NewDecoder(r.Body).Decode(&wire)
+				if strings.Contains(wire.Query, "getComponentWorkspace(") && name != "denied" && name != "not found" {
+					location := nativeTestLocation()
+					mutateNativeLocation(name, &location)
+					_ = json.NewEncoder(w).Encode(map[string]any{"data": map[string]any{"getComponentWorkspace": location}})
+					return
+				}
 				switch name {
-				case "denied":
+				case "denied", "scope denied":
 					_, _ = w.Write([]byte(`{"errors":[{"message":"denied","extensions":{"code":"permission_denied"}}]}`))
 				case "not found":
 					http.NotFound(w, r)
@@ -40,7 +49,10 @@ func TestTaskReadScopeNativeInitialLocatorFailsClosed(t *testing.T) {
 			if !errors.As(err, &unavailable) || result.TaskContext != nil || result.Request.Prompt != "" {
 				t.Fatalf("native lookup produced context-free execution: result=%+v err=%v", result, err)
 			}
-			want := 1
+			want := 2
+			if name == "denied" || name == "not found" || strings.HasPrefix(name, "location ") {
+				want = 1
+			}
 			if name == "missing workspace" || name == "missing bearer" || name == "missing task" {
 				want = 0
 			}

@@ -251,11 +251,14 @@ completion or record unseen objects from later fragments.
 ### Workspace-native initial locator
 
 With `RIIDO_AI_SERVER_TASK_CONTEXT_LOCATOR_VERSION=2`, a requester-private
-assignment starts directly at `getComponentReadScope` with the authorized
-workspace ID and canonical task ID. It does not call the legacy REST workspace
-locator. The returned v2 scope must match that workspace and root; its nonempty
-current team must match the root work. That current team is carried into the
-assignment and continuations. Central project/milestone leaves may have no team.
+assignment resolves `getComponentWorkspace` through the configured native
+GraphQL endpoint using the caller's token and canonical task ID. It validates
+the returned task ID, workspace, task/subtask classification and nonempty
+current team, then supplies that team to `getComponentReadScope` with the
+workspace ID and locator version 2. It never calls the legacy REST locator.
+The scope and root must retain the resolved team; a move between reads fails
+closed and never retries against another identity. Central project/milestone
+leaves may have no team, but the producer's root task team guard is unchanged.
 Missing workspace, lookup/permission/transport errors, invalid identities and
 prompt composition failures stop assignment creation; they never produce a
 context-free fallback execution. Version 1 retains its existing REST locator

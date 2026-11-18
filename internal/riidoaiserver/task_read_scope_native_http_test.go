@@ -26,12 +26,21 @@ func TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations(t *testing.T)
 			return
 		}
 		calls++
+		if strings.Contains(req.Query, "getComponentWorkspace(") {
+			if r.Header.Get("Authorization") != "Bearer human" || req.Variables["id"] != "task-private" {
+				t.Error("native locator lost requester or identity")
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"data": map[string]any{"getComponentWorkspace": nativeTestLocation()}})
+			return
+		}
 		if r.Header.Get("Authorization") != "Bearer human" || req.Variables["workspaceId"] != "workspace" || req.Variables["locatorVersion"] != float64(2) || !strings.Contains(req.Query, "workspaceId:$workspaceId,locatorVersion:$locatorVersion") {
 			t.Errorf("native request lost authority: %+v", req)
 		}
 		root, data := "getComponentReadScope", any(capture.Scope)
-		if strings.Contains(req.Query, "getComponentReadScope(componentId:") && req.Variables["teamId"] != nil {
-			t.Error("native initial read must discover the current team")
+		if strings.Contains(req.Query, "getComponentReadScope(componentId:") && req.Variables["teamId"] != "team" {
+			t.Error("producer requires the current team resolved by the locator")
+			_, _ = w.Write([]byte(`{"errors":[{"extensions":{"code":"permission_denied"}}]}`))
+			return
 		}
 		if strings.Contains(req.Query, "getIntakeReadScopeBody") {
 			root, data = "getIntakeReadScopeBody", capture.BodyPages[0].Page
@@ -50,24 +59,11 @@ func TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations(t *testing.T)
 		t.Fatal(err)
 	}
 	got, err := client.GetAIAgentTaskContextForRequest(t.Context(), AIAgentTaskContextRequest{ComponentID: "task-private", WorkspaceID: "workspace", BearerToken: "human"})
-	if err != nil || calls != 3 || got.Component.Kind != "intake" || got.TeamID != "team" || got.ReadScope.TeamID != "team" || got.Hierarchy.Project.ID != "project" {
+	if err != nil || calls != 4 || got.Component.Kind != "intake" || got.TeamID != "team" || got.ReadScope.TeamID != "team" || got.Hierarchy.Project.ID != "project" {
 		t.Fatalf("native read failed: calls=%d context=%+v err=%v", calls, got, err)
 	}
 	composed, err := composeAssignRequestWithTaskContextResult("task-private", "task-private", AssignRequest{Prompt: "Inspect only"}, got)
 	if err != nil || composed.Request.TeamID != "team" || !strings.Contains(composed.Request.Prompt, "hello") || !strings.Contains(composed.Request.Prompt, "current project") || strings.Contains(composed.Request.Prompt, taskContextUnavailableDocumentContent) {
 		t.Fatalf("native context did not reach runtime prompt: %+v %v", composed, err)
-	}
-}
-
-func TestTaskReadScopeNativeNoLegacyFallback(t *testing.T) {
-	for _, response := range []string{`{"errors":[{"extensions":{"code":"permission_denied"}}]}`, `{"data":{"getComponentReadScope":{"schemaVersion":"riido-read-scope.v1"}}}`} {
-		calls := 0
-		upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { calls++; _, _ = w.Write([]byte(response)) }))
-		client, _ := NewAIAgentPrivateTaskContextClient(AIAgentPrivateTaskContextClientConfig{BaseURL: upstream.URL, LocatorVersion: 2})
-		_, err := client.getTaskReadScope(t.Context(), AIAgentTaskContextRequest{ComponentID: "task", WorkspaceID: "workspace"}, "team")
-		upstream.Close()
-		if err == nil || calls != 1 {
-			t.Fatalf("legacy fallback: calls=%d err=%v", calls, err)
-		}
 	}
 }

@@ -14,14 +14,6 @@ func (c *AIAgentPrivateTaskContextClient) loadTaskReadScope(ctx context.Context,
 	if !scopeMatchesLocator(scope, c.locatorVersion, req.WorkspaceID) {
 		return scope, taskContextReadError{"invalid"}
 	}
-	if c.locatorVersion == 2 && team == "" {
-		// The authorized native root resolves its current team in this read.
-		// Parent leaves may be central, but an assigned task must own a team.
-		team = scope.TeamID
-		if team == "" {
-			return scope, taskContextReadError{"invalid"}
-		}
-	}
 	return scope, validateTaskReadScope(scope, req.ComponentID, team)
 }
 
@@ -37,9 +29,6 @@ func (c *AIAgentPrivateTaskContextClient) taskReadScopeRequest(req AIAgentTaskCo
 		}
 		query = nativeReadScopeQuery(query)
 		variables["workspaceId"], variables["locatorVersion"] = req.WorkspaceID, 2
-		if team == "" {
-			variables["teamId"] = nil
-		}
 	}
 	return query, variables, nil
 }
