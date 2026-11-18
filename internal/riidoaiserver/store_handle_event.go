@@ -29,7 +29,7 @@ func (s *Store) handleEvent(state *storeState, agentID string, req AgentEventReq
 	if req.TaskID != "" && req.TaskID != assignment.TaskID {
 		return AgentEventResponse{}, fmt.Errorf("assignment %s belongs to task %s", req.AssignmentID, assignment.TaskID)
 	}
-	if err := validateDaemonBinding(s.agentRegistry, agentID, PollRequest{DaemonID: req.DaemonID, DeviceID: req.DeviceID, RuntimeID: req.RuntimeID}); err != nil {
+	if err := validateReportingBinding(s.agentRegistry, assignment, req); err != nil {
 		return AgentEventResponse{}, err
 	}
 	req = assignmentEventACKRequest(assignment, req)

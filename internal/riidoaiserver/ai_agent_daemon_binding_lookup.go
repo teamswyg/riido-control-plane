@@ -23,7 +23,26 @@ func (s *DevelopmentAIAgentClientStore) LookupDaemonBinding(agentID string) (Age
 	return s.daemonBindingLocked(agent)
 }
 
+// LookupReportingBinding keeps the same current identity checks without using
+// a provider probe as revocation of an already running execution's reports.
+func (s *DevelopmentAIAgentClientStore) LookupReportingBinding(agentID string) (AgentRuntimeBinding, bool) {
+	if s == nil {
+		return AgentRuntimeBinding{}, false
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	agent, ok := s.agents[strings.TrimSpace(agentID)]
+	if !ok {
+		return AgentRuntimeBinding{}, false
+	}
+	return s.daemonIdentityLocked(agent, false)
+}
+
 func (s *DevelopmentAIAgentClientStore) daemonBindingLocked(agent AgentClientRecord) (AgentRuntimeBinding, bool) {
+	return s.daemonIdentityLocked(agent, true)
+}
+
+func (s *DevelopmentAIAgentClientStore) daemonIdentityLocked(agent AgentClientRecord, requireAvailable bool) (AgentRuntimeBinding, bool) {
 	agent.AgentID = strings.TrimSpace(agent.AgentID)
 	agent.RuntimeID = strings.TrimSpace(agent.RuntimeID)
 	if agent.AgentID == "" || agent.RuntimeID == "" {
@@ -34,7 +53,7 @@ func (s *DevelopmentAIAgentClientStore) daemonBindingLocked(agent AgentClientRec
 		return AgentRuntimeBinding{}, false
 	}
 	runtime, ok := runtimeByID(device.Runtimes, agent.RuntimeID)
-	if !ok || !runtimeAvailableForBinding(runtime) {
+	if !ok || requireAvailable && !runtimeAvailableForBinding(runtime) {
 		return AgentRuntimeBinding{}, false
 	}
 	daemon, ok := s.daemonForRuntimeLocked(device.DeviceID, runtime)

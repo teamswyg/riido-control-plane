@@ -221,3 +221,23 @@ delegate and keep ordinary projection save/retry behavior unchanged.
 The daemon adapter interval can include event backpressure and is not a native
 inference clock. Native-versus-daemon comparison requires matching task, model,
 reasoning, context and cold/resumed session; no fixed completion target is set.
+
+## Reporting admitted executions during provider probe changes · RIID-6237
+
+An event request that passed device authentication carries that verified device
+and owner into execution coverage admission, just like poll. A body-supplied ID
+cannot manufacture provenance and must match the authenticated header. Bearer
+callers retain their legacy path. A transient provider availability change must
+not revoke reporting for an execution already admitted on that same current
+agent/device/daemon/runtime binding. Reporting lookup may ignore runtime readiness;
+new assignments and polls still require an available runtime. Removed or changed
+bindings, foreign devices, coverage generations, leases and event identities keep
+their existing checks. Terminal reporting never grants another execution.
+
+Regression checks cover ordinary device provenance, device substitution, covered
+generation authentication, reporting through a transient unavailable runtime and
+rejection of a new poll or mismatched binding. Rejected events distinguish
+`authorization_forbidden`/`authentication_failed` from malformed requests without
+recording credentials or response content. This repairs the RIID-6213 failure
+window: 264 progress requests received 403 between 04:31:45 and 04:32:01 UTC on
+2026-11-18; two later 503 storage failures are separate transient dependencies.

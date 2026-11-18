@@ -3,14 +3,12 @@ package riidoaiserver
 import (
 	"context"
 	"net/http"
-	"strings"
 )
 
 func authenticatedCoverageEventContext(w http.ResponseWriter, r *http.Request, req AgentEventRequest, auth AuthorizationResult) (context.Context, bool) {
-	if auth.executionCoverageGeneration != "" || strings.HasPrefix(req.DeviceID, executionCoveragePrefix) || r.Header.Get(executionCoverageHeader) != "" {
-		return authenticatedPollContext(w, r, PollRequest{DeviceID: req.DeviceID}, auth)
-	}
-	return r.Context(), true
+	// All device-authenticated events retain verified provenance, even when a
+	// transient provider probe makes the runtime unavailable for new work.
+	return authenticatedPollContext(w, r, PollRequest{DeviceID: req.DeviceID}, auth)
 }
 
 func (s *Store) prepareCoverageEvent(ctx context.Context, agentID string, req AgentEventRequest) (context.Context, error) {
