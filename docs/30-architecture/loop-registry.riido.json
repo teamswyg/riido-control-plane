@@ -2399,7 +2399,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "30c61f8a30ed71348205a65df54f63e1247fec72f343a53639c35c87377bbecc"
+      "semantic_hash": "ad103b1275a39aeae205f25e2c883491f7c68d332b120d2ebb71f8c954dc619c"
     },
     {
       "id": "loop_evidence_artifacts_must_have_refresh_owners",
@@ -3793,7 +3793,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2ea7195a8a02530f37d48bbca1a83f658c116e6aff6b2dbb2da3027ae1156d06"
+      "semantic_hash": "0ba84f18bb3533500c6c727ad8983c194b488a75d86def438dcb9709a22ccf28"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",

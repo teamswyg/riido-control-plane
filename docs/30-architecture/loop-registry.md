@@ -210,7 +210,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `59596cfcfe6c` |
 | `closed_loop_candidates_must_carry_subject` | `closed_loop_candidate` | `18` | `4` | `4ad0edee1a94` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `16` | `10` | `61ce25286b04` |
-| `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `30c61f8a30ed` |
+| `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `ad103b1275a3` |
 | `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `464a102de5f9` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `161` | `55` | `9e7a18b67d8f` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `cb4e54278745` |
@@ -237,7 +237,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `8091a2a57b4d` |
 | `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `11` | `6` | `44d6af7f6ee2` |
 | `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `3d5d6f828aa0` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `10` | `4` | `2ea7195a8a02` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `10` | `4` | `0ba84f18bb35` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `20` | `12` | `7080491ce2a2` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `15` | `10` | `3caff5515abb` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `ab6db3f8c126` |
