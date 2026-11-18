@@ -34,3 +34,20 @@ func workspaceRetryOriginalInstruction(thread AIAgentTaskThreadRecord, history [
 	}
 	return ""
 }
+
+func workspaceRetryInstruction(instruction string, worktree *AssignmentWorktree, pulls []taskCheckoutPullRequest) (string, error) {
+	firstLine, rest, _ := strings.Cut(instruction, "\n")
+	if input := strings.TrimSpace(firstLine); isWorkspaceRetryInstruction(input) {
+		if err := selectWorkspaceRetryCheckout(worktree, pulls, input); err != nil {
+			return "", err
+		}
+		instruction = strings.TrimSpace(rest)
+	} else if number, fallback := strings.CutPrefix(worktree.Source, checkoutPullFallbackPrefix); fallback {
+		// The generated task branch just failed. Use the authorized linked
+		// PR selected by the refreshed context for this attempt.
+		if err := selectWorkspaceRetryCheckout(worktree, pulls, "PR #"+number); err != nil {
+			return "", err
+		}
+	}
+	return instruction, nil
+}

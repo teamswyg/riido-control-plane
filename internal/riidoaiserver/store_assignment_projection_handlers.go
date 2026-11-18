@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
+
+	"github.com/teamswyg/riido-contracts/assignment"
 )
 
 func (s *Store) applyClaimedAssignment(state *storeState, claim AssignmentClaimResult) error {
@@ -38,28 +39,34 @@ func handleLoadAssignmentProjection(state *storeState, assignmentID string) (Ass
 	if assignmentID == "" {
 		return AssignmentProjection{}, false, errors.New("assignment_id is required")
 	}
-	assignment, ok := state.assignments[assignmentID]
+	current, ok := state.assignments[assignmentID]
 	if !ok {
 		return AssignmentProjection{}, false, nil
 	}
-	lastEventSeq := int64(0)
+	projection := AssignmentProjection{Assignment: *copyAssignment(current)}
 	terminalSeq := int64(0)
-	var terminalAt time.Time
-	var workspacePreparationFailed bool
-	var terminalEvent *TaskEvent
-	for _, event := range state.events[assignment.TaskID] {
-		if event.AssignmentID == assignmentID && isTerminal(event.State) && (terminalSeq == 0 || event.Seq < terminalSeq) {
-			terminalSeq, terminalAt = event.Seq, event.At
+	var recoveryEvents []TaskEvent
+	for _, event := range state.events[current.TaskID] {
+		if event.AssignmentID != assignmentID {
+			continue
 		}
-		if event.AssignmentID == assignmentID && event.Seq > lastEventSeq {
-			lastEventSeq = event.Seq
-			workspacePreparationFailed = isWorkspacePreparationFailure(assignment, event)
-			terminalEvent = nil
-			if assignmentTerminalEventMatches(assignment, event) {
+		if current.State == AssignmentFailed && event.Type == EventRiidoLog && event.Metadata[assignment.RecoveryStateKey] != "" && len(recoveryEvents) <= maxRecoveryReceipts {
+			recoveryEvents = append(recoveryEvents, event)
+		}
+		if isTerminal(event.State) && (terminalSeq == 0 || event.Seq < terminalSeq) {
+			terminalSeq, projection.ContextTerminalAt = event.Seq, event.At
+		}
+		if event.Seq > projection.LastEventSeq {
+			projection.LastEventSeq = event.Seq
+			projection.WorkspacePreparationFailed = isWorkspacePreparationFailure(current, event)
+			projection.TerminalEvent = nil
+			if assignmentTerminalEventMatches(current, event) {
 				event.Metadata = cloneMetadata(event.Metadata)
-				terminalEvent = &event
+				projection.TerminalEvent = &event
 			}
 		}
 	}
-	return AssignmentProjection{Assignment: *copyAssignment(assignment), LastEventSeq: lastEventSeq, ContextTerminalAt: terminalAt, WorkspacePreparationFailed: workspacePreparationFailed, TerminalEvent: terminalEvent}, true, nil
+	// Oversized legacy journals cannot establish preflight failure.
+	projection.Recovery, _ = recoveryWatermarkForRecord(AssignmentOperationRecord{Events: recoveryEvents})
+	return projection, true, nil
 }

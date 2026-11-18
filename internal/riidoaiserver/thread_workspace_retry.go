@@ -3,7 +3,6 @@ package riidoaiserver
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/teamswyg/riido-contracts/assignment"
 )
@@ -14,10 +13,10 @@ var errWorkspaceRetryAlreadyStarted = errors.New("a retry is already linked to t
 
 const workspaceRetryInputHelp = "reply with a linked PR number (PR #123), a branch in the same repository (branch: staging), or retry after restoring repository access"
 
-// A workspace preparation diagnostic is emitted before provider submission.
+// Both workspace setup and confirmed Codex preflight failures precede submission.
 // A missing session ID by itself does not establish that it is safe to replay.
-func (s Server) prepareWorkspaceRetry(ctx context.Context, principal AuthorizationResult, thread AIAgentTaskThreadRecord, history AIAgentTaskThreadHistoryCollectionResponse, req *AssignRequest, taskContext *AIAgentTaskContext, body string) (bool, error) {
-	if thread.AssignmentState != AgentAssignmentStateFailed || taskContext == nil {
+func (s Server) preparePreStartRetry(ctx context.Context, principal AuthorizationResult, thread AIAgentTaskThreadRecord, history AIAgentTaskThreadHistoryCollectionResponse, req *AssignRequest, taskContext *AIAgentTaskContext, body string) (bool, error) {
+	if thread.AssignmentState != AgentAssignmentStateFailed {
 		return false, nil
 	}
 	reader, ok := s.assignment.(AssignmentProjectionReader)
@@ -30,7 +29,11 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 	}
 	// Reconciliation can advance the thread before its diagnostic arrives.
 	reportedWorkspaceFailure := thread.ExecutionContext != nil && thread.ExecutionContext.DiagnosticCode == workspacePreparationFailedDiagnostic
-	if !reportedWorkspaceFailure && !projection.WorkspacePreparationFailed {
+	workspaceFailure := reportedWorkspaceFailure || projection.WorkspacePreparationFailed
+	if workspaceFailure && taskContext == nil {
+		return false, nil
+	}
+	if !workspaceFailure && !confirmedCodexPreStartFailure(projection, req) {
 		return false, nil
 	}
 	previous := projection.Assignment
@@ -40,8 +43,9 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 		previous.CreatedBy != principal.PrincipalID {
 		return false, ErrAuthorizationForbidden
 	}
+	repositoryOptional := !workspaceFailure && previous.Worktree == nil && req.Worktree == nil
 	if previous.State != AssignmentFailed || assignment.ResumeSessionIDForAssignment(previous) != "" ||
-		!sameCheckoutRepository(previous.Worktree, req.Worktree) {
+		(!repositoryOptional && !sameCheckoutRepository(previous.Worktree, req.Worktree)) {
 		return false, nil
 	}
 	for _, row := range history.Threads {
@@ -50,16 +54,9 @@ func (s Server) prepareWorkspaceRetry(ctx context.Context, principal Authorizati
 		}
 	}
 	instruction := taskMessageContextText(body, taskDocumentContextLimit)
-	firstLine, rest, _ := strings.Cut(instruction, "\n")
-	if input := strings.TrimSpace(firstLine); isWorkspaceRetryInstruction(input) {
-		if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, input); err != nil {
-			return false, err
-		}
-		instruction = strings.TrimSpace(rest)
-	} else if number, fallback := strings.CutPrefix(req.Worktree.Source, checkoutPullFallbackPrefix); fallback {
-		// The generated task branch just failed. Use the authorized linked
-		// PR selected by the refreshed context for this attempt.
-		if err := selectWorkspaceRetryCheckout(req.Worktree, taskContext.linkedPullRequests, "PR #"+number); err != nil {
+	if workspaceFailure {
+		instruction, err = workspaceRetryInstruction(instruction, req.Worktree, taskContext.linkedPullRequests)
+		if err != nil {
 			return false, err
 		}
 	}
