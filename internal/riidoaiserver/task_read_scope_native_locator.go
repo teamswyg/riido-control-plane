@@ -14,7 +14,8 @@ func (c *AIAgentPrivateTaskContextClient) getNativeTaskReadScope(ctx context.Con
 		return AIAgentTaskContext{}, err
 	}
 	location = location.normalized()
-	if location.ID != req.ComponentID || location.Team.Workspace.ID != req.WorkspaceID || location.Team.ID == "" || (location.ComponentType != "task" && location.ComponentType != "subtask") {
+	kindAllowed := location.ComponentType == "task" || location.ComponentType == "subtask" || (req.metadataOnly && (location.ComponentType == "project" || location.ComponentType == "milestone"))
+	if location.ID != req.ComponentID || location.Team.Workspace.ID != req.WorkspaceID || location.Team.ID == "" || !kindAllowed {
 		return AIAgentTaskContext{}, taskContextReadError{"invalid"}
 	}
 	if req.metadataOnly {

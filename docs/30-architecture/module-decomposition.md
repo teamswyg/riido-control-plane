@@ -10,7 +10,7 @@ This reader is generated from the package boundary manifest and current Go packa
 
 ## Coverage
 
-Packages: `111`; runtime: `1`; internal: `6`; tools: `103`; forbidden import hits: `0`.
+Packages: `112`; runtime: `1`; internal: `6`; tools: `104`; forbidden import hits: `0`.
 
 File line budget target: `75`; files over target: `222`; max file lines: `710`.
 
@@ -76,7 +76,7 @@ None. Every over-budget directory is covered by a hotspot ratchet.
 - `source-ready-adapter`: `internal/ownergraphql/controlplane`
 - `guard`: `internal/repoidentity`
 - `core`: `internal/riidoaiserver`
-- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aiagentload`, `tools/aiagentrisk`, `tools/aiagentthreadsnapshot`, `tools/aigeneratedsmokematrix`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/containercontract`, `tools/contextmap`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/controlplanepressure`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/metricshttpadapter`, `tools/migrationledger`, `tools/openquestions`, `tools/operationalreadiness`, `tools/providerstatus`, `tools/publicpageslive`, `tools/requestauth`, `tools/reviewaccountseed`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
+- `evidence-tool`: `tools/agentcatalogrbac`, `tools/agentruntimebinding`, `tools/aiagentclientapi`, `tools/aiagentload`, `tools/aiagentrisk`, `tools/aiagentthreadsnapshot`, `tools/aigeneratedsmokematrix`, `tools/apiclientdelivery`, `tools/assignmentjournal`, `tools/cloudwatchemf`, `tools/configreference`, `tools/ainativepreflight`, `tools/containercontract`, `tools/contextmap`, `tools/controlplaneaudit`, `tools/controlplaneperf`, `tools/controlplanepressure`, `tools/figmaprojection`, `tools/healthreadycmd`, `tools/integrationmatrix`, `tools/metricshttpadapter`, `tools/migrationledger`, `tools/openquestions`, `tools/operationalreadiness`, `tools/providerstatus`, `tools/publicpageslive`, `tools/requestauth`, `tools/reviewaccountseed`, `tools/runtimeboundary`, `tools/runtimecdownership`, `tools/saascontrolplane`, `tools/snapshotcqrsgate`, `tools/storesaferouting`, `tools/storesnapshotoutbox`, `tools/webfrontendapi`
 - `policy-evidence-tool`: `tools/ciworkflowparity`
 - `meta-evidence-tool`: `tools/closedloopcandidatedecision`, `tools/closedloopcandidateintake`, `tools/evidencegraph`, `tools/gocibaseline`, `tools/harnesspromotion`, `tools/knowledgecoverage`, `tools/liveworkflowevidence`, `tools/loopclosureaudit`, `tools/looprefreshdispatch`, `tools/loopregistry`, `tools/moduledecomposition`, `tools/precommitbaseline`, `tools/repositoryreadme`, `tools/syntaxhash`, `tools/workflowevidence`
 - `policy-tool`: `tools/dependencyallowlist`, `tools/deploypolicy`

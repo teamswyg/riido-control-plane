@@ -1,42 +1,13 @@
 // ainativepreflight validates production task configuration without AWS writes.
-// It reports field names only; task definitions and secret references stay private.
 package main
 
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"net/url"
-	"os"
-	"regexp"
 	"strings"
 )
-
-type entry struct {
-	Name      string `json:"name"`
-	Value     string `json:"value"`
-	ValueFrom string `json:"valueFrom"`
-}
-type container struct {
-	EnvironmentFiles []json.RawMessage `json:"environmentFiles"`
-	Name             string            `json:"name"`
-	Environment      []entry           `json:"environment"`
-	Secrets          []entry           `json:"secrets"`
-}
-type task struct {
-	Containers []container `json:"containerDefinitions"`
-}
-
-var keyNames = []string{"RIIDO_AI_SERVER_EXTERNAL_AUTHZ_API_KEY", "RIIDO_AI_SERVER_COMMENT_DELIVERY_KEY", "RIIDO_AI_SERVER_AGENT_SOURCE_STATE_KEY"}
-var urlPaths = map[string]string{
-	"RIIDO_AI_SERVER_EXTERNAL_AUTHZ_URL":            "/internal/control-plane/authorize",
-	"RIIDO_AI_SERVER_TASK_CONTEXT_GRAPHQL_URL":      "/graphql",
-	"RIIDO_AI_SERVER_TASK_CONTEXT_BASE_URL":         "",
-	"RIIDO_AI_SERVER_COMMENT_DELIVERY_EVIDENCE_URL": "",
-	"RIIDO_AI_SERVER_AGENT_SOURCE_STATE_URL":        "",
-}
-var nonProduction = regexp.MustCompile(`(^|[.-])(staging|stage|testnet|test|development|dev|localhost)([.-]|$)`)
 
 func validate(body []byte, name string) error {
 	var envelope struct {
@@ -101,27 +72,4 @@ func validate(body []byte, name string) error {
 		}
 	}
 	return nil
-}
-func run(args []string) error {
-	fs := flag.NewFlagSet("ainativepreflight", flag.ContinueOnError)
-	path := fs.String("task-definition", "", "private ECS task definition JSON")
-	name := fs.String("container", "", "configured container name")
-	if fs.Parse(args) != nil {
-		return errors.New("invalid arguments")
-	}
-	if *path == "" || *name == "" || fs.NArg() != 0 {
-		return errors.New("task-definition and container are required")
-	}
-	b, err := os.ReadFile(*path)
-	if err != nil {
-		return errors.New("cannot read private task definition")
-	}
-	return validate(b, *name)
-}
-func main() {
-	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, "BLOCKED:", err)
-		os.Exit(1)
-	}
-	fmt.Println("Production native AI configuration shape: PASS (endpoint ownership and cross-service key equality require private preflight)")
 }

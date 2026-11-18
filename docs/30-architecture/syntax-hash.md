@@ -70,6 +70,7 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `knowledge_coverage_guard` | `tools/knowledgecoverage` | 100% | `1df4ce6f3352` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `baseline_ci_parity_guard` | `tools/ciworkflowparity` | 100% | `7dca39e1d076` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `dependency_allowlist_guard` | `tools/dependencyallowlist` | 100% | `5a72db5d07b4` | `context_map_must_guard_public_boundaries` |
+| `ai_native_deployment_preflight_guard` | `tools/ainativepreflight` | 100% | `7d8e93425906` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `dependency_allowlist_layers_adapter` | `tools/dependencyallowlist/layers` | 100% | `9acb9c8eebf2` | `context_map_must_guard_public_boundaries` |
 | `provider_status_guard` | `tools/providerstatus` | 100% | `f1f9b73bec0a` | `store_safe_routing_must_preserve_provider_status_decisions` |
 | `provider_status_path_adapter` | `tools/providerstatus/pathutil` | 100% | `429078cba0e3` | `store_safe_routing_must_preserve_provider_status_decisions` |
@@ -116,14 +117,14 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 | `ai_agent_thread_snapshot_guard` | `tools/aiagentthreadsnapshot` | 100% | `3906569ffc96` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
 | `react_query_generated_client_guard` | `tools/reactquerygen` | 100% | `d23929aab84a` | `react_query_generator_must_preserve_generated_client_surface` |
 | `operational_readiness_tool_guard` | `tools/operationalreadiness` | 100% | `eb5389a30692` | `operational_readiness_checks_must_bind_release_items_to_evidence` |
-| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `b72873012d82` | `server_route_handlers_must_stay_semantically_split` |
+| `riido_ai_server_guard` | `internal/riidoaiserver` | 100% | `4c489283f330` | `server_route_handlers_must_stay_semantically_split` |
 | `control_plane_owner_graphql_guard` | `internal/ownergraphql/controlplane` | 100% | `f9f103976492` | `runtime_deployment_boundary_must_preserve_public_private_ownership` |
 | `local_agent_snapshot_file_adapter` | `internal/agentstatefile` | 100% | `36519e540535` | `store_snapshot_file_outbox_must_preserve_durable_replay_evidence` |
 
 ## Repository Coverage
 
-- Go files: `4830`
-- tracked files: `4830`
+- Go files: `4836`
+- tracked files: `4836`
 - untracked files: `0`
 - coverage: `100.00%`
 
@@ -169,16 +170,16 @@ Executable SSOT: [`syntax-hash.riido.json`](syntax-hash.riido.json).
 
 - formula: `analysis_reduction_basis_points*efficiency_weight + compression_gain*compression_weight`
 - constraint gate: `coverage>=floor && golden_commands==targets && collisions==0 && relocations==tracked && physical_violations==0`
-- tracked files: `4830`
-- unique syntax hashes: `4627`
+- tracked files: `4836`
+- unique syntax hashes: `4633`
 - compression gain: `203`
-- analysis reduction: `4.20%`
+- analysis reduction: `4.19%`
 - collision count: `0`
-- relocation mappings: `4830`
+- relocation mappings: `4836`
 - missing relocation mappings: `0`
 - relocation coverage: `100.00%`
-- golden commands: `111`
+- golden commands: `112`
 - missing golden commands: `0`
-- efficiency score: `420`
+- efficiency score: `419`
 - compression score: `203`
-- weighted score: `623`
+- weighted score: `622`
