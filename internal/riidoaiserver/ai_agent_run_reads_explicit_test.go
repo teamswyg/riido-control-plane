@@ -30,6 +30,7 @@ func TestExplicitReadReceiptRequiresCurrentViewerAccess(t *testing.T) {
 
 func TestExplicitViewerMetadataSelectsNoBody(t *testing.T) {
 	calls := 0
+	missing := false
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		if r.Header.Get("Authorization") != "Bearer viewer" {
@@ -41,6 +42,10 @@ func TestExplicitViewerMetadataSelectsNoBody(t *testing.T) {
 		}
 		if r.URL.Path != "/graphql" {
 			http.Error(w, strings.Repeat("body", 1<<20), http.StatusOK)
+			return
+		}
+		if missing {
+			_, _ = w.Write([]byte(`{"errors":[{"extensions":{"code":"NOT_FOUND"}}]}`))
 			return
 		}
 		var in struct {
@@ -61,5 +66,10 @@ func TestExplicitViewerMetadataSelectsNoBody(t *testing.T) {
 	out, err := client.GetAIAgentTaskContextForRequest(t.Context(), AIAgentTaskContextRequest{ComponentID: "target", WorkspaceID: "workspace", BearerToken: "viewer", metadataOnly: true})
 	if err != nil || out.Component.Title != "Current title" || calls != 2 {
 		t.Fatalf("bounded metadata failed: %v calls=%d", err, calls)
+	}
+	missing = true
+	server := Server{taskContext: client}
+	if _, visible, err := server.currentExplicitReadMetadata(t.Context(), "viewer", "workspace", runReadSourceKey{"task", "target", "metadata"}); visible || err != nil {
+		t.Fatalf("missing GraphQL source failed whole read: %v visible=%v", err, visible)
 	}
 }

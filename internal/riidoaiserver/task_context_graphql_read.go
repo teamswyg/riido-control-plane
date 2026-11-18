@@ -38,6 +38,8 @@ func (c *AIAgentPrivateTaskContextClient) contextGraphQL(ctx context.Context, be
 		switch failure.Extensions.Code {
 		case "UNAUTHENTICATED", "FORBIDDEN":
 			return taskContextReadError{"denied"}
+		case "NOT_FOUND":
+			return taskContextReadError{"missing"}
 		default:
 			return taskContextReadError{"unavailable"}
 		}
