@@ -56,7 +56,7 @@ func (s Server) readExplicitAssignment(ctx context.Context, a Assignment, req Ag
 		return empty, 503, errors.New("explicit source response too large")
 	}
 	var v explicitAssignmentResult
-	if json.Unmarshal(raw, &v) != nil || v.SchemaVersion != "riido-agent-explicit-read.v1" || v.WorkspaceID != a.WorkspaceID || v.RootID != a.TaskID || v.PrincipalID != a.CreatedBy || v.ID == "" || v.TeamID == "" || !json.Valid(v.Data) {
+	if json.Unmarshal(raw, &v) != nil || !validExplicitAssignmentLocator(raw, v) || v.WorkspaceID != a.WorkspaceID || v.RootID != a.TaskID || v.PrincipalID != a.CreatedBy || v.ID == "" || !json.Valid(v.Data) {
 		return empty, 503, errors.New("explicit source provenance mismatch")
 	}
 	switch v.Kind {
