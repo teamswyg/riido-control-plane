@@ -248,6 +248,20 @@ fragment. The owning resource remains recorded for envelope-only fragments.
 This means a partial read of an object is a read; it does not claim full-object
 completion or record unseen objects from later fragments.
 
+### Workspace-native initial locator
+
+With `RIIDO_AI_SERVER_TASK_CONTEXT_LOCATOR_VERSION=2`, a requester-private
+assignment starts directly at `getComponentReadScope` with the authorized
+workspace ID and canonical task ID. It does not call the legacy REST workspace
+locator. The returned v2 scope must match that workspace and root; its nonempty
+current team must match the root work. That current team is carried into the
+assignment and continuations. Central project/milestone leaves may have no team.
+Missing workspace, lookup/permission/transport errors, invalid identities and
+prompt composition failures stop assignment creation; they never produce a
+context-free fallback execution. Version 1 retains its existing REST locator
+and fallback behavior. This boundary applies to fresh current-viewer reads as
+well as initial assignments; retained captures do not confer current access.
+
 ### Large typed read-scope slots
 
 A producer may replace work/meeting metadata, one comment page, or one board page with `contentPage`. These are fixed `metadata`, `comments_page`, and `board_page` body parts, bound to resource kind/ID/team and the normalized closed selector. The consumer reassembles UTF-8 chunks, verifies the complete canonical hash, and validates the fixed slot before using placeholders. Unknown fields, recursive references, mismatched identities/selectors and changed hashes are rejected. No stored OAuth or live evidence fallback is added. Captures retain the existing byte and time budgets; an unfinished typed slot stays explicitly incomplete.

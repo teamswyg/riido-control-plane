@@ -216,7 +216,8 @@
     "large_typed_parts": "Large metadata/comments_page/board_page payloads use the four fixed kind-specific body roots with a normalized typed selector. Reconstruct contentPage before interpreting placeholder fields. Bind each full canonical JSON version to kind/id/actual team/part/normalized selector/source/format, validate every continuation and current requester, and preserve fixed logical comment/board pagination. Captured evidence replays exact selector-bound pages offline. Resource summaries retain original identity when capture budget ends before metadata is complete. Existing total storage/call/retention budgets are unchanged: keep captured prefixes explicitly incomplete and never advertise uncaptured bytes as complete. This extension requires actual producer HTTP/PG/evidence plus CP/CLI integration before full-read acceptance.",
     "click_snapshot_body": "RIID-5892/5900: click-time HTML selects mentions; an authorized producer may return its persisted root document with unchanged source/version and authenticated server continuation. Supplying an editor snapshot does not require a client_snapshot response. Legacy client_snapshot responses remain bound to the exact input version and prefix and continue locally. Identity, permission, page and version validation remain required.",
     "native_followup_prompt": "RIID-5891: after authorized native resume selection, send the new instruction and bounded new conversation messages since the validated prior assignment CreatedAt only; omit repeated execution policy, delegation guide and catalog; with no new context the prompt is exactly the readable user input; retain fresh task snapshots for on-demand CLI reads without false prompt-read audit. Requests without a native session retain full initial context; resume failure remains explicit.",
-    "human_comment_followup": "RIID-5892: a new human execution preserves revalidated server-owned original comment evidence while resetting automatic depth/budget/ancestors. Immutable evidence Agent identity is independent of the new chain. Older missing bindings follow persisted same-task/root parent edges only; another requester cannot inherit the original capability. Active execution/tool approval does not reset limits. Fresh authorized follow-up snapshots are inherited by children. Human follow-up status targets its new message, with ordinary user notifications; automatic children target the calling Agent message."
+    "human_comment_followup": "RIID-5892: a new human execution preserves revalidated server-owned original comment evidence while resetting automatic depth/budget/ancestors. Immutable evidence Agent identity is independent of the new chain. Older missing bindings follow persisted same-task/root parent edges only; another requester cannot inherit the original capability. Active execution/tool approval does not reset limits. Fresh authorized follow-up snapshots are inherited by children. Human follow-up status targets its new message, with ordinary user notifications; automatic children target the calling Agent message.",
+    "workspace_native_initial_locator": "Locator version 2 uses requester-authorized workspace and canonical task ID directly at typed getComponentReadScope, without legacy REST lookup. Validate v2 workspace/root and nonempty current root team; propagate that team while allowing teamless central parent leaves. Any initial validation, lookup, permission, transport or prompt composition error fails closed rather than dispatching a context-free fallback. Version 1 is unchanged."
   },
   "verification": {
     "synthetic_only": true,
@@ -341,7 +342,12 @@
       "TestCommentFollowupRestoresInvocationAndDispatches",
       "TestCommentFollowupResetsOnlyHumanChainAndKeepsEvidenceIdentity",
       "TestCommentFollowupCannotTransferEvidenceOrIgnoreRevocation",
-      "TestCommentFollowupDoesNotWriteStatusToOriginalComment"
+      "TestCommentFollowupDoesNotWriteStatusToOriginalComment",
+      "TestTaskReadScopeNativeCompositionFailureCannotDispatchFallback",
+      "TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations",
+      "TestTaskReadScopeNativeInitialLocatorFailsClosed",
+      "TestTaskReadScopeNativeTransportFailureCannotDispatchFallback",
+      "TestHTTPAIAgentClientNativeLocatorFailureDoesNotPublishAssignment"
     ]
   },
   "limits": [

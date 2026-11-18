@@ -6,7 +6,12 @@ import (
 	"strings"
 )
 
-func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error) {
+func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx context.Context, req AIAgentTaskContextRequest) (result AIAgentTaskContext, err error) {
+	defer func() {
+		if err != nil && c != nil && c.locatorVersion == 2 {
+			err = latestTaskDocumentError{taskReadScopeError{withFailureStage("read_scope", err)}}
+		}
+	}()
 	if err := ctx.Err(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
@@ -23,7 +28,13 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	}
 	requestCtx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
-
+	if c.locatorVersion == 2 {
+		req.ComponentID, req.BearerToken = componentID, bearerToken
+		if err := req.DocumentSnapshot.validate(); err != nil {
+			return AIAgentTaskContext{}, err
+		}
+		return c.getTaskReadScope(requestCtx, req, "")
+	}
 	location, err := c.getComponentWorkspace(requestCtx, componentID, bearerToken)
 	if err != nil {
 		return AIAgentTaskContext{}, err
@@ -38,7 +49,7 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	if err := req.DocumentSnapshot.validate(); err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	if c.assignmentReadScope || c.locatorVersion == 2 || req.capturedReadScope {
+	if c.assignmentReadScope || req.capturedReadScope {
 		req.WorkspaceID = location.Team.Workspace.ID
 		req.ComponentID, req.BearerToken = componentID, bearerToken
 		out, err := c.getTaskReadScope(requestCtx, req, location.Team.ID)
@@ -57,9 +68,6 @@ func (c *AIAgentPrivateTaskContextClient) GetAIAgentTaskContextForRequest(ctx co
 	}
 	contextSnapshot := detail.toAIAgentTaskContext()
 	contextSnapshot.TeamID = location.Team.ID
-	if err := req.DocumentSnapshot.validate(); err != nil {
-		return AIAgentTaskContext{}, err
-	}
 	if err := c.enrichTaskContextFor(requestCtx, location.Team.ID, componentID, bearerToken, &contextSnapshot, req); err != nil {
 		return AIAgentTaskContext{}, err
 	}
