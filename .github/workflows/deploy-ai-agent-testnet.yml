@@ -122,6 +122,22 @@ jobs:
           role-to-assume: ${{ secrets.RIIDO_AI_SERVER_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Test production native configuration guard
+        run: go test ./tools/ainativepreflight -count=1
+
+      - name: Verify production native AI configuration
+        if: env.DEPLOYMENT_TARGET == 'production'
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          preflight_json="$RUNNER_TEMP/ai-native-preflight.json"
+          trap 'rm -f "$preflight_json"' EXIT
+          task_definition="$(aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" --query 'services[0].taskDefinition' --output text)"
+          echo "::add-mask::$task_definition"
+          aws ecs describe-task-definition --task-definition "$task_definition" --query taskDefinition > "$preflight_json"
+          go run ./tools/ainativepreflight -task-definition "$preflight_json" -container "$ECS_CONTAINER_NAME"
+
       - name: Build and push immutable image
         shell: bash
         run: |
@@ -220,6 +236,9 @@ jobs:
             --query 'taskDefinition' \
             > "$current_json"
           chmod 600 "$current_json"
+          if [ "$DEPLOYMENT_TARGET" = production ]; then
+            go run ./tools/ainativepreflight -task-definition "$current_json" -container "$ECS_CONTAINER_NAME"
+          fi
 
           jq -e --arg name "$ECS_CONTAINER_NAME" \
             '.containerDefinitions[] | select(.name == $name)' \
