@@ -10,7 +10,10 @@ func writeAIAgentClientError(w http.ResponseWriter, err error) {
 	var dependency assignmentDependencyError
 	var onboardingDependency onboardingAgentCreateDependencyError
 	var latest latestTaskDocumentError
+	var eventStore aiAgentClientEventStoreError
 	switch {
+	case errors.As(err, &eventStore):
+		writeError(w, http.StatusServiceUnavailable, eventStore.Error())
 	case errors.Is(err, errThreadMessageExecutionCancelled):
 		writeError(w, http.StatusServiceUnavailable, err.Error())
 	case errors.As(err, &latest):
