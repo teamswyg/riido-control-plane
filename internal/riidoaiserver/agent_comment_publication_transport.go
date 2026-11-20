@@ -22,7 +22,7 @@ func (s Server) publishAgentComment(ctx context.Context, event TaskEvent) error 
 	}
 	source, ok := s.aiAgent.(agentCommentPublicationReader)
 	if !ok {
-		return fmt.Errorf("Agent comment source unavailable")
+		return fmt.Errorf("agent comment source unavailable")
 	}
 	publication, err := source.agentCommentPublication(ctx, event)
 	if err != nil || publication.MessageID == "" {
@@ -56,6 +56,6 @@ func (s Server) publishAgentComment(ctx context.Context, event TaskEvent) error 
 		// A removed task, inaccessible requester, or deleted source has no audience.
 		return nil
 	default:
-		return fmt.Errorf("Agent comment publication returned HTTP %d", res.StatusCode)
+		return fmt.Errorf("agent comment publication returned HTTP %d", res.StatusCode)
 	}
 }

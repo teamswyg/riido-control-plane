@@ -21,7 +21,7 @@ func TestPublishAgentCommentUsesCommittedReplyAndStableReplayIdentity(t *testing
 	posts := make(chan agentCommentPublication, 3)
 	var attempts atomic.Int32
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/internal/agent-comment-publications" || r.Method != "POST" || r.Header.Get(CommentDeliveryKeyHeader) != "fixture-key" {
+		if r.URL.Path != "/internal/agent-comment-publications" || r.Method != http.MethodPost || r.Header.Get(CommentDeliveryKeyHeader) != "fixture-key" {
 			t.Error("unexpected publication request")
 		}
 		var body agentCommentPublication
