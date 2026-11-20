@@ -13,6 +13,7 @@ type CommentDeliveryConfig struct {
 	EvidenceBaseURL string
 	Key             string
 	HTTPClient      *http.Client
+	PublishComments bool
 }
 
 type verifiedCommentDelivery struct {
@@ -33,6 +34,9 @@ type verifiedCommentDelivery struct {
 
 func (config CommentDeliveryConfig) Validate() error {
 	if config.EvidenceBaseURL == "" && config.Key == "" {
+		if config.PublishComments {
+			return errors.New("agent comment publication requires a comment delivery endpoint")
+		}
 		return nil
 	}
 	endpoint, err := url.Parse(config.EvidenceBaseURL)
