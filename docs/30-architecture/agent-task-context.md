@@ -185,6 +185,28 @@ Synthetic regressions cover the readable trigger reply, GET/live/replay revalida
 
 ## Bounded typed read scope (RIID-5900)
 
+### Transient read recovery (RIID-6214)
+
+Requester-authorized read-scope HTTP queries may retry once on HTTP 502/503/504,
+an upstream timeout while the caller deadline is still live, or an interrupted
+network read. Each attempt rebuilds the same read-only query, variables and
+requester bearer; a short jittered wait and both attempts share the original
+task-context deadline. An expired deadline or caller cancellation never starts
+another attempt. Evidence-backed offline reads are not retried over HTTP.
+Denials, missing data, integrity/version conflicts, malformed responses and
+unclassified GraphQL errors are not retried or downgraded.
+
+If a continuation still has a transient failure after the retry, retain only
+the already validated captured prefix with `complete=false` and partial scope
+status. No missing page receives a cursor and no permission failure becomes
+partial success. The initial scope still must load and pass root/workspace,
+team and source validation; missing initial scope fails closed. This extends
+the existing deadline-limited capture contract to transient continuation errors.
+
+Only context reads are retried, before assignment.
+Per-attempt trace spans expose only the fixed query name, attempt number and
+sanitized outcome, never query variables, requester credentials or source text.
+
 `RIIDO_AI_SERVER_ASSIGNMENT_READ_SCOPE` defaults to false. When enabled, the
 private context client uses fixed typed GraphQL roots under the authenticated
 requester after verifying the root workspace/team. The producer selects the root,

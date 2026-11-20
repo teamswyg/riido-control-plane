@@ -10,7 +10,7 @@ import (
 
 func TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations(t *testing.T) {
 	capture := nativeTestCapture(t, "intake")
-	var calls int
+	var calls, intakeAttempts int
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/workspace") {
 			t.Error("native read must not call legacy workspace locator")
@@ -43,6 +43,11 @@ func TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations(t *testing.T)
 			return
 		}
 		if strings.Contains(req.Query, "getIntakeReadScopeBody") {
+			intakeAttempts++
+			if intakeAttempts == 1 {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				return
+			}
 			root, data = "getIntakeReadScopeBody", capture.BodyPages[0].Page
 		}
 		if strings.Contains(req.Query, "getComponentReadScopeBody") {
@@ -59,7 +64,7 @@ func TestTaskReadScopeNativeHTTPPropagatesWorkspaceOnContinuations(t *testing.T)
 		t.Fatal(err)
 	}
 	got, err := client.GetAIAgentTaskContextForRequest(t.Context(), AIAgentTaskContextRequest{ComponentID: "task-private", WorkspaceID: "workspace", BearerToken: "human"})
-	if err != nil || calls != 4 || got.Component.Kind != "intake" || got.TeamID != "team" || got.ReadScope.TeamID != "team" || got.Hierarchy.Project.ID != "project" {
+	if err != nil || calls != 5 || intakeAttempts != 2 || got.Component.Kind != "intake" || got.TeamID != "team" || got.ReadScope.TeamID != "team" || got.Hierarchy.Project.ID != "project" {
 		t.Fatalf("native read failed: calls=%d context=%+v err=%v", calls, got, err)
 	}
 	composed, err := composeAssignRequestWithTaskContextResult("task-private", "task-private", AssignRequest{Prompt: "Inspect only"}, got)
