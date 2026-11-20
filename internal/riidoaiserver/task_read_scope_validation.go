@@ -2,7 +2,7 @@ package riidoaiserver
 
 func validateTaskReadScope(scope taskReadScope, id, team string) error {
 	invalid := taskContextReadError{"invalid"}
-	if scope.SchemaVersion != taskReadScopeSchema || scope.RootID != id || scope.TeamID != team || !readScopeStatus(scope.Status) || scope.Selection == nil || scope.Works == nil || scope.Meetings == nil {
+	if !validReadScopeSchema(scope.SchemaVersion, scope.WorkspaceID) || scope.RootID != id || scope.TeamID != team || !readScopeStatus(scope.Status) || scope.Selection == nil || scope.Works == nil || scope.Meetings == nil {
 		return invalid
 	}
 	if scope.Selection.RelatedWorkLimit != 5 || scope.Selection.RelatedMeetingLimit != 5 || scope.Selection.ChildrenLimit != 10 {
@@ -10,7 +10,7 @@ func validateTaskReadScope(scope taskReadScope, id, team string) error {
 	}
 	seen, counts, root := map[string]bool{}, map[string]int{}, false
 	for _, work := range scope.Works {
-		if work == nil || work.ID == "" || work.TeamID == "" || work.Kind == AssignmentContentMeeting || !validAssignmentContentKind(work.Kind) || work.Body == nil || work.Comments == nil || work.Links == nil || work.GitHub == nil || work.Repositories == nil || work.PartsStatus == nil || work.Priorities == nil || work.Checklists == nil || work.Attachments == nil || work.Sprints == nil {
+		if work == nil || work.ID == "" || (work.TeamID == "" && scope.SchemaVersion != taskReadScopeNativeSchema) || (work.WorkspaceID != "" && work.WorkspaceID != scope.WorkspaceID) || work.Kind == AssignmentContentMeeting || !validAssignmentContentKind(work.Kind) || work.Body == nil || work.Comments == nil || work.Links == nil || work.GitHub == nil || work.Repositories == nil || work.PartsStatus == nil || work.Priorities == nil || work.Checklists == nil || work.Attachments == nil || work.Sprints == nil {
 			return invalid
 		}
 		key := string(work.Kind) + "\x00" + work.ID
@@ -23,7 +23,7 @@ func validateTaskReadScope(scope taskReadScope, id, team string) error {
 		}
 		for _, reason := range work.Reasons {
 			if reason.Kind == "root" {
-				if work.Kind != AssignmentContentComponent || work.ID != id || work.TeamID != team || root {
+				if (work.Kind != AssignmentContentComponent && scope.SchemaVersion != taskReadScopeNativeSchema) || work.ID != id || work.TeamID != team || root {
 					return invalid
 				}
 				root = true

@@ -185,6 +185,28 @@ Synthetic regressions cover the readable trigger reply, GET/live/replay revalida
 
 ## Bounded typed read scope (RIID-5900)
 
+### Transient read recovery (RIID-6214)
+
+Requester-authorized read-scope HTTP queries may retry once on HTTP 502/503/504,
+an upstream timeout while the caller deadline is still live, or an interrupted
+network read. Each attempt rebuilds the same read-only query, variables and
+requester bearer; a short jittered wait and both attempts share the original
+task-context deadline. An expired deadline or caller cancellation never starts
+another attempt. Evidence-backed offline reads are not retried over HTTP.
+Denials, missing data, integrity/version conflicts, malformed responses and
+unclassified GraphQL errors are not retried or downgraded.
+
+If a continuation still has a transient failure after the retry, retain only
+the already validated captured prefix with `complete=false` and partial scope
+status. No missing page receives a cursor and no permission failure becomes
+partial success. The initial scope still must load and pass root/workspace,
+team and source validation; missing initial scope fails closed. This extends
+the existing deadline-limited capture contract to transient continuation errors.
+
+Only context reads are retried, before assignment.
+Per-attempt trace spans expose only the fixed query name, attempt number and
+sanitized outcome, never query variables, requester credentials or source text.
+
 `RIIDO_AI_SERVER_ASSIGNMENT_READ_SCOPE` defaults to false. When enabled, the
 private context client uses fixed typed GraphQL roots under the authenticated
 requester after verifying the root workspace/team. The producer selects the root,
@@ -247,6 +269,26 @@ only for leaf objects whose serialized byte ranges overlap the delivered
 fragment. The owning resource remains recorded for envelope-only fragments.
 This means a partial read of an object is a read; it does not claim full-object
 completion or record unseen objects from later fragments.
+
+### Workspace-native initial locator
+
+With `RIIDO_AI_SERVER_TASK_CONTEXT_LOCATOR_VERSION=2`, a requester-private
+assignment resolves `getComponentWorkspace` through the configured native
+GraphQL endpoint using the caller's token and canonical task ID. It validates
+the returned task ID, workspace, task/subtask classification and nonempty
+current team, then supplies that team to `getComponentReadScope` with the
+workspace ID and locator version 2. It never calls the legacy REST locator.
+The scope and root must retain the resolved team; a move between reads fails
+closed and never retries against another identity. Central project/milestone
+leaves may have no team, but the producer's root task team guard is unchanged.
+Missing workspace, lookup/permission/transport errors, invalid identities and
+prompt composition failures stop assignment creation; they never produce a
+context-free fallback execution. Version 1 retains its existing REST locator
+and fallback behavior. This boundary applies to fresh current-viewer reads as
+well as initial assignments; retained captures do not confer current access.
+Metadata-only viewer checks resolve that same canonical identity, then request only
+ID, current title and kind. They do not capture body, comments or related work.
+A missing or forbidden target is hidden from the source list.
 
 ### Large typed read-scope slots
 

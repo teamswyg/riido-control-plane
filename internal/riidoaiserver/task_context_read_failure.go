@@ -15,7 +15,11 @@ func taskContextHTTPFailure(status int) error {
 	case status >= 400 && status < 500:
 		outcome = "invalid"
 	}
-	return taskContextReadError{outcome}
+	failure := taskContextReadError{outcome}
+	if status == 502 || status == 503 || status == 504 {
+		return transientTaskContextReadError{failure}
+	}
+	return failure
 }
 
 func taskContextTransportFailure(ctx context.Context, err error) error {
@@ -23,10 +27,14 @@ func taskContextTransportFailure(ctx context.Context, err error) error {
 		return ctx.Err()
 	}
 	if errors.Is(err, context.DeadlineExceeded) {
-		return context.DeadlineExceeded
+		return transientTaskContextReadError{context.DeadlineExceeded}
 	}
 	if errors.Is(err, context.Canceled) {
 		return context.Canceled
 	}
-	return taskContextReadError{"unavailable"}
+	failure := taskContextReadError{"unavailable"}
+	if transientTaskContextTransport(err) {
+		return transientTaskContextReadError{failure}
+	}
+	return failure
 }

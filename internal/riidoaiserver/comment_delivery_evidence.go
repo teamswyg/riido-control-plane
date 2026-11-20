@@ -9,21 +9,6 @@ import (
 	"time"
 )
 
-func (s Server) fetchCommentDeliveryEvidence(ctx context.Context, w http.ResponseWriter, eventID string) (verifiedCommentDelivery, bool) {
-	started := time.Now()
-	evidence, err := s.readCommentDeliveryEvidence(ctx, eventID)
-	if err != nil {
-		logCommentDeliveryFailure(ctx, "comment", "evidence", "comment:"+eventID, started, err)
-		status := http.StatusBadGateway
-		if errors.Is(err, ErrAuthorizationForbidden) {
-			status = http.StatusForbidden
-		}
-		writeError(w, status, "comment delivery evidence unavailable")
-		return verifiedCommentDelivery{}, false
-	}
-	return evidence, true
-}
-
 func (s Server) readCommentDeliveryEvidence(ctx context.Context, eventID string) (verifiedCommentDelivery, error) {
 	config := s.config.CommentDelivery
 	evidence, err := s.fetchInvocationEvidence(ctx, strings.TrimRight(config.EvidenceBaseURL, "/")+"/internal/agent-comment-deliveries/"+url.PathEscape(eventID))
@@ -43,8 +28,9 @@ func (s Server) fetchInvocationEvidence(ctx context.Context, endpoint string) (v
 		return verifiedCommentDelivery{}, err
 	}
 	req.Header.Set(CommentDeliveryKeyHeader, config.Key)
-	if s.config.AssignmentReadScope {
-		req.Header.Set(commentReadScopeVersionHeader, taskReadScopeSchema)
+	schema := s.invocationReadScopeSchema()
+	if schema != "" {
+		req.Header.Set(commentReadScopeVersionHeader, schema)
 	}
 	client := config.HTTPClient
 	if client == nil {
@@ -65,6 +51,9 @@ func (s Server) fetchInvocationEvidence(ctx context.Context, endpoint string) (v
 	evidence, decodeErr := decodeCommentDeliveryEvidence(result.Body)
 	if decodeErr != nil || evidence.PrincipalID == "" || evidence.WorkspaceID == "" || evidence.TaskID == "" || evidence.Context.Component.ID != evidence.TaskID || (evidence.Context.Component.ComponentType != "task" && evidence.Context.Component.ComponentType != "subtask") {
 		return verifiedCommentDelivery{}, errors.New("invalid comment delivery evidence")
+	}
+	if schema == taskReadScopeNativeSchema && (evidence.Context.ReadScopeEvidence == nil || evidence.Context.ReadScopeEvidence.Scope == nil || evidence.Context.ReadScopeEvidence.Scope.SchemaVersion != schema) {
+		return verifiedCommentDelivery{}, errors.New("native scoped comment evidence required")
 	}
 	if err := s.prepareCommentReadScope(ctx, &evidence); err != nil {
 		return verifiedCommentDelivery{}, errors.New("invalid scoped comment evidence")

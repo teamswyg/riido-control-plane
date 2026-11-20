@@ -3,7 +3,7 @@ package riidoaiserver
 import "encoding/json"
 
 func projectReadScopeWork(out *AIAgentTaskContext, resource AssignmentScopedResource, work *taskReadScopeWork) {
-	if resource.Kind != AssignmentContentComponent {
+	if resource.Kind != AssignmentContentComponent && resource.ID != out.ReadScope.RootID {
 		return
 	}
 	if resource.ID == out.ReadScope.RootID {
@@ -12,7 +12,7 @@ func projectReadScopeWork(out *AIAgentTaskContext, resource AssignmentScopedReso
 			BranchName    string `json:"branchName"`
 		}
 		_ = json.Unmarshal(work.Details, &detail)
-		if work.ContentPage != nil && work.Summary != nil {
+		if work.Summary != nil {
 			if work.Summary.ComponentType != nil {
 				detail.ComponentType = *work.Summary.ComponentType
 			}
@@ -20,7 +20,7 @@ func projectReadScopeWork(out *AIAgentTaskContext, resource AssignmentScopedReso
 				detail.BranchName = *work.Summary.BranchName
 			}
 		}
-		out.Component = AIAgentTaskContextComponent{ID: resource.ID, Title: resource.Title, KeyNumber: resource.KeyNumber, UpdatedAt: resource.UpdatedAt, ComponentType: detail.ComponentType, BranchName: detail.BranchName}
+		out.Component = AIAgentTaskContextComponent{Kind: nativeReadScopeKind(resource), ID: resource.ID, Title: resource.Title, KeyNumber: resource.KeyNumber, UpdatedAt: resource.UpdatedAt, ComponentType: detail.ComponentType, BranchName: detail.BranchName}
 		out.Document = AIAgentTaskContextDocument{Content: work.Body.Content, ContentFormat: work.Body.Format, Source: work.Body.Source, Status: work.Body.Status}
 		out.Repositories = readScopeLegacyRepositories(work.Repositories)
 		if checkoutMetadataComplete(work.PartsStatus) {
@@ -49,7 +49,7 @@ func validateReadScopeEditor(resource AssignmentScopedResource, body *taskReadBo
 	if editor == nil {
 		return taskContextReadError{"invalid"}
 	}
-	if body.Format != editor.ContentFormat || body.Part != "document" || body.Version != readScopeBodyVersion(resource.Kind, resource.ID, "document", "client_snapshot", editor.ContentFormat, editor.Content) || len(body.Content) > len(editor.Content) || editor.Content[:len(body.Content)] != body.Content {
+	if body.Format != editor.ContentFormat || body.Part != "document" || body.Version != resourceBodyVersion(resource, "document", "client_snapshot", editor.ContentFormat, editor.Content) || len(body.Content) > len(editor.Content) || editor.Content[:len(body.Content)] != body.Content {
 		return taskContextReadError{"invalid"}
 	}
 	return nil

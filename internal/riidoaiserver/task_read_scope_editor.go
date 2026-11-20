@@ -6,7 +6,7 @@ func readScopeEditorContinuation(resource AssignmentScopedResource, first taskRe
 	if err := editor.validate(); err != nil {
 		return nil, err
 	}
-	if resource.Kind != AssignmentContentComponent || first.Part != "document" || first.Format != editor.ContentFormat || first.Version != readScopeBodyVersion(resource.Kind, resource.ID, first.Part, "client_snapshot", editor.ContentFormat, editor.Content) || offset < 0 || offset >= len(editor.Content) || !utf8.RuneStart(editor.Content[offset]) {
+	if (resource.Kind != AssignmentContentComponent && resource.WorkspaceID == "") || first.Part != "document" || first.Format != editor.ContentFormat || first.Version != resourceBodyVersion(resource, first.Part, "client_snapshot", editor.ContentFormat, editor.Content) || offset < 0 || offset >= len(editor.Content) || !utf8.RuneStart(editor.Content[offset]) {
 		return nil, taskContextReadError{"invalid"}
 	}
 	end := min(offset+8192, len(editor.Content))

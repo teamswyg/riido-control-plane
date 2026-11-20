@@ -6,7 +6,14 @@ import (
 )
 
 func readScopeIncomplete(ctx context.Context, err error) bool {
-	return ctx.Err() != nil || errors.Is(err, errReadScopeCaptureIncomplete)
+	var failure taskContextReadError
+	if errors.As(err, &failure) {
+		switch failure.outcome {
+		case "denied", "missing", "invalid", "integrity":
+			return false
+		}
+	}
+	return ctx.Err() != nil || errors.Is(err, errReadScopeCaptureIncomplete) || isTransientTaskContextRead(err)
 }
 
 func (b *taskReadScopeBuilder) missingPart(resource AssignmentScopedResource, part AssignmentContentPart, status string) AssignmentContentManifest {

@@ -6,7 +6,7 @@ func (s *PersistentAIAgentClientStore) SubscribeAIAgentClientEvents(ctx context.
 	s.operationMu.Lock()
 	defer s.operationMu.Unlock()
 	if err := s.reloadSnapshot(ctx); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, aiAgentClientEventStoreError{cause: err}
 	}
 	return s.DevelopmentAIAgentClientStore.SubscribeAIAgentClientEvents(ctx, principal)
 }

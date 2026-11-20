@@ -3,26 +3,20 @@ package riidoaiserver
 import "context"
 
 func (c *AIAgentPrivateTaskContextClient) getTaskReadScope(ctx context.Context, req AIAgentTaskContextRequest, team string) (AIAgentTaskContext, error) {
-	variables := map[string]any{"componentId": req.ComponentID, "teamId": team, "editorSnapshot": nil}
-	if req.DocumentSnapshot != nil {
-		variables["editorSnapshot"] = map[string]string{"content": req.DocumentSnapshot.Content, "contentFormat": req.DocumentSnapshot.ContentFormat}
-	}
-	var scope taskReadScope
-	if err := c.readScopeGraphQL(ctx, req.BearerToken, readScopeQuery, "getComponentReadScope", variables, &scope); err != nil {
-		return AIAgentTaskContext{}, err
-	}
-	if err := validateTaskReadScope(scope, req.ComponentID, team); err != nil {
+	scope, err := c.loadTaskReadScope(ctx, req, team)
+	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
 	b, err := newTaskReadScopeBuilder()
 	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
-	out := AIAgentTaskContext{TeamID: team, ReadScope: &AssignmentReadScope{SchemaVersion: taskReadScopeSchema, RootID: scope.RootID, TeamID: team, Status: "available", Resources: []AssignmentScopedResource{}}, Repositories: []AIAgentTaskContextRepository{}}
+	out := AIAgentTaskContext{TeamID: team, ReadScope: &AssignmentReadScope{SchemaVersion: taskReadScopeSchema, SourceSchemaVersion: nativeScopeSourceSchema(scope), WorkspaceID: scope.WorkspaceID, RootID: scope.RootID, TeamID: team, Status: "available", Resources: []AssignmentScopedResource{}}, Repositories: []AIAgentTaskContextRepository{}}
 	for _, work := range scope.Works {
 		resource, _ := readScopeWorkSummary(work)
+		resource.WorkspaceID = scope.WorkspaceID
 		var rootEditor *AIAgentTaskDocumentSnapshot
-		if resource.Kind == AssignmentContentComponent && resource.ID == scope.RootID {
+		if resource.ID == scope.RootID {
 			rootEditor = req.DocumentSnapshot
 		}
 		if err := validateReadScopeEditor(resource, work.Body, rootEditor); err != nil {
@@ -38,7 +32,7 @@ func (c *AIAgentPrivateTaskContextClient) getTaskReadScope(ctx context.Context, 
 				continue
 			}
 			var editor *AIAgentTaskDocumentSnapshot
-			if resource.ID == req.ComponentID && resource.Kind == AssignmentContentComponent {
+			if resource.ID == req.ComponentID {
 				editor = req.DocumentSnapshot
 			}
 			part, err := c.captureReadScopeBody(ctx, req.BearerToken, b, resource, body, editor)

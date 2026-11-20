@@ -20,6 +20,71 @@
   ],
   "chains": [
     {
+      "id": "task_context_transient_read_recovery_6214",
+      "observation": "A synthetic upstream 503 on initial task read scope or a continuation produced an assignment API 503 even though the initial capture or a subsequent read could be valid. Existing caller deadlines, scoped capture authority and request receipts must remain authoritative.",
+      "hypothesis": "Retry only explicitly transient read-only HTTP queries once inside the existing deadline, then preserve validated continuation prefixes as partial. Never retry assignment mutations, reset a budget or downgrade denial, integrity, version or malformed-data failures.",
+      "claims": [
+        "ambiguous_task_context_must_ask_before_work",
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "control_plane_performance_hot_paths_must_emit_evidence",
+        "config_reference_must_preserve_env_manifest_parity"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_read_retry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_context_read_failure.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_retry.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/task_read_scope_incomplete.go"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_retry_http_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_retry_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_retry_errors_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_retry_deadline_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/task_read_scope_retry_boundary_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        },
+        {
+          "kind": "artifact",
+          "path": "loop-registry-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The synthetic assignment route fails before correction and accepts after bounded read recovery. Replaying the same request preserves assignment, run and thread identity. Continuation exhaustion preserves only captured pages and explicit incompleteness. Missing initial scope and permanent errors remain failures. Full Go tests and focused race checks pass locally; production incident correlation and live QA remain separate. Generated documents and hashes are refreshed without relaxing line-budget or semantic checks. No deployment, environment change, credential cache or durable queue redesign is included.",
+      "next_loop": "ai_thread_history"
+    },
+    {
       "id": "cli_monolith_grant_legacy_boundary_5972",
       "observation": "A synthetic signed monolith CLI read grant passed both read and create through the legacy HTTP app PDP in legacy-only and dual-auth configurations. The app PDP does not own CLI grant revocation or installation policy. This is conditional source/fixture evidence, not a live production exploit. After dedicated thread and Agent readers landed, the legacy denial wrapper also needs evidence at the real environment-factory and HTTP-server composition boundary.",
       "hypothesis": "Reject CLI markers before the entire legacy fallback chain while preserving normal app, opaque and Auth-v2 credentials. Unverified claim inspection can deny but never authenticate. CP thread reads require a separate resource/purpose-bound exchange and current grant/domain checks. Locally served TLS dependencies can test credential routing and fresh authority without live accounts or external side effects.",
@@ -29649,6 +29714,52 @@
       ],
       "decision": "Keep new-claim readiness strict. For an existing lease, report authorization retains current agent/device/runtime/daemon identity, authenticated device provenance, coverage generation, lease/state and durable projection checks while allowing transient runtime unavailability. Tests reject device substitution and changed binding identities and accept completion after offline/missing observations. Failure diagnostics separate authorization rejection from bad input. Existing terminal projection and SSE replay ownership remain unchanged. A paired native Codex plus local HTTP daemon/server run completed with five partial snapshots, no report failures and 52 ms adapter-completion-to-terminal-ACK; this single local observation is not a production latency guarantee.",
       "next_loop": "ai_thread_history"
+    },
+    {
+      "id": "explicit_workspace_locator_6239",
+      "observation": "RIID-6239: workspace-owned projects and milestones have no owner team. The explicit native producer now returns a versioned null-team locator, while the current consumer only accepts a real team. The shared API guide changes no thread lifecycle behavior.",
+      "hypothesis": "Accept explicit-read.v2 only for project/milestone with an explicitly present null team_id. Keep v1 real-team validation and all immutable requester, workspace, root, ACL, quota and audit checks.",
+      "claims": [
+        "assignment_read_scope_must_preserve_captured_leaf_authority",
+        "thread_history_must_keep_user_followups"
+      ],
+      "changes": [
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_locator.go"
+        },
+        {
+          "kind": "code",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_client.go"
+        },
+        {
+          "kind": "manifest",
+          "path": "docs/20-domain/ai-agent-client-api.riido.json"
+        }
+      ],
+      "verifiers": [
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_locator_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_read_test.go"
+        },
+        {
+          "kind": "test",
+          "path": "internal/riidoaiserver/agent_assignment_explicit_negotiation_test.go"
+        }
+      ],
+      "evidence": [
+        {
+          "kind": "artifact",
+          "path": "go-ci-baseline-evidence",
+          "redacted": true
+        }
+      ],
+      "decision": "The HTTP regressions accept current-authority workspace projects/milestones and persist their read receipt. Missing fields, null-team TASKs, fabricated PM teams and mismatched provenance remain denied. This additive transport contract neither expands automatic snapshot scope nor changes thread messages. Deploy the compatible consumer before enabling the producer v2 envelope; local tests and CI do not establish live-account or UI acceptance.",
+      "next_loop": "closed_loop_candidate"
     }
   ],
   "loop": {

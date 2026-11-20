@@ -41,7 +41,7 @@ func (s Server) handleAIAgentClientEvents(w http.ResponseWriter, r *http.Request
 		events, err = s.aiAgent.AIAgentClientEvents(r.Context(), principal)
 	}
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeAIAgentClientError(w, err)
 		return
 	}
 	events = aiAgentClientReplayEventsAfterLastEventID(events, r.Header.Get("Last-Event-ID"))

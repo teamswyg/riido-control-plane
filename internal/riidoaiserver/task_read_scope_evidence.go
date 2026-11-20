@@ -11,12 +11,18 @@ func materializeCommentReadScope(ctx context.Context, evidence verifiedCommentDe
 	if evidence.Context.TeamID != "" && evidence.Context.TeamID != team {
 		return AIAgentTaskContext{}, taskContextReadError{"invalid"}
 	}
+	if bundle.Scope.SchemaVersion == taskReadScopeNativeSchema && bundle.Scope.WorkspaceID != evidence.WorkspaceID {
+		return AIAgentTaskContext{}, taskContextReadError{"invalid"}
+	}
 	index, err := newTaskReadEvidenceIndex(bundle, evidence.TaskID, team)
 	if err != nil {
 		return AIAgentTaskContext{}, err
 	}
 	client := &AIAgentPrivateTaskContextClient{readScopeEvidence: index}
-	out, err := client.getTaskReadScope(ctx, AIAgentTaskContextRequest{ComponentID: evidence.TaskID}, team)
+	if bundle.Scope.SchemaVersion == taskReadScopeNativeSchema {
+		client.locatorVersion = 2
+	}
+	out, err := client.getTaskReadScope(ctx, AIAgentTaskContextRequest{ComponentID: evidence.TaskID, WorkspaceID: evidence.WorkspaceID}, team)
 	if err == nil && !index.complete {
 		out.ReadScope.Status = "partial"
 	}

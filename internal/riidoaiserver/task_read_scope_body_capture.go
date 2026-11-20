@@ -44,7 +44,7 @@ func (c *AIAgentPrivateTaskContextClient) captureReadScopeBody(ctx context.Conte
 			return AssignmentContentManifest{}, err
 		}
 	}
-	if complete && (readScopeBodyVersion(resource.Kind, resource.ID, first.Part, first.Source, first.Format, content) != first.Version || (first.Format == "json" && !json.Valid([]byte(content)))) {
+	if complete && (resourceBodyVersion(resource, first.Part, first.Source, first.Format, content) != first.Version || (first.Format == "json" && !json.Valid([]byte(content)))) {
 		return AssignmentContentManifest{}, taskContextReadError{"invalid"}
 	}
 	return b.addPart(resource, readScopeBodyPart(first.Part), first.Version, pages, complete), nil
