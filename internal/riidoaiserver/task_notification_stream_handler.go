@@ -51,7 +51,7 @@ func (s Server) handleTaskNotificationStream(w http.ResponseWriter, r *http.Requ
 			defer cancel()
 		}
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeAIAgentClientError(w, err)
 			return
 		}
 		go func() {
