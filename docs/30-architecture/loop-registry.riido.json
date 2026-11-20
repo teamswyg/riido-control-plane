@@ -2061,7 +2061,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "f2144d8a901e476d187c01b8313633a9bdaf441e8579eb6f677059e42097f042"
+      "semantic_hash": "1b4fbf8f770b444340b2e3569a9d6a616b3c8264887928afe206b4f9370dc8cb"
     },
     {
       "id": "closed_loop_candidates_must_carry_adoption_plan",
@@ -2399,7 +2399,7 @@
         "docs/30-architecture/syntax-hash.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "38cc5db679132e8dc73ce38cea8f27cbc1bfa37d1e85a4e9bd7b746cc881bcee"
+      "semantic_hash": "ac5e07fe7c1ddfb56117bf8b2ad3110d69ffd2b24bfe392f0a8daec7b3fc2645"
     },
     {
       "id": "loop_evidence_artifacts_must_have_refresh_owners",
@@ -3793,7 +3793,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "3529830a05e847c744babc09f970d0857ca9bfadcea1e256e12cecf829ce50e0"
+      "semantic_hash": "a04ab31e26223f87cf34c474831f75d19925bea666157efff444e83f1c08158f"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",

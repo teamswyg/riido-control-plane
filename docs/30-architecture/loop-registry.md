@@ -204,13 +204,13 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `control_plane_meta_evidence_must_self_expire` | `control_plane_performance_harness` | `10` | `4` | `5e7d9e4fc6cc` |
 | `harness_promotion_must_run_after_failure` | `closed_loop_candidate` | `18` | `10` | `3765802738d2` |
 | `generated_endpoint_smoke_matrix_must_remain_contract_gate` | `closed_loop_candidate` | `11` | `18` | `9b277095a585` |
-| `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `68` | `34` | `f2144d8a901e` |
+| `loop_closure_audit_must_prove_human_exit_requirements` | `loop_closure_audit` | `68` | `34` | `1b4fbf8f770b` |
 | `closed_loop_candidates_must_carry_adoption_plan` | `closed_loop_candidate` | `24` | `6` | `cf1f480d188f` |
 | `closed_loop_candidates_must_carry_promotion_edge` | `closed_loop_candidate` | `28` | `9` | `827391a44bc8` |
 | `closed_loop_candidates_must_carry_source_ref` | `closed_loop_candidate` | `22` | `6` | `17f2d23a949c` |
 | `closed_loop_candidates_must_carry_subject` | `closed_loop_candidate` | `18` | `4` | `7cec9f4f4afc` |
 | `loop_verifiers_must_accept_verify_intent` | `closed_loop_candidate` | `16` | `10` | `61ce25286b04` |
-| `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `38cc5db67913` |
+| `loop_registry_tool_must_preserve_generated_doc_and_evidence_contract` | `closed_loop_candidate` | `16` | `5` | `ac5e07fe7c1d` |
 | `loop_evidence_artifacts_must_have_refresh_owners` | `closed_loop_candidate` | `10` | `3` | `f1700dec3799` |
 | `ambiguous_task_context_must_ask_before_work` | `ai_thread_history` | `161` | `55` | `3f8e88e03e9c` |
 | `claim_surface_evidence_must_expose_code_test_doc_binding` | `closed_loop_candidate` | `17` | `7` | `dd91ec08a3fd` |
@@ -237,7 +237,7 @@ Machine-readable path bindings are emitted in `architecture_index` evidence.
 | `claim_bound_paths_must_trigger_loop_registry` | `closed_loop_candidate` | `5` | `4` | `8091a2a57b4d` |
 | `evidence_graph_must_cover_loop_registry_claims` | `closed_loop_candidate` | `11` | `6` | `49408d35f5e2` |
 | `evidence_graph_refs_must_trigger_evidence_workflow` | `closed_loop_candidate` | `6` | `4` | `43e96a5fc3b8` |
-| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `10` | `4` | `3529830a05e8` |
+| `evidence_graph_evidence_must_expose_full_chain` | `closed_loop_candidate` | `10` | `4` | `a04ab31e2622` |
 | `evidence_graph_chain_changes_require_executable_surface` | `closed_loop_candidate` | `20` | `12` | `7080491ce2a2` |
 | `loop_evidence_artifacts_must_self_expire` | `closed_loop_candidate` | `15` | `10` | `3caff5515abb` |
 | `closed_loop_candidate_evidence_must_self_expire` | `closed_loop_candidate` | `12` | `3` | `ab6db3f8c126` |
