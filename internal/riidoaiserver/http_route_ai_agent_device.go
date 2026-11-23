@@ -35,6 +35,9 @@ func aiAgentClientAgentHTTPRoute(base string, segments []string) string {
 	if len(segments) == 3 && segments[2] == "editability" {
 		return base + "/agents/{agent_id}/editability"
 	}
+	if len(segments) == 3 && segments[2] == "dashboard" {
+		return base + "/agents/{agent_id}/dashboard"
+	}
 	return ""
 }
 

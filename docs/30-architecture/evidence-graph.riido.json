@@ -29768,6 +29768,31 @@
       ],
       "decision": "The HTTP regressions accept current-authority workspace projects/milestones and persist their read receipt. Missing fields, null-team TASKs, fabricated PM teams and mismatched provenance remain denied. This additive transport contract neither expands automatic snapshot scope nor changes thread messages. Deploy the compatible consumer before enabling the producer v2 envelope; local tests and CI do not establish live-account or UI acceptance.",
       "next_loop": "closed_loop_candidate"
+    },
+    {
+      "id": "agent_dashboard_failure_observation_8722",
+      "observation": "RIID-8722: the agent dashboard request was absent from the HTTP route classifier and history 503s omitted their failure stage. A nearby production 503 recorded only the workspace prefix and no trace correlation, so the incident's failing request and dependency could not be identified.",
+      "hypothesis": "Registering the v1 and v2 dashboard routes and recording bounded stages for history load, viewer-scoped task lookup and visible detail load will make subsequent failures attributable while preserving authorization and HTTP responses.",
+      "claims": [
+        "sse_reconnect_must_resume_after_last_event_id",
+        "control_plane_performance_hot_paths_must_emit_evidence"
+      ],
+      "changes": [
+        {"kind": "code", "path": "internal/riidoaiserver/http_route_ai_agent_device.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/agent_dashboard_http.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/request_failure_observation.go"},
+        {"kind": "code", "path": "internal/riidoaiserver/tracing_correlation.go"}
+      ],
+      "verifiers": [
+        {"kind": "test", "path": "internal/riidoaiserver/http_route_ai_agent_client_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/http_route_ai_agent_v1_test.go"},
+        {"kind": "test", "path": "internal/riidoaiserver/agent_dashboard_http_test.go"}
+      ],
+      "evidence": [
+        {"kind": "artifact", "path": "go-ci-baseline-evidence", "redacted": true}
+      ],
+      "decision": "Verify route normalization, fail-closed visibility and absence of raw agent IDs, credentials and arbitrary errors in logs. Keep SSE replay behavior and log redaction rules. No performance improvement or historical root cause is claimed.",
+      "next_loop": "ai_thread_history"
     }
   ],
   "loop": {

@@ -1,6 +1,9 @@
 package riidoaiserver
 
-import "context"
+import (
+	"context"
+	"net/http"
+)
 
 // traceCorrelationReader exposes only validated OTel identifiers to structured logs.
 type traceCorrelationReader interface {
@@ -31,4 +34,14 @@ func validTraceHex(value string, length int) bool {
 		nonzero = nonzero || c != '0'
 	}
 	return nonzero
+}
+
+func requestTraceID(r *http.Request) string {
+	traceID, _ := traceCorrelationFromContext(r.Context())
+	return traceID
+}
+
+func requestSpanID(r *http.Request) string {
+	_, spanID := traceCorrelationFromContext(r.Context())
+	return spanID
 }

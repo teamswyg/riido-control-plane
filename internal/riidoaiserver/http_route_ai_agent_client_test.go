@@ -21,6 +21,7 @@ func TestTraceHTTPRouteClassifiesV2AIAgentClientRoutes(t *testing.T) {
 		"/v2/client/workspaces/ws-sensitive/ai-agent/threads/thread-sensitive/messages":               "/v2/client/workspaces/{workspace_id}/ai-agent/threads/{thread_id}/messages",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/agent-assignments/agent-sensitive/stop":          "/v2/client/workspaces/{workspace_id}/ai-agent/agent-assignments/{agent_id}/stop",
 		"/v2/client/workspaces/ws-sensitive/ai-agent/agents/agent-sensitive/daemon/restart":           "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/daemon/{action}",
+		"/v2/client/workspaces/ws-sensitive/ai-agent/agents/agent-sensitive/dashboard":                "/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard",
 	}
 	for path, want := range tests {
 		if got := traceHTTPRoute(http.MethodGet, path); got != want {
