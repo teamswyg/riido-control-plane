@@ -17,6 +17,7 @@ func TestTraceHTTPRouteClassifiesV1AIAgentClientRoutes(t *testing.T) {
 		"/v1/client/ai-agent/tasks/task-sensitive/comments":     "/v1/client/ai-agent/tasks/{task_id}/comments",
 		"/v1/client/ai-agent/threads/thread-sensitive/messages": "/v1/client/ai-agent/threads/{thread_id}/messages",
 		"/v1/client/ai-agent/agents/agent-sensitive/daemon":     "/v1/client/ai-agent/agents/{agent_id}/daemon",
+		"/v1/client/ai-agent/agents/agent-sensitive/dashboard":  "/v1/client/ai-agent/agents/{agent_id}/dashboard",
 	}
 	for path, want := range tests {
 		t.Run(path, func(t *testing.T) {

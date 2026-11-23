@@ -1,41 +1,15 @@
 package riidoaiserver
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
-	"errors"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 )
-
-type dashboardTestAuthorizer struct{ fail bool }
-
-func (a dashboardTestAuthorizer) Authorize(_ context.Context, _ string, req AuthorizationRequest) (AuthorizationResult, error) {
-	if a.fail && req.TaskID != "" {
-		return AuthorizationResult{}, errors.New("temporary authorization failure")
-	}
-	if req.TaskID == "secret" {
-		return AuthorizationResult{}, ErrAuthorizationForbidden
-	}
-	return AuthorizationResult{PrincipalID: "user-1", WorkspaceID: req.WorkspaceID}, nil
-}
-
-type dashboardTestContext struct{ calls []string }
-
-func (c *dashboardTestContext) GetAIAgentTaskContext(context.Context, string) (AIAgentTaskContext, error) {
-	panic("must not use service credentials")
-}
-
-func (c *dashboardTestContext) GetAIAgentTaskContextForRequest(_ context.Context, req AIAgentTaskContextRequest) (AIAgentTaskContext, error) {
-	c.calls = append(c.calls, req.ComponentID)
-	if req.BearerToken != "viewer-token" {
-		panic("missing viewer credentials")
-	}
-	return AIAgentTaskContext{Component: AIAgentTaskContextComponent{ID: req.ComponentID, Title: "Visible task", KeyNumber: "RIID-5830"}}, nil
-}
 
 func TestAgentDashboardHTTPPermissionsAndUnavailable(t *testing.T) {
 	now := time.Now().UTC()
@@ -52,10 +26,26 @@ func TestAgentDashboardHTTPPermissionsAndUnavailable(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/v2/client/workspaces/"+defaultAIAgentClientWorkspaceID+"/ai-agent/agents/agent-owned-codex/dashboard?page=1", nil)
 			req.Header.Set("Authorization", "Bearer viewer-token")
 			response := httptest.NewRecorder()
+			var logs bytes.Buffer
+			if fail {
+				previous := log.Writer()
+				log.SetOutput(&logs)
+				t.Cleanup(func() { log.SetOutput(previous) })
+			}
 			server.Handler().ServeHTTP(response, req)
 			if fail {
 				if response.Code != 503 {
 					t.Fatalf("status=%d", response.Code)
+				}
+				line := logs.String()
+				if !strings.Contains(line, `route="/v2/client/workspaces/{workspace_id}/ai-agent/agents/{agent_id}/dashboard"`) ||
+					!strings.Contains(line, `stage="dashboard_task_lookup"`) {
+					t.Fatalf("missing dashboard failure observation: %s", line)
+				}
+				for _, sensitive := range []string{"viewer-token", "agent-owned-codex", "temporary authorization failure"} {
+					if strings.Contains(line, sensitive) {
+						t.Fatalf("dashboard log exposed private data: %s", line)
+					}
 				}
 				return
 			}

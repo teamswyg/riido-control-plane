@@ -65,6 +65,7 @@ func (s Server) handleAgentDashboard(w http.ResponseWriter, r *http.Request, age
 	}
 	history, err := load(r.Context(), agentID)
 	if err != nil {
+		logRequestFailure(r, "dashboard_history_load", err)
 		writeError(w, http.StatusServiceUnavailable, "dashboard history is unavailable")
 		return
 	}
@@ -92,6 +93,7 @@ func (s Server) handleAgentDashboard(w http.ResponseWriter, r *http.Request, age
 			continue
 		}
 		if err != nil {
+			logRequestFailure(r, "dashboard_task_lookup", err)
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 			return
 		}
@@ -99,6 +101,7 @@ func (s Server) handleAgentDashboard(w http.ResponseWriter, r *http.Request, age
 	}
 	view := buildAgentDashboard(agent, history, tasks, page, time.Now().UTC())
 	if err := history.fillVisibleDetails(r.Context(), agentID, &view); err != nil {
+		logRequestFailure(r, "dashboard_history_details", err)
 		writeError(w, http.StatusServiceUnavailable, "dashboard history is unavailable")
 		return
 	}

@@ -25,6 +25,8 @@ func boundedRequestFailureStage(stage string) string {
 	switch stage {
 	case "authorization", "projection_reconcile", "thread_history", "runtime_snapshot_decode", "runtime_snapshot_sync":
 		return stage
+	case "dashboard_history_load", "dashboard_task_lookup", "dashboard_history_details":
+		return stage
 	default:
 		return "unknown"
 	}
@@ -66,14 +68,4 @@ func boundedRequestFailureType(err error) string {
 			return "unknown"
 		}
 	}
-}
-
-func requestTraceID(r *http.Request) string {
-	traceID, _ := traceCorrelationFromContext(r.Context())
-	return traceID
-}
-
-func requestSpanID(r *http.Request) string {
-	_, spanID := traceCorrelationFromContext(r.Context())
-	return spanID
 }
