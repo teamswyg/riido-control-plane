@@ -1211,6 +1211,19 @@
           {
             "name": "is_default",
             "type": "boolean"
+          },
+          {
+            "name": "reasoning_efforts",
+            "type": "array",
+            "description": "해당 모델이 지원하는 추론 Effort 목록입니다.",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "default_reasoning_effort",
+            "type": "string",
+            "description": "런타임이 보고한 해당 모델의 기본 추론 Effort입니다."
           }
         ]
       }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -374,7 +375,8 @@ func equalRuntimeModelRecords(a, b []RuntimeModelRecord) bool {
 		return false
 	}
 	for i := range a {
-		if a[i] != b[i] {
+		if a[i].ModelID != b[i].ModelID || a[i].Label != b[i].Label || a[i].IsDefault != b[i].IsDefault ||
+			a[i].DefaultReasoningEffort != b[i].DefaultReasoningEffort || !slices.Equal(a[i].ReasoningEfforts, b[i].ReasoningEfforts) {
 			return false
 		}
 	}
