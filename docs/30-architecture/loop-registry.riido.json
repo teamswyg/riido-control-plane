@@ -3793,7 +3793,7 @@
         "docs/30-architecture/loop-registry.md",
         "docs/30-architecture/evidence-graph.md"
       ],
-      "semantic_hash": "2089d386d61344c46e891829719a2fb9a5d9101ee314ac7ed5c4f8028bb69977"
+      "semantic_hash": "bd365089f1e048f2158c051f36944c65298e3d1a8036b21f5a272bffc659564c"
     },
     {
       "id": "evidence_graph_chain_changes_require_executable_surface",
