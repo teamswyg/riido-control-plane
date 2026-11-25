@@ -3,7 +3,9 @@ package riidoaiserver
 import "context"
 
 func (s *PersistentAIAgentClientStore) BootstrapAIAgentClient(ctx context.Context, principal AuthorizationResult, clientKind ClientKind) (ClientBootstrapResponse, error) {
-	s.operationMu.Lock()
+	if err := s.lockOperationContext(ctx); err != nil {
+		return ClientBootstrapResponse{}, err
+	}
 	defer s.operationMu.Unlock()
 	if err := s.reloadSnapshot(ctx); err != nil {
 		return ClientBootstrapResponse{}, err
