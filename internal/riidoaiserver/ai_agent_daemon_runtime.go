@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -368,19 +367,6 @@ func daemonStatusChangedForEvent(prev DeviceDaemonRecord, prevOK bool, next Devi
 		}
 	}
 	return false
-}
-
-func equalRuntimeModelRecords(a, b []RuntimeModelRecord) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i].ModelID != b[i].ModelID || a[i].Label != b[i].Label || a[i].IsDefault != b[i].IsDefault ||
-			a[i].DefaultReasoningEffort != b[i].DefaultReasoningEffort || !slices.Equal(a[i].ReasoningEfforts, b[i].ReasoningEfforts) {
-			return false
-		}
-	}
-	return true
 }
 
 func equalStringSetIgnoreOrder(a, b []string) bool {

@@ -86,14 +86,6 @@ const (
 	DaemonControlStateFailed     DaemonControlState = "failed"
 )
 
-type RuntimeModelRecord struct {
-	ModelID                string   `json:"model_id"`
-	Label                  string   `json:"label"`
-	IsDefault              bool     `json:"is_default"`
-	ReasoningEfforts       []string `json:"reasoning_efforts,omitempty"`
-	DefaultReasoningEffort string   `json:"default_reasoning_effort,omitempty"`
-}
-
 type AgentEditability string
 
 const (
