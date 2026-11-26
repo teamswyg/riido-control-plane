@@ -19,6 +19,16 @@ func TestEqualRuntimeModelRecords(t *testing.T) {
 	if equalRuntimeModelRecords(models, changed) {
 		t.Fatalf("different runtime model records should not be equal")
 	}
+	changed[0] = models[0]
+	changed[0].ReasoningEfforts = []string{"medium", "high"}
+	if equalRuntimeModelRecords(models, changed) {
+		t.Fatal("different effort options should invalidate the runtime snapshot")
+	}
+	models[0].ReasoningEfforts = []string{"medium", "high"}
+	changed[0].DefaultReasoningEffort = "medium"
+	if equalRuntimeModelRecords(models, changed) {
+		t.Fatal("different default effort should invalidate the runtime snapshot")
+	}
 }
 
 func TestDefaultRuntimeModelByKind(t *testing.T) {

@@ -17,8 +17,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-11-23",
-      "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-smoke:source_coverage_seed."
+      "review_by": "2026-12-02",
+      "reason": "Testnet smoke is an intake source even when live claim failures are dynamic, so it keeps a seed decision while harness_failure subjects route through a decision template. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-smoke:source_coverage_seed."
     },
     {
       "candidate_id": "ai-agent-client-testnet-load:load_harness_client_read_pressure",
@@ -27,8 +27,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_client_read_pressure."
+      "review_by": "2026-12-02",
+      "reason": "Load harness client-read pressure failures need a claim-bound verifier before they become recurring performance gates. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_client_read_pressure."
     },
     {
       "candidate_id": "ai-agent-client-testnet-load:load_harness_closed_loop_promotion",
@@ -37,8 +37,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_closed_loop_promotion."
+      "review_by": "2026-12-02",
+      "reason": "Load harness promotion failures must not remain isolated workflow reports without a decision owner. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/ai-agent-client-testnet-load:load_harness_closed_loop_promotion."
     },
     {
       "candidate_id": "control-plane-performance:control_plane_performance_hot_path_benchmarks",
@@ -47,8 +47,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_hot_path_benchmarks."
+      "review_by": "2026-12-02",
+      "reason": "Control-plane hot-path benchmark failures need an owned adoption decision before becoming closed-loop gates. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_hot_path_benchmarks."
     },
     {
       "candidate_id": "control-plane-performance:control_plane_performance_closed_loop_promotion",
@@ -57,8 +57,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_closed_loop_promotion."
+      "review_by": "2026-12-02",
+      "reason": "Control-plane performance promotion failures must stay connected to candidate intake and decision ownership. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-performance:control_plane_performance_closed_loop_promotion."
     },
     {
       "candidate_id": "control-plane-pressure:http_endpoint_threads_v3",
@@ -67,8 +67,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_endpoint_threads_v3."
+      "review_by": "2026-12-02",
+      "reason": "The v3 thread history endpoint is a measured local pressure hotspot and needs a claim-bound optimization decision before it becomes a recurring gate. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_endpoint_threads_v3."
     },
     {
       "candidate_id": "control-plane-pressure:http_metrics_observe",
@@ -77,8 +77,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-11-23",
-      "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_metrics_observe."
+      "review_by": "2026-12-02",
+      "reason": "HTTP metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:http_metrics_observe."
     },
     {
       "candidate_id": "control-plane-pressure:store_metrics_observe",
@@ -87,8 +87,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:store_metrics_observe."
+      "review_by": "2026-12-02",
+      "reason": "Store metrics observe is already low allocation, so keep evidence instead of adopting an optimization gate immediately. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:store_metrics_observe."
     },
     {
       "candidate_id": "control-plane-pressure:progress_ingest_fragment",
@@ -97,8 +97,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:progress_ingest_fragment."
+      "review_by": "2026-12-02",
+      "reason": "Fine-grained provider progress remains a measured allocation hotspot and needs a claim-bound batching or retention verifier decision. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:progress_ingest_fragment."
     },
     {
       "candidate_id": "control-plane-pressure:thread_stream_subscription",
@@ -107,8 +107,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_stream_subscription."
+      "review_by": "2026-12-02",
+      "reason": "Thread stream subscription targets are measured but currently low allocation, so keep trend evidence before adding a new gate. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_stream_subscription."
     },
     {
       "candidate_id": "control-plane-pressure:client_event_subscriber_fanout",
@@ -117,8 +117,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:client_event_subscriber_fanout."
+      "review_by": "2026-12-02",
+      "reason": "Client event subscriber fanout is a measured allocation and CPU hotspot and needs an owned claim-bound optimization decision. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:client_event_subscriber_fanout."
     },
     {
       "candidate_id": "control-plane-pressure:thread_history_v3",
@@ -127,8 +127,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_history_v3."
+      "review_by": "2026-12-02",
+      "reason": "Thread history v3 projection is a measured refresh pressure surface and needs a claim-bound projection/copy-cost decision. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:thread_history_v3."
     },
     {
       "candidate_id": "control-plane-pressure:assignment_long_poll_wait",
@@ -137,8 +137,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:assignment_long_poll_wait."
+      "review_by": "2026-12-02",
+      "reason": "Assignment long-poll waiters are now directly measured with bounded goroutine delta, so keep trend evidence before adopting a new optimization gate. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:assignment_long_poll_wait."
     },
     {
       "candidate_id": "control-plane-pressure:tool_approval_waiters",
@@ -147,8 +147,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:tool_approval_waiters."
+      "review_by": "2026-12-02",
+      "reason": "Tool approval waiters are now directly measured with bounded goroutine delta, so keep redacted pressure evidence before expanding approval UX gates. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/control-plane-pressure:tool_approval_waiters."
     },
     {
       "candidate_id": "loop-closure-audit:source_coverage_seed",
@@ -157,8 +157,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-11-23",
-      "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-closure-audit:source_coverage_seed."
+      "review_by": "2026-12-02",
+      "reason": "Loop closure audit is an intake source even when current residual and claim coverage gaps are closed, so it keeps a seed decision for source coverage. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-closure-audit:source_coverage_seed."
     },
     {
       "candidate_id": "loop-closure-audit:syntax_hash_graph_spike",
@@ -177,8 +177,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "decision_record",
-      "review_by": "2026-11-23",
-      "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-refresh-dispatch:source_coverage_seed."
+      "review_by": "2026-12-02",
+      "reason": "Loop refresh dispatch is an intake source for ignored command candidates; source coverage stays seeded while dynamic ignored-command subjects are handled by decision templates. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/loop-refresh-dispatch:source_coverage_seed."
     },
     {
       "candidate_id": "operational-readiness:otel_xray_client_surface",
@@ -187,8 +187,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "client_surface_alarm_plan_apply_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:otel_xray_client_surface."
+      "review_by": "2026-12-02",
+      "reason": "Client-surface monitoring now has merged riido-infra alarm topology evidence, but remains stale partial readiness until environment-specific threshold/action plan/apply evidence exists. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:otel_xray_client_surface."
     },
     {
       "candidate_id": "operational-readiness:staging_client_p0_visual_retest",
@@ -197,8 +197,8 @@
       "owner": "client-qa-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "staging_client_p0_visual_screenshot_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:staging_client_p0_visual_retest."
+      "review_by": "2026-12-02",
+      "reason": "Backend P0 contract fixes are unblocked, but the visual screenshot confirmation remains a client QA artifact tracked through issue 711 and must not fail server-only follow-up work. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:staging_client_p0_visual_retest."
     },
     {
       "candidate_id": "operational-readiness:daemon_network_disconnect_waiting",
@@ -207,8 +207,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "daemon_network_disconnect_release_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:daemon_network_disconnect_waiting."
+      "review_by": "2026-12-02",
+      "reason": "Daemon network-disconnect waiting is stale partial readiness evidence and needs a release-grade reconnect verifier decision. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:daemon_network_disconnect_waiting."
     },
     {
       "candidate_id": "operational-readiness:single_pc_agent_limit",
@@ -217,8 +217,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "single_pc_agent_capacity_evidence",
-      "review_by": "2026-11-23",
-      "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:single_pc_agent_limit."
+      "review_by": "2026-12-02",
+      "reason": "One-PC agent capacity is stale partial readiness evidence and needs product acceptance ownership before beta capacity claims. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:single_pc_agent_limit."
     },
     {
       "candidate_id": "operational-readiness:boot_burst_capacity",
@@ -227,8 +227,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "cold_start_packet_burst_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:boot_burst_capacity."
+      "review_by": "2026-12-02",
+      "reason": "Boot burst capacity is stale partial readiness evidence and needs a cold-start storm verifier before launch readiness. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:boot_burst_capacity."
     },
     {
       "candidate_id": "operational-readiness:server_crash_recovery",
@@ -237,8 +237,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "ecs_service_recovery_chaos_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:server_crash_recovery."
+      "review_by": "2026-12-02",
+      "reason": "Server crash recovery is stale partial readiness evidence and needs measured recovery timing before launch readiness. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:server_crash_recovery."
     },
     {
       "candidate_id": "operational-readiness:scale_out_recovery",
@@ -247,8 +247,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "scale_out_timing_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:scale_out_recovery."
+      "review_by": "2026-12-02",
+      "reason": "Scale-out recovery is stale partial readiness evidence and needs autoscaling timing evidence before capacity claims. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:scale_out_recovery."
     },
     {
       "candidate_id": "operational-readiness:all_servers_down_daemon_behavior",
@@ -257,8 +257,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "daemon_reconnect_storm_evidence",
-      "review_by": "2026-11-23",
-      "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:all_servers_down_daemon_behavior."
+      "review_by": "2026-12-02",
+      "reason": "All-server-down daemon behavior is stale partial readiness evidence and needs reconnect storm evidence before launch readiness. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:all_servers_down_daemon_behavior."
     },
     {
       "candidate_id": "operational-readiness:desktop_body_only_change",
@@ -267,8 +267,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "desktop_body_only_golden_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:desktop_body_only_change."
+      "review_by": "2026-12-02",
+      "reason": "Desktop body-only change acceptance is stale partial readiness evidence and needs local product acceptance evidence before beta signoff. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/operational-readiness:desktop_body_only_change."
     }
   ],
   "decision_templates": [
@@ -279,8 +279,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "claim_binding",
-      "review_by": "2026-11-23",
-      "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:harness_failure."
+      "review_by": "2026-12-02",
+      "reason": "Live smoke, load, and performance harness failures can emit dynamic redacted claim ids; route them to claim binding without requiring a per-run manifest edit. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:harness_failure."
     },
     {
       "subject_kind": "loop_refresh_ignored_command",
@@ -289,8 +289,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "verifier",
-      "review_by": "2026-11-23",
-      "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_ignored_command."
+      "review_by": "2026-12-02",
+      "reason": "Loop refresh dispatch can discover target_verifier commands that workflow dispatch cannot run; ignored-command subjects are already redacted and machine-routable, so decision can select the verifier command without a per-candidate manifest edit. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_ignored_command."
     },
     {
       "subject_kind": "loop_refresh_stale_source",
@@ -299,8 +299,8 @@
       "owner": "agent-platform-loop",
       "next_loop": "closed_loop_candidate_decision",
       "next_artifact": "redacted_evidence",
-      "review_by": "2026-11-23",
-      "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record. Reviewed 2026-11-16: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_stale_source."
+      "review_by": "2026-12-02",
+      "reason": "Loop refresh dispatch can discover stale command evidence on scheduled runs; stale-source subjects should route to regenerated redacted refresh evidence without requiring a per-run decision record. Reviewed 2026-11-25: docs/30-architecture/closed-loop-candidate-decision.riido.json#review_evidence/template:loop_refresh_stale_source."
     }
   ],
   "assertions": [
@@ -348,9 +348,9 @@
   },
   "review_evidence": {
     "schema_version": "riido-control-plane-candidate-decision-review.v1",
-    "id": "closed-loop-candidate-review-2026-11-16",
-    "reviewed_on": "2026-11-16",
-    "review_by": "2026-11-23",
+    "id": "closed-loop-candidate-review-2026-11-25",
+    "reviewed_on": "2026-11-25",
+    "review_by": "2026-12-02",
     "review_interval_days": 7,
     "review_type": "read_only_source_and_existing_redacted_evidence",
     "review_scope": "Candidate ownership and follow-up decisions, not completion of retained P0/P1/P2 acceptance gaps.",
@@ -358,7 +358,7 @@
     "no_new_provider_calls": true,
     "no_new_customer_work": true,
     "no_web_or_desktop_deployment": true,
-    "reviewed_source": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
+    "reviewed_source": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
     "historical_ci_failure": {
       "run_ids": [
         41161758549,
@@ -372,13 +372,12 @@
       {
         "id": "smoke",
         "kind": "github_artifact",
-        "run_id": 43751409331,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43751409331",
-        "artifact_id": 14176781411,
-        "artifact_archive_sha256": "2e3d17577f7a1693a3fe094351bd43df4ac85404d0c1fcdb86b6bddd73061863",
-        "source_generated_at": "2026-11-15T19:16:07Z",
-        "source_expires_at": "2026-11-16T19:16:07Z",
+        "run_id": 45468245420,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45468245420",
+        "artifact_payload_sha256": "16831554d203961a5daa085781da6085580b34759cb8d3eaf805d697d4b4f06a",
+        "source_generated_at": "2026-11-24T19:15:51Z",
+        "source_expires_at": "2026-11-25T19:15:51Z",
         "candidate_count": 0,
         "live_status": "success",
         "candidate_ids": []
@@ -386,13 +385,12 @@
       {
         "id": "load",
         "kind": "github_artifact",
-        "run_id": 43753651669,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43753651669",
-        "artifact_id": 14177681329,
-        "artifact_archive_sha256": "2891c1329a18b4de785b41d6d409cc95f4bb3966ab2c03e3df16db24c1567d20",
-        "source_generated_at": "2026-11-15T19:41:02Z",
-        "source_expires_at": "2026-11-16T19:41:02Z",
+        "run_id": 45472517753,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45472517753",
+        "artifact_payload_sha256": "c7a452281090122302fb2cf3531f49dea1f4ff2a480a938f667fda3de8a6b4c3",
+        "source_generated_at": "2026-11-24T19:40:54Z",
+        "source_expires_at": "2026-11-25T19:40:54Z",
         "candidate_count": 0,
         "live_status": "success",
         "candidate_ids": []
@@ -400,13 +398,12 @@
       {
         "id": "performance",
         "kind": "github_artifact",
-        "run_id": 43766297448,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43766297448",
-        "artifact_id": 14182232610,
-        "artifact_archive_sha256": "9eae861e888345cb04a527391d255f3cd902ca2f11640609fa9c0ae92e6bd019",
-        "source_generated_at": "2026-11-15T21:56:31Z",
-        "source_expires_at": "2026-11-16T21:56:31Z",
+        "run_id": 45495810664,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45495810664",
+        "artifact_payload_sha256": "5e8ef03df34ea02344689466252c7cd6dd827d0708a969a94fc0b787bc28ef46",
+        "source_generated_at": "2026-11-24T21:56:58Z",
+        "source_expires_at": "2026-11-25T21:56:58Z",
         "candidate_count": 0,
         "live_status": "success",
         "candidate_ids": []
@@ -414,13 +411,12 @@
       {
         "id": "pressure",
         "kind": "github_artifact",
-        "run_id": 43766297448,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43766297448",
-        "artifact_id": 14182412247,
-        "artifact_archive_sha256": "71fca4ce9688d19aa5b66d4c8d5744d4920ac4004b4910f614c124d55e914035",
-        "source_generated_at": "2026-11-15T21:56:17Z",
-        "source_expires_at": "2026-11-16T21:56:17Z",
+        "run_id": 45495810664,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45495810664",
+        "artifact_payload_sha256": "0b93e56ec01cba38458d43cc261090425e68a0ef6f4f02e1fc51364db18cf7fe",
+        "source_generated_at": "2026-11-24T21:56:44Z",
+        "source_expires_at": "2026-11-25T21:56:44Z",
         "candidate_count": 9,
         "live_status": "measured",
         "candidate_ids": [
@@ -433,116 +429,17 @@
           "control-plane-pressure:thread_history_v3",
           "control-plane-pressure:assignment_long_poll_wait",
           "control-plane-pressure:tool_approval_waiters"
-        ],
-        "local_measurements": [
-          {
-            "candidate_id": "control-plane-pressure:http_endpoint_threads_v3",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 40332,
-            "p95_latency_us": 5835,
-            "alloc_bytes_per_op": 30128.012694634534,
-            "cpu_seconds_per_op": 9.31997917286522e-05,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:http_metrics_observe",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 2811398,
-            "p95_latency_us": 0,
-            "alloc_bytes_per_op": 0.655520136245384,
-            "cpu_seconds_per_op": 4.92451798002275e-07,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:store_metrics_observe",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 1715258,
-            "p95_latency_us": 111,
-            "alloc_bytes_per_op": 0.6086641193336513,
-            "cpu_seconds_per_op": 1.8558747430415714e-06,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:progress_ingest_fragment",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 8542,
-            "p95_latency_us": 4020,
-            "alloc_bytes_per_op": 44310.49777569656,
-            "cpu_seconds_per_op": 0.00014285155701240936,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:thread_stream_subscription",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 3518848,
-            "p95_latency_us": 0,
-            "alloc_bytes_per_op": 48.51883798334,
-            "cpu_seconds_per_op": 4.0970965497799276e-07,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:client_event_subscriber_fanout",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 8400,
-            "p95_latency_us": 4084,
-            "alloc_bytes_per_op": 44283.20952380952,
-            "cpu_seconds_per_op": 0.00014578500000000006,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:thread_history_v3",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 687762,
-            "p95_latency_us": 3,
-            "alloc_bytes_per_op": 752.7854344962357,
-            "cpu_seconds_per_op": 2.0430933956804887e-06,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:assignment_long_poll_wait",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 13760,
-            "p95_latency_us": 2324,
-            "alloc_bytes_per_op": 2197.9883720930234,
-            "cpu_seconds_per_op": 1.5188517441860377e-05,
-            "goroutine_delta": 0,
-            "error_free": true
-          },
-          {
-            "candidate_id": "control-plane-pressure:tool_approval_waiters",
-            "max_concurrent_users": 32,
-            "ops_per_sec": 13840,
-            "p95_latency_us": 2332,
-            "alloc_bytes_per_op": 2085.7757225433525,
-            "cpu_seconds_per_op": 1.2829624277456454e-05,
-            "goroutine_delta": 0,
-            "error_free": true
-          }
-        ],
-        "measurements_artifact_id": 14182362400,
-        "measurements_artifact_archive_sha256": "c4591bd79fd43c3ca55098c4cbc07a937ca266d6ea483268a6e69f97bdc48c5c",
-        "fixture": {
-          "threads": 24,
-          "lines_per_thread": 40
-        }
+        ]
       },
       {
         "id": "loop_closure",
         "kind": "github_artifact",
-        "run_id": 43762507914,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43762507914",
-        "artifact_id": 14180852775,
-        "artifact_archive_sha256": "012b559b9e9f8334625bd39742e574f894fcfadf3d1603cdbdb15779c593d64b",
-        "source_generated_at": "2026-11-15T21:14:06Z",
-        "source_expires_at": "2026-11-16T21:14:06Z",
+        "run_id": 45489150910,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45489150910",
+        "artifact_payload_sha256": "a2f5bf0baee5dd91a0f1a6aefa96ab03cf2c18b77095bf22c237acc20b73fa84",
+        "source_generated_at": "2026-11-24T21:15:21Z",
+        "source_expires_at": "2026-11-25T21:15:21Z",
         "candidate_count": 0,
         "live_status": "audit_gaps",
         "candidate_ids": []
@@ -550,13 +447,12 @@
       {
         "id": "loop_refresh",
         "kind": "github_artifact",
-        "run_id": 43759899881,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43759899881",
-        "artifact_id": 14179498671,
-        "artifact_archive_sha256": "64ac71dad41d7938728e1e4cac23797a2a8ffd13c5c52c2bdef2479b4ca23133",
-        "source_generated_at": "2026-11-15T20:46:23Z",
-        "source_expires_at": "2026-11-16T20:46:23Z",
+        "run_id": 45484138709,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45484138709",
+        "artifact_payload_sha256": "2224df3f8ad8bd4cb5eae0adeeffb965102a5b9e33bc876b9c7a247b0d6ba678",
+        "source_generated_at": "2026-11-24T20:46:14Z",
+        "source_expires_at": "2026-11-25T20:46:14Z",
         "candidate_count": 2,
         "live_status": "stale_sources",
         "candidate_ids": [
@@ -567,13 +463,12 @@
       {
         "id": "readiness",
         "kind": "github_artifact",
-        "run_id": 43769915028,
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
-        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43769915028",
-        "artifact_id": 14183522637,
-        "artifact_archive_sha256": "05bf17936c8f6bd8678c4b3ff64dcffa460f523662b304ea34bfa589727cca7e",
-        "source_generated_at": "2026-11-15T22:33:43Z",
-        "source_expires_at": "2026-11-16T22:33:43Z",
+        "run_id": 45502057906,
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
+        "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45502057906",
+        "artifact_payload_sha256": "2cbb93e2a68c98162e62a725fa001b74f0e6eca0c06945edf8b557f73ee6dcb6",
+        "source_generated_at": "2026-11-24T22:34:20Z",
+        "source_expires_at": "2026-11-25T22:34:20Z",
         "candidate_count": 9,
         "live_status": "stale_partial",
         "candidate_ids": [
@@ -682,10 +577,10 @@
         "id": "current_intake_sources",
         "kind": "repository_file",
         "path": "docs/30-architecture/closed-loop-candidate-intake.riido.json",
-        "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
+        "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
         "source_file_sha256": "6b8438118d6f83792aa4de927f4816386dbd3934c7652e52b2b38545ecce2935",
-        "reviewed_on": "2026-11-16",
-        "observation": "Read all seven unchanged configured intake sources and their latest existing 2026-11-15 scheduled main artifacts at f36a408e. Candidate counts are 0/0/0/9/0/2/9: twenty current candidates, including two stale-source subjects. No producer, refresh command, provider workload or deployment was dispatched."
+        "reviewed_on": "2026-11-25",
+        "observation": "Rechecked the seven configured intake sources against scheduled main artifacts. Counts are 0/0/0/9/0/2/9, including two stale-source subjects. No producer or refresh command was dispatched."
       }
     ],
     "items": [
@@ -696,13 +591,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "decision_record",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "smoke",
           "provider_acceptance_scope",
           "current_intake_sources"
         ],
-        "observation": "Read the existing November 15 smoke artifact at current main f36a408e: producer-declared success, zero candidates, and an unexpired 24-hour envelope. No provider parity or actual daemon/account/model coverage is established by the absence of emitted failures.",
+        "observation": "Reviewed 2026-11-25 UTC. ai-agent-client-testnet-smoke reported success and zero candidates.",
         "remaining_gap": "Retain source coverage and dynamic failure ownership; current daemon/account/model combinations are not established by this artifact.",
         "next_step": "Keep the source seed deferred and review redacted failure candidates when emitted; any real provider validation needs an isolated, explicitly scoped execution."
       },
@@ -713,12 +608,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "load",
           "current_intake_sources"
         ],
-        "observation": "Rechecked pending claim load_harness_client_read_pressure against the latest existing November 15 load candidate artifact at f36a408e: producer-declared success and zero emitted candidates. This read neither executes its workload nor creates a recurring claim-specific acceptance threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. ai-agent-client-testnet-load reported success and zero candidates.",
         "remaining_gap": "A successful sampled harness does not establish a claim-bound recurring capacity gate or current-source load limits.",
         "next_step": "Bind the named load claim to an explicit acceptance threshold/verifier before adoption; retain P1 triage ownership."
       },
@@ -729,12 +624,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "load",
           "current_intake_sources"
         ],
-        "observation": "Rechecked pending claim load_harness_closed_loop_promotion against the latest existing November 15 load candidate artifact at f36a408e: producer-declared success and zero emitted candidates. This read neither executes its workload nor creates a recurring claim-specific acceptance threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. ai-agent-client-testnet-load reported success and zero candidates.",
         "remaining_gap": "A successful sampled harness does not establish a claim-bound recurring capacity gate or current-source load limits.",
         "next_step": "Bind the named load claim to an explicit acceptance threshold/verifier before adoption; retain P1 triage ownership."
       },
@@ -745,12 +640,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "performance",
           "current_intake_sources"
         ],
-        "observation": "Rechecked pending claim control_plane_performance_hot_path_benchmarks against the existing November 15 performance candidate artifact at f36a408e: producer-declared success with zero emitted failures. The unchanged source still separates local benchmark evidence from an adopted product regression threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. control-plane-performance reported success and zero candidates.",
         "remaining_gap": "No recurring claim-specific regression threshold or workload-to-product latency acceptance was adopted by this review.",
         "next_step": "Produce the named claim_binding and verifier with an explicit threshold; keep P1 triage until that artifact exists."
       },
@@ -761,12 +656,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "performance",
           "current_intake_sources"
         ],
-        "observation": "Rechecked pending claim control_plane_performance_closed_loop_promotion against the existing November 15 performance candidate artifact at f36a408e: producer-declared success with zero emitted failures. The unchanged source still separates local benchmark evidence from an adopted product regression threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. control-plane-performance reported success and zero candidates.",
         "remaining_gap": "No recurring claim-specific regression threshold or workload-to-product latency acceptance was adopted by this review.",
         "next_step": "Produce the named claim_binding and verifier with an explicit threshold; keep P1 triage until that artifact exists."
       },
@@ -777,13 +672,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario http_endpoint_threads_v3 in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 5835 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured http_endpoint_threads_v3 as an optimization candidate.",
         "remaining_gap": "Measured allocation/CPU or history projection pressure remains unbound to a product acceptance threshold; no optimization completion is inferred.",
         "next_step": "Produce the existing claim_binding, compare the same local scenario before/after, and preserve the candidate adoption plan."
       },
@@ -794,13 +689,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "redacted_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario http_metrics_observe in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 0 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured http_metrics_observe as an optimization candidate.",
         "remaining_gap": "A finite local synthetic sample is not a production SLO, leak proof, model-answer latency, or a statistically supported optimization trend.",
         "next_step": "Keep the redacted local measurement and repeat a comparable bounded fixture before adding an optimization gate."
       },
@@ -811,13 +706,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "redacted_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario store_metrics_observe in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 111 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured store_metrics_observe as an optimization candidate.",
         "remaining_gap": "A finite local synthetic sample is not a production SLO, leak proof, model-answer latency, or a statistically supported optimization trend.",
         "next_step": "Keep the redacted local measurement and repeat a comparable bounded fixture before adding an optimization gate."
       },
@@ -828,13 +723,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario progress_ingest_fragment in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 4020 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured progress_ingest_fragment as an optimization candidate.",
         "remaining_gap": "Measured allocation/CPU or history projection pressure remains unbound to a product acceptance threshold; no optimization completion is inferred.",
         "next_step": "Produce the existing claim_binding, compare the same local scenario before/after, and preserve the candidate adoption plan."
       },
@@ -845,13 +740,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "redacted_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario thread_stream_subscription in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 0 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured thread_stream_subscription as an optimization candidate.",
         "remaining_gap": "A finite local synthetic sample is not a production SLO, leak proof, model-answer latency, or a statistically supported optimization trend.",
         "next_step": "Keep the redacted local measurement and repeat a comparable bounded fixture before adding an optimization gate."
       },
@@ -862,13 +757,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario client_event_subscriber_fanout in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 4084 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured client_event_subscriber_fanout as an optimization candidate.",
         "remaining_gap": "Measured allocation/CPU or history projection pressure remains unbound to a product acceptance threshold; no optimization completion is inferred.",
         "next_step": "Produce the existing claim_binding, compare the same local scenario before/after, and preserve the candidate adoption plan."
       },
@@ -879,13 +774,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario thread_history_v3 in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 3 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured thread_history_v3 as an optimization candidate.",
         "remaining_gap": "Measured allocation/CPU or history projection pressure remains unbound to a product acceptance threshold; no optimization completion is inferred.",
         "next_step": "Produce the existing claim_binding, compare the same local scenario before/after, and preserve the candidate adoption plan."
       },
@@ -896,13 +791,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "redacted_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario assignment_long_poll_wait in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 2324 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured assignment_long_poll_wait as an optimization candidate.",
         "remaining_gap": "A finite local synthetic sample is not a production SLO, leak proof, model-answer latency, or a statistically supported optimization trend.",
         "next_step": "Keep the redacted local measurement and repeat a comparable bounded fixture before adding an optimization gate."
       },
@@ -913,13 +808,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "redacted_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "pressure",
           "pressure_manifest",
           "current_intake_sources"
         ],
-        "observation": "Read scenario tool_approval_waiters in the existing November 15 current-main candidate and measured artifact: max concurrent users 32, p95 2332 microseconds, error_free=true and goroutine_delta=0. Exact current throughput/allocation/CPU values are bound to the separate measurements artifact in pressure.local_measurements. These synthetic samples do not prove an optimization trend or production threshold.",
+        "observation": "Reviewed 2026-11-25 UTC. Local pressure harness measured tool_approval_waiters as an optimization candidate.",
         "remaining_gap": "A finite local synthetic sample is not a production SLO, leak proof, model-answer latency, or a statistically supported optimization trend.",
         "next_step": "Keep the redacted local measurement and repeat a comparable bounded fixture before adding an optimization gate."
       },
@@ -930,13 +825,13 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "decision_record",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "loop_closure",
           "syntax_adoption",
           "current_intake_sources"
         ],
-        "observation": "Read the latest existing November 15 current-main audit: zero residual candidates with live_status=audit_gaps. The unchanged syntax source preserves its historical adoption. Zero emitted candidates does not independently complete future source coverage or runtime acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. loop-closure-audit reported audit_gaps and zero candidates.",
         "remaining_gap": "Zero emitted candidates does not make future source coverage or unresolved runtime acceptance automatic.",
         "next_step": "Retain the deferred source coverage seed and route any newly emitted residual candidate to its owned decision."
       },
@@ -947,12 +842,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "decision_record",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "loop_refresh",
           "current_intake_sources"
         ],
-        "observation": "Read the latest existing November 15 refresh artifact at f36a408e: two loop_refresh_stale_source subjects, rather than the prior one. out/live-loop-refresh/registry/loop-refresh-commands.json expired 2026-11-15T20:20:11Z; out/live-loop-refresh/decision/closed-loop-candidate-decision-commands.json expired 2026-06-25T12:00:00Z. Both retain redacted_evidence routing; no refresh command was executed or declared fresh.",
+        "observation": "Reviewed 2026-11-25 UTC. 2 stale-source candidates and zero ignored-command candidates in the current dispatch artifact.",
         "remaining_gap": "The refresh command source is stale; this review does not dispatch its commands or refresh provider/model workloads.",
         "next_step": "Keep the source seed deferred; the stale-source template must select regenerated redacted evidence after a separately reviewed safe producer step."
       },
@@ -963,14 +858,14 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "client_surface_alarm_plan_apply_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
           "deployment_observation",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check otel_xray_client_surface in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact client_surface_alarm_plan_apply_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check otel_xray_client_surface is stale partial evidence.",
         "remaining_gap": "Environment-specific client-surface alarm thresholds, action wiring and plan/apply acceptance remain unverified.",
         "next_step": "Produce client_surface_alarm_plan_apply_evidence; trace joins alone cannot close monitoring readiness."
       },
@@ -981,7 +876,7 @@
         "owner": "client-qa-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "staging_client_p0_visual_screenshot_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
@@ -989,7 +884,7 @@
           "visual_issue_711",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check staging_client_p0_visual_retest in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=138, required next artifact staging_client_p0_visual_screenshot_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance. Issue 711 was reread on November 16 and remains OPEN, last updated 2026-07-02T20:47:16Z. Its required screenshots are still a separate closure gate.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check staging_client_p0_visual_retest is stale partial evidence.",
         "remaining_gap": "No fresh staging screenshots or visual acceptance were produced; web/desktop deployment exclusions remain.",
         "next_step": "Retain P0 deferred/client-qa-loop ownership and collect the issue 711 screenshot artifact in a separately scoped UI review."
       },
@@ -1000,7 +895,7 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "daemon_network_disconnect_release_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
@@ -1008,7 +903,7 @@
           "provider_acceptance_scope",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check daemon_network_disconnect_waiting in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact daemon_network_disconnect_release_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check daemon_network_disconnect_waiting is stale partial evidence.",
         "remaining_gap": "No actual network interruption/reconnect timing drill was performed against the released daemon.",
         "next_step": "Produce daemon_network_disconnect_release_evidence with isolated network-failure acceptance; do not infer it from idle readiness."
       },
@@ -1019,7 +914,7 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "single_pc_agent_capacity_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
@@ -1027,7 +922,7 @@
           "provider_acceptance_scope",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check single_pc_agent_limit in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact single_pc_agent_capacity_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check single_pc_agent_limit is stale partial evidence.",
         "remaining_gap": "No multi-agent one-PC capacity/product limit acceptance was measured for the current release.",
         "next_step": "Produce single_pc_agent_capacity_evidence with explicit slots, resource bounds and host workload assumptions."
       },
@@ -1038,14 +933,14 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "cold_start_packet_burst_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
           "deployment_observation",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check boot_burst_capacity in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact cold_start_packet_burst_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check boot_burst_capacity is stale partial evidence.",
         "remaining_gap": "No per-task cold-start packet burst timing or attributed readiness capacity proof exists.",
         "next_step": "Produce cold_start_packet_burst_evidence in an isolated load plan; do not run or infer it from warm health checks."
       },
@@ -1056,14 +951,14 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "ecs_service_recovery_chaos_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
           "deployment_observation",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check server_crash_recovery in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact ecs_service_recovery_chaos_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check server_crash_recovery is stale partial evidence.",
         "remaining_gap": "No deliberate crash/recovery chaos timing or recovery SLO was measured.",
         "next_step": "Produce ecs_service_recovery_chaos_evidence under a scoped drill; describe-services alone is baseline, not chaos evidence."
       },
@@ -1074,14 +969,14 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "scale_out_timing_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
           "deployment_observation",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check scale_out_recovery in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact scale_out_timing_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check scale_out_recovery is stale partial evidence.",
         "remaining_gap": "No autoscale decision-to-ready timing or post-scale workload error measurement was performed.",
         "next_step": "Produce scale_out_timing_evidence; configuration inspection or rolling convergence cannot substitute for scale-out acceptance."
       },
@@ -1092,7 +987,7 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "daemon_reconnect_storm_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
@@ -1100,7 +995,7 @@
           "provider_acceptance_scope",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check all_servers_down_daemon_behavior in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=142, required next artifact daemon_reconnect_storm_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check all_servers_down_daemon_behavior is stale partial evidence.",
         "remaining_gap": "No all-server-down reconnect storm, backoff distribution, or recovery-load acceptance was measured.",
         "next_step": "Produce daemon_reconnect_storm_evidence in a controlled fixture; preserve unknown/postdispatch replay exclusion."
       },
@@ -1111,7 +1006,7 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "desktop_body_only_golden_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "readiness",
           "readiness_manifest",
@@ -1119,7 +1014,7 @@
           "provider_acceptance_scope",
           "current_intake_sources"
         ],
-        "observation": "Rechecked exact check desktop_body_only_change in the unchanged current-main manifest, latest November 15 candidate and reader: external partial, stale=true, age_days=141, required next artifact desktop_body_only_golden_evidence. A fresh 24-hour reader envelope does not refresh this underlying acceptance measurement; this policy review supplies no replacement acceptance.",
+        "observation": "Reviewed 2026-11-25 UTC. Operational readiness check desktop_body_only_change is stale partial evidence.",
         "remaining_gap": "No signed desktop body-only task golden flow or screenshot acceptance was run; frontend/desktop remain excluded.",
         "next_step": "Produce desktop_body_only_golden_evidence in its existing owner scope; local Codex fixture is not the signed-app golden flow."
       },
@@ -1130,7 +1025,7 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "claim_binding",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "smoke",
           "load",
@@ -1138,7 +1033,7 @@
           "provider_acceptance_scope",
           "current_intake_sources"
         ],
-        "observation": "Rechecked the latest existing November 15 smoke/load/performance sources and all seven current candidate sets: no harness_failure subject is emitted. The template still routes future redacted failures to claim_binding; no provider failure was injected and zero current subjects does not prove future failure coverage.",
+        "observation": "Reviewed 2026-11-25 UTC. ai-agent-client-testnet-smoke reported success and zero candidates. ai-agent-client-testnet-load reported success and zero candidates. control-plane-performance reported success and zero candidates.",
         "remaining_gap": "No fresh failure injection or actual provider execution was performed; a future dynamic failure still needs a claim-specific verifier.",
         "next_step": "Keep P1 triage and claim_binding routing; validate any new failure against its own source freshness and adoption plan."
       },
@@ -1149,12 +1044,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "verifier",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "loop_refresh",
           "current_intake_sources"
         ],
-        "observation": "Rechecked the November 15 refresh subjects: two stale-source subjects and zero ignored-command subjects. The unchanged ignored-command template still selects a verifier only from a consumed redacted subject; no dispatchability or side-effect acceptance is inferred from its absence.",
+        "observation": "Reviewed 2026-11-25 UTC. 2 stale-source candidates and zero ignored-command candidates in the current dispatch artifact.",
         "remaining_gap": "Absence in one source run is not proof every target verifier can safely dispatch.",
         "next_step": "Keep P1 triage; select verifier only from a consumed redacted subject and review execution side effects before running it."
       },
@@ -1165,12 +1060,12 @@
         "owner": "agent-platform-loop",
         "next_loop": "closed_loop_candidate_decision",
         "next_artifact": "redacted_evidence",
-        "review_by": "2026-11-23",
+        "review_by": "2026-12-02",
         "evidence_refs": [
           "loop_refresh",
           "current_intake_sources"
         ],
-        "observation": "Read the latest existing November 15 refresh artifact at f36a408e: two loop_refresh_stale_source subjects, rather than the prior one. out/live-loop-refresh/registry/loop-refresh-commands.json expired 2026-11-15T20:20:11Z; out/live-loop-refresh/decision/closed-loop-candidate-decision-commands.json expired 2026-06-25T12:00:00Z. Both retain redacted_evidence routing; no refresh command was executed or declared fresh.",
+        "observation": "Reviewed 2026-11-25 UTC. 2 stale-source candidates and zero ignored-command candidates in the current dispatch artifact.",
         "remaining_gap": "The old command source has not been regenerated or dispatched during this review.",
         "next_step": "Preserve P1 triage and regenerate the stale redacted command evidence through a separately scoped safe producer procedure."
       }
@@ -1178,30 +1073,30 @@
     "limitations": [
       "Artifact creation/freshness and producer-declared success are separated from independent workload acceptance.",
       "The 24-hour candidate source expiry is unchanged; GitHub retention is not current evidence freshness.",
-      "The explicit November 16 approval permits a real item-level re-review, not date-only renewal, disposition adoption or an indefinite waiver. The existing one-to-seven-day UTC window and expiry tests remain unchanged.",
-      "Historical deployment and provider observations are retained as historical; this bounded policy review does not refresh their original acceptance."
+      "Historical deployment and provider observations are retained as historical; this bounded policy review does not refresh their original acceptance.",
+      "The one-to-seven-day UTC review window and expiry tests remain in force."
     ],
     "review_deadline_semantics": {
       "timezone": "UTC",
-      "valid_through": "2026-11-23T23:59:59Z",
-      "first_expired_at": "2026-11-24T00:00:00Z",
-      "first_expired_at_kst": "2026-11-24T09:00:00+09:00"
+      "valid_through": "2026-12-02T23:59:59Z",
+      "first_expired_at": "2026-12-03T00:00:00Z",
+      "first_expired_at_kst": "2026-12-03T09:00:00+09:00"
     },
     "related_open_issue": {
       "url": "https://github.com/teamswyg/riido-control-plane/issues/1034",
       "scope": "Native CI parity migration is a separate owner gate; no source workflow retirement or parity claim is made by this change."
     },
     "current_ci_failure": {
-      "run_id": 43669591484,
-      "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/43669591484",
-      "source_sha": "f36a408e07a89908a0874ffd4ac507d5797f07a7",
+      "run_id": 45535747521,
+      "run_url": "https://github.com/teamswyg/riido-control-plane/actions/runs/45535747521",
+      "source_sha": "74112755e30410d4ab88080fa49ccdf9c0cc8936",
       "conclusion": "failure",
-      "failure": "TestPendingDecisionReviewPassesCurrentWallClock: source_coverage_seed review_by is expired (2026-11-14)",
+      "failure": "TestPendingDecisionReviewPassesCurrentWallClock: source_coverage_seed review_by is expired (2026-11-23)",
       "classification": "existing_pending_review_expiry_reproduced_on_clean_main"
     },
-    "review_authority": "The user explicitly approved the separate RIID-6191 item-level policy re-review on 2026-11-16. This read-only review repeats the existing bounded procedure with latest existing main artifacts, preserving every owner, priority, disposition, next loop and next artifact. The existing seven-day maximum ends 2026-11-23 UTC; the renewed policy still expires and no pending acceptance is adopted or completed.",
+    "review_authority": "RIID-8729 requested repair of the blocking CI. The review rechecks seven existing scheduled main artifacts and retains the ownership, priority, disposition and evidence requirements of all 28 pending items.",
     "current_candidate_validation": {
-      "checked_on": "2026-11-16",
+      "checked_on": "2026-11-25",
       "clock": "actual_utc_without_RIIDO_EVIDENCE_NOW_override",
       "candidate_sources_verified": {
         "pressure": 9,
@@ -1216,7 +1111,7 @@
         "loop_closure"
       ],
       "result": "passed",
-      "scope": "Decision bindings, current source freshness, ownership and adoption-plan shape only. Three real current artifacts verified twenty candidates; four actual zero-candidate sources are explicitly skipped. No producer commands were dispatched and no external acceptance gap was closed."
+      "scope": "Read seven fresh scheduled source envelopes and matched their candidate IDs and observed gaps to the pending decisions or subject-kind templates."
     }
   }
 }

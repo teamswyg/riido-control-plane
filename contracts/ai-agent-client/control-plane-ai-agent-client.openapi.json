@@ -8061,6 +8061,10 @@
       "RuntimeModelRecord": {
         "description": "runtime이 제공하는 model 후보 record입니다. model_id는 runtime 범위 안에서만 의미가 있는 opaque identifier입니다.",
         "properties": {
+          "default_reasoning_effort": {
+            "description": "런타임이 보고한 해당 모델의 기본 추론 Effort입니다.",
+            "type": "string"
+          },
           "is_default": {
             "type": "boolean"
           },
@@ -8069,6 +8073,13 @@
           },
           "model_id": {
             "type": "string"
+          },
+          "reasoning_efforts": {
+            "description": "해당 모델이 지원하는 추론 Effort 목록입니다.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "required": [

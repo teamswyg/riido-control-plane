@@ -1216,9 +1216,17 @@ export type RuntimeKind = "codex" | "claude_code" | "cursor" | "openclaw";
  * runtime이 제공하는 model 후보 record입니다. model_id는 runtime 범위 안에서만 의미가 있는 opaque identifier입니다.
  */
 export interface RuntimeModelRecord {
+  /**
+   * 런타임이 보고한 해당 모델의 기본 추론 Effort입니다.
+   */
+  default_reasoning_effort?: string;
   is_default: boolean;
   label: string;
   model_id: string;
+  /**
+   * 해당 모델이 지원하는 추론 Effort 목록입니다.
+   */
+  reasoning_efforts?: string[];
 }
 
 /**

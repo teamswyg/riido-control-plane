@@ -369,18 +369,6 @@ func daemonStatusChangedForEvent(prev DeviceDaemonRecord, prevOK bool, next Devi
 	return false
 }
 
-func equalRuntimeModelRecords(a, b []RuntimeModelRecord) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 func equalStringSetIgnoreOrder(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
