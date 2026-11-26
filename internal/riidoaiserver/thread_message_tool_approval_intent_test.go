@@ -24,6 +24,7 @@ func TestThreadMessageRejectsGenericFollowupPhrases(t *testing.T) {
 		"이어서 진행해줘",
 		"계속 진행해줘",
 		"검증과 PR 리뷰 후 승인·저장도 확인해줘.",
+		"승인해도 될까요?",
 		"Follow up on the task and verify the approval flow.",
 		mentionHTML("agent-public-openclaw") + "<blockquote>" + mentionHTML("agent-public-openclaw") + "</blockquote> 승인",
 		mentionHTML("agent-public-openclaw") + "<code>" + mentionHTML("agent-public-openclaw") + "</code> 승인",

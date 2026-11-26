@@ -14,7 +14,7 @@ func threadMessageApprovesToolApproval(body string) bool {
 		"go run", "approve", "approved", "allow", "allowed",
 		"go ahead", "직접 실행해 주세요", "승인할게 진행해줘",
 		"너가 직접 진행해줘 승인할게", "go 명령 실행도 해줘",
-		"승인할게", "승인합니다", "허용합니다", "approve this tool request only",
+		"승인해", "승인할게", "승인합니다", "허용합니다", "approve this tool request only",
 	} {
 		if text == phrase {
 			return true

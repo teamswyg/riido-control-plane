@@ -18,6 +18,10 @@ func TestHTTPThreadMessageApprovesPendingToolApprovalExecutionReply(t *testing.T
 	assertHTTPThreadMessageApprovesPendingToolApproval(t, approvalExecutionChatBody)
 }
 
+func TestHTTPThreadMessageApprovesPendingToolApprovalKoreanImperative(t *testing.T) {
+	assertHTTPThreadMessageApprovesPendingToolApproval(t, "<p>승인해</p>")
+}
+
 func TestHTTPThreadMessageApprovesOnlyCurrentToolRequest(t *testing.T) {
 	assertHTTPThreadMessageApprovesPendingToolApproval(t, "<p>APPROVE THIS TOOL REQUEST ONLY.</p>")
 }
